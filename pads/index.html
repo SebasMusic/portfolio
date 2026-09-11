@@ -180,7 +180,7 @@
         await audioCtx.resume();
       }
 
-      const audioUrl = `audio/${currentPreset} ${note}.mp3`;
+      const audioUrl = `audio/${currentPreset}_${note}.mp3`;
       const padKey = `${currentPreset}_${note}`;
 
       if (activePads[padKey]) {
