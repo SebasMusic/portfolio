@@ -180,7 +180,8 @@
         await audioCtx.resume();
       }
 
-      const audioUrl = `audio/${currentPreset}_${note}.mp3`;
+      // Ruta explícita con ./ para subcarpeta en GitHub Pages
+      const audioUrl = `./audio/${currentPreset}_${note}.mp3`;
       const padKey = `${currentPreset}_${note}`;
 
       if (activePads[padKey]) {
@@ -205,6 +206,9 @@
         try {
           btnElement.classList.add('active');
           const response = await fetch(audioUrl);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
           const buffer = await response.arrayBuffer();
           const audioBuffer = await audioCtx.decodeAudioData(buffer);
 
