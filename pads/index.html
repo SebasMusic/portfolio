@@ -51,6 +51,7 @@
       letter-spacing: 1px;
     }
 
+    /* SELECTOR DE PRESETS */
     .preset-container {
       display: flex;
       gap: 10px;
@@ -86,6 +87,7 @@
       box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
     }
 
+    /* GRILLA DE NOTAS */
     .pad-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -137,6 +139,7 @@
     <p class="subtitle">Select a sound preset and key to engage continuous pad</p>
   </div>
 
+  <!-- SELECTOR DE 4 SONIDOS -->
   <div class="preset-container">
     <button class="preset-btn active" onclick="selectPreset('pad1', this)">DAWN</button>
     <button class="preset-btn" onclick="selectPreset('pad2', this)">CELESTIAL</button>
@@ -144,6 +147,7 @@
     <button class="preset-btn" onclick="selectPreset('pad4', this)">ELYSIUM</button>
   </div>
 
+  <!-- GRILLA DE 12 TONALIDADES -->
   <div class="pad-grid">
     <button class="pad-btn" onclick="togglePad('C', this)">C</button>
     <button class="pad-btn" onclick="togglePad('Cs', this)">C# / Db</button>
@@ -176,10 +180,12 @@
         await audioCtx.resume();
       }
 
+      // Ruta relativa limpia utilizando guion bajo (_)
       const audioUrl = `./audio/${currentPreset}_${note}.mp3`;
       const padKey = `${currentPreset}_${note}`;
 
       if (activePads[padKey]) {
+        // FADE OUT
         const { gainNode, sourceNode } = activePads[padKey];
         const now = audioCtx.currentTime;
         const fadeOutTime = 2.5; 
@@ -196,6 +202,7 @@
         }, fadeOutTime * 1000);
 
       } else {
+        // FADE IN
         try {
           btnElement.classList.add('active');
           const response = await fetch(audioUrl);
