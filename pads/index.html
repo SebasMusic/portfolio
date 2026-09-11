@@ -180,8 +180,8 @@
         await audioCtx.resume();
       }
 
-      // Ruta relativa limpia utilizando guion bajo (_)
-      const audioUrl = `./audio/${currentPreset}_${note}.mp3`;
+      // Ruta adaptada para extensiones .MP3 en mayúscula
+      const audioUrl = `./audio/${currentPreset}_${note}.MP3`;
       const padKey = `${currentPreset}_${note}`;
 
       if (activePads[padKey]) {
