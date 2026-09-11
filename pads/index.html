@@ -180,8 +180,8 @@
         await audioCtx.resume();
       }
 
-      // Ruta adaptada para extensiones .MP3 en mayúscula
-      const audioUrl = `./audio/${currentPreset} ${note}.MP3`;
+      // Apuntamos a la carpeta Audio con 'A' mayúscula
+      const audioUrl = `./Audio/${currentPreset}_${note}.mp3`;
       const padKey = `${currentPreset}_${note}`;
 
       if (activePads[padKey]) {
