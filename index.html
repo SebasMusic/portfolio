@@ -3,238 +3,204 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aura · Ambient Pad Player</title>
+  <title>Audio Tools & Apps · Portfolio</title>
   <style>
     :root {
-      --bg-color: #0b0d17;
+      --bg-color: #080911;
       --card-bg: rgba(255, 255, 255, 0.03);
       --card-border: rgba(255, 255, 255, 0.08);
       --accent-purple: #8b5cf6;
       --accent-cyan: #06b6d4;
       --text-main: #ffffff;
-      --text-muted: #8a99ad;
+      --text-muted: #94a3b8;
     }
+
+    * { box-sizing: border-box; }
 
     body {
       background-color: var(--bg-color);
       color: var(--text-main);
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
       min-height: 100vh;
-      margin: 0;
-      padding: 20px;
-      box-sizing: border-box;
     }
 
-    .header-container {
+    header {
+      width: 100%;
+      max-width: 1000px;
+      padding: 60px 20px 40px 20px;
       text-align: center;
-      margin-bottom: 25px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #c084fc;
+      font-size: 0.85em;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-bottom: 15px;
     }
 
     h1 {
+      font-size: 2.8em;
       font-weight: 300;
-      letter-spacing: 3px;
-      margin: 0 0 5px 0;
-      font-size: 2em;
-      background: linear-gradient(135deg, #fff, var(--text-muted));
+      margin: 0 0 15px 0;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff, var(--text-muted));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    p.subtitle {
+    p.bio {
       color: var(--text-muted);
-      margin: 0;
-      font-size: 0.9em;
-      letter-spacing: 1px;
+      max-width: 600px;
+      margin: 0 auto;
+      font-size: 1.05em;
+      line-height: 1.6;
     }
 
-    /* PRESET SELECTOR (4 SOUNDS) */
-    .preset-container {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 30px;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 6px;
-      border-radius: 30px;
-      border: 1px solid var(--card-border);
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .preset-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      padding: 10px 22px;
-      border-radius: 20px;
-      font-size: 0.9em;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      letter-spacing: 0.5px;
-    }
-
-    .preset-btn:hover {
-      color: var(--text-main);
-    }
-
-    .preset-btn.active {
-      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
-      color: #fff;
-      box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
-    }
-
-    /* KEY GRID */
-    .pad-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 15px;
-      max-width: 680px;
+    main {
       width: 100%;
+      max-width: 1000px;
+      padding: 20px;
+      flex: 1;
     }
 
-    .pad-btn {
+    .section-title {
+      font-size: 1.2em;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-bottom: 25px;
+      font-weight: 400;
+      text-transform: uppercase;
+    }
+
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+    }
+
+    .app-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 24px 10px;
-      color: var(--text-main);
-      font-size: 1.1em;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      padding: 30px;
       display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app-card:hover {
+      border-color: var(--accent-purple);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15);
+    }
+
+    .app-card.featured::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+    }
+
+    .app-card h2 {
+      margin: 0 0 10px 0;
+      font-size: 1.4em;
+      font-weight: 500;
+    }
+
+    .app-card p {
+      color: var(--text-muted);
+      font-size: 0.95em;
+      line-height: 1.5;
+      margin-bottom: 25px;
+    }
+
+    .btn-launch {
+      display: inline-flex;
       align-items: center;
       justify-content: center;
+      padding: 12px 20px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9em;
+      transition: opacity 0.3s ease;
+    }
+
+    .btn-launch:hover { opacity: 0.9; }
+
+    .app-card.placeholder {
+      border-style: dashed;
+      opacity: 0.5;
+    }
+
+    .app-card.placeholder:hover {
+      transform: none;
+      border-color: var(--card-border);
+      box-shadow: none;
+    }
+
+    footer {
+      padding: 40px 20px;
+      color: var(--text-muted);
+      font-size: 0.85em;
       text-align: center;
-    }
-
-    .pad-btn:hover {
-      border-color: var(--accent-purple);
-      box-shadow: 0 0 15px rgba(139, 92, 246, 0.25);
-      transform: translateY(-2px);
-    }
-
-    .pad-btn.active {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(6, 182, 212, 0.8));
-      border-color: #a78bfa;
-      box-shadow: 0 0 25px rgba(139, 92, 246, 0.5);
-    }
-
-    @media (max-width: 500px) {
-      .pad-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
     }
   </style>
 </head>
 <body>
 
-  <div class="header-container">
-    <h1>AURA · AMBIENT PADS</h1>
-    <p class="subtitle">Select a sound preset and key to engage continuous pad</p>
-  </div>
+  <header>
+    <div class="badge">INTERACTIVE AUDIO LAB</div>
+    <h1>Free Web Tools for Musicians</h1>
+    <p class="bio">High-quality, seamless, accessible audio applications designed for practice, worship, live performance, and music education.</p>
+  </header>
 
-  <!-- 4 SOUND PRESETS -->
-<div class="preset-container">
-  <button class="preset-btn active" onclick="selectPreset('pad1', this)">DAWN</button>
-  <button class="preset-btn" onclick="selectPreset('pad2', this)">CELESTIAL</button>
-  <button class="preset-btn" onclick="selectPreset('pad3', this)">MAJESTIC</button>
-  <button class="preset-btn" onclick="selectPreset('pad4', this)">ELYSIUM</button>
-</div>
+  <main>
+    <div class="section-title">Featured Applications</div>
+    
+    <div class="apps-grid">
+      
+      <!-- App 1: Pad Player -->
+      <div class="app-card featured">
+        <div>
+          <h2>Aura · Ambient Pad Player</h2>
+          <p>Continuous, high-definition ambient pads featuring 4 custom textures and 12 semitones. Designed with smooth Web Audio API crossfading.</p>
+        </div>
+        <a href="./pads/index.html" class="btn-launch">Launch Application →</a>
+      </div>
 
-  <!-- 12 KEYS GRID -->
-  <div class="pad-grid">
-    <button class="pad-btn" onclick="togglePad('C', this)">C</button>
-    <button class="pad-btn" onclick="togglePad('Cs', this)">C# / Db</button>
-    <button class="pad-btn" onclick="togglePad('D', this)">D</button>
-    <button class="pad-btn" onclick="togglePad('Ds', this)">D# / Eb</button>
-    <button class="pad-btn" onclick="togglePad('E', this)">E</button>
-    <button class="pad-btn" onclick="togglePad('F', this)">F</button>
-    <button class="pad-btn" onclick="togglePad('Fs', this)">F# / Gb</button>
-    <button class="pad-btn" onclick="togglePad('G', this)">G</button>
-    <button class="pad-btn" onclick="togglePad('Gs', this)">G# / Ab</button>
-    <button class="pad-btn" onclick="togglePad('A', this)">A</button>
-    <button class="pad-btn" onclick="togglePad('As', this)">A# / Bb</button>
-    <button class="pad-btn" onclick="togglePad('B', this)">B</button>
-  </div>
+      <!-- App 2: Placeholder -->
+      <div class="app-card placeholder">
+        <div>
+          <h2>Next Tool Coming Soon</h2>
+          <p>Interactive metronome, chord generator, or tuning utility currently in development.</p>
+        </div>
+      </div>
 
-  <script>
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audioCtx = new AudioContext();
-    const activePads = {};
-    let currentPreset = 'pad1'; // Preset activo por defecto
+    </div>
+  </main>
 
-    // Cambiar de Preset (Alba, Celestial, Majestuoso, Elysium)
-    function selectPreset(presetKey, btnElement) {
-      currentPreset = presetKey;
-      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-      btnElement.classList.add('active');
-    }
+  <footer>
+    <p>© 2026 · Built with Web Audio API & Modern Web Standards</p>
+  </footer>
 
-    // Activar / Apagar Pad
-    async function togglePad(note, btnElement) {
-      if (audioCtx.state === 'suspended') {
-        await audioCtx.resume();
-      }
-
-      // Ruta dinámica según el preset seleccionado
-      const audioUrl = `audio/${currentPreset}_${note}.mp3`;
-      const padKey = `${currentPreset}_${note}`;
-
-      if (activePads[padKey]) {
-        // FADE OUT
-        const { gainNode, sourceNode } = activePads[padKey];
-        const now = audioCtx.currentTime;
-        const fadeOutTime = 2.5; 
-
-        gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + fadeOutTime);
-
-        btnElement.classList.remove('active');
-
-        setTimeout(() => {
-          sourceNode.stop();
-          sourceNode.disconnect();
-          delete activePads[padKey];
-        }, fadeOutTime * 1000);
-
-      } else {
-        // FADE IN
-        try {
-          btnElement.classList.add('active');
-          const response = await fetch(audioUrl);
-          const buffer = await response.arrayBuffer();
-          const audioBuffer = await audioCtx.decodeAudioData(buffer);
-
-          const sourceNode = audioCtx.createBufferSource();
-          const gainNode = audioCtx.createGain();
-
-          sourceNode.buffer = audioBuffer;
-          sourceNode.loop = true;
-
-          const now = audioCtx.currentTime;
-          const fadeInTime = 2.0; 
-
-          gainNode.gain.setValueAtTime(0.0001, now);
-          gainNode.gain.exponentialRampToValueAtTime(1.0, now + fadeInTime);
-
-          sourceNode.connect(gainNode);
-          gainNode.connect(audioCtx.destination);
-
-          sourceNode.start(0);
-          activePads[padKey] = { sourceNode, gainNode, btnElement };
-
-        } catch (e) {
-          console.error("Audio file not found: " + audioUrl, e);
-          btnElement.classList.remove('active');
-        }
-      }
-    }
-  </script>
 </body>
 </html>
