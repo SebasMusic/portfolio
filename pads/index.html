@@ -141,10 +141,10 @@
 
   <!-- SELECTOR DE 4 SONIDOS -->
   <div class="preset-container">
-    <button class="preset-btn active" onclick="selectPreset('pad1', this)">DAWN</button>
-    <button class="preset-btn" onclick="selectPreset('pad2', this)">CELESTIAL</button>
-    <button class="preset-btn" onclick="selectPreset('pad3', this)">MAJESTIC</button>
-    <button class="preset-btn" onclick="selectPreset('pad4', this)">ELYSIUM</button>
+    <button class="preset-btn active" onclick="selectPreset('Pad 1 (Dawn)', 'pad1', this)">DAWN</button>
+    <button class="preset-btn" onclick="selectPreset('Pad 2 (Celestial)', 'pad2', this)">CELESTIAL</button>
+    <button class="preset-btn" onclick="selectPreset('Pad 3 (Majestic)', 'pad2', this)">MAJESTIC</button>
+    <button class="preset-btn" onclick="selectPreset('Pad 4 (Elysium)', 'pad4', this)">ELYSIUM</button>
   </div>
 
   <!-- GRILLA DE 12 TONALIDADES -->
@@ -167,10 +167,12 @@
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioCtx = new AudioContext();
     const activePads = {};
-    let currentPreset = 'pad1';
+    let currentFolder = 'Pad 1 (Dawn)';
+    let currentFilePrefix = 'pad1';
 
-    function selectPreset(presetKey, btnElement) {
-      currentPreset = presetKey;
+    function selectPreset(folderName, filePrefix, btnElement) {
+      currentFolder = folderName;
+      currentFilePrefix = filePrefix;
       document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
       btnElement.classList.add('active');
     }
@@ -180,9 +182,9 @@
         await audioCtx.resume();
       }
 
-      // Ruta explícita con ./ para subcarpeta en GitHub Pages
-      const audioUrl = `./audio/${currentPreset}_${note}.mp3`;
-      const padKey = `${currentPreset}_${note}`;
+      // Ruta ajustada a las subcarpetas y a la doble extensión .mp3.mp3
+      const audioUrl = `./audio/${currentFolder}/${currentFilePrefix}_${note}.mp3.mp3`;
+      const padKey = `${currentFolder}_${note}`;
 
       if (activePads[padKey]) {
         // FADE OUT
