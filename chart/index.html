@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- html2canvas para la exportación limpia a PNG -->
+  <!-- html2canvas para exportar a PNG -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
@@ -39,7 +39,7 @@
       align-items: center;
     }
 
-    /* BARRA SUPERIOR DE NAVEGACIÓN FUERA DEL MÓDULO */
+    /* BARRA SUPERIOR */
     .top-nav {
       width: 100%;
       max-width: 1100px;
@@ -71,7 +71,7 @@
       transform: translateX(-3px);
     }
 
-    /* LAYOUT PRINCIPAL: PANEL DE HERRAMIENTAS + HOJA PREVIEW */
+    /* LAYOUT STUDIO */
     .studio-layout {
       width: 100%;
       max-width: 1100px;
@@ -81,7 +81,7 @@
       align-items: start;
     }
 
-    /* PANEL DE CONTROL LATERAL */
+    /* PANEL LATERAL DE CONTROL */
     .toolbox-panel {
       background: var(--panel-bg);
       border: 1px solid var(--card-border);
@@ -147,7 +147,12 @@
       box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
     }
 
-    .select-input, .text-input {
+    .tool-btn.custom-btn {
+      border: 1px dashed var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .select-input {
       width: 100%;
       background: rgba(0,0,0,0.4);
       border: 1px solid var(--card-border);
@@ -158,20 +163,20 @@
       outline: none;
     }
 
-    /* CONTENEDOR DE LA HOJA (CHART HOJA BLANCA IMPRESA) */
-    .sheet-wrapper {
+    /* CONTENEDOR MULTI-HOJA A4 */
+    .sheets-container {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
       background: #e2e8f0;
       padding: 30px;
       border-radius: 20px;
-      display: flex;
-      justify-content: center;
-      overflow-x: auto;
+      align-items: center;
     }
 
-    /* DISEÑO CARACTERÍSTICO CON ENCUADRE MODERNO Y MARCAS DE ESQUINA */
     .chart-paper {
-      width: 794px; /* Formato A4 proporcional */
-      min-height: 1123px;
+      width: 794px;
+      height: 1123px; /* Tamaño A4 estricto */
       background: var(--paper-bg);
       color: var(--paper-text);
       padding: 45px;
@@ -182,9 +187,9 @@
       flex-direction: column;
       justify-content: space-between;
       position: relative;
+      overflow: hidden;
     }
 
-    /* MARCAS DE ENCUADRE ESTÉTICAS EN LAS ESQUINAS (SIGNATURE FRAME) */
     .chart-paper::before {
       content: '';
       position: absolute;
@@ -197,23 +202,24 @@
     .paper-inner {
       display: flex;
       flex-direction: column;
-      gap: 25px;
+      gap: 20px;
       width: 100%;
+      flex: 1;
+      overflow: hidden;
     }
 
-    /* ENCABEZADO EDITABLE CON TIPOGRAFÍA BUNGEE */
     .chart-header {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 8px;
       border-bottom: 2px solid #0f172a;
-      padding-bottom: 15px;
+      padding-bottom: 12px;
     }
 
     .song-title-editable {
       font-family: 'Bungee', cursive, sans-serif;
-      font-size: 2.1em;
+      font-size: 2em;
       text-transform: uppercase;
       text-align: center;
       border: none;
@@ -224,16 +230,14 @@
       letter-spacing: 1px;
     }
 
-    .song-title-editable::placeholder {
-      color: #cbd5e1;
-    }
+    .song-title-editable::placeholder { color: #cbd5e1; }
 
     .header-sub-row {
       width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.9em;
+      font-size: 0.88em;
       font-weight: 600;
       color: #475569;
     }
@@ -247,23 +251,21 @@
       font-size: 1em;
     }
 
-    .editable-sub::placeholder {
-      color: #cbd5e1;
-    }
+    .editable-sub::placeholder { color: #cbd5e1; }
 
-    /* GRILLA DE COMPASES Y SECCIONES */
     .chart-content {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
     }
 
     .section-block {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
+    /* BADGE DE SECCIÓN EDITABLE EN LINEA */
     .section-badge {
       display: inline-block;
       align-self: flex-start;
@@ -271,37 +273,46 @@
       color: #fff;
       font-weight: 800;
       font-size: 0.85em;
-      padding: 4px 12px;
+      padding: 3px 10px;
       border-radius: 6px;
       letter-spacing: 1px;
+      border: none;
+      outline: none;
+      text-transform: uppercase;
     }
 
     .measures-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0;
+      display: flex;
+      flex-wrap: wrap;
       border-left: 2px solid #0f172a;
     }
 
     .measure-box {
-      height: 75px;
+      height: 72px;
       border-right: 2px solid #0f172a;
-      border-top: 1px solid #cbd5e1;
-      border-bottom: 1px solid #cbd5e1;
+      border-top: 2px solid #0f172a;
+      border-bottom: 2px solid #0f172a;
       padding: 6px 10px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       position: relative;
       background: #fff;
+      cursor: pointer;
+      transition: background 0.2s ease;
     }
 
-    .measure-box:nth-child(-n+4) {
-      border-top: 2px solid #0f172a;
+    .measure-box.selected {
+      background: #f0fdf4;
+      border-color: #16a34a !important;
     }
-    
-    .measure-box:nth-last-child(-n+4) {
-      border-bottom: 2px solid #0f172a;
+
+    .measure-box.break-system {
+      flex-basis: 100% !important;
+      height: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
     }
 
     .chord-input {
@@ -318,15 +329,16 @@
       display: flex;
       justify-content: space-around;
       color: #94a3b8;
-      font-size: 1.2em;
+      font-size: 1.1em;
       user-select: none;
       font-weight: 700;
     }
 
+    /* ANOTACIÓN DE BANDA EDITABLE EN LINEA */
     .band-annotation {
       position: absolute;
-      top: -12px;
-      right: 8px;
+      top: -10px;
+      right: 6px;
       font-size: 0.7em;
       font-weight: 700;
       color: #2563eb;
@@ -334,9 +346,9 @@
       padding: 1px 6px;
       border-radius: 4px;
       border: 1px solid #bfdbfe;
+      outline: none;
     }
 
-    /* PIE DE PÁGINA (PAGINACIÓN Y REFERENCIA DE CANCIÓN) */
     .chart-footer {
       border-top: 1.5px dashed #cbd5e1;
       padding-top: 10px;
@@ -356,8 +368,8 @@
 
     @media (max-width: 950px) {
       .studio-layout { grid-template-columns: 1fr; }
-      .sheet-wrapper { padding: 10px; }
-      .chart-paper { width: 100%; min-height: auto; padding: 20px; }
+      .sheets-container { padding: 10px; }
+      .chart-paper { width: 100%; height: auto; min-height: 1123px; }
     }
   </style>
 </head>
@@ -376,7 +388,7 @@
       <!-- EXPORTAR & TRANSPOSICIÓN -->
       <div class="toolbox-section">
         <div class="toolbox-title">⚡ Acciones Principales</div>
-        <button class="tool-btn primary" onclick="exportToPNG()">📥 Descargar Chart (PNG)</button>
+        <button class="tool-btn primary" onclick="exportAllPagesToPNG()">📥 Descargar Todo (PNG)</button>
         
         <div style="display:flex; gap:8px; margin-top:5px;">
           <button class="tool-btn" style="flex:1;" onclick="transposeAll(-1)">♭ -1 Semitono</button>
@@ -398,199 +410,259 @@
         </select>
       </div>
 
-      <!-- AGREGAR SECCIONES EXPANSIÓN -->
+      <!-- SECCIONES -->
       <div class="toolbox-section">
-        <div class="toolbox-title">🏷️ Agregar Secciones</div>
+        <div class="toolbox-title">🏷️ Secciones</div>
         <div class="btn-grid">
+          <button class="tool-btn custom-btn" onclick="addEditableSection()">✏️ EDITABLE</button>
           <button class="tool-btn" onclick="addSection('INTRO')">+ INTRO</button>
-          <button class="tool-btn" onclick="addSection('REINTRO')">+ REINTRO</button>
           <button class="tool-btn" onclick="addSection('VERSO')">+ VERSO</button>
-          <button class="tool-btn" onclick="addSection('PRE-CORO')">+ PRE-CORO</button>
           <button class="tool-btn" onclick="addSection('CORO')">+ CORO</button>
           <button class="tool-btn" onclick="addSection('PUENTE')">+ PUENTE</button>
-          <button class="tool-btn" onclick="addSection('INSTRUMENTAL')">+ INSTRUM.</button>
           <button class="tool-btn" onclick="addSection('SOLO')">+ SOLO</button>
-          <button class="tool-btn" onclick="addSection('SOLO GUITARRA')">+ SOLO GT</button>
-          <button class="tool-btn" onclick="addSection('SOLO PIANO')">+ SOLO PNO</button>
-          <button class="tool-btn" onclick="addSection('SOLO BATERÍA')">+ SOLO BAT</button>
-          <button class="tool-btn" onclick="addSection('SOLO BAJO')">+ SOLO BAJO</button>
-          <button class="tool-btn" onclick="addSection('SOLO VOCES')">+ SOLO VOCES</button>
-          <button class="tool-btn" onclick="addSection('OUTRO')">+ OUTRO</button>
         </div>
       </div>
 
-      <!-- ESTRUCTURA DE COMPASES -->
+      <!-- INSERCIÓN Y AGRUPACIÓN DE COMPASES -->
       <div class="toolbox-section">
-        <div class="toolbox-title">🎼 Compases</div>
-        <button class="tool-btn" onclick="addMeasureSystem()">+ Agregar Sistema (4 Compases)</button>
-        <button class="tool-btn" onclick="addSingleMeasure()">+ Agregar 1 Compás</button>
-        <button class="tool-btn" style="color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="removeLastMeasure()">🗑️ Eliminar Último Compás</button>
+        <div class="toolbox-title">🎼 Inserción de Compases</div>
+        <div style="font-size:0.75em; color:var(--text-muted); margin-bottom:4px;">Haz clic en un compás para seleccionarlo:</div>
+        <button class="tool-btn" onclick="insertMeasure('before')">⬅️ Agregar ANTES del seleccionado</button>
+        <button class="tool-btn" onclick="insertMeasure('after')">➡️ Agregar DESPUÉS del seleccionado</button>
+        <button class="tool-btn" style="margin-top:6px; background:rgba(234,179,8,0.15); border-color:rgba(234,179,8,0.4); color:#fef08a;" onclick="toggleSystemBreak()">↵ Salto de Línea (Agrupar)</button>
+        <button class="tool-btn" style="margin-top:4px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="removeSelectedMeasure()">🗑️ Eliminar Compás Seleccionado</button>
       </div>
 
-      <!-- ANOTACIONES BANDA -->
+      <!-- INDICACIONES BANDA -->
       <div class="toolbox-section">
         <div class="toolbox-title">📌 Indicaciones Banda</div>
-        <div class="btn-grid">
+        <button class="tool-btn custom-btn" onclick="addAnnotation('✏️ Tu Nota', true)">✏️ Nota Personalizada</button>
+        <div class="btn-grid" style="margin-top:6px;">
           <button class="tool-btn" onclick="addAnnotation('Banda IN')">Banda IN</button>
           <button class="tool-btn" onclick="addAnnotation('Tutti')">Tutti</button>
           <button class="tool-btn" onclick="addAnnotation('Corte')">Corte</button>
-          <button class="tool-btn" onclick="addAnnotation('Loop')">Loop</button>
           <button class="tool-btn" onclick="addAnnotation('Pad Only')">Pad Only</button>
-          <button class="tool-btn" onclick="addAnnotation('Solo Bat')">Solo Bat</button>
         </div>
       </div>
 
     </div>
 
-    <!-- ÁREA DE HOJA BLANCA IMPRESA -->
-    <div class="sheet-wrapper">
-      <div class="chart-paper" id="chartPaper">
-        
+    <!-- CONTENEDOR MULTI-PÁGINA A4 -->
+    <div class="sheets-container" id="sheetsContainer">
+      
+      <!-- PÁGINA 1 -->
+      <div class="chart-paper" id="paper-page-1">
         <div class="paper-inner">
-          <!-- ENCABEZADO EDITABLE CON TIPOGRAFÍA BUNGEE -->
           <div class="chart-header">
-            <input type="text" class="song-title-editable" id="songTitleInput" placeholder="TÍTULO DE LA CANCIÓN" value="" oninput="updateFooterTitle(this.value)">
-            
+            <input type="text" class="song-title-editable" id="songTitleInput" placeholder="TÍTULO DE LA CANCIÓN" oninput="updateFooterTitle(this.value)">
             <div class="header-sub-row">
               <div><input type="text" class="editable-sub" placeholder="Artista / Banda" style="width:200px;"></div>
-              <div>Métrica: <span id="displayTimeSig">4/4</span></div>
+              <div>Métrica: <span class="displayTimeSig">4/4</span></div>
               <div><input type="text" class="editable-sub" placeholder="BPM: 120" style="width:90px; text-align:right;"></div>
             </div>
           </div>
 
-          <!-- ESTRUCTURA DE COMPASES DE LA CANCIÓN -->
-          <div class="chart-content" id="chartContent">
-            
-            <!-- SECCIÓN DE INICIO POR DEFECTO -->
+          <div class="chart-content">
             <div class="section-block">
-              <span class="section-badge">INTRO</span>
-              <div class="measures-grid" id="grid-1">
-                <div class="measure-box">
+              <span class="section-badge" contenteditable="true">INTRO</span>
+              <div class="measures-grid">
+                <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
                   <input type="text" class="chord-input" placeholder="C">
                   <div class="rhythm-slashes">///////</div>
                 </div>
-                <div class="measure-box">
+                <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
                   <input type="text" class="chord-input" placeholder="G/B">
                   <div class="rhythm-slashes">///////</div>
                 </div>
-                <div class="measure-box">
+                <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
                   <input type="text" class="chord-input" placeholder="Am7">
                   <div class="rhythm-slashes">///////</div>
                 </div>
-                <div class="measure-box">
+                <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
                   <input type="text" class="chord-input" placeholder="F2">
                   <div class="rhythm-slashes">///////</div>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 
-        <!-- PIE DE PÁGINA CON REFERENCIA AUTOMÁTICA DE CANCIÓN Y PAGINACIÓN -->
         <div class="chart-footer">
-          <div class="footer-title-ref" id="footerTitleRef">UNTITLED CHART</div>
-          <div>PÁG. <span id="currentPageNum">1</span> / <span id="totalPagesNum">1</span></div>
+          <div class="footer-title-ref">UNTITLED CHART</div>
+          <div class="page-num-ref">PÁG. 1 / 1</div>
         </div>
-
       </div>
+
     </div>
 
   </div>
 
   <script>
-    let activeGridId = 'grid-1';
-    let gridCounter = 1;
+    let selectedMeasure = null;
+    let pageCount = 1;
+
+    function selectMeasure(el) {
+      if (selectedMeasure) selectedMeasure.classList.remove('selected');
+      selectedMeasure = el;
+      selectedMeasure.classList.add('selected');
+    }
 
     function updateTimeSignature(val) {
-      document.getElementById('displayTimeSig').innerText = val;
+      document.querySelectorAll('.displayTimeSig').forEach(el => el.innerText = val);
     }
 
     function updateFooterTitle(val) {
-      const ref = document.getElementById('footerTitleRef');
-      ref.innerText = val.trim() !== '' ? val.toUpperCase() : 'UNTITLED CHART';
+      const text = val.trim() !== '' ? val.toUpperCase() : 'UNTITLED CHART';
+      document.querySelectorAll('.footer-title-ref').forEach(el => el.innerText = text);
     }
 
-    function addSection(title) {
-      gridCounter++;
-      const content = document.getElementById('chartContent');
-      
+    function getCurrentPageContent() {
+      const pages = document.querySelectorAll('.chart-paper');
+      const lastPage = pages[pages.length - 1];
+      return lastPage.querySelector('.chart-content');
+    }
+
+    function checkPaginationOverflow() {
+      const pages = document.querySelectorAll('.chart-paper');
+      const lastPage = pages[pages.length - 1];
+      const inner = lastPage.querySelector('.paper-inner');
+
+      if (inner.scrollHeight > 920) {
+        createNewPage();
+      }
+    }
+
+    function createNewPage() {
+      pageCount++;
+      const container = document.getElementById('sheetsContainer');
+      const titleText = document.getElementById('songTitleInput').value.toUpperCase() || 'UNTITLED CHART';
+      const timeSig = document.getElementById('timeSignatureSelect').value;
+
+      const newPaper = document.createElement('div');
+      newPaper.className = 'chart-paper';
+      newPaper.id = `paper-page-${pageCount}`;
+
+      newPaper.innerHTML = `
+        <div class="paper-inner">
+          <div class="chart-header">
+            <div style="font-family:'Bungee', cursive; font-size:1.4em; text-align:center; text-transform:uppercase;">${titleText} (CONT.)</div>
+            <div class="header-sub-row">
+              <div>Métrica: <span class="displayTimeSig">${timeSig}</span></div>
+              <div>Continuación Hoja ${pageCount}</div>
+            </div>
+          </div>
+          <div class="chart-content"></div>
+        </div>
+        <div class="chart-footer">
+          <div class="footer-title-ref">${titleText}</div>
+          <div class="page-num-ref">PÁG. ${pageCount} / ${pageCount}</div>
+        </div>
+      `;
+
+      container.appendChild(newPaper);
+      updateTotalPagesCounter();
+    }
+
+    function updateTotalPagesCounter() {
+      const total = document.querySelectorAll('.chart-paper').length;
+      document.querySelectorAll('.page-num-ref').forEach((el, idx) => {
+        el.innerText = `PÁG. ${idx + 1} / ${total}`;
+      });
+    }
+
+    function addEditableSection() {
+      addSection('NUEVA SECCIÓN', true);
+    }
+
+    function addSection(title, isEditable = false) {
+      const content = getCurrentPageContent();
       const newBlock = document.createElement('div');
       newBlock.className = 'section-block';
-      
-      const newGridId = `grid-${gridCounter}`;
-      activeGridId = newGridId;
 
       newBlock.innerHTML = `
-        <span class="section-badge">${title}</span>
-        <div class="measures-grid" id="${newGridId}">
-          <div class="measure-box">
+        <span class="section-badge" contenteditable="true">${title}</span>
+        <div class="measures-grid">
+          <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
             <input type="text" class="chord-input" placeholder="Acorde">
             <div class="rhythm-slashes">///////</div>
           </div>
-          <div class="measure-box">
+          <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
             <input type="text" class="chord-input" placeholder="Acorde">
             <div class="rhythm-slashes">///////</div>
           </div>
-          <div class="measure-box">
+          <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
             <input type="text" class="chord-input" placeholder="Acorde">
             <div class="rhythm-slashes">///////</div>
           </div>
-          <div class="measure-box">
+          <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
             <input type="text" class="chord-input" placeholder="Acorde">
             <div class="rhythm-slashes">///////</div>
           </div>
         </div>
       `;
       content.appendChild(newBlock);
+      checkPaginationOverflow();
     }
 
-    function addMeasureSystem() {
-      const activeGrid = document.getElementById(activeGridId) || document.querySelector('.measures-grid');
-      for (let i = 0; i < 4; i++) {
-        const box = document.createElement('div');
-        box.className = 'measure-box';
-        box.innerHTML = `
-          <input type="text" class="chord-input" placeholder="Acorde">
-          <div class="rhythm-slashes">///////</div>
-        `;
-        activeGrid.appendChild(box);
+    function insertMeasure(position) {
+      if (!selectedMeasure) {
+        alert('Por favor haz clic primero en un compás para elegir la posición de inserción.');
+        return;
       }
-    }
 
-    function addSingleMeasure() {
-      const activeGrid = document.getElementById(activeGridId) || document.querySelector('.measures-grid');
-      const box = document.createElement('div');
-      box.className = 'measure-box';
-      box.innerHTML = `
+      const newBox = document.createElement('div');
+      newBox.className = 'measure-box';
+      newBox.style.flex = '0 0 25%';
+      newBox.onclick = function() { selectMeasure(this); };
+      newBox.innerHTML = `
         <input type="text" class="chord-input" placeholder="Acorde">
         <div class="rhythm-slashes">///////</div>
       `;
-      activeGrid.appendChild(box);
+
+      if (position === 'before') {
+        selectedMeasure.parentNode.insertBefore(newBox, selectedMeasure);
+      } else {
+        selectedMeasure.parentNode.insertBefore(newBox, selectedMeasure.nextSibling);
+      }
+
+      selectMeasure(newBox);
+      checkPaginationOverflow();
     }
 
-    function removeLastMeasure() {
-      const activeGrid = document.getElementById(activeGridId) || document.querySelector('.measures-grid');
-      if (activeGrid && activeGrid.lastElementChild) {
-        activeGrid.removeChild(activeGrid.lastElementChild);
+    function toggleSystemBreak() {
+      if (!selectedMeasure) {
+        alert('Selecciona un compás para agrupar o hacer un salto de línea.');
+        return;
+      }
+      const grid = selectedMeasure.parentNode;
+      const breakEl = document.createElement('div');
+      breakEl.className = 'measure-box break-system';
+      grid.insertBefore(breakEl, selectedMeasure.nextSibling);
+      checkPaginationOverflow();
+    }
+
+    function removeSelectedMeasure() {
+      if (selectedMeasure && selectedMeasure.parentNode) {
+        selectedMeasure.parentNode.removeChild(selectedMeasure);
+        selectedMeasure = null;
       }
     }
 
-    function addAnnotation(text) {
-      const activeGrid = document.getElementById(activeGridId) || document.querySelector('.measures-grid');
-      if (activeGrid && activeGrid.lastElementChild) {
-        const lastBox = activeGrid.lastElementChild;
-        let badge = lastBox.querySelector('.band-annotation');
-        if (!badge) {
-          badge = document.createElement('span');
-          badge.className = 'band-annotation';
-          lastBox.appendChild(badge);
-        }
-        badge.innerText = text;
+    function addAnnotation(text, isEditable = false) {
+      if (!selectedMeasure) {
+        alert('Haz clic en el compás donde quieres poner la indicación.');
+        return;
       }
+      let badge = selectedMeasure.querySelector('.band-annotation');
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'band-annotation';
+        badge.contentEditable = 'true';
+        selectedMeasure.appendChild(badge);
+      }
+      badge.innerText = text;
     }
 
-    // MOTOR DE TRANSPOSICIÓN AUTOMÁTICA DE ACORDES
     const notesChromatic = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     const notesFlats = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
@@ -605,22 +677,22 @@
     }
 
     function transposeAll(semitones) {
-      const inputs = document.querySelectorAll('.chord-input');
-      inputs.forEach(input => {
+      document.querySelectorAll('.chord-input').forEach(input => {
         if (input.value.trim() !== '') {
           input.value = transposeChord(input.value, semitones);
         }
       });
     }
 
-    // EXPORTACIÓN A PNG ALTA CALIDAD
-    function exportToPNG() {
-      const paper = document.getElementById('chartPaper');
-      html2canvas(paper, { scale: 2 }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = 'chart-partitura.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+    function exportAllPagesToPNG() {
+      const papers = document.querySelectorAll('.chart-paper');
+      papers.forEach((paper, idx) => {
+        html2canvas(paper, { scale: 2 }).then(canvas => {
+          const link = document.createElement('a');
+          link.download = `chart-pagina-${idx + 1}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        });
       });
     }
   </script>
