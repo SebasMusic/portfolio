@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chord Chart Studio</title>
   
+  <!-- Google Analytics GA4 Base -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3DTLYSJMH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-Q3DTLYSJMH');
+  </script>
+
   <!-- Tipografía Bungee exacta para el título e Inter para el cuerpo -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -539,7 +549,6 @@
   </div>
 
   <script>
-    // DICCIONARIO COMPLETO PARA LOS 8 IDIOMAS DEL HOME
     const i18n = {
       en: {
         btnBack: "← HOME",
@@ -963,12 +972,9 @@
     let selectedMeasure = null;
     let pageCount = 1;
 
-    // DETECCIÓN E INICIALIZACIÓN SINCRO CON INDEX.HTML
     function initLanguage() {
-      // Usa exactamente la clave 'preferred_lang' del archivo principal
       let savedLang = localStorage.getItem('preferred_lang');
 
-      // Fallback a URL o lenguaje del navegador
       if (!savedLang) {
         const urlParams = new URLSearchParams(window.location.search);
         savedLang = urlParams.get('lang');
@@ -992,7 +998,6 @@
       currentLang = lang;
       const dict = i18n[lang] || i18n['en'];
 
-      // Botones e Interfaz General
       document.getElementById('btnBack').innerText = dict.btnBack;
       document.getElementById('titleActions').innerText = dict.titleActions;
       document.getElementById('btnExportPNG').innerText = dict.btnExportPNG;
@@ -1031,7 +1036,6 @@
       document.getElementById('btnBandIn').innerText = dict.bandIn;
       document.getElementById('btnCorte').innerText = dict.corte;
 
-      // Placeholders y Encabezados
       document.getElementById('songTitleInput').placeholder = dict.titlePlaceholder;
       document.getElementById('artistInput').placeholder = dict.artistPlaceholder;
       document.getElementById('lblTimeSigHeader').innerText = dict.lblTimeSigHeader;
@@ -1056,7 +1060,6 @@
       selectedMeasure.classList.add('selected');
     }
 
-    // GENERADOR DINÁMICO DE SLASHES SEGÚN MÉTRICA DE TIEMPO
     function getSlashHTML(timeSig) {
       switch (timeSig) {
         case '4/4':
@@ -1083,6 +1086,10 @@
       document.querySelectorAll('.rhythm-slashes').forEach(el => {
         el.innerHTML = html;
       });
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'change_time_signature', { 'time_sig': val });
+      }
     }
 
     function updateFooterTitle(val) {
@@ -1286,9 +1293,20 @@
           input.value = transposeChord(input.value, semitones);
         }
       });
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'transpose_chart', { 'semitones': semitones });
+      }
     }
 
     function exportAllPagesToPNG() {
+      if (typeof gtag === 'function') {
+        gtag('event', 'export_chart_png', {
+          'song_title': document.getElementById('songTitleInput').value || 'Sin Titulo',
+          'total_pages': document.querySelectorAll('.chart-paper').length
+        });
+      }
+
       const papers = document.querySelectorAll('.chart-paper');
       papers.forEach((paper, idx) => {
         html2canvas(paper, { scale: 2 }).then(canvas => {
@@ -1300,7 +1318,6 @@
       });
     }
 
-    // Inicializar idioma al cargar el documento
     window.addEventListener('DOMContentLoaded', () => {
       initLanguage();
     });
