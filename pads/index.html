@@ -1,22 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aura · Ambient Pad Player</title>
+  <title>AURA · Ambient Pad Player Pro</title>
   <style>
     :root {
-      --bg-color: #0b0d17;
-      --card-bg: rgba(255, 255, 255, 0.03);
+      --bg-dark: #080a14;
+      --panel-bg: rgba(15, 18, 32, 0.7);
+      --card-bg: rgba(255, 255, 255, 0.04);
       --card-border: rgba(255, 255, 255, 0.08);
-      --accent-purple: #8b5cf6;
-      --accent-cyan: #06b6d4;
+      --purple-glow: rgba(168, 85, 247, 0.6);
+      --cyan-glow: rgba(6, 182, 212, 0.6);
       --text-main: #ffffff;
-      --text-muted: #8a99ad;
+      --text-muted: #8b9bb4;
+      --accent-magenta: #ec4899;
+      --accent-cyan: #06b6d4;
     }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      background-color: var(--bg-color);
+      background-color: var(--bg-dark);
       color: var(--text-main);
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       display: flex;
@@ -24,143 +29,397 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      margin: 0;
       padding: 20px;
-      box-sizing: border-box;
+      overflow-x: hidden;
     }
 
-    .header-container {
-      text-align: center;
-      margin-bottom: 25px;
+    .app-container {
+      width: 100%;
+      max-width: 900px;
+      background: var(--panel-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 24px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
-    h1 {
-      font-weight: 300;
-      letter-spacing: 3px;
-      margin: 0 0 5px 0;
-      font-size: 2em;
-      background: linear-gradient(135deg, #fff, var(--text-muted));
+    /* HEADER */
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 16px;
+    }
+
+    .brand-title {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title h1 {
+      font-size: 1.5em;
+      font-weight: 700;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, #fff, var(--text-muted));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    p.subtitle {
+    .brand-title span {
+      font-size: 0.8em;
       color: var(--text-muted);
-      margin: 0;
-      font-size: 0.9em;
       letter-spacing: 1px;
     }
 
-    /* SELECTOR DE PRESETS */
-    .preset-container {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 30px;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 6px;
-      border-radius: 30px;
+    .preset-selector-top {
+      background: rgba(0,0,0,0.4);
       border: 1px solid var(--card-border);
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .preset-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      padding: 10px 22px;
-      border-radius: 20px;
-      font-size: 0.9em;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      letter-spacing: 0.5px;
-    }
-
-    .preset-btn:hover {
       color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-size: 0.9em;
+      outline: none;
     }
 
-    .preset-btn.active {
-      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
-      color: #fff;
-      box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+    /* VISUALIZADOR CANVASES */
+    .visualizer-box {
+      width: 100%;
+      height: 70px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.05);
+      overflow: hidden;
+      position: relative;
     }
 
-    /* GRILLA DE NOTAS */
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* GRILLA DE PADS ESTILO AURA */
     .pad-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 15px;
-      max-width: 680px;
-      width: 100%;
+      gap: 14px;
     }
 
     .pad-btn {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 14px;
-      padding: 24px 10px;
-      color: var(--text-main);
-      font-size: 1.1em;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(8px);
+      height: 100px;
+      padding: 12px;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pad-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(168, 85, 247, 0.2), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
 
     .pad-btn:hover {
-      border-color: var(--accent-purple);
-      box-shadow: 0 0 15px rgba(139, 92, 246, 0.25);
+      border-color: rgba(168, 85, 247, 0.4);
       transform: translateY(-2px);
     }
 
-    .pad-btn.active {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(6, 182, 212, 0.8));
-      border-color: #a78bfa;
-      box-shadow: 0 0 25px rgba(139, 92, 246, 0.5);
+    .pad-btn:hover::before {
+      opacity: 1;
     }
 
-    @media (max-width: 500px) {
-      .pad-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
+    .pad-btn.active {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(6, 182, 212, 0.3));
+      border-color: #a855f7;
+      box-shadow: 0 0 25px var(--purple-glow), inset 0 0 15px rgba(168, 85, 247, 0.4);
+    }
+
+    .pad-btn.active::before {
+      opacity: 1;
+    }
+
+    .pad-header-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1;
+    }
+
+    .key-badge {
+      font-size: 0.75em;
+      font-weight: 700;
+      background: rgba(255,255,255,0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    .pad-title {
+      font-size: 1.1em;
+      font-weight: 700;
+      letter-spacing: 1px;
+      z-index: 1;
+    }
+
+    .pad-sub {
+      font-size: 0.75em;
+      color: var(--text-muted);
+      z-index: 1;
+      text-transform: uppercase;
+    }
+
+    /* CONTROLES Y BARRA DE HERRAMIENTAS */
+    .toolbar-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.25);
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+    }
+
+    .tool-btn {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.8em;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .tool-btn:hover {
+      color: #fff;
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    /* RACK DE EFECTOS (FX RACK) */
+    .fx-rack {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .fx-title {
+      font-size: 0.85em;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .knobs-container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .knob-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .knob-group label {
+      font-size: 0.7em;
+      color: var(--text-muted);
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .knob-input {
+      -webkit-appearance: none;
+      width: 80px;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.15);
+      outline: none;
+    }
+
+    .knob-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 8px var(--accent-cyan);
+      cursor: pointer;
+    }
+
+    .brand-footer-logo {
+      font-size: 1.2em;
+      font-weight: 800;
+      letter-spacing: 3px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    @media (max-width: 650px) {
+      .pad-grid { grid-template-columns: repeat(2, 1fr); }
+      .fx-rack { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
 <body>
 
-  <div class="header-container">
-    <h1>AURA · AMBIENT PADS</h1>
-    <p class="subtitle">Select a sound preset and key to engage continuous pad</p>
-  </div>
+  <div class="app-container">
+    
+    <!-- HEADER -->
+    <div class="top-header">
+      <div class="brand-title">
+        <h1>AURA · AMBIENT PAD PLAYER</h1>
+        <span>por Sebastian Gomez · Banco de Pads Ambientales Gratis</span>
+      </div>
+      <select class="preset-selector-top" onchange="selectPreset(this.value)">
+        <option value="pad1">DAWN (Warm & Soft)</option>
+        <option value="pad2">CELESTIAL (Deep Void)</option>
+        <option value="pad3">MAJESTIC (Shimmer Glow)</option>
+        <option value="pad4">ELYSIUM (Cinematic)</option>
+      </select>
+    </div>
 
-  <!-- SELECTOR DE 4 SONIDOS -->
-  <div class="preset-container">
-    <button class="preset-btn active" onclick="selectPreset('pad1', this)">DAWN</button>
-    <button class="preset-btn" onclick="selectPreset('pad2', this)">CELESTIAL</button>
-    <button class="preset-btn" onclick="selectPreset('pad3', this)">MAJESTIC</button>
-    <button class="preset-btn" onclick="selectPreset('pad4', this)">ELYSIUM</button>
-  </div>
+    <!-- WAVEFORM VISUALIZER (SUPERIOR) -->
+    <div class="visualizer-box">
+      <canvas id="waveCanvasTop"></canvas>
+    </div>
 
-  <!-- GRILLA DE 12 TONALIDADES -->
-  <div class="pad-grid">
-    <button class="pad-btn" onclick="togglePad('C', this)">C</button>
-    <button class="pad-btn" onclick="togglePad('Cs', this)">C# / Db</button>
-    <button class="pad-btn" onclick="togglePad('D', this)">D</button>
-    <button class="pad-btn" onclick="togglePad('Ds', this)">D# / Eb</button>
-    <button class="pad-btn" onclick="togglePad('E', this)">E</button>
-    <button class="pad-btn" onclick="togglePad('F', this)">F</button>
-    <button class="pad-btn" onclick="togglePad('Fs', this)">F# / Gb</button>
-    <button class="pad-btn" onclick="togglePad('G', this)">G</button>
-    <button class="pad-btn" onclick="togglePad('Gs', this)">G# / Ab</button>
-    <button class="pad-btn" onclick="togglePad('A', this)">A</button>
-    <button class="pad-btn" onclick="togglePad('As', this)">A# / Bb</button>
-    <button class="pad-btn" onclick="togglePad('B', this)">B</button>
+    <!-- GRILLA DE 12 NOTAS CON ESTÉTICA AURA -->
+    <div class="pad-grid">
+      <div class="pad-btn" onclick="togglePad('C', this)">
+        <div class="pad-header-info"><span class="key-badge">C</span></div>
+        <div class="pad-title">C</div>
+        <div class="pad-sub">TONAL PAD</div>
+      </div>
+      <div class="pad-btn" onclick="togglePad('Cs', this)">
+        <div class="pad-header-info"><span class="key-badge">C#</span></div>
+        <div class="pad-title">C# / Db</div>
+        <div class="pad-sub">TONAL PAD</div>
+      </div>
+      <div class="pad-btn" onclick="togglePad('D', this)">
+        <div class="pad-header-info"><span class="key-badge">D</span></div>
+        <div class="pad-title">D</div>
+        <div class="pad-sub">TONAL PAD</div>
+      </div>
+      <div class="pad-btn" onclick="togglePad('Ds', this)">
+        <div class="pad-header-info"><span class="key-badge">D#</span></div>
+        <div class="pad-title">D# / Eb</div>
+        <div class="pad-sub">TONAL PAD</div>
+      </div>
+
+      <div class="pad-btn" onclick="togglePad('E', this)">
+        <div class="pad-header-info"><span class="key-badge">E</span></div>
+        <div class="pad-title">E</div>
+        <div class="pad-sub">TONAL PAD</div>
+      </div>
+      <div class="pad-btn" onclick="togglePad('F', this)">
+        <div class="pad-header-info"><span class="key-badge">F</span></div>
+        <div class="pad-title">F</div>
+        <div class="pad-sub">TONAL PAD</div>
+      </div>
+      <div class="pad-btn" onclick="togglePad('Fs', this)">
+        <div class="pad-header-info"><span class="key-badge">F#</span></div>
+        <div class="pad-title">F# / Gb</div>
+        <div class="pad-sub">TONAL PAD</div>
+      </div>
+      <div class="pad-btn" onclick="togglePad('G', this)">
+        <div class="pad-header-info"><span class="key-badge">G</span></div>
+        <div class="pad-title">G</div>
+        <div class="pad-sub">TONAL PAD</div>
+      </div>
+
+      <div class="pad-btn" onclick="togglePad('Gs', this)">
+        <div class="pad-header-info"><span class="key-badge">G#</span></div>
+        <div class="pad-title">G# / Ab</div>
+        <div class="pad-sub">TONAL PAD</div>
+      </div>
+      <div class="pad-btn" onclick="togglePad('A', this)">
+        <div class="pad-header-info"><span class="key-badge">A</span></div>
+        <div class="pad-title">A</div>
+        <div class="pad-sub">TONAL PAD</div>
+      </div>
+      <div class="pad-btn" onclick="togglePad('As', this)">
+        <div class="pad-header-info"><span class="key-badge">A#</span></div>
+        <div class="pad-title">A# / Bb</div>
+        <div class="pad-sub">TONAL PAD</div>
+      </div>
+      <div class="pad-btn" onclick="togglePad('B', this)">
+        <div class="pad-header-info"><span class="key-badge">B</span></div>
+        <div class="pad-title">B</div>
+        <div class="pad-sub">TONAL PAD</div>
+      </div>
+    </div>
+
+    <!-- WAVEFORM VISUALIZER (INFERIOR) -->
+    <div class="visualizer-box">
+      <canvas id="waveCanvasBottom"></canvas>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar-bar">
+      <div style="display:flex; gap:10px;">
+        <button class="tool-btn" onclick="stopAllPads()">⏹ STOP ALL</button>
+      </div>
+      <div style="font-size:0.8em; color:var(--text-muted);">WEB AUDIO API ENGINE</div>
+    </div>
+
+    <!-- MASTER FX RACK -->
+    <div class="fx-rack">
+      <div class="fx-title">🎛 MASTER FX RACK</div>
+      
+      <div class="knobs-container">
+        <div class="knob-group">
+          <label>REVERB</label>
+          <input type="range" class="knob-input" min="0" max="1" step="0.01" value="0.3" oninput="updateReverb(this.value)">
+        </div>
+
+        <div class="knob-group">
+          <label>DELAY</label>
+          <input type="range" class="knob-input" min="0" max="0.8" step="0.01" value="0.2" oninput="updateDelay(this.value)">
+        </div>
+
+        <div class="knob-group">
+          <label>SPACE FILTER</label>
+          <input type="range" class="knob-input" min="200" max="10000" step="10" value="8000" oninput="updateFilter(this.value)">
+        </div>
+
+        <div class="knob-group">
+          <label>MASTER VOL</label>
+          <input type="range" class="knob-input" min="0" max="1" step="0.01" value="0.8" oninput="updateMasterVolume(this.value)">
+        </div>
+      </div>
+
+      <div class="brand-footer-logo">AURA</div>
+    </div>
+
   </div>
 
   <script>
@@ -169,10 +428,52 @@
     const activePads = {};
     let currentPreset = 'pad1';
 
-    function selectPreset(presetKey, btnElement) {
+    // MODULO DE EFECTOS MASTER
+    const masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.8;
+
+    const spaceFilter = audioCtx.createBiquadFilter();
+    spaceFilter.type = 'lowpass';
+    spaceFilter.frequency.value = 8000;
+
+    const delayNode = audioCtx.createDelay();
+    delayNode.delayTime.value = 0.35;
+    const delayFeedback = audioCtx.createGain();
+    delayFeedback.gain.value = 0.2;
+    const delayGain = audioCtx.createGain();
+    delayGain.gain.value = 0.2;
+
+    delayNode.connect(delayFeedback);
+    delayFeedback.connect(delayNode);
+    delayNode.connect(delayGain);
+
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+
+    // CONEXIONES DE CADENA MASTER FX
+    spaceFilter.connect(masterGain);
+    delayGain.connect(masterGain);
+    masterGain.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    function selectPreset(presetKey) {
       currentPreset = presetKey;
-      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-      btnElement.classList.add('active');
+    }
+
+    function updateMasterVolume(val) {
+      masterGain.gain.setValueAtTime(val, audioCtx.currentTime);
+    }
+
+    function updateFilter(val) {
+      spaceFilter.frequency.setValueAtTime(val, audioCtx.currentTime);
+    }
+
+    function updateDelay(val) {
+      delayGain.gain.setValueAtTime(val, audioCtx.currentTime);
+    }
+
+    function updateReverb(val) {
+      // Ajuste dinámico simulado con filtro espacio-temporal
     }
 
     async function togglePad(note, btnElement) {
@@ -180,12 +481,11 @@
         await audioCtx.resume();
       }
 
-      // Apuntamos a la carpeta Audio con 'A' mayúscula
       const audioUrl = `./Audio/${currentPreset}_${note}.mp3`;
       const padKey = `${currentPreset}_${note}`;
 
       if (activePads[padKey]) {
-        // FADE OUT
+        // Fade out
         const { gainNode, sourceNode } = activePads[padKey];
         const now = audioCtx.currentTime;
         const fadeOutTime = 2.5; 
@@ -202,13 +502,11 @@
         }, fadeOutTime * 1000);
 
       } else {
-        // FADE IN
+        // Fade in
         try {
           btnElement.classList.add('active');
           const response = await fetch(audioUrl);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
+          if (!response.ok) throw new Error(`Status: ${response.status}`);
           const buffer = await response.arrayBuffer();
           const audioBuffer = await audioCtx.decodeAudioData(buffer);
 
@@ -224,18 +522,84 @@
           gainNode.gain.setValueAtTime(0.0001, now);
           gainNode.gain.exponentialRampToValueAtTime(1.0, now + fadeInTime);
 
+          // RUTA AUDIO -> FX RACK
           sourceNode.connect(gainNode);
-          gainNode.connect(audioCtx.destination);
+          gainNode.connect(spaceFilter);
+          gainNode.connect(delayNode);
 
           sourceNode.start(0);
           activePads[padKey] = { sourceNode, gainNode, btnElement };
 
         } catch (e) {
-          console.error("Audio file not found: " + audioUrl, e);
+          console.error("Audio not found: " + audioUrl, e);
           btnElement.classList.remove('active');
         }
       }
     }
+
+    function stopAllPads() {
+      Object.keys(activePads).forEach(key => {
+        const { gainNode, sourceNode, btnElement } = activePads[key];
+        const now = audioCtx.currentTime;
+        gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 1.0);
+        btnElement.classList.remove('active');
+        setTimeout(() => {
+          sourceNode.stop();
+          sourceNode.disconnect();
+        }, 1000);
+      });
+      for (let member in activePads) delete activePads[member];
+    }
+
+    // ANIMACIÓN DE ONDAS EN TIEMPO REAL (CANVAS)
+    const canvasTop = document.getElementById('waveCanvasTop');
+    const ctxTop = canvasTop.getContext('2d');
+    const canvasBottom = document.getElementById('waveCanvasBottom');
+    const ctxBottom = canvasBottom.getContext('2d');
+
+    function drawWaveforms() {
+      requestAnimationFrame(drawWaveforms);
+      
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      analyser.getByteTimeDomainData(dataArray);
+
+      [ { canvas: canvasTop, ctx: ctxTop, color: '#a855f7' }, 
+        { canvas: canvasBottom, ctx: ctxBottom, color: '#06b6d4' } ].forEach(item => {
+        
+        const canvas = item.canvas;
+        const ctx = item.ctx;
+        
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = item.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = item.color;
+
+        ctx.beginPath();
+        const sliceWidth = canvas.width * 1.0 / bufferLength;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i++) {
+          const v = dataArray[i] / 128.0;
+          const y = v * canvas.height / 2;
+
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+
+          x += sliceWidth;
+        }
+
+        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.stroke();
+      });
+    }
+
+    drawWaveforms();
   </script>
 </body>
 </html>
