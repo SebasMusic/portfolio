@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AURA · Chord Chart Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070913;
+      --panel-bg: rgba(15, 18, 32, 0.85);
+      --panel-border: rgba(255, 255, 255, 0.1);
+      --accent-purple: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --paper-bg: #ffffff;
+      --paper-text: #0f172a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* BOTÓN RETORNO AL INICIO */
+    .top-nav {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 15px;
+    }
+
+    .btn-back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-back-home:hover {
+      color: #ffffff;
+      border-color: rgba(139, 92, 246, 0.5);
+      background: rgba(139, 92, 246, 0.15);
+      box-shadow: 0 0 14px rgba(139, 92, 246, 0.3);
+      transform: translateX(-3px);
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    .app-workspace {
+      width: 100%;
+      max-width: 1100px;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 25px;
+    }
+
+    /* PANEL DE CONTROL LATERAL */
+    .control-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      padding: 20px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      height: fit-content;
+    }
+
+    .panel-header {
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 12px;
+    }
+
+    .panel-header h2 {
+      font-size: 1.2em;
+      font-weight: 700;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .panel-section-title {
+      font-size: 0.75em;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.8em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .form-input, .form-select {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--panel-border);
+      color: #fff;
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 0.9em;
+      font-family: inherit;
+      outline: none;
+      transition: border 0.2s ease;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+    }
+
+    /* CONTROLES DE TRANSPOSICIÓN */
+    .transpose-box {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .transpose-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .btn-transpose {
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      color: #c084fc;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9em;
+      cursor: pointer;
+      flex: 1;
+      transition: all 0.2s ease;
+    }
+
+    .btn-transpose:hover {
+      background: rgba(139, 92, 246, 0.4);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(139, 92, 246, 0.3);
+    }
+
+    .key-display {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 1.1em;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      background: rgba(0,0,0,0.5);
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      text-align: center;
+      min-width: 60px;
+    }
+
+    /* BOTONES DE ACCIÓN Y EXPORTACIÓN */
+    .action-btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.9em;
+      cursor: pointer;
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* HOJA DE PARTITURA / CHART PREVIEW */
+    .sheet-preview-container {
+      background: #111425;
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      padding: 25px;
+      display: flex;
+      justify-content: center;
+      overflow-x: auto;
+    }
+
+    .sheet-paper {
+      background: var(--paper-bg);
+      color: var(--paper-text);
+      width: 100%;
+      max-width: 700px;
+      min-height: 900px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      position: relative;
+    }
+
+    /* ENCABEZADO DE LA PARTITURA */
+    .chart-header {
+      text-align: center;
+      border-bottom: 2px solid #000;
+      padding-bottom: 15px;
+      position: relative;
+    }
+
+    .chart-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2em;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 2px;
+      line-height: 1.1;
+    }
+
+    .chart-subtitle {
+      font-size: 0.85em;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+    }
+
+    .chart-meta-left {
+      position: absolute;
+      left: 0;
+      bottom: 8px;
+      text-align: left;
+      font-size: 0.8em;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .chart-meta-right {
+      position: absolute;
+      right: 0;
+      bottom: 8px;
+      text-align: right;
+      font-size: 0.8em;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    /* SECCIONES Y SISTEMAS DE COMPASES */
+    .chart-body {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    .section-block {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-badge-title {
+      display: inline-block;
+      background: #000;
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.85em;
+      padding: 3px 10px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      align-self: flex-start;
+    }
+
+    /* LINEA DE COMPASES (SISTEMA) */
+    .measures-system {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 2px solid #000;
+      border-bottom: 2px solid #000;
+      background: #fff;
+    }
+
+    .measure-cell {
+      border-right: 2px solid #000;
+      padding: 10px 8px;
+      min-height: 75px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .measures-system .measure-cell:first-child {
+      border-left: 2px solid #000;
+    }
+
+    .measure-chords {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 1.15em;
+      font-weight: 700;
+      color: #000;
+      min-height: 28px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .measure-slash-line {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      color: #64748b;
+      font-size: 0.9em;
+      font-weight: 700;
+      padding-top: 4px;
+    }
+
+    .measure-number {
+      position: absolute;
+      top: 2px;
+      left: 4px;
+      font-size: 0.65em;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    .measure-cell.editable:hover {
+      background: #f1f5f9;
+      cursor: pointer;
+    }
+
+    /* ESTILOS DE IMPRESIÓN IMPRESCINDIBLES */
+    @media print {
+      body {
+        background: #fff !important;
+        padding: 0 !important;
+      }
+      .top-nav, .control-panel {
+        display: none !important;
+      }
+      .app-workspace {
+        display: block !important;
+        width: 100% !important;
+      }
+      .sheet-preview-container {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+      }
+      .sheet-paper {
+        box-shadow: none !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .app-workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- RETORNO -->
+  <div class="top-nav">
+    <a href="../index.html" class="btn-back-home">← INICIO</a>
+  </div>
+
+  <div class="app-workspace">
+
+    <!-- CONTROLES LATERALES -->
+    <div class="control-panel">
+      <div class="panel-header">
+        <h2>CHORD CHART STUDIO</h2>
+      </div>
+
+      <!-- METADATOS DE LA CANCIÓN -->
+      <div class="form-group">
+        <div class="panel-section-title">Información del Chart</div>
+        <label>Título de la Canción</label>
+        <input type="text" id="inputTitle" class="form-input" value="EL AMOR DESPUÉS DEL AMOR" oninput="updateSheet()">
+      </div>
+
+      <div class="form-group">
+        <label>Álbum / Subtítulo</label>
+        <input type="text" id="inputSubtitle" class="form-input" value="(ÁLBUM: EL AMOR DESPUÉS DEL AMOR - 1992)" oninput="updateSheet()">
+      </div>
+
+      <div class="form-group">
+        <label>Artista / Banda</label>
+        <input type="text" id="inputArtist" class="form-input" value="FITO PÁEZ" oninput="updateSheet()">
+      </div>
+
+      <div class="form-group">
+        <label>Creador del Chart</label>
+        <input type="text" id="inputAuthor" class="form-input" value="SEBAS GÓMEZ" oninput="updateSheet()">
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="form-group">
+          <label>Género</label>
+          <input type="text" id="inputGenre" class="form-input" value="ROCK NACIONAL" oninput="updateSheet()">
+        </div>
+        <div class="form-group">
+          <label>Tempo (BPM)</label>
+          <input type="text" id="inputBPM" class="form-input" value="♩ = 95" oninput="updateSheet()">
+        </div>
+      </div>
+
+      <!-- PARÁMETROS MUSICALES Y TRANSPOSICIÓN -->
+      <div class="form-group">
+        <div class="panel-section-title">Métrica y Transposición</div>
+        <label>Métrica / Time Signature</label>
+        <select id="selectMetric" class="form-select" onchange="updateSheet()">
+          <option value="4/4" selected>4/4 (Estándar)</option>
+          <option value="3/4">3/4 (Vals)</option>
+          <option value="2/4">2/4 (Marcha)</option>
+          <option value="6/8">6/8 (Balada/Folklore)</option>
+          <option value="9/8">9/8</option>
+          <option value="12/8">12/8 (Slow Blues)</option>
+          <option value="2/2">2/2 (Cut Time)</option>
+        </select>
+      </div>
+
+      <div class="transpose-box">
+        <label style="font-size:0.8em; color:var(--text-muted); font-weight:600;">Transposición de Tonalidad</label>
+        <div class="transpose-row">
+          <button class="btn-transpose" onclick="transpose(-1)">-1 Semitono</button>
+          <div class="key-display" id="keyDisplay">C</div>
+          <button class="btn-transpose" onclick="transpose(1)">+1 Semitono</button>
+        </div>
+      </div>
+
+      <!-- ACCIONES DE EDICIÓN Y EXPORTACIÓN -->
+      <div class="action-btn-group">
+        <button class="btn-action btn-primary" onclick="window.print()">🖨 IMPRIMIR / PDF</button>
+        <button class="btn-action btn-secondary" onclick="addSection('VERSO')">➕ Agregar Sección</button>
+      </div>
+
+    </div>
+
+    <!-- VISTA PREVIA DE LA HOJA (CHART) -->
+    <div class="sheet-preview-container">
+      <div class="sheet-paper" id="sheetPaper">
+        
+        <!-- ENCABEZADO -->
+        <div class="chart-header">
+          <div class="chart-meta-left" id="displayGenre">ROCK NACIONAL</div>
+          
+          <div class="chart-title" id="displayTitle">EL AMOR DESPUÉS DEL AMOR</div>
+          <div class="chart-subtitle" id="displaySubtitle">(ÁLBUM: EL AMOR DESPUÉS DEL AMOR - 1992)</div>
+          
+          <div class="chart-meta-right">
+            <div id="displayArtist">FITO PÁEZ</div>
+            <div style="font-size:0.85em; color:#64748b;" id="displayAuthor">CHART: SEBAS GÓMEZ</div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; font-size:0.85em; font-weight:700;">
+          <span id="displayBPM">♩ = 95</span>
+          <span>MÉTRICA: <span id="displayMetric">4/4</span></span>
+        </div>
+
+        <!-- CUERPO DE COMPASES POR SECCIONES -->
+        <div class="chart-body" id="chartBody">
+          
+          <!-- SECCIÓN INTRO -->
+          <div class="section-block">
+            <span class="section-badge-title">INTRO</span>
+            <div class="measures-system">
+              <div class="measure-cell editable" onclick="editMeasure(this)">
+                <span class="measure-number">1</span>
+                <div class="measure-chords">G(omit5)</div>
+                <div class="measure-slash-line">/ / / /</div>
+              </div>
+              <div class="measure-cell editable" onclick="editMeasure(this)">
+                <span class="measure-number">2</span>
+                <div class="measure-chords">Gsus4(omit5)</div>
+                <div class="measure-slash-line">/ / / /</div>
+              </div>
+              <div class="measure-cell editable" onclick="editMeasure(this)">
+                <span class="measure-number">3</span>
+                <div class="measure-chords">G(omit5)</div>
+                <div class="measure-slash-line">/ / / /</div>
+              </div>
+              <div class="measure-cell editable" onclick="editMeasure(this)">
+                <span class="measure-number">4</span>
+                <div class="measure-chords">Dsus4  D</div>
+                <div class="measure-slash-line">/ / / /</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN VERSO -->
+          <div class="section-block">
+            <span class="section-badge-title">VERSO</span>
+            <div class="measures-system">
+              <div class="measure-cell editable" onclick="editMeasure(this)">
+                <span class="measure-number">5</span>
+                <div class="measure-chords">G(omit5)</div>
+                <div class="measure-slash-line">/ / / /</div>
+              </div>
+              <div class="measure-cell editable" onclick="editMeasure(this)">
+                <span class="measure-number">6</span>
+                <div class="measure-chords">Gsus4(omit5)</div>
+                <div class="measure-slash-line">/ / / /</div>
+              </div>
+              <div class="measure-cell editable" onclick="editMeasure(this)">
+                <span class="measure-number">7</span>
+                <div class="measure-chords">Dsus4  D</div>
+                <div class="measure-slash-line">/ / / /</div>
+              </div>
+              <div class="measure-cell editable" onclick="editMeasure(this)">
+                <span class="measure-number">8</span>
+                <div class="measure-chords">G</div>
+                <div class="measure-slash-line">/ / / /</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const scaleSharps = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const scaleFlats  = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+    let currentKeyIndex = 0;
+
+    function updateSheet() {
+      document.getElementById('displayTitle').innerText = document.getElementById('inputTitle').value || 'TITULO';
+      document.getElementById('displaySubtitle').innerText = document.getElementById('inputSubtitle').value;
+      document.getElementById('displayArtist').innerText = document.getElementById('inputArtist').value;
+      document.getElementById('displayAuthor').innerText = 'CHART: ' + document.getElementById('inputAuthor').value;
+      document.getElementById('displayGenre').innerText = document.getElementById('inputGenre').value;
+      document.getElementById('displayBPM').innerText = document.getElementById('inputBPM').value;
+      
+      const metric = document.getElementById('selectMetric').value;
+      document.getElementById('displayMetric').innerText = metric;
+
+      let slashPattern = '/ / / /';
+      if (metric === '3/4') slashPattern = '/ / /';
+      if (metric === '2/4' || metric === '2/2') slashPattern = '/ /';
+      if (metric === '6/8') slashPattern = '. . . . . .';
+
+      document.querySelectorAll('.measure-slash-line').forEach(el => {
+        el.innerText = slashPattern;
+      });
+    }
+
+    function transposeChordToken(token, semitones) {
+      const chordRegex = /([A-G][b#]?)([^/]*)(?:\/([A-G][b#]?))?/;
+      const match = token.match(chordRegex);
+      if (!match) return token;
+
+      let root = match[1];
+      let ext = match[2] || '';
+      let bass = match[3] || '';
+
+      function shiftNote(noteStr) {
+        let idx = scaleSharps.indexOf(noteStr);
+        if (idx === -1) idx = scaleFlats.indexOf(noteStr);
+        if (idx === -1) return noteStr;
+
+        let newIdx = (idx + semitones) % 12;
+        if (newIdx < 0) newIdx += 12;
+
+        return scaleSharps[newIdx];
+      }
+
+      let newRoot = shiftNote(root);
+      let newBass = bass ? '/' + shiftNote(bass) : '';
+
+      return newRoot + ext + newBass;
+    }
+
+    function transpose(semitones) {
+      currentKeyIndex = (currentKeyIndex + semitones) % 12;
+      if (currentKeyIndex < 0) currentKeyIndex += 12;
+      document.getElementById('keyDisplay').innerText = scaleSharps[currentKeyIndex];
+
+      document.querySelectorAll('.measure-chords').forEach(chordDiv => {
+        let text = chordDiv.innerText;
+        let tokens = text.split(/(\s+)/);
+        let transposedTokens = tokens.map(t => {
+          if (t.trim().length === 0) return t;
+          return transposeChordToken(t, semitones);
+        });
+        chordDiv.innerText = transposedTokens.join('');
+      });
+    }
+
+    function editMeasure(cellElem) {
+      const chordDiv = cellElem.querySelector('.measure-chords');
+      const currentChords = chordDiv.innerText;
+      const newChords = prompt('Ingrese los acordes para este compás:', currentChords);
+      if (newChords !== null) {
+        chordDiv.innerText = newChords;
+      }
+    }
+
+    function addSection(defaultName) {
+      const secName = prompt('Nombre de la nueva sección (ej: CORO, PUENTE, SOLO):', defaultName);
+      if (!secName) return;
+
+      const chartBody = document.getElementById('chartBody');
+      const lastMeasureNum = document.querySelectorAll('.measure-cell').length + 1;
+
+      const newSec = document.createElement('div');
+      newSec.className = 'section-block';
+      newSec.innerHTML = `
+        <span class="section-badge-title">${secName.toUpperCase()}</span>
+        <div class="measures-system">
+          <div class="measure-cell editable" onclick="editMeasure(this)">
+            <span class="measure-number">${lastMeasureNum}</span>
+            <div class="measure-chords">C</div>
+            <div class="measure-slash-line">/ / / /</div>
+          </div>
+          <div class="measure-cell editable" onclick="editMeasure(this)">
+            <span class="measure-number">${lastMeasureNum + 1}</span>
+            <div class="measure-chords">G/B</div>
+            <div class="measure-slash-line">/ / / /</div>
+          </div>
+          <div class="measure-cell editable" onclick="editMeasure(this)">
+            <span class="measure-number">${lastMeasureNum + 2}</span>
+            <div class="measure-chords">Am</div>
+            <div class="measure-slash-line">/ / / /</div>
+          </div>
+          <div class="measure-cell editable" onclick="editMeasure(this)">
+            <span class="measure-number">${lastMeasureNum + 3}</span>
+            <div class="measure-chords">F</div>
+            <div class="measure-slash-line">/ / / /</div>
+          </div>
+        </div>
+      `;
+      chartBody.appendChild(newSec);
+      updateSheet();
+    }
+
+    updateSheet();
+  </script>
+</body>
+</html>
