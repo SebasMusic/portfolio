@@ -6,11 +6,11 @@
   <title>AURA · Ambient Pad Player Pro</title>
   <style>
     :root {
-      --bg-dark: #080a14;
-      --panel-bg: rgba(15, 18, 32, 0.75);
-      --card-border: rgba(255, 255, 255, 0.12);
-      --purple-glow: rgba(168, 85, 247, 0.8);
-      --cyan-glow: rgba(6, 182, 212, 0.8);
+      --bg-dark: #060812;
+      --panel-bg: rgba(12, 15, 28, 0.85);
+      --card-border: rgba(255, 255, 255, 0.15);
+      --purple-glow: rgba(168, 85, 247, 0.9);
+      --cyan-glow: rgba(6, 182, 212, 0.9);
       --text-main: #ffffff;
       --text-muted: #94a3b8;
       --accent-magenta: #ec4899;
@@ -34,13 +34,13 @@
 
     .app-container {
       width: 100%;
-      max-width: 900px;
+      max-width: 920px;
       background: var(--panel-bg);
       border: 1px solid var(--card-border);
-      border-radius: 20px;
+      border-radius: 24px;
       padding: 24px;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+      backdrop-filter: blur(25px);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.7);
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -94,21 +94,21 @@
 
     .preset-selector-top {
       background: rgba(15, 18, 32, 0.9);
-      border: 1px solid rgba(168, 85, 247, 0.4);
+      border: 1px solid rgba(168, 85, 247, 0.5);
       color: var(--text-main);
       padding: 8px 16px;
       border-radius: 12px;
       font-size: 0.9em;
       outline: none;
       cursor: pointer;
-      box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.25);
     }
 
     /* VISUALIZADOR CANVASES */
     .visualizer-box {
       width: 100%;
       height: 80px;
-      background: rgba(0,0,0,0.4);
+      background: rgba(0,0,0,0.5);
       border-radius: 14px;
       border: 1px solid var(--card-border);
       overflow: hidden;
@@ -121,7 +121,7 @@
       display: block;
     }
 
-    /* GRILLA DE PADS VISIBLES Y COLORIDOS */
+    /* GRILLA DE PADS CON EFECTO AURORA BOREAL PERMANENTE */
     .pad-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -129,84 +129,147 @@
     }
 
     .pad-btn {
-      /* Fondo colorido visible en reposo */
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.18), rgba(6, 182, 212, 0.18));
-      border: 1px solid rgba(168, 85, 247, 0.35);
-      border-radius: 14px;
-      height: 100px;
-      padding: 12px;
+      border-radius: 16px;
+      height: 110px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
     }
 
+    /* CAPA DE AURORA NATIVE CSS PERMANENTE */
     .pad-btn::before {
       content: '';
       position: absolute;
+      inset: -20px;
+      border-radius: 50%;
+      filter: blur(25px);
+      opacity: 0.85;
+      transition: opacity 0.3s ease, transform 0.5s ease;
+      z-index: 0;
+    }
+
+    /* TEXTURAS ABSTRACTAS UNICAS POR CADA PAD (FORMATO AURORA) */
+    .pad-btn[data-note="C"]::before {
+      background: radial-gradient(circle at 10% 20%, #a855f7, #3b82f6 50%, #06b6d4 90%);
+    }
+    .pad-btn[data-note="Cs"]::before {
+      background: radial-gradient(circle at 80% 30%, #ec4899, #8b5cf6 60%, #10b981 95%);
+    }
+    .pad-btn[data-note="D"]::before {
+      background: radial-gradient(circle at 30% 80%, #06b6d4, #3b82f6 50%, #6366f1 90%);
+    }
+    .pad-btn[data-note="Ds"]::before {
+      background: radial-gradient(circle at 70% 70%, #8b5cf6, #d946ef 50%, #3b82f6 90%);
+    }
+    .pad-btn[data-note="E"]::before {
+      background: radial-gradient(circle at 20% 40%, #10b981, #06b6d4 55%, #8b5cf6 90%);
+    }
+    .pad-btn[data-note="F"]::before {
+      background: radial-gradient(circle at 90% 10%, #6366f1, #a855f7 50%, #ec4899 90%);
+    }
+    .pad-btn[data-note="Fs"]::before {
+      background: radial-gradient(circle at 40% 90%, #d946ef, #06b6d4 50%, #3b82f6 90%);
+    }
+    .pad-btn[data-note="G"]::before {
+      background: radial-gradient(circle at 60% 10%, #06b6d4, #10b981 50%, #6366f1 90%);
+    }
+    .pad-btn[data-note="Gs"]::before {
+      background: radial-gradient(circle at 15% 85%, #8b5cf6, #ec4899 50%, #06b6d4 90%);
+    }
+    .pad-btn[data-note="A"]::before {
+      background: radial-gradient(circle at 85% 85%, #3b82f6, #6366f1 50%, #a855f7 90%);
+    }
+    .pad-btn[data-note="As"]::before {
+      background: radial-gradient(circle at 50% 10%, #ec4899, #a855f7 55%, #3b82f6 90%);
+    }
+    .pad-btn[data-note="B"]::before {
+      background: radial-gradient(circle at 20% 70%, #06b6d4, #8b5cf6 50%, #d946ef 90%);
+    }
+
+    /* EFECTO DE CRISTAL / FROSTED GLASS SOBRE LA AURORA */
+    .pad-btn::after {
+      content: '';
+      position: absolute;
       inset: 0;
-      background: radial-gradient(circle at center, rgba(168, 85, 247, 0.35), transparent 70%);
-      opacity: 0.4;
-      transition: opacity 0.3s ease;
+      background: rgba(10, 14, 28, 0.45);
+      backdrop-filter: blur(6px);
+      z-index: 1;
+      transition: background 0.3s ease;
     }
 
     .pad-btn:hover {
-      border-color: rgba(168, 85, 247, 0.7);
-      transform: translateY(-3px);
-      box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+      transform: translateY(-4px) scale(1.02);
+      border-color: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 255, 255, 0.2);
     }
 
     .pad-btn:hover::before {
-      opacity: 0.8;
+      opacity: 1;
+      transform: scale(1.15);
     }
 
-    /* ESTADO ACTIVO INTENSO */
+    .pad-btn:hover::after {
+      background: rgba(10, 14, 28, 0.25);
+    }
+
+    /* ESTADO ENCENDIDO (ACTIVE PAD) */
     .pad-btn.active {
-      background: linear-gradient(135deg, rgba(168, 85, 247, 0.65), rgba(6, 182, 212, 0.65));
-      border-color: #ffffff;
-      box-shadow: 0 0 30px var(--purple-glow), inset 0 0 15px rgba(255, 255, 255, 0.5);
-      transform: scale(1.02);
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 30px var(--purple-glow), inset 0 0 20px rgba(255, 255, 255, 0.6);
+      transform: scale(1.03);
     }
 
     .pad-btn.active::before {
       opacity: 1;
+      transform: scale(1.25);
+    }
+
+    .pad-btn.active::after {
+      background: rgba(10, 14, 28, 0.1);
     }
 
     .pad-header-info {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 1;
+      z-index: 2;
     }
 
     .key-badge {
       font-size: 0.75em;
-      font-weight: 700;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 2px 7px;
-      border-radius: 5px;
-      color: #e2e8f0;
-      border: 1px solid rgba(255,255,255,0.1);
+      font-weight: 800;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: #ffffff;
+      border: 1px solid rgba(255,255,255,0.25);
+      backdrop-filter: blur(4px);
     }
 
     .pad-title {
-      font-size: 1.15em;
-      font-weight: 700;
+      font-size: 1.25em;
+      font-weight: 800;
       letter-spacing: 1px;
-      z-index: 1;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      z-index: 2;
+      color: #ffffff;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
     }
 
     .pad-sub {
       font-size: 0.75em;
-      color: #cbd5e1;
-      z-index: 1;
+      color: #e2e8f0;
+      z-index: 2;
       text-transform: uppercase;
-      font-weight: 600;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
     }
 
     /* CONTROLES Y BARRA DE HERRAMIENTAS */
@@ -214,15 +277,15 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(0,0,0,0.3);
+      background: rgba(0,0,0,0.4);
       padding: 10px 16px;
       border-radius: 12px;
       border: 1px solid var(--card-border);
     }
 
     .tool-btn {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.5);
       color: #fca5a5;
       padding: 8px 16px;
       border-radius: 8px;
@@ -233,14 +296,14 @@
     }
 
     .tool-btn:hover {
-      background: rgba(239, 68, 68, 0.3);
+      background: rgba(239, 68, 68, 0.4);
       color: #fff;
-      box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
     }
 
     /* RACK DE EFECTOS (FX RACK) */
     .fx-rack {
-      background: rgba(0, 0, 0, 0.45);
+      background: rgba(0, 0, 0, 0.5);
       border: 1px solid var(--card-border);
       border-radius: 16px;
       padding: 16px 20px;
@@ -287,7 +350,7 @@
       width: 80px;
       height: 4px;
       border-radius: 2px;
-      background: rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.2);
       outline: none;
     }
 
@@ -297,12 +360,12 @@
       height: 14px;
       border-radius: 50%;
       background: var(--accent-cyan);
-      box-shadow: 0 0 8px var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-cyan);
       cursor: pointer;
     }
 
     .brand-footer-logo {
-      font-size: 1.2em;
+      font-size: 1.3em;
       font-weight: 800;
       letter-spacing: 3px;
       background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
@@ -344,66 +407,66 @@
       <canvas id="waveCanvasTop"></canvas>
     </div>
 
-    <!-- GRILLA DE 12 NOTAS CON COLORES VISIBLES -->
+    <!-- GRILLA DE 12 NOTAS CON EFECTO AURORA BOREAL PERMANENTE -->
     <div class="pad-grid">
-      <div class="pad-btn" onclick="togglePad('C', this)">
+      <div class="pad-btn" data-note="C" onclick="togglePad('C', this)">
         <div class="pad-header-info"><span class="key-badge">C</span></div>
         <div class="pad-title">C</div>
         <div class="pad-sub">TONAL PAD</div>
       </div>
-      <div class="pad-btn" onclick="togglePad('Cs', this)">
+      <div class="pad-btn" data-note="Cs" onclick="togglePad('Cs', this)">
         <div class="pad-header-info"><span class="key-badge">C#</span></div>
         <div class="pad-title">C# / Db</div>
         <div class="pad-sub">TONAL PAD</div>
       </div>
-      <div class="pad-btn" onclick="togglePad('D', this)">
+      <div class="pad-btn" data-note="D" onclick="togglePad('D', this)">
         <div class="pad-header-info"><span class="key-badge">D</span></div>
         <div class="pad-title">D</div>
         <div class="pad-sub">TONAL PAD</div>
       </div>
-      <div class="pad-btn" onclick="togglePad('Ds', this)">
+      <div class="pad-btn" data-note="Ds" onclick="togglePad('Ds', this)">
         <div class="pad-header-info"><span class="key-badge">D#</span></div>
         <div class="pad-title">D# / Eb</div>
         <div class="pad-sub">TONAL PAD</div>
       </div>
 
-      <div class="pad-btn" onclick="togglePad('E', this)">
+      <div class="pad-btn" data-note="E" onclick="togglePad('E', this)">
         <div class="pad-header-info"><span class="key-badge">E</span></div>
         <div class="pad-title">E</div>
         <div class="pad-sub">TONAL PAD</div>
       </div>
-      <div class="pad-btn" onclick="togglePad('F', this)">
+      <div class="pad-btn" data-note="F" onclick="togglePad('F', this)">
         <div class="pad-header-info"><span class="key-badge">F</span></div>
         <div class="pad-title">F</div>
         <div class="pad-sub">TONAL PAD</div>
       </div>
-      <div class="pad-btn" onclick="togglePad('Fs', this)">
+      <div class="pad-btn" data-note="Fs" onclick="togglePad('Fs', this)">
         <div class="pad-header-info"><span class="key-badge">F#</span></div>
         <div class="pad-title">F# / Gb</div>
         <div class="pad-sub">TONAL PAD</div>
       </div>
-      <div class="pad-btn" onclick="togglePad('G', this)">
+      <div class="pad-btn" data-note="G" onclick="togglePad('G', this)">
         <div class="pad-header-info"><span class="key-badge">G</span></div>
         <div class="pad-title">G</div>
         <div class="pad-sub">TONAL PAD</div>
       </div>
 
-      <div class="pad-btn" onclick="togglePad('Gs', this)">
+      <div class="pad-btn" data-note="Gs" onclick="togglePad('Gs', this)">
         <div class="pad-header-info"><span class="key-badge">G#</span></div>
         <div class="pad-title">G# / Ab</div>
         <div class="pad-sub">TONAL PAD</div>
       </div>
-      <div class="pad-btn" onclick="togglePad('A', this)">
+      <div class="pad-btn" data-note="A" onclick="togglePad('A', this)">
         <div class="pad-header-info"><span class="key-badge">A</span></div>
         <div class="pad-title">A</div>
         <div class="pad-sub">TONAL PAD</div>
       </div>
-      <div class="pad-btn" onclick="togglePad('As', this)">
+      <div class="pad-btn" data-note="As" onclick="togglePad('As', this)">
         <div class="pad-header-info"><span class="key-badge">A#</span></div>
         <div class="pad-title">A# / Bb</div>
         <div class="pad-sub">TONAL PAD</div>
       </div>
-      <div class="pad-btn" onclick="togglePad('B', this)">
+      <div class="pad-btn" data-note="B" onclick="togglePad('B', this)">
         <div class="pad-header-info"><span class="key-badge">B</span></div>
         <div class="pad-title">B</div>
         <div class="pad-sub">TONAL PAD</div>
@@ -578,7 +641,7 @@
       for (let member in activePads) delete activePads[member];
     }
 
-    // ANIMACIÓN DE ONDAS GRUESAS CON MULTICAPA & RESPLANDOR
+    // ANIMACIÓN DE ONDAS MULTICAPA CON RESPLANDOR
     const canvasTop = document.getElementById('waveCanvasTop');
     const ctxTop = canvasTop.getContext('2d');
     const canvasBottom = document.getElementById('waveCanvasBottom');
