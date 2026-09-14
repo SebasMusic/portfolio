@@ -33,12 +33,13 @@
       position: relative;
     }
 
-    /* BOTÓN FUERA DEL MÓDULO (ALINEADO ARRIBA A LA IZQUIERDA) */
+    /* BOTÓN Y NAVEGACIÓN SUPERIOR */
     .btn-back-home-wrapper {
       width: 100%;
       max-width: 920px;
       display: flex;
-      justify-content: flex-start;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 15px;
     }
 
@@ -65,6 +66,18 @@
       background: rgba(168, 85, 247, 0.15);
       box-shadow: 0 0 14px rgba(168, 85, 247, 0.3);
       transform: translateX(-3px);
+    }
+
+    .lang-selector-mini {
+      background: rgba(12, 15, 28, 0.85);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      outline: none;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
     }
 
     .app-container {
@@ -392,9 +405,20 @@
 </head>
 <body>
 
-  <!-- BOTÓN FUERA DEL MÓDULO -->
+  <!-- BOTÓN FUERA DEL MÓDULO CON SELECTOR SINCRO -->
   <div class="btn-back-home-wrapper">
-    <a href="../index.html" class="btn-back-home">← INICIO</a>
+    <a href="../index.html" class="btn-back-home" id="btnBackHome">← HOME</a>
+
+    <select class="lang-selector-mini" id="langSelector" onchange="changeLanguageManually(this.value)">
+      <option value="en">🇬🇧 English</option>
+      <option value="es">🇪🇸 Español</option>
+      <option value="pt">🇧🇷 Português</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="de">🇩🇪 Deutsch</option>
+      <option value="zh">🇨🇳 中文</option>
+      <option value="ru">🇷🇺 Русский</option>
+      <option value="ja">🇯🇵 日本語</option>
+    </select>
   </div>
 
   <div class="app-container">
@@ -403,7 +427,7 @@
     <div class="top-header">
       <div class="brand-title">
         <h1>AURA · AMBIENT PAD PLAYER</h1>
-        <span>por Sebastian Gomez · Banco de Pads Ambientales Gratis</span>
+        <span id="txt-sub-author">por Sebastian Gomez · Banco de Pads Ambientales Gratis</span>
       </div>
       
       <!-- PRESET SELECTOR -->
@@ -534,6 +558,54 @@
   </div>
 
   <script>
+    // DICCIONARIO PARA NAVEGACIÓN Y SUBTÍTULO
+    const backNavLabels = {
+      en: { btnBack: "← HOME", author: "by Sebastian Gomez · Free Ambient Pad Player" },
+      es: { btnBack: "← INICIO", author: "por Sebastian Gomez · Banco de Pads Ambientales Gratis" },
+      pt: { btnBack: "← INÍCIO", author: "por Sebastian Gomez · Banco de Pads Ambientais Grátis" },
+      fr: { btnBack: "← ACCUEIL", author: "par Sebastian Gomez · Banques de Pads Ambiants Gratuits" },
+      de: { btnBack: "← STARTSEITE", author: "von Sebastian Gomez · Kostenloser Ambient-Pad-Player" },
+      zh: { btnBack: "← 首页", author: "作者：Sebastian Gomez · 免费氛围 Pad 音色库" },
+      ru: { btnBack: "← НА ГЛАВНУЮ", author: "от Sebastian Gomez · Бесплатный банк эмбиент-пэдов" },
+      ja: { btnBack: "← ホーム", author: "Sebastian Gomez 作 · 無料アンビエントパッド音源" }
+    };
+
+    let currentLang = 'en';
+
+    function initLanguage() {
+      let savedLang = localStorage.getItem('preferred_lang');
+
+      if (!savedLang) {
+        const urlParams = new URLSearchParams(window.location.search);
+        savedLang = urlParams.get('lang');
+      }
+
+      if (!savedLang) {
+        const userNavLang = (navigator.language || navigator.userLanguage || '').split('-')[0];
+        savedLang = userNavLang;
+      }
+
+      if (!backNavLabels[savedLang]) {
+        savedLang = 'en';
+      }
+
+      currentLang = savedLang;
+      document.getElementById('langSelector').value = currentLang;
+      applyLanguage(currentLang);
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      const data = backNavLabels[lang] || backNavLabels['en'];
+      document.getElementById('btnBackHome').innerText = data.btnBack;
+      document.getElementById('txt-sub-author').innerText = data.author;
+    }
+
+    function changeLanguageManually(lang) {
+      localStorage.setItem('preferred_lang', lang);
+      applyLanguage(lang);
+    }
+
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioCtx = new AudioContext();
     const activePads = {};
@@ -752,7 +824,10 @@
       }, true);
     }
 
-    animateWaves();
+    window.addEventListener('DOMContentLoaded', () => {
+      initLanguage();
+      animateWaves();
+    });
   </script>
 </body>
 </html>
