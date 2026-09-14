@@ -8,7 +8,7 @@
     :root {
       --bg-dark: #060812;
       --panel-bg: rgba(12, 15, 28, 0.85);
-      --card-border: rgba(255, 255, 255, 0.15);
+      --card-border: rgba(255, 255, 255, 0.1);
       --purple-glow: rgba(168, 85, 247, 0.9);
       --cyan-glow: rgba(6, 182, 212, 0.9);
       --text-main: #ffffff;
@@ -94,14 +94,14 @@
 
     .preset-selector-top {
       background: rgba(15, 18, 32, 0.9);
-      border: 1px solid rgba(168, 85, 247, 0.5);
+      border: 1px solid rgba(168, 85, 247, 0.4);
       color: var(--text-main);
       padding: 8px 16px;
       border-radius: 12px;
       font-size: 0.9em;
       outline: none;
       cursor: pointer;
-      box-shadow: 0 0 12px rgba(168, 85, 247, 0.25);
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
     }
 
     /* VISUALIZADOR CANVASES */
@@ -121,7 +121,7 @@
       display: block;
     }
 
-    /* GRILLA DE PADS CON EFECTO AURORA BOREAL PERMANENTE */
+    /* GRILLA DE PADS ELEGANTES CON PATRONES SUTILES UNICOS */
     .pad-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -139,100 +139,101 @@
       transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(15, 18, 30, 0.75);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
-    /* CAPA DE AURORA NATIVE CSS PERMANENTE */
+    /* CAPA DE AURORA NATIVE CSS (OPACIDAD BAJA EN REPOSO) */
     .pad-btn::before {
       content: '';
       position: absolute;
-      inset: -20px;
+      inset: -15px;
       border-radius: 50%;
-      filter: blur(25px);
-      opacity: 0.85;
-      transition: opacity 0.3s ease, transform 0.5s ease;
+      filter: blur(22px);
+      opacity: 0.28; /* Opacidad baja estilo imagen izquierda */
+      transition: opacity 0.4s ease, transform 0.5s ease;
       z-index: 0;
     }
 
-    /* TEXTURAS ABSTRACTAS UNICAS POR CADA PAD (FORMATO AURORA) */
+    /* TEXTURAS ABSTRACTAS UNICAS POR CADA PAD */
     .pad-btn[data-note="C"]::before {
-      background: radial-gradient(circle at 10% 20%, #a855f7, #3b82f6 50%, #06b6d4 90%);
+      background: radial-gradient(circle at 10% 20%, #a855f7, #3b82f6 60%, #06b6d4 90%);
     }
     .pad-btn[data-note="Cs"]::before {
-      background: radial-gradient(circle at 80% 30%, #ec4899, #8b5cf6 60%, #10b981 95%);
+      background: radial-gradient(circle at 85% 25%, #ec4899, #8b5cf6 65%, #10b981 95%);
     }
     .pad-btn[data-note="D"]::before {
-      background: radial-gradient(circle at 30% 80%, #06b6d4, #3b82f6 50%, #6366f1 90%);
+      background: radial-gradient(circle at 25% 85%, #06b6d4, #3b82f6 55%, #6366f1 90%);
     }
     .pad-btn[data-note="Ds"]::before {
-      background: radial-gradient(circle at 70% 70%, #8b5cf6, #d946ef 50%, #3b82f6 90%);
+      background: radial-gradient(circle me 75% 75%, #8b5cf6, #d946ef 55%, #3b82f6 90%);
     }
     .pad-btn[data-note="E"]::before {
-      background: radial-gradient(circle at 20% 40%, #10b981, #06b6d4 55%, #8b5cf6 90%);
+      background: radial-gradient(circle at 15% 45%, #10b981, #06b6d4 55%, #8b5cf6 90%);
     }
     .pad-btn[data-note="F"]::before {
-      background: radial-gradient(circle at 90% 10%, #6366f1, #a855f7 50%, #ec4899 90%);
+      background: radial-gradient(circle at 90% 15%, #6366f1, #a855f7 50%, #ec4899 90%);
     }
     .pad-btn[data-note="Fs"]::before {
-      background: radial-gradient(circle at 40% 90%, #d946ef, #06b6d4 50%, #3b82f6 90%);
+      background: radial-gradient(circle at 35% 90%, #d946ef, #06b6d4 55%, #3b82f6 90%);
     }
     .pad-btn[data-note="G"]::before {
-      background: radial-gradient(circle at 60% 10%, #06b6d4, #10b981 50%, #6366f1 90%);
+      background: radial-gradient(circle at 65% 15%, #06b6d4, #10b981 55%, #6366f1 90%);
     }
     .pad-btn[data-note="Gs"]::before {
-      background: radial-gradient(circle at 15% 85%, #8b5cf6, #ec4899 50%, #06b6d4 90%);
+      background: radial-gradient(circle at 15% 85%, #8b5cf6, #ec4899 55%, #06b6d4 90%);
     }
     .pad-btn[data-note="A"]::before {
-      background: radial-gradient(circle at 85% 85%, #3b82f6, #6366f1 50%, #a855f7 90%);
+      background: radial-gradient(circle at 85% 85%, #3b82f6, #6366f1 55%, #a855f7 90%);
     }
     .pad-btn[data-note="As"]::before {
-      background: radial-gradient(circle at 50% 10%, #ec4899, #a855f7 55%, #3b82f6 90%);
+      background: radial-gradient(circle at 50% 15%, #ec4899, #a855f7 55%, #3b82f6 90%);
     }
     .pad-btn[data-note="B"]::before {
-      background: radial-gradient(circle at 20% 70%, #06b6d4, #8b5cf6 50%, #d946ef 90%);
+      background: radial-gradient(circle at 20% 75%, #06b6d4, #8b5cf6 55%, #d946ef 90%);
     }
 
-    /* EFECTO DE CRISTAL / FROSTED GLASS SOBRE LA AURORA */
+    /* CAPA SOBRIA DE OSCURECIMIENTO */
     .pad-btn::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: rgba(10, 14, 28, 0.45);
-      backdrop-filter: blur(6px);
+      background: rgba(10, 13, 24, 0.55);
+      backdrop-filter: blur(4px);
       z-index: 1;
       transition: background 0.3s ease;
     }
 
     .pad-btn:hover {
-      transform: translateY(-4px) scale(1.02);
-      border-color: rgba(255, 255, 255, 0.6);
-      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px);
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     }
 
     .pad-btn:hover::before {
-      opacity: 1;
-      transform: scale(1.15);
+      opacity: 0.65;
+      transform: scale(1.1);
     }
 
     .pad-btn:hover::after {
-      background: rgba(10, 14, 28, 0.25);
+      background: rgba(10, 13, 24, 0.35);
     }
 
     /* ESTADO ENCENDIDO (ACTIVE PAD) */
     .pad-btn.active {
-      border: 2px solid #ffffff;
-      box-shadow: 0 0 30px var(--purple-glow), inset 0 0 20px rgba(255, 255, 255, 0.6);
-      transform: scale(1.03);
+      border: 1.5px solid #ffffff;
+      box-shadow: 0 0 30px var(--purple-glow), inset 0 0 15px rgba(255, 255, 255, 0.5);
+      transform: scale(1.02);
     }
 
     .pad-btn.active::before {
-      opacity: 1;
-      transform: scale(1.25);
+      opacity: 0.95;
+      transform: scale(1.2);
     }
 
     .pad-btn.active::after {
-      background: rgba(10, 14, 28, 0.1);
+      background: rgba(10, 13, 24, 0.15);
     }
 
     .pad-header-info {
@@ -244,13 +245,12 @@
 
     .key-badge {
       font-size: 0.75em;
-      font-weight: 800;
-      background: rgba(0, 0, 0, 0.5);
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.12);
       padding: 3px 8px;
       border-radius: 6px;
-      color: #ffffff;
-      border: 1px solid rgba(255,255,255,0.25);
-      backdrop-filter: blur(4px);
+      color: #e2e8f0;
+      border: 1px solid rgba(255,255,255,0.15);
     }
 
     .pad-title {
@@ -259,17 +259,16 @@
       letter-spacing: 1px;
       z-index: 2;
       color: #ffffff;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      text-shadow: 0 2px 6px rgba(0,0,0,0.8);
     }
 
     .pad-sub {
       font-size: 0.75em;
-      color: #e2e8f0;
+      color: var(--text-muted);
       z-index: 2;
       text-transform: uppercase;
-      font-weight: 700;
+      font-weight: 600;
       letter-spacing: 0.5px;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
     }
 
     /* CONTROLES Y BARRA DE HERRAMIENTAS */
@@ -407,7 +406,7 @@
       <canvas id="waveCanvasTop"></canvas>
     </div>
 
-    <!-- GRILLA DE 12 NOTAS CON EFECTO AURORA BOREAL PERMANENTE -->
+    <!-- GRILLA DE 12 NOTAS CON PATRONES UNICOS Y SUAVES -->
     <div class="pad-grid">
       <div class="pad-btn" data-note="C" onclick="togglePad('C', this)">
         <div class="pad-header-info"><span class="key-badge">C</span></div>
