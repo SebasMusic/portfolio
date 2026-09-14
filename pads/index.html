@@ -104,15 +104,16 @@
       box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
     }
 
-    /* VISUALIZADOR CANVASES */
+    /* VISUALIZADOR CANVASES (ESTILO AURORA CÓSMICA) */
     .visualizer-box {
       width: 100%;
-      height: 80px;
-      background: rgba(0,0,0,0.5);
-      border-radius: 14px;
+      height: 90px;
+      background: rgba(4, 6, 14, 0.8);
+      border-radius: 16px;
       border: 1px solid var(--card-border);
       overflow: hidden;
       position: relative;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
     }
 
     canvas {
@@ -144,55 +145,31 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
-    /* CAPA DE AURORA NATIVE CSS (OPACIDAD BAJA EN REPOSO) */
+    /* CAPA DE AURORA NATIVE CSS */
     .pad-btn::before {
       content: '';
       position: absolute;
       inset: -15px;
       border-radius: 50%;
       filter: blur(22px);
-      opacity: 0.28; /* Opacidad baja estilo imagen izquierda */
+      opacity: 0.28;
       transition: opacity 0.4s ease, transform 0.5s ease;
       z-index: 0;
     }
 
     /* TEXTURAS ABSTRACTAS UNICAS POR CADA PAD */
-    .pad-btn[data-note="C"]::before {
-      background: radial-gradient(circle at 10% 20%, #a855f7, #3b82f6 60%, #06b6d4 90%);
-    }
-    .pad-btn[data-note="Cs"]::before {
-      background: radial-gradient(circle at 85% 25%, #ec4899, #8b5cf6 65%, #10b981 95%);
-    }
-    .pad-btn[data-note="D"]::before {
-      background: radial-gradient(circle at 25% 85%, #06b6d4, #3b82f6 55%, #6366f1 90%);
-    }
-    .pad-btn[data-note="Ds"]::before {
-      background: radial-gradient(circle me 75% 75%, #8b5cf6, #d946ef 55%, #3b82f6 90%);
-    }
-    .pad-btn[data-note="E"]::before {
-      background: radial-gradient(circle at 15% 45%, #10b981, #06b6d4 55%, #8b5cf6 90%);
-    }
-    .pad-btn[data-note="F"]::before {
-      background: radial-gradient(circle at 90% 15%, #6366f1, #a855f7 50%, #ec4899 90%);
-    }
-    .pad-btn[data-note="Fs"]::before {
-      background: radial-gradient(circle at 35% 90%, #d946ef, #06b6d4 55%, #3b82f6 90%);
-    }
-    .pad-btn[data-note="G"]::before {
-      background: radial-gradient(circle at 65% 15%, #06b6d4, #10b981 55%, #6366f1 90%);
-    }
-    .pad-btn[data-note="Gs"]::before {
-      background: radial-gradient(circle at 15% 85%, #8b5cf6, #ec4899 55%, #06b6d4 90%);
-    }
-    .pad-btn[data-note="A"]::before {
-      background: radial-gradient(circle at 85% 85%, #3b82f6, #6366f1 55%, #a855f7 90%);
-    }
-    .pad-btn[data-note="As"]::before {
-      background: radial-gradient(circle at 50% 15%, #ec4899, #a855f7 55%, #3b82f6 90%);
-    }
-    .pad-btn[data-note="B"]::before {
-      background: radial-gradient(circle at 20% 75%, #06b6d4, #8b5cf6 55%, #d946ef 90%);
-    }
+    .pad-btn[data-note="C"]::before { background: radial-gradient(circle at 10% 20%, #a855f7, #3b82f6 60%, #06b6d4 90%); }
+    .pad-btn[data-note="Cs"]::before { background: radial-gradient(circle at 85% 25%, #ec4899, #8b5cf6 65%, #10b981 95%); }
+    .pad-btn[data-note="D"]::before { background: radial-gradient(circle at 25% 85%, #06b6d4, #3b82f6 55%, #6366f1 90%); }
+    .pad-btn[data-note="Ds"]::before { background: radial-gradient(circle at 75% 75%, #8b5cf6, #d946ef 55%, #3b82f6 90%); }
+    .pad-btn[data-note="E"]::before { background: radial-gradient(circle at 15% 45%, #10b981, #06b6d4 55%, #8b5cf6 90%); }
+    .pad-btn[data-note="F"]::before { background: radial-gradient(circle at 90% 15%, #6366f1, #a855f7 50%, #ec4899 90%); }
+    .pad-btn[data-note="Fs"]::before { background: radial-gradient(circle at 35% 90%, #d946ef, #06b6d4 55%, #3b82f6 90%); }
+    .pad-btn[data-note="G"]::before { background: radial-gradient(circle at 65% 15%, #06b6d4, #10b981 55%, #6366f1 90%); }
+    .pad-btn[data-note="Gs"]::before { background: radial-gradient(circle at 15% 85%, #8b5cf6, #ec4899 55%, #06b6d4 90%); }
+    .pad-btn[data-note="A"]::before { background: radial-gradient(circle at 85% 85%, #3b82f6, #6366f1 55%, #a855f7 90%); }
+    .pad-btn[data-note="As"]::before { background: radial-gradient(circle at 50% 15%, #ec4899, #a855f7 55%, #3b82f6 90%); }
+    .pad-btn[data-note="B"]::before { background: radial-gradient(circle at 20% 75%, #06b6d4, #8b5cf6 55%, #d946ef 90%); }
 
     /* CAPA SOBRIA DE OSCURECIMIENTO */
     .pad-btn::after {
@@ -401,7 +378,7 @@
       </div>
     </div>
 
-    <!-- WAVEFORM VISUALIZER (SUPERIOR GRUESO) -->
+    <!-- VISUALIZADOR CÓSMICO SUPERIOR (AURORA SILK WAVE) -->
     <div class="visualizer-box">
       <canvas id="waveCanvasTop"></canvas>
     </div>
@@ -472,7 +449,7 @@
       </div>
     </div>
 
-    <!-- WAVEFORM VISUALIZER (INFERIOR GRUESO) -->
+    <!-- VISUALIZADOR CÓSMICO INFERIOR (AURORA SILK WAVE) -->
     <div class="visualizer-box">
       <canvas id="waveCanvasBottom"></canvas>
     </div>
@@ -542,7 +519,7 @@
     delayNode.connect(delayGain);
 
     const analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 512;
+    analyser.fftSize = 256;
 
     spaceFilter.connect(masterGain);
     delayGain.connect(masterGain);
@@ -640,62 +617,94 @@
       for (let member in activePads) delete activePads[member];
     }
 
-    // ANIMACIÓN DE ONDAS MULTICAPA CON RESPLANDOR
+    // ALGORITMO RENDERIZADOR DE ONDAS CÓSMICAS ETEREAS (AURORA SILK WAVE)
     const canvasTop = document.getElementById('waveCanvasTop');
     const ctxTop = canvasTop.getContext('2d');
     const canvasBottom = document.getElementById('waveCanvasBottom');
     const ctxBottom = canvasBottom.getContext('2d');
 
-    function drawWaveforms() {
-      requestAnimationFrame(drawWaveforms);
-      
-      const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-      analyser.getByteTimeDomainData(dataArray);
+    let step = 0;
 
-      [ { canvas: canvasTop, ctx: ctxTop, color: '#c084fc', glow: '#a855f7' }, 
-        { canvas: canvasBottom, ctx: ctxBottom, color: '#22d3ee', glow: '#06b6d4' } ].forEach(item => {
-        
-        const canvas = item.canvas;
-        const ctx = item.ctx;
-        
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
+    function renderAuroraWave(canvas, ctx, baseColors, isReverse) {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+      const width = canvas.width;
+      const height = canvas.height;
+      const centerY = height / 2;
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, width, height);
 
-        // Capa de Resplandor Neón
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = item.color;
-        ctx.shadowBlur = 18;
-        ctx.shadowColor = item.glow;
+      // Obtener volumen general del audio real
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+      let volume = sum / dataArray.length; // 0 a 255
+      let audioAmp = Math.max(0.15, volume / 120); // Amplitud base etérea + respuesta al audio
 
+      // DIBUJAR CAPAS DE HILOS SENOIDALES FLUIDOS (AURORA SILK)
+      const layers = 14; 
+
+      for (let l = 0; l < layers; l++) {
         ctx.beginPath();
-        const sliceWidth = canvas.width * 1.0 / bufferLength;
-        let x = 0;
+        ctx.lineWidth = 1.2;
 
-        for (let i = 0; i < bufferLength; i++) {
-          const v = dataArray[i] / 128.0;
-          const y = v * canvas.height / 2;
+        // Gradiente dinámico por capa
+        const grad = ctx.createLinearGradient(0, 0, width, 0);
+        if (!isReverse) {
+          grad.addColorStop(0, baseColors.c1);
+          grad.addColorStop(0.5, baseColors.c2);
+          grad.addColorStop(1, baseColors.c3);
+        } else {
+          grad.addColorStop(0, baseColors.c3);
+          grad.addColorStop(0.5, baseColors.c2);
+          grad.addColorStop(1, baseColors.c1);
+        }
+        ctx.strokeStyle = grad;
 
-          if (i === 0) ctx.moveTo(x, y);
+        // Resplandor difuso etéreo
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = baseColors.glow;
+
+        const speed = (isReverse ? -0.015 : 0.015) + (l * 0.001);
+        const freq = 0.004 + (l * 0.0006);
+        const amp = (12 + (l * 2)) * audioAmp;
+        const phaseShift = l * 0.35 + (step * speed);
+
+        for (let x = 0; x <= width; x += 4) {
+          // Fórmula armónica compuesta de senos suaves
+          const y = centerY + 
+            Math.sin(x * freq + phaseShift) * amp + 
+            Math.cos(x * freq * 0.7 - phaseShift) * (amp * 0.4);
+
+          if (x === 0) ctx.moveTo(x, y);
           else ctx.lineTo(x, y);
-
-          x += sliceWidth;
         }
 
-        ctx.lineTo(canvas.width, canvas.height / 2);
         ctx.stroke();
-
-        // Núcleo brillante interno
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#ffffff';
-        ctx.shadowBlur = 4;
-        ctx.stroke();
-      });
+      }
     }
 
-    drawWaveforms();
+    function animateWaves() {
+      requestAnimationFrame(animateWaves);
+      step += 1;
+
+      renderAuroraWave(canvasTop, ctxTop, {
+        c1: 'rgba(192, 132, 252, 0.7)',
+        c2: 'rgba(168, 85, 247, 0.8)',
+        c3: 'rgba(59, 130, 246, 0.7)',
+        glow: 'rgba(168, 85, 247, 0.5)'
+      }, false);
+
+      renderAuroraWave(canvasBottom, ctxBottom, {
+        c1: 'rgba(34, 211, 238, 0.7)',
+        c2: 'rgba(6, 182, 212, 0.8)',
+        c3: 'rgba(139, 92, 246, 0.7)',
+        glow: 'rgba(6, 182, 212, 0.5)'
+      }, true);
+    }
+
+    animateWaves();
   </script>
 </body>
 </html>
