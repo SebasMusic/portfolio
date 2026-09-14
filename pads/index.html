@@ -46,7 +46,38 @@
       gap: 20px;
     }
 
-    /* HEADER */
+    /* BARRA DE NAVEGACIÓN Y HEADER */
+    .nav-bar-top {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .btn-back-portfolio {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8em;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-back-portfolio:hover {
+      color: #ffffff;
+      border-color: rgba(168, 85, 247, 0.5);
+      background: rgba(168, 85, 247, 0.15);
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.25);
+      transform: translateX(-2px);
+    }
+
     .top-header {
       display: flex;
       justify-content: space-between;
@@ -104,16 +135,16 @@
       box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
     }
 
-    /* VISUALIZADOR CANVASES (ESTILO AURORA CÓSMICA) */
+    /* VISUALIZADOR CANVASES (CÓSMICO CON LOMAS PRONUNCIADAS) */
     .visualizer-box {
       width: 100%;
-      height: 90px;
-      background: rgba(4, 6, 14, 0.8);
+      height: 95px;
+      background: rgba(4, 6, 14, 0.85);
       border-radius: 16px;
       border: 1px solid var(--card-border);
       overflow: hidden;
       position: relative;
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+      box-shadow: inset 0 0 25px rgba(0,0,0,0.85);
     }
 
     canvas {
@@ -122,7 +153,7 @@
       display: block;
     }
 
-    /* GRILLA DE PADS ELEGANTES CON PATRONES SUTILES UNICOS */
+    /* GRILLA DE PADS ELEGANTES */
     .pad-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -359,6 +390,11 @@
 
   <div class="app-container">
     
+    <!-- BARRA CON BOTÓN DE RETORNO AL PORTFOLIO -->
+    <div class="nav-bar-top">
+      <a href="../index.html" class="btn-back-portfolio">← PORTFOLIO</a>
+    </div>
+
     <!-- HEADER -->
     <div class="top-header">
       <div class="brand-title">
@@ -378,7 +414,7 @@
       </div>
     </div>
 
-    <!-- VISUALIZADOR CÓSMICO SUPERIOR (AURORA SILK WAVE) -->
+    <!-- VISUALIZADOR CÓSMICO SUPERIOR (ONDULADO & LOMAS PRONUNCIADAS) -->
     <div class="visualizer-box">
       <canvas id="waveCanvasTop"></canvas>
     </div>
@@ -449,7 +485,7 @@
       </div>
     </div>
 
-    <!-- VISUALIZADOR CÓSMICO INFERIOR (AURORA SILK WAVE) -->
+    <!-- VISUALIZADOR CÓSMICO INFERIOR (ONDULADO & LOMAS PRONUNCIADAS) -->
     <div class="visualizer-box">
       <canvas id="waveCanvasBottom"></canvas>
     </div>
@@ -617,7 +653,7 @@
       for (let member in activePads) delete activePads[member];
     }
 
-    // ALGORITMO RENDERIZADOR DE ONDAS CÓSMICAS ETEREAS (AURORA SILK WAVE)
+    // ALGORITMO RENDERIZADOR DE ONDAS CÓSMICAS (LOMAS PRONUNCIADAS Y MOVIMIENTO ONDULADO)
     const canvasTop = document.getElementById('waveCanvasTop');
     const ctxTop = canvasTop.getContext('2d');
     const canvasBottom = document.getElementById('waveCanvasBottom');
@@ -634,22 +670,20 @@
 
       ctx.clearRect(0, 0, width, height);
 
-      // Obtener volumen general del audio real
+      // Respuesta dinámica al audio real
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       analyser.getByteFrequencyData(dataArray);
       let sum = 0;
       for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
-      let volume = sum / dataArray.length; // 0 a 255
-      let audioAmp = Math.max(0.15, volume / 120); // Amplitud base etérea + respuesta al audio
+      let volume = sum / dataArray.length; 
+      let audioAmp = Math.max(0.4, volume / 70); // Amplitud más amplia para generar lomas pronunciadas
 
-      // DIBUJAR CAPAS DE HILOS SENOIDALES FLUIDOS (AURORA SILK)
-      const layers = 14; 
+      const layers = 16; 
 
       for (let l = 0; l < layers; l++) {
         ctx.beginPath();
         ctx.lineWidth = 1.2;
 
-        // Gradiente dinámico por capa
         const grad = ctx.createLinearGradient(0, 0, width, 0);
         if (!isReverse) {
           grad.addColorStop(0, baseColors.c1);
@@ -662,20 +696,20 @@
         }
         ctx.strokeStyle = grad;
 
-        // Resplandor difuso etéreo
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 14;
         ctx.shadowColor = baseColors.glow;
 
-        const speed = (isReverse ? -0.015 : 0.015) + (l * 0.001);
-        const freq = 0.004 + (l * 0.0006);
-        const amp = (12 + (l * 2)) * audioAmp;
-        const phaseShift = l * 0.35 + (step * speed);
+        const speed = (isReverse ? -0.018 : 0.018) + (l * 0.0012);
+        const freqMain = 0.0025 + (l * 0.0003); // Frecuencia baja = cumbres anchas y ondas largas
+        const freqSec = 0.005 + (l * 0.0005);
+        const amp = (22 + (l * 2.5)) * audioAmp; // Amplitud alta = lomas pronunciadas
+        const phaseShift = l * 0.4 + (step * speed);
 
-        for (let x = 0; x <= width; x += 4) {
-          // Fórmula armónica compuesta de senos suaves
+        for (let x = 0; x <= width; x += 3) {
+          // Combinación matemática para crestas profundas y curvas suaves
           const y = centerY + 
-            Math.sin(x * freq + phaseShift) * amp + 
-            Math.cos(x * freq * 0.7 - phaseShift) * (amp * 0.4);
+            Math.sin(x * freqMain + phaseShift) * amp + 
+            Math.cos(x * freqSec - phaseShift * 0.8) * (amp * 0.45);
 
           if (x === 0) ctx.moveTo(x, y);
           else ctx.lineTo(x, y);
@@ -690,17 +724,17 @@
       step += 1;
 
       renderAuroraWave(canvasTop, ctxTop, {
-        c1: 'rgba(192, 132, 252, 0.7)',
-        c2: 'rgba(168, 85, 247, 0.8)',
-        c3: 'rgba(59, 130, 246, 0.7)',
-        glow: 'rgba(168, 85, 247, 0.5)'
+        c1: 'rgba(192, 132, 252, 0.75)',
+        c2: 'rgba(168, 85, 247, 0.85)',
+        c3: 'rgba(59, 130, 246, 0.75)',
+        glow: 'rgba(168, 85, 247, 0.6)'
       }, false);
 
       renderAuroraWave(canvasBottom, ctxBottom, {
-        c1: 'rgba(34, 211, 238, 0.7)',
-        c2: 'rgba(6, 182, 212, 0.8)',
-        c3: 'rgba(139, 92, 246, 0.7)',
-        glow: 'rgba(6, 182, 212, 0.5)'
+        c1: 'rgba(34, 211, 238, 0.75)',
+        c2: 'rgba(6, 182, 212, 0.85)',
+        c3: 'rgba(139, 92, 246, 0.75)',
+        glow: 'rgba(6, 182, 212, 0.6)'
       }, true);
     }
 
