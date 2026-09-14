@@ -30,6 +30,41 @@
       min-height: 100vh;
       padding: 20px;
       overflow-x: hidden;
+      position: relative;
+    }
+
+    /* BOTÓN FUERA DEL MÓDULO (ALINEADO ARRIBA A LA IZQUIERDA) */
+    .btn-back-home-wrapper {
+      width: 100%;
+      max-width: 920px;
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 15px;
+    }
+
+    .btn-back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-back-home:hover {
+      color: #ffffff;
+      border-color: rgba(168, 85, 247, 0.5);
+      background: rgba(168, 85, 247, 0.15);
+      box-shadow: 0 0 14px rgba(168, 85, 247, 0.3);
+      transform: translateX(-3px);
     }
 
     .app-container {
@@ -46,38 +81,7 @@
       gap: 20px;
     }
 
-    /* BARRA DE NAVEGACIÓN Y HEADER */
-    .nav-bar-top {
-      display: flex;
-      align-items: center;
-      margin-bottom: 5px;
-    }
-
-    .btn-back-portfolio {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: var(--text-muted);
-      text-decoration: none;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.8em;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
-    }
-
-    .btn-back-portfolio:hover {
-      color: #ffffff;
-      border-color: rgba(168, 85, 247, 0.5);
-      background: rgba(168, 85, 247, 0.15);
-      box-shadow: 0 0 12px rgba(168, 85, 247, 0.25);
-      transform: translateX(-2px);
-    }
-
+    /* HEADER */
     .top-header {
       display: flex;
       justify-content: space-between;
@@ -135,7 +139,7 @@
       box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
     }
 
-    /* VISUALIZADOR CANVASES (CÓSMICO CON LOMAS PRONUNCIADAS) */
+    /* VISUALIZADOR CANVASES */
     .visualizer-box {
       width: 100%;
       height: 95px;
@@ -388,12 +392,12 @@
 </head>
 <body>
 
+  <!-- BOTÓN FUERA DEL MÓDULO -->
+  <div class="btn-back-home-wrapper">
+    <a href="../index.html" class="btn-back-home">← INICIO</a>
+  </div>
+
   <div class="app-container">
-    
-    <!-- BARRA CON BOTÓN DE RETORNO AL PORTFOLIO -->
-    <div class="nav-bar-top">
-      <a href="../index.html" class="btn-back-portfolio">← PORTFOLIO</a>
-    </div>
 
     <!-- HEADER -->
     <div class="top-header">
@@ -402,7 +406,7 @@
         <span>por Sebastian Gomez · Banco de Pads Ambientales Gratis</span>
       </div>
       
-      <!-- PRESET SELECTOR CON LEYENDA CLARA -->
+      <!-- PRESET SELECTOR -->
       <div class="preset-wrapper">
         <span class="preset-label">Presets:</span>
         <select class="preset-selector-top" onchange="selectPreset(this.value)">
@@ -414,12 +418,12 @@
       </div>
     </div>
 
-    <!-- VISUALIZADOR CÓSMICO SUPERIOR (ONDULADO & LOMAS PRONUNCIADAS) -->
+    <!-- VISUALIZADOR CÓSMICO SUPERIOR -->
     <div class="visualizer-box">
       <canvas id="waveCanvasTop"></canvas>
     </div>
 
-    <!-- GRILLA DE 12 NOTAS CON PATRONES UNICOS Y SUAVES -->
+    <!-- GRILLA DE 12 NOTAS -->
     <div class="pad-grid">
       <div class="pad-btn" data-note="C" onclick="togglePad('C', this)">
         <div class="pad-header-info"><span class="key-badge">C</span></div>
@@ -485,7 +489,7 @@
       </div>
     </div>
 
-    <!-- VISUALIZADOR CÓSMICO INFERIOR (ONDULADO & LOMAS PRONUNCIADAS) -->
+    <!-- VISUALIZADOR CÓSMICO INFERIOR -->
     <div class="visualizer-box">
       <canvas id="waveCanvasBottom"></canvas>
     </div>
@@ -653,7 +657,7 @@
       for (let member in activePads) delete activePads[member];
     }
 
-    // ALGORITMO RENDERIZADOR DE ONDAS CÓSMICAS (LOMAS PRONUNCIADAS Y MOVIMIENTO ONDULADO)
+    // ALGORITMO RENDERIZADOR DE ONDAS CÓSMICAS (ESTÁTICAS EN REPOSO / ANIMADAS AL SONAR)
     const canvasTop = document.getElementById('waveCanvasTop');
     const ctxTop = canvasTop.getContext('2d');
     const canvasBottom = document.getElementById('waveCanvasBottom');
@@ -670,19 +674,21 @@
 
       ctx.clearRect(0, 0, width, height);
 
-      // Respuesta dinámica al audio real
+      // Calcular volumen del audio real
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       analyser.getByteFrequencyData(dataArray);
       let sum = 0;
       for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
-      let volume = sum / dataArray.length; 
-      let audioAmp = Math.max(0.4, volume / 70); // Amplitud más amplia para generar lomas pronunciadas
+      let volume = sum / dataArray.length; // 0 a 255
+
+      // Verificamos si hay al menos un pad sonando
+      const isPlaying = Object.keys(activePads).length > 0;
 
       const layers = 16; 
 
       for (let l = 0; l < layers; l++) {
         ctx.beginPath();
-        ctx.lineWidth = 1.2;
+        ctx.lineWidth = isPlaying ? 1.2 : 1.0;
 
         const grad = ctx.createLinearGradient(0, 0, width, 0);
         if (!isReverse) {
@@ -696,23 +702,31 @@
         }
         ctx.strokeStyle = grad;
 
-        ctx.shadowBlur = 14;
+        ctx.shadowBlur = isPlaying ? 14 : 6;
         ctx.shadowColor = baseColors.glow;
 
-        const speed = (isReverse ? -0.018 : 0.018) + (l * 0.0012);
-        const freqMain = 0.0025 + (l * 0.0003); // Frecuencia baja = cumbres anchas y ondas largas
-        const freqSec = 0.005 + (l * 0.0005);
-        const amp = (22 + (l * 2.5)) * audioAmp; // Amplitud alta = lomas pronunciadas
-        const phaseShift = l * 0.4 + (step * speed);
+        if (!isPlaying) {
+          // ESTADO ESTÁTICO DE REPOSO (LÍNEAS SUAVES PARALELAS SIN MOVIMIENTO)
+          const offsetY = (l - layers / 2) * 1.5;
+          ctx.moveTo(0, centerY + offsetY);
+          ctx.lineTo(width, centerY + offsetY);
+        } else {
+          // ESTADO ANIMADO CUANDO COMIENZA A SONAR EL PAD
+          let audioAmp = Math.max(0.4, volume / 70);
+          const speed = (isReverse ? -0.018 : 0.018) + (l * 0.0012);
+          const freqMain = 0.0025 + (l * 0.0003);
+          const freqSec = 0.005 + (l * 0.0005);
+          const amp = (22 + (l * 2.5)) * audioAmp;
+          const phaseShift = l * 0.4 + (step * speed);
 
-        for (let x = 0; x <= width; x += 3) {
-          // Combinación matemática para crestas profundas y curvas suaves
-          const y = centerY + 
-            Math.sin(x * freqMain + phaseShift) * amp + 
-            Math.cos(x * freqSec - phaseShift * 0.8) * (amp * 0.45);
+          for (let x = 0; x <= width; x += 3) {
+            const y = centerY + 
+              Math.sin(x * freqMain + phaseShift) * amp + 
+              Math.cos(x * freqSec - phaseShift * 0.8) * (amp * 0.45);
 
-          if (x === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
+            if (x === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
         }
 
         ctx.stroke();
