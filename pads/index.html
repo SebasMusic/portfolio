@@ -4,6 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AURA · Ambient Pad Player Pro</title>
+  
+  <!-- Google Analytics GA4 Base -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3DTLYSJMH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-Q3DTLYSJMH');
+  </script>
+
   <style>
     :root {
       --bg-dark: #060812;
@@ -193,7 +204,6 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
-    /* CAPA DE AURORA NATIVE CSS */
     .pad-btn::before {
       content: '';
       position: absolute;
@@ -205,7 +215,6 @@
       z-index: 0;
     }
 
-    /* TEXTURAS ABSTRACTAS UNICAS POR CADA PAD */
     .pad-btn[data-note="C"]::before { background: radial-gradient(circle at 10% 20%, #a855f7, #3b82f6 60%, #06b6d4 90%); }
     .pad-btn[data-note="Cs"]::before { background: radial-gradient(circle at 85% 25%, #ec4899, #8b5cf6 65%, #10b981 95%); }
     .pad-btn[data-note="D"]::before { background: radial-gradient(circle at 25% 85%, #06b6d4, #3b82f6 55%, #6366f1 90%); }
@@ -219,7 +228,6 @@
     .pad-btn[data-note="As"]::before { background: radial-gradient(circle at 50% 15%, #ec4899, #a855f7 55%, #3b82f6 90%); }
     .pad-btn[data-note="B"]::before { background: radial-gradient(circle at 20% 75%, #06b6d4, #8b5cf6 55%, #d946ef 90%); }
 
-    /* CAPA SOBRIA DE OSCURECIMIENTO */
     .pad-btn::after {
       content: '';
       position: absolute;
@@ -245,7 +253,6 @@
       background: rgba(10, 13, 24, 0.35);
     }
 
-    /* ESTADO ENCENDIDO (ACTIVE PAD) */
     .pad-btn.active {
       border: 1.5px solid #ffffff;
       box-shadow: 0 0 30px var(--purple-glow), inset 0 0 15px rgba(255, 255, 255, 0.5);
@@ -558,7 +565,6 @@
   </div>
 
   <script>
-    // DICCIONARIO PARA NAVEGACIÓN Y SUBTÍTULO
     const backNavLabels = {
       en: { btnBack: "← HOME", author: "by Sebastian Gomez · Free Ambient Pad Player" },
       es: { btnBack: "← INICIO", author: "por Sebastian Gomez · Banco de Pads Ambientales Gratis" },
@@ -640,6 +646,9 @@
 
     function selectPreset(presetKey) {
       currentPreset = presetKey;
+      if (typeof gtag === 'function') {
+        gtag('event', 'change_pad_preset', { 'preset': presetKey });
+      }
     }
 
     function updateMasterVolume(val) {
@@ -682,6 +691,13 @@
 
       } else {
         try {
+          if (typeof gtag === 'function') {
+            gtag('event', 'play_pad_note', {
+              'note': note,
+              'preset': currentPreset
+            });
+          }
+
           btnElement.classList.add('active');
           const response = await fetch(audioUrl);
           if (!response.ok) throw new Error(`Status: ${response.status}`);
@@ -715,6 +731,10 @@
     }
 
     function stopAllPads() {
+      if (typeof gtag === 'function') {
+        gtag('event', 'stop_all_pads');
+      }
+
       Object.keys(activePads).forEach(key => {
         const { gainNode, sourceNode, btnElement } = activePads[key];
         const now = audioCtx.currentTime;
@@ -729,7 +749,6 @@
       for (let member in activePads) delete activePads[member];
     }
 
-    // ALGORITMO RENDERIZADOR DE ONDAS CÓSMICAS (ESTÁTICAS EN REPOSO / ANIMADAS AL SONAR)
     const canvasTop = document.getElementById('waveCanvasTop');
     const ctxTop = canvasTop.getContext('2d');
     const canvasBottom = document.getElementById('waveCanvasBottom');
@@ -746,16 +765,13 @@
 
       ctx.clearRect(0, 0, width, height);
 
-      // Calcular volumen del audio real
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       analyser.getByteFrequencyData(dataArray);
       let sum = 0;
       for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
-      let volume = sum / dataArray.length; // 0 a 255
+      let volume = sum / dataArray.length;
 
-      // Verificamos si hay al menos un pad sonando
       const isPlaying = Object.keys(activePads).length > 0;
-
       const layers = 16; 
 
       for (let l = 0; l < layers; l++) {
@@ -778,12 +794,10 @@
         ctx.shadowColor = baseColors.glow;
 
         if (!isPlaying) {
-          // ESTADO ESTÁTICO DE REPOSO (LÍNEAS SUAVES PARALELAS SIN MOVIMIENTO)
           const offsetY = (l - layers / 2) * 1.5;
           ctx.moveTo(0, centerY + offsetY);
           ctx.lineTo(width, centerY + offsetY);
         } else {
-          // ESTADO ANIMADO CUANDO COMIENZA A SONAR EL PAD
           let audioAmp = Math.max(0.4, volume / 70);
           const speed = (isReverse ? -0.018 : 0.018) + (l * 0.0012);
           const freqMain = 0.0025 + (l * 0.0003);
@@ -820,7 +834,7 @@
         c1: 'rgba(34, 211, 238, 0.75)',
         c2: 'rgba(6, 182, 212, 0.85)',
         c3: 'rgba(139, 92, 246, 0.75)',
-        glow: 'rgba(6, 182, 212, 0.6)'
+        glow: 'rgba(139, 92, 246, 0.6)'
       }, true);
     }
 
