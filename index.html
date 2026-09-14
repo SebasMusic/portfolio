@@ -27,12 +27,82 @@
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
+      position: relative;
+    }
+
+    /* BARRA SUPERIOR CON SELECTOR DE IDIOMA */
+    .top-bar {
+      width: 100%;
+      max-width: 1000px;
+      display: flex;
+      justify-content: flex-end;
+      padding: 20px 20px 0 20px;
+    }
+
+    .lang-selector {
+      position: relative;
+      display: inline-block;
+    }
+
+    .lang-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .lang-btn:hover {
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
+    }
+
+    .lang-dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 110%;
+      background: #0f111e;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 100;
+      min-width: 160px;
+      overflow: hidden;
+      backdrop-filter: blur(15px);
+    }
+
+    .lang-dropdown.show {
+      display: block;
+    }
+
+    .lang-option {
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+      font-size: 0.9em;
+    }
+
+    .lang-option:hover {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--text-main);
     }
 
     header {
       width: 100%;
       max-width: 1000px;
-      padding: 60px 20px 40px 20px;
+      padding: 40px 20px 40px 20px;
       text-align: center;
     }
 
@@ -167,31 +237,52 @@
 </head>
 <body>
 
+  <!-- SELECTOR DE IDIOMA EN LA ESQUINA SUPERIOR DERECHA -->
+  <div class="top-bar">
+    <div class="lang-selector">
+      <button class="lang-btn" onclick="toggleDropdown()">
+        <span id="current-flag">🇬🇧</span>
+        <span id="current-lang-name">English</span>
+        <span style="font-size: 0.7em; margin-left: 4px;">▼</span>
+      </button>
+      <div class="lang-dropdown" id="lang-dropdown">
+        <div class="lang-option" onclick="changeLanguage('en')"><span>🇬🇧</span> English</div>
+        <div class="lang-option" onclick="changeLanguage('es')"><span>🇪🇸</span> Español</div>
+        <div class="lang-option" onclick="changeLanguage('pt')"><span>🇧🇷</span> Português</div>
+        <div class="lang-option" onclick="changeLanguage('fr')"><span>🇫🇷</span> Français</div>
+        <div class="lang-option" onclick="changeLanguage('de')"><span>🇩🇪</span> Deutsch</div>
+        <div class="lang-option" onclick="changeLanguage('zh')"><span>🇨🇳</span> 中文</div>
+        <div class="lang-option" onclick="changeLanguage('ru')"><span>🇷🇺</span> Русский</div>
+        <div class="lang-option" onclick="changeLanguage('ja')"><span>🇯🇵</span> 日本語</div>
+      </div>
+    </div>
+  </div>
+
   <header>
-    <div class="badge">INTERACTIVE AUDIO LAB</div>
-    <h1>Free Web Tools for Musicians</h1>
-    <p class="bio">High-quality, seamless, accessible audio applications designed for practice, worship, live performance, and music education.</p>
+    <div class="badge" id="txt-badge">INTERACTIVE AUDIO LAB</div>
+    <h1 id="txt-title">Free Web Tools for Musicians</h1>
+    <p class="bio" id="txt-bio">High-quality, seamless, accessible audio applications designed for practice, worship, live performance, and music education.</p>
   </header>
 
   <main>
-    <div class="section-title">Featured Applications</div>
+    <div class="section-title" id="txt-sec-title">Featured Applications</div>
     
     <div class="apps-grid">
       
       <!-- App 1: Pad Player -->
       <div class="app-card featured">
         <div>
-          <h2>Aura · Ambient Pad Player</h2>
-          <p>Continuous, high-definition ambient pads featuring 4 custom textures and 12 semitones. Designed with smooth Web Audio API crossfading.</p>
+          <h2 id="txt-app1-title">Aura · Ambient Pad Player</h2>
+          <p id="txt-app1-desc">Continuous, high-definition ambient pads featuring 4 custom textures and 12 semitones. Designed with smooth Web Audio API crossfading.</p>
         </div>
-        <a href="./pads/index.html" class="btn-launch">Launch Application →</a>
+        <a href="./pads/index.html" class="btn-launch" id="txt-app1-btn">Launch Application →</a>
       </div>
 
       <!-- App 2: Placeholder -->
       <div class="app-card placeholder">
         <div>
-          <h2>Next Tool Coming Soon</h2>
-          <p>Interactive metronome, chord generator, or tuning utility currently in development.</p>
+          <h2 id="txt-app2-title">Next Tool Coming Soon</h2>
+          <p id="txt-app2-desc">Interactive metronome, chord generator, or tuning utility currently in development.</p>
         </div>
       </div>
 
@@ -199,8 +290,170 @@
   </main>
 
   <footer>
-    <p>© 2026 · Built with Web Audio API & Modern Web Standards</p>
+    <p id="txt-footer">© 2026 · Built with Web Audio API & Modern Web Standards</p>
   </footer>
 
+  <script>
+    const translations = {
+      en: {
+        flag: "🇬🇧",
+        name: "English",
+        badge: "INTERACTIVE AUDIO LAB",
+        title: "Free Web Tools for Musicians",
+        bio: "High-quality, seamless, accessible audio applications designed for practice, worship, live performance, and music education.",
+        secTitle: "Featured Applications",
+        app1Title: "Aura · Ambient Pad Player",
+        app1Desc: "Continuous, high-definition ambient pads featuring 4 custom textures and 12 semitones. Designed with smooth Web Audio API crossfading.",
+        app1Btn: "Launch Application →",
+        app2Title: "Next Tool Coming Soon",
+        app2Desc: "Interactive metronome, chord generator, or tuning utility currently in development.",
+        footer: "© 2026 · Built with Web Audio API & Modern Web Standards"
+      },
+      es: {
+        flag: "🇪🇸",
+        name: "Español",
+        badge: "LABORATORIO DE AUDIO INTERACTIVO",
+        title: "Herramientas Web Gratuitas para Músicos",
+        bio: "Aplicaciones de audio accesibles y de alta calidad diseñadas para práctica, adoración, presentaciones en vivo y educación musical.",
+        secTitle: "Aplicaciones Destacadas",
+        app1Title: "Aura · Reproductor de Ambient Pads",
+        app1Desc: "Pads ambientales continuos de alta definición con 4 texturas personalizadas y 12 semitonos. Diseñado con transiciones suaves vía Web Audio API.",
+        app1Btn: "Abrir Aplicación →",
+        app2Title: "Próxima Herramienta Muy Pronto",
+        app2Desc: "Metrónomo interactivo, generador de acordes o afinador actualmente en desarrollo.",
+        footer: "© 2026 · Creado con Web Audio API y Estándares Web Modernos"
+      },
+      pt: {
+        flag: "🇧🇷",
+        name: "Português",
+        badge: "LABORATÓRIO DE ÁUDIO INTERATIVO",
+        title: "Ferramentas Web Gratuitas para Músicos",
+        bio: "Aplicações de áudio acessíveis e de alta qualidade projetadas para prática, louvor, performances ao vivo e educação musical.",
+        secTitle: "Aplicações em Destaque",
+        app1Title: "Aura · Reprodutor de Pads Ambientais",
+        app1Desc: "Pads ambientais contínuos de alta definição com 4 texturas personalizadas e 12 semitons. Projetado com transições suaves via Web Audio API.",
+        app1Btn: "Abrir Aplicação →",
+        app2Title: "Próxima Ferramenta Em Breve",
+        app2Desc: "Metrônomo interativo, gerador de acordes ou afinador atualmente em desenvolvimento.",
+        footer: "© 2026 · Criado com Web Audio API e Padrões Web Modernos"
+      },
+      fr: {
+        flag: "🇫🇷",
+        name: "Français",
+        badge: "LABORATOIRE D'AUDIO INTERACTIF",
+        title: "Outils Web Gratuits pour Musiciens",
+        bio: "Applications audio accessibles et de haute qualité conçues pour la pratique, le culte, le live et l'enseignement musical.",
+        secTitle: "Applications En Vedette",
+        app1Title: "Aura · Lecteur de Pads Ambiançados",
+        app1Desc: "Pads ambiants continus en haute définition avec 4 textures personnalisées et 12 demi-tons. Conçu avec des fondu-enchaînés fluides via Web Audio API.",
+        app1Btn: "Lancer l'application →",
+        app2Title: "Prochain Outil À Venir",
+        app2Desc: "Métronome interactif, générateur d'accords ou accordeur actuellement en développement.",
+        footer: "© 2026 · Créé avec Web Audio API & Normes Web Modernes"
+      },
+      de: {
+        flag: "🇩🇪",
+        name: "Deutsch",
+        badge: "INTERAKTIVES AUDIO-LABOR",
+        title: "Kostenlose Web-Tools für Musiker",
+        bio: "Hochwertige, zugängliche Audio-Anwendungen für Praxis, Gottesdienst, Live-Performance und Musikunterricht.",
+        secTitle: "Hervorgehobene Anwendungen",
+        app1Title: "Aura · Ambient Pad Player",
+        app1Desc: "Kontinuierliche High-Definition Ambient-Pads mit 4 individuellen Texturen und 12 Halbtönen. Entwickelt mit sanften Web Audio API Übergängen.",
+        app1Btn: "Anwendung Starten →",
+        app2Title: "Nächstes Tool Demnächst",
+        app2Desc: "Interaktives Metronom, Akkord-Generator oder Stimmgerät derzeit in Entwicklung.",
+        footer: "© 2026 · Erstellt mit Web Audio API & Modernen Webstandards"
+      },
+      zh: {
+        flag: "🇨🇳",
+        name: "中文",
+        badge: "交互式音频实验室",
+        title: "面向音乐人的免费 Web 工具",
+        bio: "高质量、无缝且易于使用的音频应用程序，专为练习、敬拜、现场演出和音乐教育而设计。",
+        secTitle: "特色应用程序",
+        app1Title: "Aura · 氛围 Pad 播放器",
+        app1Desc: "高清连续氛围 Pad，包含 4 种自定义音色和 12 个半音。采用 Web Audio API 实现平滑淡入淡出。",
+        app1Btn: "启动应用程序 →",
+        app2Title: "下一个工具即将推出",
+        app2Desc: "交互式节拍器、和弦生成器或调音工具目前正在开发中。",
+        footer: "© 2026 · 基于 Web Audio API 和现代 Web 标准构建"
+      },
+      ru: {
+        flag: "🇷🇺",
+        name: "Русский",
+        badge: "ИНТЕРАКТИВНАЯ АУДИОЛАБОРАТОРИЯ",
+        title: "Бесплатные веб-инструменты для музыкантов",
+        bio: "Качественные и доступные аудиоприложения для практики, богослужений, живых выступлений и музыкального образования.",
+        secTitle: "Рекомендуемые Приложения",
+        app1Title: "Aura · Проигрыватель эмбиент-пэдов",
+        app1Desc: "Непрерывные эмбиент-пэды высокой четкости с 4 текстурами и 12 полутонами. Созданы с плавным кроссфейдом через Web Audio API.",
+        app1Btn: "Запустить приложение →",
+        app2Title: "Следующий инструмент скоро",
+        app2Desc: "Интерактивный метроном, генератор аккордов или тюнер находятся в разработке.",
+        footer: "© 2026 · Создано с использованием Web Audio API и современных веб-стандартов"
+      },
+      ja: {
+        flag: "🇯🇵",
+        name: "日本語",
+        badge: "インタラクティブ・オーディオ・ラボ",
+        title: "ミュージシャンのための無料Webツール",
+        bio: "練習、礼拝、ライブパフォーマンス、音楽教育のために設計された高品質でシームレスなオーディオアプリ。",
+        secTitle: "注目のアプリケーション",
+        app1Title: "Aura · アンビエント・パッド・プレイヤー",
+        app1Desc: "4つのカスタムテクスチャと12の半音を備えた高品質な連続アンビエントパッド。Web Audio APIによる滑らかなクロスフェードを実現。",
+        app1Btn: "アプリを起動 →",
+        app2Title: "次のツールもまもなく登場",
+        app2Desc: "インタラクティブなメトロノーム、コードジェネレーター、チューナーを現在開発中。",
+        footer: "© 2026 · Web Audio API と最新の Web 標準で構築"
+      }
+    };
+
+    function toggleDropdown() {
+      document.getElementById('lang-dropdown').classList.toggle('show');
+    }
+
+    // Cerrar el menú si se hace clic afuera
+    window.onclick = function(event) {
+      if (!event.target.closest('.lang-selector')) {
+        const dropdown = document.getElementById('lang-dropdown');
+        if (dropdown.classList.contains('show')) {
+          dropdown.classList.remove('show');
+        }
+      }
+    }
+
+    function changeLanguage(langKey) {
+      const data = translations[langKey] || translations.en;
+      
+      // Actualizar el botón principal
+      document.getElementById('current-flag').textContent = data.flag;
+      document.getElementById('current-lang-name').textContent = data.name;
+
+      // Actualizar textos
+      document.getElementById('txt-badge').textContent = data.badge;
+      document.getElementById('txt-title').textContent = data.title;
+      document.getElementById('txt-bio').textContent = data.bio;
+      document.getElementById('txt-sec-title').textContent = data.secTitle;
+      document.getElementById('txt-app1-title').textContent = data.app1Title;
+      document.getElementById('txt-app1-desc').textContent = data.app1Desc;
+      document.getElementById('txt-app1-btn').textContent = data.app1Btn;
+      document.getElementById('txt-app2-title').textContent = data.app2Title;
+      document.getElementById('txt-app2-desc').textContent = data.app2Desc;
+      document.getElementById('txt-footer').textContent = data.footer;
+
+      // Guardar preferencia
+      localStorage.setItem('preferred_lang', langKey);
+
+      // Cerrar menú
+      document.getElementById('lang-dropdown').classList.remove('show');
+    }
+
+    // Cargar idioma guardado o usar Inglés por defecto
+    window.onload = function() {
+      const savedLang = localStorage.getItem('preferred_lang') || 'en';
+      changeLanguage(savedLang);
+    }
+  </script>
 </body>
 </html>
