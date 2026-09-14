@@ -265,7 +265,6 @@
       gap: 8px;
     }
 
-    /* BADGE DE SECCIÓN EDITABLE EN LINEA */
     .section-badge {
       display: inline-block;
       align-self: flex-start;
@@ -292,7 +291,7 @@
       border-right: 2px solid #0f172a;
       border-top: 2px solid #0f172a;
       border-bottom: 2px solid #0f172a;
-      padding: 6px 10px;
+      padding: 6px 12px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -325,16 +324,23 @@
       background: transparent;
     }
 
+    /* SLASHES DE DURACIÓN SEGÚN MÉTRICA */
     .rhythm-slashes {
       display: flex;
       justify-content: space-around;
-      color: #94a3b8;
-      font-size: 1.1em;
+      align-items: center;
+      color: #64748b;
+      font-size: 1.15em;
       user-select: none;
-      font-weight: 700;
+      font-weight: 800;
+      width: 100%;
     }
 
-    /* ANOTACIÓN DE BANDA EDITABLE EN LINEA */
+    .rhythm-slashes span {
+      display: inline-block;
+      letter-spacing: -1px;
+    }
+
     .band-annotation {
       position: absolute;
       top: -10px;
@@ -423,14 +429,24 @@
         </div>
       </div>
 
-      <!-- INSERCIÓN Y AGRUPACIÓN DE COMPASES -->
+      <!-- INSERCIÓN Y AGRUPACIÓN DE COMPASES EXPANDIDA -->
       <div class="toolbox-section">
-        <div class="toolbox-title">🎼 Inserción de Compases</div>
-        <div style="font-size:0.75em; color:var(--text-muted); margin-bottom:4px;">Haz clic en un compás para seleccionarlo:</div>
-        <button class="tool-btn" onclick="insertMeasure('before')">⬅️ Agregar ANTES del seleccionado</button>
-        <button class="tool-btn" onclick="insertMeasure('after')">➡️ Agregar DESPUÉS del seleccionado</button>
+        <div class="toolbox-title">🎼 Compases & Estructura</div>
+        <div class="btn-grid">
+          <button class="tool-btn" onclick="addMultipleMeasures(4)">+ 4 Compases</button>
+          <button class="tool-btn" onclick="addMultipleMeasures(8)">+ 8 Compases</button>
+        </div>
+        <div style="display:flex; gap:6px; margin-top:4px;">
+          <input type="number" id="customMeasureQty" value="12" min="1" max="100" class="select-input" style="width:70px; text-align:center;">
+          <button class="tool-btn" style="flex:1;" onclick="addMultipleMeasures()">+ Cantidad N</button>
+        </div>
+        <div style="font-size:0.75em; color:var(--text-muted); margin-top:6px; margin-bottom:2px;">Ubicación según selección:</div>
+        <div class="btn-grid">
+          <button class="tool-btn" onclick="insertMeasure('before')">⬅️ Antes</button>
+          <button class="tool-btn" onclick="insertMeasure('after')">➡️ Después</button>
+        </div>
         <button class="tool-btn" style="margin-top:6px; background:rgba(234,179,8,0.15); border-color:rgba(234,179,8,0.4); color:#fef08a;" onclick="toggleSystemBreak()">↵ Salto de Línea (Agrupar)</button>
-        <button class="tool-btn" style="margin-top:4px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="removeSelectedMeasure()">🗑️ Eliminar Compás Seleccionado</button>
+        <button class="tool-btn" style="margin-top:4px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="removeSelectedMeasure()">🗑️ Eliminar Seleccionado</button>
       </div>
 
       <!-- INDICACIONES BANDA -->
@@ -468,19 +484,19 @@
               <div class="measures-grid">
                 <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
                   <input type="text" class="chord-input" placeholder="C">
-                  <div class="rhythm-slashes">///////</div>
+                  <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
                 </div>
                 <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
                   <input type="text" class="chord-input" placeholder="G/B">
-                  <div class="rhythm-slashes">///////</div>
+                  <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
                 </div>
                 <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
                   <input type="text" class="chord-input" placeholder="Am7">
-                  <div class="rhythm-slashes">///////</div>
+                  <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
                 </div>
                 <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
                   <input type="text" class="chord-input" placeholder="F2">
-                  <div class="rhythm-slashes">///////</div>
+                  <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
                 </div>
               </div>
             </div>
@@ -507,8 +523,33 @@
       selectedMeasure.classList.add('selected');
     }
 
+    // GENERADOR DINÁMICO DE SLASHES SEGÚN MÉTRICA DE TIEMPO
+    function getSlashHTML(timeSig) {
+      switch (timeSig) {
+        case '4/4':
+          return '<span>/</span><span>/</span><span>/</span><span>/</span>';
+        case '3/4':
+          return '<span>/</span><span>/</span><span>/</span>';
+        case '2/4':
+        case '2/2':
+          return '<span>/</span><span>/</span>';
+        case '6/8':
+          return '<span>/•</span><span>/•</span>';
+        case '9/8':
+          return '<span>/•</span><span>/•</span><span>/•</span>';
+        case '12/8':
+          return '<span>/•</span><span>/•</span><span>/•</span><span>/•</span>';
+        default:
+          return '<span>/</span><span>/</span><span>/</span><span>/</span>';
+      }
+    }
+
     function updateTimeSignature(val) {
       document.querySelectorAll('.displayTimeSig').forEach(el => el.innerText = val);
+      const html = getSlashHTML(val);
+      document.querySelectorAll('.rhythm-slashes').forEach(el => {
+        el.innerHTML = html;
+      });
     }
 
     function updateFooterTitle(val) {
@@ -574,33 +615,62 @@
       addSection('NUEVA SECCIÓN', true);
     }
 
+    function createMeasureElement() {
+      const timeSig = document.getElementById('timeSignatureSelect').value;
+      const box = document.createElement('div');
+      box.className = 'measure-box';
+      box.style.flex = '0 0 25%';
+      box.onclick = function() { selectMeasure(this); };
+      box.innerHTML = `
+        <input type="text" class="chord-input" placeholder="Acorde">
+        <div class="rhythm-slashes">${getSlashHTML(timeSig)}</div>
+      `;
+      return box;
+    }
+
     function addSection(title, isEditable = false) {
       const content = getCurrentPageContent();
       const newBlock = document.createElement('div');
       newBlock.className = 'section-block';
 
-      newBlock.innerHTML = `
-        <span class="section-badge" contenteditable="true">${title}</span>
-        <div class="measures-grid">
-          <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
-            <input type="text" class="chord-input" placeholder="Acorde">
-            <div class="rhythm-slashes">///////</div>
-          </div>
-          <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
-            <input type="text" class="chord-input" placeholder="Acorde">
-            <div class="rhythm-slashes">///////</div>
-          </div>
-          <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
-            <input type="text" class="chord-input" placeholder="Acorde">
-            <div class="rhythm-slashes">///////</div>
-          </div>
-          <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
-            <input type="text" class="chord-input" placeholder="Acorde">
-            <div class="rhythm-slashes">///////</div>
-          </div>
-        </div>
-      `;
+      const grid = document.createElement('div');
+      grid.className = 'measures-grid';
+      for (let i = 0; i < 4; i++) {
+        grid.appendChild(createMeasureElement());
+      }
+
+      newBlock.innerHTML = `<span class="section-badge" contenteditable="true">${title}</span>`;
+      newBlock.appendChild(grid);
       content.appendChild(newBlock);
+      checkPaginationOverflow();
+    }
+
+    function addMultipleMeasures(qty) {
+      const count = qty || parseInt(document.getElementById('customMeasureQty').value) || 1;
+      
+      let targetGrid;
+      if (selectedMeasure && selectedMeasure.parentNode) {
+        targetGrid = selectedMeasure.parentNode;
+      } else {
+        const grids = document.querySelectorAll('.measures-grid');
+        targetGrid = grids[grids.length - 1];
+      }
+
+      if (!targetGrid) {
+        addSection('SECCIÓN');
+        targetGrid = document.querySelectorAll('.measures-grid')[0];
+      }
+
+      for (let i = 0; i < count; i++) {
+        const box = createMeasureElement();
+        if (selectedMeasure && selectedMeasure.parentNode === targetGrid) {
+          targetGrid.insertBefore(box, selectedMeasure.nextSibling);
+          selectedMeasure = box;
+        } else {
+          targetGrid.appendChild(box);
+        }
+      }
+
       checkPaginationOverflow();
     }
 
@@ -610,15 +680,7 @@
         return;
       }
 
-      const newBox = document.createElement('div');
-      newBox.className = 'measure-box';
-      newBox.style.flex = '0 0 25%';
-      newBox.onclick = function() { selectMeasure(this); };
-      newBox.innerHTML = `
-        <input type="text" class="chord-input" placeholder="Acorde">
-        <div class="rhythm-slashes">///////</div>
-      `;
-
+      const newBox = createMeasureElement();
       if (position === 'before') {
         selectedMeasure.parentNode.insertBefore(newBox, selectedMeasure);
       } else {
