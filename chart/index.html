@@ -115,6 +115,8 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
+      position: sticky;
+      top: 20px;
     }
 
     .toolbox-section {
@@ -200,6 +202,7 @@
     .chart-paper {
       width: 794px;
       height: 1123px; /* Tamaño A4 estricto */
+      max-height: 1123px;
       background: var(--paper-bg);
       color: var(--paper-text);
       padding: 45px;
@@ -225,9 +228,9 @@
     .paper-inner {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
       width: 100%;
-      flex: 1;
+      height: 980px; /* Límite útil vertical A4 */
       overflow: hidden;
     }
 
@@ -280,6 +283,7 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
+      flex: 1;
     }
 
     .section-block {
@@ -399,6 +403,7 @@
       .studio-layout { grid-template-columns: 1fr; }
       .sheets-container { padding: 10px; }
       .chart-paper { width: 100%; height: auto; min-height: 1123px; }
+      .toolbox-panel { position: static; }
     }
   </style>
 </head>
@@ -501,7 +506,7 @@
     <!-- CONTENEDOR MULTI-PÁGINA A4 -->
     <div class="sheets-container" id="sheetsContainer">
       
-      <!-- PÁGINA 1 -->
+      <!-- PÁGINA 1 INICIAL -->
       <div class="chart-paper" id="paper-page-1">
         <div class="paper-inner">
           <div class="chart-header">
@@ -970,7 +975,6 @@
 
     let currentLang = 'en';
     let selectedMeasure = null;
-    let pageCount = 1;
 
     function initLanguage() {
       let savedLang = localStorage.getItem('preferred_lang');
@@ -1098,32 +1102,84 @@
       document.querySelectorAll('.footer-title-ref').forEach(el => el.innerText = text);
     }
 
-    function getCurrentPageContent() {
-      const pages = document.querySelectorAll('.chart-paper');
-      const lastPage = pages[pages.length - 1];
-      return lastPage.querySelector('.chart-content');
+    // --- MANEJO DINÁMICO DE PAGINACIÓN A4 EXACTA ---
+    function checkPaginationOverflow() {
+      const container = document.getElementById('sheetsContainer');
+      let pages = Array.from(document.querySelectorAll('.chart-paper'));
+
+      for (let i = 0; i < pages.length; i++) {
+        let currentPage = pages[i];
+        let inner = currentPage.querySelector('.paper-inner');
+        let content = currentPage.querySelector('.chart-content');
+
+        // Mientras el contenido supere los 920px de espacio útil en A4
+        while (inner.scrollHeight > 930 && content.children.length > 0) {
+          let nextPageIndex = i + 1;
+          let nextPage = pages[nextPageIndex];
+
+          if (!nextPage) {
+            nextPage = createNewPageElement(nextPageIndex + 1);
+            container.appendChild(nextPage);
+            pages.push(nextPage);
+          }
+
+          let nextContent = nextPage.querySelector('.chart-content');
+          let lastBlock = content.lastElementChild;
+
+          // Si el último bloque tiene una grilla con compases, mover solo compases si es posible
+          if (lastBlock && lastBlock.classList.contains('section-block')) {
+            let grid = lastBlock.querySelector('.measures-grid');
+            if (grid && grid.children.length > 1) {
+              let firstBlockInNext = nextContent.firstElementChild;
+              if (!firstBlockInNext || !firstBlockInNext.classList.contains('section-block')) {
+                let newBlock = document.createElement('div');
+                newBlock.className = 'section-block';
+                let newGrid = document.createElement('div');
+                newGrid.className = 'measures-grid';
+                newBlock.appendChild(newGrid);
+                nextContent.insertBefore(newBlock, nextContent.firstChild);
+                firstBlockInNext = newBlock;
+              }
+              let targetGrid = firstBlockInNext.querySelector('.measures-grid');
+              let lastMeasure = grid.lastElementChild;
+              if (lastMeasure) {
+                targetGrid.insertBefore(lastMeasure, targetGrid.firstChild);
+              }
+            } else {
+              // Mover el bloque completo si tiene un solo compás o está vacío
+              nextContent.insertBefore(lastBlock, nextContent.firstChild);
+            }
+          } else {
+            nextContent.insertBefore(lastBlock, nextContent.firstChild);
+          }
+        }
+      }
+
+      cleanupEmptyPages();
+      updateTotalPagesCounter();
     }
 
-    function checkPaginationOverflow() {
-      const pages = document.querySelectorAll('.chart-paper');
-      const lastPage = pages[pages.length - 1];
-      const inner = lastPage.querySelector('.paper-inner');
-
-      if (inner.scrollHeight > 920) {
-        createNewPage();
+    function cleanupEmptyPages() {
+      const pages = Array.from(document.querySelectorAll('.chart-paper'));
+      for (let i = pages.length - 1; i > 0; i--) {
+        let page = pages[i];
+        let content = page.querySelector('.chart-content');
+        if (!content || content.children.length === 0 || content.innerText.trim() === "") {
+          page.parentNode.removeChild(page);
+        } else {
+          break; // Detener en cuanto encontremos una página con contenido
+        }
       }
     }
 
-    function createNewPage() {
-      pageCount++;
+    function createNewPageElement(pageNum) {
       const dict = i18n[currentLang] || i18n['en'];
-      const container = document.getElementById('sheetsContainer');
       const titleText = document.getElementById('songTitleInput').value.toUpperCase() || dict.untitledChart;
       const timeSig = document.getElementById('timeSignatureSelect').value;
 
       const newPaper = document.createElement('div');
       newPaper.className = 'chart-paper';
-      newPaper.id = `paper-page-${pageCount}`;
+      newPaper.id = `paper-page-${pageNum}`;
 
       newPaper.innerHTML = `
         <div class="paper-inner">
@@ -1131,19 +1187,23 @@
             <div style="font-family:'Bungee', cursive; font-size:1.4em; text-align:center; text-transform:uppercase;">${titleText} (CONT.)</div>
             <div class="header-sub-row">
               <div>${dict.lblTimeSigHeader}: <span class="displayTimeSig">${timeSig}</span></div>
-              <div>${dict.continuation} ${pageCount}</div>
+              <div>${dict.continuation} ${pageNum}</div>
             </div>
           </div>
           <div class="chart-content"></div>
         </div>
         <div class="chart-footer">
           <div class="footer-title-ref">${titleText}</div>
-          <div class="page-num-ref">${dict.pageLabel} ${pageCount} / ${pageCount}</div>
+          <div class="page-num-ref">${dict.pageLabel} ${pageNum} / ${pageNum}</div>
         </div>
       `;
+      return newPaper;
+    }
 
-      container.appendChild(newPaper);
-      updateTotalPagesCounter();
+    function getCurrentPageContent() {
+      const pages = document.querySelectorAll('.chart-paper');
+      const lastPage = pages[pages.length - 1];
+      return lastPage.querySelector('.chart-content');
     }
 
     function updateTotalPagesCounter() {
@@ -1253,8 +1313,11 @@
 
     function removeSelectedMeasure() {
       if (selectedMeasure && selectedMeasure.parentNode) {
-        selectedMeasure.parentNode.removeChild(selectedMeasure);
+        let grid = selectedMeasure.parentNode;
+        grid.removeChild(selectedMeasure);
         selectedMeasure = null;
+        cleanupEmptyPages();
+        checkPaginationOverflow();
       }
     }
 
