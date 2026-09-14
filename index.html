@@ -4,6 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Audio Tools & Apps · Portfolio</title>
+
+  <!-- Google Analytics GA4 Base -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3DTLYSJMH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-Q3DTLYSJMH');
+  </script>
+
   <style>
     :root {
       --bg-color: #080911;
@@ -264,7 +275,7 @@
           <h2 id="txt-app1-title">Aura · Ambient Pad Player</h2>
           <p id="txt-app1-desc">Continuous, high-definition ambient pads featuring 4 custom textures and 12 semitones. Designed with smooth Web Audio API crossfading.</p>
         </div>
-        <a href="./pads/index.html" class="btn-launch" id="txt-app1-btn">Launch Application →</a>
+        <a href="./pads/index.html" class="btn-launch" id="txt-app1-btn" onclick="trackLaunch('Aura Pad Player')">Launch Application →</a>
       </div>
 
       <!-- App 2: Chord Chart Studio -->
@@ -273,7 +284,7 @@
           <h2 id="txt-app2-title">Chord Chart Studio</h2>
           <p id="txt-app2-desc">Create, edit, transpose, and export clean professional song chord charts with custom time signatures and metrics.</p>
         </div>
-        <a href="./chart/index.html" class="btn-launch" id="txt-app2-btn">Launch Application →</a>
+        <a href="./chart/index.html" class="btn-launch" id="txt-app2-btn" onclick="trackLaunch('Chord Chart Studio')">Launch Application →</a>
       </div>
 
     </div>
@@ -443,6 +454,16 @@
 
       localStorage.setItem('preferred_lang', langKey);
       document.getElementById('lang-dropdown').classList.remove('show');
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'select_language', { 'language': langKey });
+      }
+    }
+
+    function trackLaunch(appName) {
+      if (typeof gtag === 'function') {
+        gtag('event', 'launch_app', { 'app_name': appName });
+      }
     }
 
     window.onload = function() {
