@@ -506,7 +506,8 @@
     .section-block {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
+      margin-top: 8px;
     }
 
     .section-badge {
@@ -515,13 +516,22 @@
       background: #0f172a;
       color: #fff;
       font-weight: 800;
-      font-size: 0.85em;
-      padding: 3px 10px;
-      border-radius: 6px;
+      font-size: 0.82em;
+      padding: 2px 8px;
+      border-radius: 4px;
       letter-spacing: 1px;
       border: none;
       outline: none;
       text-transform: uppercase;
+      min-width: 20px;
+      min-height: 16px;
+    }
+    
+    /* Si la insignia de sección está vacía, colapsar completamente su espacio */
+    .section-badge:empty {
+      display: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
 
     .song2-subtitle {
@@ -543,7 +553,7 @@
     }
 
     .measure-box {
-      height: 80px;
+      height: 85px;
       border-right: 2px solid #0f172a;
       border-top: 2px solid #0f172a;
       border-bottom: 2px solid #0f172a;
@@ -578,7 +588,7 @@
       content: '•';
       position: absolute;
       left: 3px;
-      top: 32px;
+      top: 35px;
       font-size: 1.2em;
       font-weight: 900;
       color: #0f172a;
@@ -593,27 +603,31 @@
       content: '•';
       position: absolute;
       right: 3px;
-      top: 32px;
+      top: 35px;
       font-size: 1.2em;
       font-weight: 900;
       color: #0f172a;
       line-height: 0;
     }
 
+    /* CASILLAS DE REPETICIÓN (VOLTAS) MULTI-COMPÁS */
     .volta-bracket {
       position: absolute;
-      top: -14px;
-      left: -2px;
-      right: -2px;
-      height: 12px;
+      top: -16px;
+      left: 0;
+      right: 0;
+      height: 14px;
       border-top: 2px solid #0f172a;
       border-left: 2px solid #0f172a;
-      font-size: 0.65em;
+      border-right: 2px solid #0f172a;
+      font-size: 0.7em;
       font-weight: 800;
-      padding-left: 3px;
-      line-height: 1;
+      padding-left: 4px;
+      line-height: 1.1;
       color: #0f172a;
       pointer-events: none;
+      z-index: 10;
+      background: rgba(255,255,255,0.9);
     }
 
     .measure-main {
@@ -622,6 +636,7 @@
       justify-content: space-between;
       flex: 1;
       height: 100%;
+      padding-top: 14px; /* Espacio reservado superior para que las casillas no pisen los acordes */
     }
 
     .chord-input {
@@ -697,7 +712,7 @@
 
     .band-annotation {
       position: absolute;
-      top: -10px;
+      top: -12px;
       right: 6px;
       font-size: 0.7em;
       font-weight: 700;
@@ -707,6 +722,7 @@
       border-radius: 4px;
       border: 1px solid #bfdbfe;
       outline: none;
+      z-index: 5;
     }
 
     .time-sig-stack {
@@ -754,7 +770,7 @@
       z-index: 1000;
       flex-direction: column;
       gap: 3px;
-      min-width: 180px;
+      min-width: 190px;
     }
 
     .context-menu-item {
@@ -909,17 +925,17 @@
 
       <!-- MÓDULO 4: STRUCTURE & REPEATS -->
       <div class="toolbox-section">
-        <div class="collapsible-header collapsed" id="modStructure" onclick="toggleModule(this)">Structure & Repeats</div>
+        <div class="collapsible-header collapsed" id="modStructure" onclick="toggleModule(this)">Estructura y Repeticiones</div>
         <div class="collapsible-body hidden">
-          <div style="font-size:0.75em; color:var(--text-muted);">Repeat Barlines & Voltas:</div>
+          <div style="font-size:0.75em; color:var(--text-muted);">Barras de Repetición y Voltas:</div>
           <div class="btn-grid">
-            <button class="tool-btn custom-btn" onclick="toggleRepeat('start')">||: Start Repeat</button>
-            <button class="tool-btn custom-btn" onclick="toggleRepeat('end')">:|| End Repeat</button>
-            <button class="tool-btn" onclick="applyVolta(1)">Volta [1.]</button>
-            <button class="tool-btn" onclick="applyVolta(2)">Volta [2.]</button>
+            <button class="tool-btn custom-btn" onclick="toggleRepeat('start')">||: Inicio Repetición</button>
+            <button class="tool-btn custom-btn" onclick="toggleRepeat('end')">:|| Fin Repetición</button>
+            <button class="tool-btn" onclick="applyVolta(1)">Casilla [1.]</button>
+            <button class="tool-btn" onclick="applyVolta(2)">Casilla [2.]</button>
           </div>
 
-          <div style="font-size:0.75em; color:var(--text-muted); margin-top:4px;">Barlines & Navigation:</div>
+          <div style="font-size:0.75em; color:var(--text-muted); margin-top:4px;">Navegación:</div>
           <div class="btn-grid">
             <button class="tool-btn" onclick="addAnnotation('𝄌 Segno')">𝄌 Segno</button>
             <button class="tool-btn" onclick="addAnnotation('𝄍 Coda')">𝄍 Coda</button>
@@ -931,32 +947,32 @@
 
       <!-- MÓDULO 5: TIME SIGNATURE -->
       <div class="toolbox-section">
-        <div class="collapsible-header collapsed" id="modTimeSig" onclick="toggleModule(this)">Time Signature</div>
+        <div class="collapsible-header collapsed" id="modTimeSig" onclick="toggleModule(this)">Métrica de Tiempo</div>
         <div class="collapsible-body hidden">
           <select class="select-input" id="timeSignatureSelect">
-            <option value="4/4" selected id="opt44">4/4 (Four-Four)</option>
-            <option value="3/4" id="opt34">3/4 (Three-Four)</option>
-            <option value="2/4" id="opt24">2/4 (Two-Four)</option>
-            <option value="6/8" id="opt68">6/8 (Six-Eighths)</option>
-            <option value="9/8" id="opt98">9/8 (Nine-Eighths)</option>
-            <option value="12/8" id="opt128">12/8 (Twelve-Eighths)</option>
-            <option value="2/2" id="opt22">2/2 (Cut Time)</option>
+            <option value="4/4" selected id="opt44">4/4 (Cuatro Cuartos)</option>
+            <option value="3/4" id="opt34">3/4 (Tres Cuartos)</option>
+            <option value="2/4" id="opt24">2/4 (Dos Cuartos)</option>
+            <option value="6/8" id="opt68">6/8 (Seis Octavos)</option>
+            <option value="9/8" id="opt98">9/8 (Nueve Octavos)</option>
+            <option value="12/8" id="opt128">12/8 (Doce Octavos)</option>
+            <option value="2/2" id="opt22">2/2 (Compás de Blanquita)</option>
           </select>
-          <button class="tool-btn" style="margin-top:2px; border-color:var(--accent-purple); color:#d8b4fe;" id="btnApplyTimeSig" onclick="applyTimeSignatureToSelected()">Apply Time Sig from Selection</button>
+          <button class="tool-btn" style="margin-top:2px; border-color:var(--accent-purple); color:#d8b4fe;" id="btnApplyTimeSig" onclick="applyTimeSignatureToSelected()">Aplicar Métrica a Selección</button>
         </div>
       </div>
 
       <!-- MÓDULO 6: SECTIONS & SUBTITLE -->
       <div class="toolbox-section">
-        <div class="collapsible-header collapsed" id="modSections" onclick="toggleModule(this)">Sections & Subtitle</div>
+        <div class="collapsible-header collapsed" id="modSections" onclick="toggleModule(this)">Secciones y Subtítulos</div>
         <div class="collapsible-body hidden">
-          <button class="tool-btn custom-btn" style="width:100%; font-weight:700; margin-bottom:4px;" id="btnSubSong2" onclick="addSong2Subtitle()">+ Add Subtitle</button>
+          <button class="tool-btn custom-btn" style="width:100%; font-weight:700; margin-bottom:4px;" id="btnSubSong2" onclick="addSong2Subtitle()">+ Agregar Subtítulo</button>
           <div class="btn-grid">
             <button class="tool-btn custom-btn" id="btnSecEdit" onclick="addEditableSection()">EDITABLE</button>
             <button class="tool-btn" id="btnSecIntro" onclick="addSection(i18n[currentLang].secIntro)">+ INTRO</button>
-            <button class="tool-btn" id="btnSecVerse" onclick="addSection(i18n[currentLang].secVerse)">+ VERSE</button>
-            <button class="tool-btn" id="btnSecChorus" onclick="addSection(i18n[currentLang].secChorus)">+ CHORUS</button>
-            <button class="tool-btn" id="btnSecBridge" onclick="addSection(i18n[currentLang].secBridge)">+ BRIDGE</button>
+            <button class="tool-btn" id="btnSecVerse" onclick="addSection(i18n[currentLang].secVerse)">+ VERSO</button>
+            <button class="tool-btn" id="btnSecChorus" onclick="addSection(i18n[currentLang].secChorus)">+ CORO</button>
+            <button class="tool-btn" id="btnSecBridge" onclick="addSection(i18n[currentLang].secBridge)">+ PUENTE</button>
             <button class="tool-btn" id="btnSecSolo" onclick="addSection(i18n[currentLang].secSolo)">+ SOLO</button>
           </div>
         </div>
@@ -964,37 +980,37 @@
 
       <!-- MÓDULO 7: MEASURES & STRUCTURE -->
       <div class="toolbox-section">
-        <div class="collapsible-header collapsed" id="modMeasures" onclick="toggleModule(this)">Measures & Structure</div>
+        <div class="collapsible-header collapsed" id="modMeasures" onclick="toggleModule(this)">Compases y Estructura</div>
         <div class="collapsible-body hidden">
-          <button class="tool-btn primary" style="margin-bottom:6px; background:linear-gradient(135deg, #10b981, #06b6d4);" id="btnGroupSelected" onclick="groupSelectedInSystem()">Group Selected in 1 System</button>
+          <button class="tool-btn primary" style="margin-bottom:6px; background:linear-gradient(135deg, #10b981, #06b6d4);" id="btnGroupSelected" onclick="groupSelectedInSystem()">Agrupar Selección en 1 Sistema</button>
 
           <div class="btn-grid">
-            <button class="tool-btn" id="btnAdd4" onclick="addMultipleMeasures(4)">+ 4 Measures</button>
-            <button class="tool-btn" id="btnAdd8" onclick="addMultipleMeasures(8)">+ 8 Measures</button>
+            <button class="tool-btn" id="btnAdd4" onclick="addMultipleMeasures(4)">+ 4 Compases</button>
+            <button class="tool-btn" id="btnAdd8" onclick="addMultipleMeasures(8)">+ 8 Compases</button>
           </div>
           <div style="display:flex; gap:6px; margin-top:4px;">
             <input type="number" id="customMeasureQty" value="12" min="1" max="100" class="select-input" style="width:70px; text-align:center;">
-            <button class="tool-btn" style="flex:1;" id="btnAddN" onclick="addMultipleMeasures()">+ Custom N</button>
+            <button class="tool-btn" style="flex:1;" id="btnAddN" onclick="addMultipleMeasures()">+ N Personalizado</button>
           </div>
-          <div style="font-size:0.75em; color:var(--text-muted); margin-top:6px; margin-bottom:2px;" id="lblLocation">Position relative to selection:</div>
+          <div style="font-size:0.75em; color:var(--text-muted); margin-top:6px; margin-bottom:2px;" id="lblLocation">Posición relativa a selección:</div>
           <div class="btn-grid">
-            <button class="tool-btn" id="btnInsertBefore" onclick="insertMeasure('before')">Before</button>
-            <button class="tool-btn" id="btnInsertAfter" onclick="insertMeasure('after')">After</button>
+            <button class="tool-btn" id="btnInsertBefore" onclick="insertMeasure('before')">Antes</button>
+            <button class="tool-btn" id="btnInsertAfter" onclick="insertMeasure('after')">Después</button>
           </div>
-          <button class="tool-btn" style="margin-top:6px; background:rgba(234,179,8,0.15); border-color:rgba(234,179,8,0.4); color:#fef08a;" id="btnLineBreak" onclick="toggleSystemBreak()">Line Break (Group)</button>
+          <button class="tool-btn" style="margin-top:6px; background:rgba(234,179,8,0.15); border-color:rgba(234,179,8,0.4); color:#fef08a;" id="btnLineBreak" onclick="toggleSystemBreak()">Salto de Línea (Grupo)</button>
         </div>
       </div>
 
       <!-- MÓDULO 8: BAND CUES -->
       <div class="toolbox-section">
-        <div class="collapsible-header collapsed" id="modBandCues" onclick="toggleModule(this)">Band Cues</div>
+        <div class="collapsible-header collapsed" id="modBandCues" onclick="toggleModule(this)">Indicaciones de Banda</div>
         <div class="collapsible-body hidden">
-          <button class="tool-btn custom-btn" id="btnCustomNote" onclick="addAnnotation(i18n[currentLang].noteDefault, true)">Custom Note</button>
+          <button class="tool-btn custom-btn" id="btnCustomNote" onclick="addAnnotation(i18n[currentLang].noteDefault, true)">Nota Personalizada</button>
           <div class="btn-grid" style="margin-top:6px;">
             <button class="tool-btn" id="btnBandIn" onclick="addAnnotation(i18n[currentLang].bandIn)">Band IN</button>
             <button class="tool-btn" id="btnTutti" onclick="addAnnotation('Tutti')">Tutti</button>
 
-            <button class="tool-btn" id="btnCorte" onclick="addAnnotation(i18n[currentLang].corte)">Break / Cut</button>
+            <button class="tool-btn" id="btnCorte" onclick="addAnnotation(i18n[currentLang].corte)">Corte / Break</button>
             <button class="tool-btn" id="btnPadOnly" onclick="addAnnotation('Pad Only')">Pad Only</button>
           </div>
         </div>
@@ -1009,7 +1025,7 @@
       <div class="rhythm-toolbar">
         <div class="rhythm-title">
           <span id="lblRhythmStudioTitle">Rhythms & Notation Studio</span>
-          <span style="font-size:0.8em; opacity:0.8; font-weight:600;" id="lblRhythmShortcuts">Undo: Ctrl+Z | Redo: Ctrl+Y | Copy: Ctrl+C | Paste: Ctrl+V</span>
+          <span style="font-size:0.8em; opacity:0.8; font-weight:600;" id="lblRhythmShortcuts">Shift+Click: Rango | Deshacer: Ctrl+Z | Copiar: Ctrl+C</span>
         </div>
         
         <!-- FIGURAS MUSICALES EN SÍMBOLOS -->
@@ -1153,7 +1169,7 @@
         btnBandIn: "Band IN",
         btnCorte: "Break / Cut",
         lblRhythmStudioTitle: "Rhythms & Notation Studio",
-        lblRhythmShortcuts: "Undo: Ctrl+Z | Redo: Ctrl+Y | Copy: Ctrl+C",
+        lblRhythmShortcuts: "Shift+Click: Range | Undo: Ctrl+Z | Copy: Ctrl+C",
         btnResetSlashes: "Reset Slashes",
         titlePlaceholder: "SONG TITLE",
         artistPlaceholder: "Artist / Band",
@@ -1198,7 +1214,7 @@
         btnSubSong2: "+ Agregar Subtítulo",
         btnSecEdit: "EDITABLE",
         modMeasures: "Compases y Estructura",
-        btnGroupSelected: "Agrupar Seleccionados en 1 Sistema",
+        btnGroupSelected: "Agrupar Selección en 1 Sistema",
         btnAdd4: "+ 4 Compases",
         btnAdd8: "+ 8 Compases",
         btnAddN: "+ N Personalizado",
@@ -1211,7 +1227,7 @@
         btnBandIn: "Entra Banda",
         btnCorte: "Corte / Break",
         lblRhythmStudioTitle: "Estudio de Ritmo y Notación",
-        lblRhythmShortcuts: "Deshacer: Ctrl+Z | Rehacer: Ctrl+Y | Copiar: Ctrl+C",
+        lblRhythmShortcuts: "Shift+Clic: Rango | Deshacer: Ctrl+Z | Copiar: Ctrl+C",
         btnResetSlashes: "Restablecer Slashes",
         titlePlaceholder: "TÍTULO DE LA CANCIÓN",
         artistPlaceholder: "Artista / Banda",
@@ -1232,14 +1248,13 @@
       }
     };
 
-    let currentLang = 'en';
+    let currentLang = 'es';
     let selectedMeasures = [];
     let lastSelectedMeasure = null;
     let activeBeatSlot = null;
     let activeSubIndex = 0;
     let currentArticulationScale = 1.4;
 
-    // PORTAPAPELES Y HISTORIAL UNDO/REDO
     let clipboardMeasureData = null;
     let undoStack = [];
     let redoStack = [];
@@ -1249,15 +1264,14 @@
       const container = document.getElementById('sheetsContainer');
       undoStack.push(container.innerHTML);
       if (undoStack.length > 50) undoStack.shift();
-      redoStack = []; // Limpiar redo al hacer nueva acción
+      redoStack = [];
     }
 
     function undoAction() {
       if (undoStack.length === 0) return;
       const container = document.getElementById('sheetsContainer');
       redoStack.push(container.innerHTML);
-      const prevState = undoStack.pop();
-      container.innerHTML = prevState;
+      container.innerHTML = undoStack.pop();
       rebindAllEvents();
     }
 
@@ -1265,8 +1279,7 @@
       if (redoStack.length === 0) return;
       const container = document.getElementById('sheetsContainer');
       undoStack.push(container.innerHTML);
-      const nextState = redoStack.pop();
-      container.innerHTML = nextState;
+      container.innerHTML = redoStack.pop();
       rebindAllEvents();
     }
 
@@ -1289,7 +1302,7 @@
     }
 
     function initLanguage() {
-      let savedLang = localStorage.getItem('preferred_lang') || 'en';
+      let savedLang = localStorage.getItem('preferred_lang') || 'es';
       currentLang = savedLang;
       document.getElementById('langSelector').value = currentLang;
       applyLanguage(currentLang);
@@ -1319,8 +1332,28 @@
       applyLanguage(lang);
     }
 
+    // MANEJO DE SELECCIÓN Y SHIFT + CLICK PARA RANGO MULTI-COMPÁS
     function handleMeasureClick(el, event) {
       if (el.classList.contains('break-system')) return;
+
+      if (event.shiftKey && lastSelectedMeasure) {
+        const allMeasures = Array.from(document.querySelectorAll('.measure-box:not(.break-system)'));
+        const startIdx = allMeasures.indexOf(lastSelectedMeasure);
+        const endIdx = allMeasures.indexOf(el);
+
+        if (startIdx !== -1 && endIdx !== -1) {
+          clearSelections();
+          const min = Math.min(startIdx, endIdx);
+          const max = Math.max(startIdx, endIdx);
+
+          for (let i = min; i <= max; i++) {
+            allMeasures[i].classList.add('selected');
+            selectedMeasures.push(allMeasures[i]);
+          }
+          return;
+        }
+      }
+
       clearSelections();
       el.classList.add('selected');
       selectedMeasures = [el];
@@ -1330,14 +1363,13 @@
       if (firstBeat) selectBeatSlot(firstBeat, null, 0);
     }
 
-    // MENÚ CONTEXTUAL (CLIC DERECHO)
     function openContextMenu(el, e) {
       e.preventDefault();
       contextTargetMeasure = el;
       const menu = document.getElementById('measureContextMenu');
       menu.style.display = 'flex';
-      menu.style.left = `${e.pageX}pfx` || `${e.clientX}px`;
-      menu.style.top = `${e.pageY}px` || `${e.clientY}px`;
+      menu.style.left = `${e.pageX}px`;
+      menu.style.top = `${e.pageY}px`;
     }
 
     window.addEventListener('click', () => {
@@ -1418,25 +1450,40 @@
       if (selectedMeasures.length === 0) return;
       saveStateForUndo();
       selectedMeasures.forEach(m => {
-        if (type === 'start') {
-          m.classList.toggle('repeat-start');
-        } else if (type === 'end') {
-          m.classList.toggle('repeat-end');
-        }
+        if (type === 'start') m.classList.toggle('repeat-start');
+        else if (type === 'end') m.classList.toggle('repeat-end');
       });
     }
 
+    // APLICAR CASILLA DE REPETICIÓN MULTI-COMPÁS (VOLTA)
     function applyVolta(num) {
       if (selectedMeasures.length === 0) return;
       saveStateForUndo();
-      const target = selectedMeasures[0];
-      let v = target.querySelector('.volta-bracket');
+
+      // Limpiar voltas previas en la selección o rango
+      selectedMeasures.forEach(m => {
+        const oldV = m.querySelector('.volta-bracket');
+        if (oldV) oldV.remove();
+      });
+
+      const first = selectedMeasures[0];
+      const last = selectedMeasures[selectedMeasures.length - 1];
+
+      // Si es un rango, colocamos el corchete abarcativo en el primero compás estirado por flex
+      let v = first.querySelector('.volta-bracket');
       if (!v) {
         v = document.createElement('div');
         v.className = 'volta-bracket';
-        target.appendChild(v);
+        first.appendChild(v);
       }
       v.innerText = `${num}.`;
+
+      if (selectedMeasures.length > 1) {
+        const totalFlex = selectedMeasures.reduce((acc, m) => acc + (parseFloat(m.style.flexBasis) || 25), 0);
+        v.style.width = `calc(${totalFlex}% + ${(selectedMeasures.length - 1) * 2}px)`;
+      } else {
+        v.style.width = '100%';
+      }
     }
 
     function toggleSubdivisionDot() {
@@ -1461,13 +1508,6 @@
           if (nextSlot) {
             setBeatData(nextSlot, [{ type: '8', dot: false, tie: false, articulation: '', scale: 1.4 }]);
           }
-        } 
-        else if (isDottedNow && currentType === '8') {
-          items = [
-            { type: items[activeSubIndex].type, dot: true, tie: false, articulation: items[activeSubIndex].articulation || '', scale: 1.4 },
-            { type: '16', dot: false, tie: false, articulation: '', scale: 1.4 }
-          ];
-          setBeatData(activeBeatSlot, items);
         } else {
           setBeatData(activeBeatSlot, items);
         }
@@ -1506,10 +1546,6 @@
             svgHTML += `<circle cx="${x-2}" cy="12" r="1.5" fill="#1e293b" />`;
             svgHTML += `<circle cx="${x-3}" cy="18" r="1.5" fill="#1e293b" />`;
             svgHTML += `<path d="M ${x-2} 12 Q ${x+2} 10 ${x+1} 16 L ${x-3} 28" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" />`;
-          } else if (pureType === 'w') {
-            svgHTML += `<rect x="${x - 5}" y="10" width="10" height="5" fill="#1e293b" />`;
-          } else if (pureType === 'h') {
-            svgHTML += `<rect x="${x - 5}" y="16" width="10" height="5" fill="#1e293b" />`;
           }
         } else {
           if (pureType === 'slash') {
@@ -1521,9 +1557,6 @@
             svgHTML += `<path d="M ${x - 3.5} 20 L ${x + 3.5} 12" stroke="#1e293b" stroke-width="4.5" stroke-linecap="round" />`;
             svgHTML += `<path d="M ${x - 2.5} 19 L ${x + 2.5} 13" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />`;
             svgHTML += `<line x1="${x - 3.5}" y1="20" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
-          } else if (pureType === 'w') {
-            svgHTML += `<path d="M ${x - 4.5} 20 L ${x + 4.5} 12" stroke="#1e293b" stroke-width="5" stroke-linecap="round" />`;
-            svgHTML += `<path d="M ${x - 3} 19 L ${x + 3} 13" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />`;
           } else {
             svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x + 3.5}" y2="8" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" />`;
             svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
@@ -1533,22 +1566,8 @@
                 svgHTML += `<path d="M ${x - 3.5} ${stemYBottom} Q ${x + 4} ${stemYBottom - 4} ${x + 2} ${stemYBottom - 10}" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round" />`;
               } else if (pureType === '16') {
                 svgHTML += `<path d="M ${x - 3.5} ${stemYBottom} Q ${x + 4} ${stemYBottom - 4} ${x + 2} ${stemYBottom - 10}" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round" />`;
-                svgHTML += `<path d="M ${x - 3.5} ${stemYBottom - 4} Q ${x + 4} ${stemYBottom - 8} ${x + 2} ${stemYBottom - 14}" fill="none" stroke="#1e293b" stroke-width="2" stroke-linecap="round" />`;
               }
             }
-          }
-        }
-
-        if (item.articulation) {
-          const artY = 4;
-          const s = item.scale || currentArticulationScale || 1.4;
-
-          if (item.articulation === 'staccato') {
-            svgHTML += `<circle cx="${x + 3.5}" cy="${artY}" r="${2 * s}" fill="#1e293b" />`;
-          } else if (item.articulation === 'accent') {
-            svgHTML += `<path d="M ${x+3.5-3*s} ${artY-2.5*s} L ${x+3.5+3*s} ${artY} L ${x+3.5-3*s} ${artY+2.5*s}" fill="none" stroke="#1e293b" stroke-width="${1.8*s}" stroke-linecap="round" stroke-linejoin="round" />`;
-          } else if (item.articulation === 'tenuto') {
-            svgHTML += `<line x1="${x+3.5-3*s}" y1="${artY}" x2="${x+3.5+3*s}" y2="${artY}" stroke="#1e293b" stroke-width="${2.2*s}" stroke-linecap="round" />`;
           }
         }
 
@@ -1582,21 +1601,10 @@
 
       if (type === '16' || type === 'r16') {
         const currentItem = items[activeSubIndex] || { type: '8', dot: false, tie: false, articulation: '', scale: 1.4 };
-        const newSubItems = [
-          { type: type, dot: false, tie: false, articulation: currentItem.articulation || '', scale: currentItem.scale || 1.4 },
+        items.splice(activeSubIndex, 1, 
+          { type: type, dot: false, tie: false, articulation: currentItem.articulation || '', scale: 1.4 },
           { type: type, dot: false, tie: false, articulation: '', scale: 1.4 }
-        ];
-        items.splice(activeSubIndex, 1, ...newSubItems);
-      } else if (type === '8' || type === 'r8') {
-        if (items.length === 1 && (items[0].type === 'q' || items[0].type === 'slash')) {
-          items = [
-            { type: type, dot: false, tie: false, articulation: '', scale: 1.4 },
-            { type: type, dot: false, tie: false, articulation: '', scale: 1.4 }
-          ];
-          activeSubIndex = 0;
-        } else if (items[activeSubIndex]) {
-          items[activeSubIndex].type = type;
-        }
+        );
       } else {
         items = [{ type: type, dot: false, tie: false, articulation: '', scale: 1.4 }];
         activeSubIndex = 0;
@@ -1647,13 +1655,6 @@
       dynBox.innerHTML = `<span style="font-size:1.1em;">${text}</span>`;
     }
 
-    function setDynamicFontSize(sizeCss) {
-      if (selectedMeasures.length > 0) {
-        const dynText = selectedMeasures[0].querySelector('.measure-dynamics-container span');
-        if (dynText) dynText.style.fontSize = sizeCss;
-      }
-    }
-
     function applyHairpin(type) {
       if (selectedMeasures.length === 0) return;
       saveStateForUndo();
@@ -1680,7 +1681,6 @@
       }
     }
 
-    // LIMPIAR CONTENIDO DE COMPÁS (SUPRIMIR)
     function clearMeasureContent(measureEl) {
       const chordInput = measureEl.querySelector('.chord-input');
       if (chordInput) chordInput.value = '';
@@ -1691,9 +1691,10 @@
       if (dyn) dyn.remove();
       const annot = measureEl.querySelector('.band-annotation');
       if (annot) annot.remove();
+      const volta = measureEl.querySelector('.volta-bracket');
+      if (volta) volta.remove();
     }
 
-    // ATAJOS DE TECLADO (COPIAR, PEGAR, DESHACER, SUPRIMIR)
     window.addEventListener('keydown', (e) => {
       const isEditingInput = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable);
       const isCtrl = e.ctrlKey || e.metaKey;
@@ -1732,15 +1733,6 @@
           saveStateForUndo();
           selectedMeasures[0].innerHTML = clipboardMeasureData;
           rebindAllEvents();
-        }
-      }
-
-      if (isCtrl && e.key.toLowerCase() === 'x') {
-        if (selectedMeasures.length > 0) {
-          e.preventDefault();
-          saveStateForUndo();
-          clipboardMeasureData = selectedMeasures[0].innerHTML;
-          clearMeasureContent(selectedMeasures[0]);
         }
       }
     });
