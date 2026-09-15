@@ -96,33 +96,46 @@
       backdrop-filter: blur(10px);
     }
 
-    /* BARRA FLOTANTE DE TECLADO RÍTMICO */
-    .rhythm-toolbar {
+    /* LAYOUT STUDIO */
+    .studio-layout {
       width: 100%;
       max-width: 1100px;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .right-main-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+    }
+
+    /* BARRA FLOTANTE DE TECLADO RÍTMICO PERFECTAMENTE ALINEADA */
+    .rhythm-toolbar {
+      width: 100%;
       background: rgba(15, 23, 42, 0.95);
       border: 1px solid var(--accent-cyan);
       border-radius: 16px;
-      padding: 12px 20px;
-      margin-bottom: 20px;
+      padding: 12px 18px;
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+      flex-direction: column;
+      gap: 10px;
       box-shadow: 0 10px 25px rgba(6, 182, 212, 0.15);
       backdrop-filter: blur(15px);
     }
 
     .rhythm-title {
-      font-size: 0.85em;
+      font-size: 0.82em;
       font-weight: 800;
       letter-spacing: 1px;
       color: var(--accent-cyan);
       text-transform: uppercase;
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
     }
 
     .rhythm-buttons {
@@ -135,15 +148,15 @@
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.15);
       color: var(--text-light);
-      padding: 6px 12px;
+      padding: 5px 10px;
       border-radius: 8px;
-      font-size: 0.8em;
+      font-size: 0.78em;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
 
     .rhythm-btn:hover, .rhythm-btn.active {
@@ -152,24 +165,23 @@
       color: #fff;
     }
 
+    .rhythm-btn.rest-btn {
+      border-color: rgba(234, 179, 8, 0.4);
+      color: #fef08a;
+    }
+
+    .rhythm-btn.rest-btn:hover {
+      background: rgba(234, 179, 8, 0.25);
+    }
+
     .key-badge {
       background: #0f172a;
       border: 1px solid rgba(255, 255, 255, 0.3);
       color: #38bdf8;
       font-size: 0.75em;
-      padding: 1px 5px;
+      padding: 1px 4px;
       border-radius: 4px;
       font-weight: 800;
-    }
-
-    /* LAYOUT STUDIO */
-    .studio-layout {
-      width: 100%;
-      max-width: 1100px;
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 24px;
-      align-items: start;
     }
 
     /* PANEL LATERAL DE CONTROL */
@@ -310,6 +322,7 @@
       padding: 30px;
       border-radius: 20px;
       align-items: center;
+      width: 100%;
     }
 
     .chart-paper {
@@ -433,7 +446,6 @@
       gap: 4px;
     }
 
-    /* ESTILO UNIFICADO Y SUAVE DE GRIS SIN NEGRITA PESADA */
     .editable-sub {
       border: none;
       outline: none;
@@ -547,7 +559,6 @@
       background: transparent;
     }
 
-    /* CONTENEDOR VECTORIAL SVG ULTRA RÁPIDO Y SIEMPRE VISIBLE */
     .rhythm-svg-container {
       width: 100%;
       height: 42px;
@@ -634,23 +645,6 @@
     </select>
   </div>
 
-  <!-- BARRA DE ESCRITURA RÍTMICA Y TECLADO RÁPIDO -->
-  <div class="rhythm-toolbar">
-    <div class="rhythm-title">
-      <span>🥁 Rhythms & Notation Studio</span>
-    </div>
-    <div class="rhythm-buttons">
-      <button class="rhythm-btn" onclick="applyRhythmType('w')"><span class="key-badge">7</span> Redonda</button>
-      <button class="rhythm-btn" onclick="applyRhythmType('h')"><span class="key-badge">6</span> Blanca</button>
-      <button class="rhythm-btn" onclick="applyRhythmType('q')"><span class="key-badge">5</span> Negra (Slash)</button>
-      <button class="rhythm-btn" onclick="applyRhythmType('8')"><span class="key-badge">4</span> Corchea</button>
-      <button class="rhythm-btn" onclick="applyRhythmType('16')"><span class="key-badge">3</span> Semicorchea</button>
-      <button class="rhythm-btn" onclick="toggleDot()"><span class="key-badge">.</span> Puntillo</button>
-      <button class="rhythm-btn" onclick="toggleTie()"><span class="key-badge">+</span> Ligadura</button>
-      <button class="rhythm-btn" style="border-color:rgba(239,68,68,0.4); color:#fca5a5;" onclick="resetMeasureRhythm()">↺ Restablecer Slashes</button>
-    </div>
-  </div>
-
   <div class="studio-layout">
     
     <!-- PANEL LATERAL DE CONTROL -->
@@ -659,7 +653,6 @@
       <div class="toolbox-section">
         <div class="toolbox-title" id="titleActions">⚡ Main Actions</div>
         
-        <!-- BOTÓN ÚNICO DE DESCARGA CON MENÚ DESPLEGABLE -->
         <div class="download-dropdown" id="downloadDropdown">
           <button class="tool-btn primary" style="width:100%; text-align:center;" id="btnExportMain" onclick="toggleDownloadMenu(event)">📥 Download Chart ▾</button>
           <div class="download-menu">
@@ -739,77 +732,110 @@
 
     </div>
 
-    <!-- CONTENEDOR MULTI-PÁGINA A4 -->
-    <div class="sheets-container" id="sheetsContainer">
-      
-      <!-- PÁGINA 1 -->
-      <div class="chart-paper" id="paper-page-1">
-        <div class="paper-inner">
-          <div class="chart-header">
-            <div class="title-container">
-              <input type="text" class="song-title-editable" id="songTitleInput" placeholder="SONG TITLE" oninput="updateFooterTitle(this.value)">
-              <div class="song-title-print" id="songTitlePrint"></div>
+    <!-- COLUMNA PRINCIPAL DERECHA (ALINEACIÓN PERFECTA DE BORDES) -->
+    <div class="right-main-column">
+
+      <!-- BARRA DE ESCRITURA RÍTMICA PERFECTAMENTE ALINEADA CON LA HOJA A4 -->
+      <div class="rhythm-toolbar">
+        <div class="rhythm-title">
+          <span>🥁 Rhythms & Notation Studio</span>
+          <span style="font-size:0.8em; opacity:0.8; font-weight:600;">Atajo Silencios: <kbd class="key-badge">Ctrl</kbd> + Número</span>
+        </div>
+        
+        <!-- NOTAS / SLASHES -->
+        <div class="rhythm-buttons">
+          <button class="rhythm-btn" onclick="applyRhythmType('w')"><span class="key-badge">7</span> Redonda</button>
+          <button class="rhythm-btn" onclick="applyRhythmType('h')"><span class="key-badge">6</span> Blanca</button>
+          <button class="rhythm-btn" onclick="applyRhythmType('q')"><span class="key-badge">5</span> Negra (Slash)</button>
+          <button class="rhythm-btn" onclick="applyRhythmType('8')"><span class="key-badge">4</span> Corchea</button>
+          <button class="rhythm-btn" onclick="applyRhythmType('16')"><span class="key-badge">3</span> Semicorchea</button>
+          <button class="rhythm-btn" onclick="toggleDot()"><span class="key-badge">.</span> Puntillo</button>
+          <button class="rhythm-btn" onclick="toggleTie()"><span class="key-badge">+</span> Ligadura</button>
+        </div>
+
+        <!-- SILENCIOS -->
+        <div class="rhythm-buttons">
+          <button class="rhythm-btn rest-btn" onclick="applyRhythmType('rw')"><span class="key-badge">Ctrl+7</span> Sil. Redonda</button>
+          <button class="rhythm-btn rest-btn" onclick="applyRhythmType('rh')"><span class="key-badge">Ctrl+6</span> Sil. Blanca</button>
+          <button class="rhythm-btn rest-btn" onclick="applyRhythmType('rq')"><span class="key-badge">Ctrl+5</span> Sil. Negra</button>
+          <button class="rhythm-btn rest-btn" onclick="applyRhythmType('r8')"><span class="key-badge">Ctrl+4</span> Sil. Corchea</button>
+          <button class="rhythm-btn rest-btn" onclick="applyRhythmType('r16')"><span class="key-badge">Ctrl+3</span> Sil. Semicorchea</button>
+          <button class="rhythm-btn" style="border-color:rgba(239,68,68,0.4); color:#fca5a5; margin-left:auto;" onclick="resetMeasureRhythm()">↺ Restablecer Slashes</button>
+        </div>
+      </div>
+
+      <!-- CONTENEDOR MULTI-PÁGINA A4 -->
+      <div class="sheets-container" id="sheetsContainer">
+        
+        <!-- PÁGINA 1 -->
+        <div class="chart-paper" id="paper-page-1">
+          <div class="paper-inner">
+            <div class="chart-header">
+              <div class="title-container">
+                <input type="text" class="song-title-editable" id="songTitleInput" placeholder="SONG TITLE" oninput="updateFooterTitle(this.value)">
+                <div class="song-title-print" id="songTitlePrint"></div>
+              </div>
+              <div class="header-sub-row">
+                <div class="sub-item-wrapper" id="wrapArtist">
+                  <input type="text" class="editable-sub" id="artistInput" placeholder="Artist / Band" style="width:160px;">
+                  <span class="sub-print-text" id="printArtist"></span>
+                </div>
+                <div class="sub-item-wrapper" id="wrapStyle">
+                  <input type="text" class="editable-sub" id="styleInput" placeholder="Style: Worship / Pop" style="width:150px; text-align:center;">
+                  <span class="sub-print-text" id="printStyle"></span>
+                </div>
+                
+                <div class="sub-item-wrapper" id="wrapTimeSig">
+                  <input type="text" class="editable-sub displayTimeSig" id="headerTimeSigInput" placeholder="4/4" value="4/4" style="width:50px; text-align:center;">
+                  <span class="sub-print-text" id="printTimeSig"></span>
+                </div>
+                
+                <div class="sub-item-wrapper" id="wrapBPM">
+                  <input type="text" class="editable-sub" id="bpmInput" placeholder="BPM: 120" style="width:80px; text-align:right;">
+                  <span class="sub-print-text" id="printBPM"></span>
+                </div>
+              </div>
             </div>
-            <div class="header-sub-row">
-              <div class="sub-item-wrapper" id="wrapArtist">
-                <input type="text" class="editable-sub" id="artistInput" placeholder="Artist / Band" style="width:160px;">
-                <span class="sub-print-text" id="printArtist"></span>
-              </div>
-              <div class="sub-item-wrapper" id="wrapStyle">
-                <input type="text" class="editable-sub" id="styleInput" placeholder="Style: Worship / Pop" style="width:150px; text-align:center;">
-                <span class="sub-print-text" id="printStyle"></span>
-              </div>
-              
-              <!-- MÉTRICA TOTALMENTE UNIFICADA EN GRIS SUAVE Y MISMO ESTILO -->
-              <div class="sub-item-wrapper" id="wrapTimeSig">
-                <input type="text" class="editable-sub displayTimeSig" id="headerTimeSigInput" placeholder="4/4" value="4/4" style="width:50px; text-align:center;">
-                <span class="sub-print-text" id="printTimeSig"></span>
-              </div>
-              
-              <div class="sub-item-wrapper" id="wrapBPM">
-                <input type="text" class="editable-sub" id="bpmInput" placeholder="BPM: 120" style="width:80px; text-align:right;">
-                <span class="sub-print-text" id="printBPM"></span>
+
+            <div class="chart-content">
+              <div class="section-block">
+                <span class="section-badge" contenteditable="true" id="firstSectionBadge">INTRO</span>
+                <div class="measures-grid">
+                  <div class="measure-box" onclick="handleMeasureClick(this, event)">
+                    <div class="measure-main">
+                      <input type="text" class="chord-input" placeholder="C">
+                      <div class="rhythm-svg-container"></div>
+                    </div>
+                  </div>
+                  <div class="measure-box" onclick="handleMeasureClick(this, event)">
+                    <div class="measure-main">
+                      <input type="text" class="chord-input" placeholder="G/B">
+                      <div class="rhythm-svg-container"></div>
+                    </div>
+                  </div>
+                  <div class="measure-box" onclick="handleMeasureClick(this, event)">
+                    <div class="measure-main">
+                      <input type="text" class="chord-input" placeholder="Am7">
+                      <div class="rhythm-svg-container"></div>
+                    </div>
+                  </div>
+                  <div class="measure-box" onclick="handleMeasureClick(this, event)">
+                    <div class="measure-main">
+                      <input type="text" class="chord-input" placeholder="F2">
+                      <div class="rhythm-svg-container"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="chart-content">
-            <div class="section-block">
-              <span class="section-badge" contenteditable="true" id="firstSectionBadge">INTRO</span>
-              <div class="measures-grid">
-                <div class="measure-box" onclick="handleMeasureClick(this, event)">
-                  <div class="measure-main">
-                    <input type="text" class="chord-input" placeholder="C">
-                    <div class="rhythm-svg-container"></div>
-                  </div>
-                </div>
-                <div class="measure-box" onclick="handleMeasureClick(this, event)">
-                  <div class="measure-main">
-                    <input type="text" class="chord-input" placeholder="G/B">
-                    <div class="rhythm-svg-container"></div>
-                  </div>
-                </div>
-                <div class="measure-box" onclick="handleMeasureClick(this, event)">
-                  <div class="measure-main">
-                    <input type="text" class="chord-input" placeholder="Am7">
-                    <div class="rhythm-svg-container"></div>
-                  </div>
-                </div>
-                <div class="measure-box" onclick="handleMeasureClick(this, event)">
-                  <div class="measure-main">
-                    <input type="text" class="chord-input" placeholder="F2">
-                    <div class="rhythm-svg-container"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="chart-footer">
+            <div class="footer-title-ref" id="footerTitle">UNTITLED CHART</div>
+            <div class="page-num-ref">PAGE 1 / 1</div>
           </div>
         </div>
 
-        <div class="chart-footer">
-          <div class="footer-title-ref" id="footerTitle">UNTITLED CHART</div>
-          <div class="page-num-ref">PAGE 1 / 1</div>
-        </div>
       </div>
 
     </div>
@@ -893,8 +919,8 @@
         opt34: "3/4 (Tres por Cuatro)",
         opt24: "2/4 (Dos por Cuatro)",
         opt68: "6/8 (Seis por Ocho)",
-        opt98: "Nueve por Ocho",
-        opt128: "Doce por Ocho",
+        opt98: "9/8 (Nueve por Ocho)",
+        opt128: "12/8 (Doce por Ocho)",
         opt22: "2/2 (Dos por Dos)",
         btnApplyTimeSig: "⏱️ Aplicar Métrica desde Selección",
         titleSections: "🏷️ Secciones y Canción 2",
@@ -1032,7 +1058,6 @@
       applyLanguage(lang);
     }
 
-    // --- MENÚ DESPLEGABLE DE DESCARGA UNIFICADO ---
     function toggleDownloadMenu(e) {
       e.stopPropagation();
       const dropdown = document.getElementById('downloadDropdown');
@@ -1044,7 +1069,6 @@
       if (dropdown) dropdown.classList.remove('active');
     });
 
-    // --- SELECCIÓN MÚLTIPLE (SHIFT + CLIC) ---
     function handleMeasureClick(el, event) {
       if (el.classList.contains('break-system')) return;
 
@@ -1075,46 +1099,66 @@
       selectedMeasures = [];
     }
 
-    // --- GENERADOR RÁPIDO DE SVG RÍTMICO INLINE (100% GARANTIZADO Y FIABLE) ---
+    // --- RENDERIZADO VECTORIAL SVG DE NOTAS Y SILENCIOS ---
     function renderSlashesSVG(container, durationType = 'q', hasDot = false, hasTie = false) {
       if (!container) return;
       
+      let isRest = durationType.startsWith('r');
+      let pureType = isRest ? durationType.substring(1) : durationType;
+
       let count = 4;
       let strokeWidth = 3.5;
       let showStems = false;
       let beamEighths = false;
       let beamSixteenths = false;
 
-      if (durationType === 'w') count = 1;
-      else if (durationType === 'h') count = 2;
-      else if (durationType === 'q') { count = 4; strokeWidth = 3.5; }
-      else if (durationType === '8') { count = 8; showStems = true; beamEighths = true; }
-      else if (durationType === '16') { count = 16; showStems = true; beamSixteenths = true; }
+      if (pureType === 'w') count = 1;
+      else if (pureType === 'h') count = 2;
+      else if (pureType === 'q') count = 4;
+      else if (pureType === '8') { count = 8; showStems = !isRest; beamEighths = !isRest; }
+      else if (pureType === '16') { count = 16; showStems = !isRest; beamSixteenths = !isRest; }
 
       let svgHTML = `<svg viewBox="0 0 160 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">`;
       
       const step = 160 / (count + 1);
-      const stemYTop = 26;
       const stemYBottom = 38;
 
       for (let i = 1; i <= count; i++) {
         const x = step * i;
-        // Dibujo del Slash inclinado
-        svgHTML += `<line x1="${x - 4}" y1="26" x2="${x + 4}" y2="10" stroke="#1e293b" stroke-width="${strokeWidth}" stroke-linecap="round" />`;
 
-        // Plica (Stem)
-        if (showStems) {
-          svgHTML += `<line x1="${x + 3}" y1="12" x2="${x + 3}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
+        if (isRest) {
+          // Dibujo de Silencios Musicales Vectoriales
+          if (pureType === 'w') {
+            svgHTML += `<rect x="${x - 6}" y="12" width="12" height="6" fill="#1e293b" />`;
+            svgHTML += `<line x1="${x - 10}" y1="12" x2="${x + 10}" y2="12" stroke="#1e293b" stroke-width="1.5" />`;
+          } else if (pureType === 'h') {
+            svgHTML += `<rect x="${x - 6}" y="18" width="12" height="6" fill="#1e293b" />`;
+            svgHTML += `<line x1="${x - 10}" y1="24" x2="${x + 10}" y2="24" stroke="#1e293b" stroke-width="1.5" />`;
+          } else if (pureType === 'q') {
+            svgHTML += `<path d="M ${x-2} 10 L ${x+3} 16 L ${x-3} 22 L ${x+2} 28 C ${x-4} 30 ${x-4} 34 ${x+1} 34" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round" />`;
+          } else if (pureType === '8') {
+            svgHTML += `<circle cx="${x-2}" cy="16" r="2" fill="#1e293b" />`;
+            svgHTML += `<path d="M ${x-2} 16 Q ${x+2} 14 ${x+1} 20 L ${x-3} 32" fill="none" stroke="#1e293b" stroke-width="2" stroke-linecap="round" />`;
+          } else if (pureType === '16') {
+            svgHTML += `<circle cx="${x-2}" cy="14" r="1.8" fill="#1e293b" />`;
+            svgHTML += `<circle cx="${x-3}" cy="20" r="1.8" fill="#1e293b" />`;
+            svgHTML += `<path d="M ${x-2} 14 Q ${x+2} 12 ${x+1} 18 L ${x-3} 32" fill="none" stroke="#1e293b" stroke-width="1.8" stroke-linecap="round" />`;
+          }
+        } else {
+          // Dibujo de Slashes de Nota
+          svgHTML += `<line x1="${x - 4}" y1="26" x2="${x + 4}" y2="10" stroke="#1e293b" stroke-width="${strokeWidth}" stroke-linecap="round" />`;
+
+          if (showStems) {
+            svgHTML += `<line x1="${x + 3}" y1="12" x2="${x + 3}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
+          }
         }
 
-        // Puntillo
         if (hasDot && i === 1) {
-          svgHTML += `<circle cx="${x + 9}" cy="16" r="2" fill="#1e293b" />`;
+          svgHTML += `<circle cx="${x + 8}" cy="18" r="2" fill="#1e293b" />`;
         }
       }
 
-      // Barras de agrupación (Beams)
-      if (beamEighths) {
+      if (!isRest && beamEighths) {
         for (let b = 0; b < count; b += 2) {
           const x1 = step * (b + 1) + 3;
           const x2 = step * (b + 2) + 3;
@@ -1122,7 +1166,7 @@
         }
       }
 
-      if (beamSixteenths) {
+      if (!isRest && beamSixteenths) {
         for (let b = 0; b < count; b += 4) {
           const x1 = step * (b + 1) + 3;
           const x4 = step * (b + 4) + 3;
@@ -1131,8 +1175,7 @@
         }
       }
 
-      // Ligadura de prolongación (Tie)
-      if (hasTie && count >= 2) {
+      if (!isRest && hasTie && count >= 2) {
         const x1 = step * 1;
         const x2 = step * 2;
         svgHTML += `<path d="M ${x1} 28 Q ${(x1 + x2) / 2} 36 ${x2} 28" fill="none" stroke="#1e293b" stroke-width="2" />`;
@@ -1142,7 +1185,6 @@
       container.innerHTML = svgHTML;
     }
 
-    // APLICACIÓN RÍTMICA DESDE TECLADO O BOTONES
     function applyRhythmType(type) {
       if (selectedMeasures.length === 0) return;
       selectedMeasures.forEach(m => {
@@ -1194,21 +1236,30 @@
       }
     }
 
-    // --- ESCUCHADOR TECLADO NUMÉRICO Y ATAJOS RÁPIDOS ---
+    // --- ESCUCHADOR DE TECLADO: NÚMEROS Y CTRL + NÚMEROS PARA SILENCIOS ---
     window.addEventListener('keydown', (e) => {
       const isEditingInput = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable);
       if (isEditingInput) return;
 
-      if (e.key === '7') { applyRhythmType('w'); }
-      else if (e.key === '6') { applyRhythmType('h'); }
-      else if (e.key === '5') { applyRhythmType('q'); }
-      else if (e.key === '4') { applyRhythmType('8'); }
-      else if (e.key === '3') { applyRhythmType('16'); }
-      else if (e.key === '.') { toggleDot(); }
-      else if (e.key === '+' || e.key === '=') { toggleTie(); }
+      const isCtrl = e.ctrlKey || e.metaKey;
+
+      if (isCtrl) {
+        if (e.key === '7') { e.preventDefault(); applyRhythmType('rw'); }
+        else if (e.key === '6') { e.preventDefault(); applyRhythmType('rh'); }
+        else if (e.key === '5') { e.preventDefault(); applyRhythmType('rq'); }
+        else if (e.key === '4') { e.preventDefault(); applyRhythmType('r8'); }
+        else if (e.key === '3') { e.preventDefault(); applyRhythmType('r16'); }
+      } else {
+        if (e.key === '7') { applyRhythmType('w'); }
+        else if (e.key === '6') { applyRhythmType('h'); }
+        else if (e.key === '5') { applyRhythmType('q'); }
+        else if (e.key === '4') { applyRhythmType('8'); }
+        else if (e.key === '3') { applyRhythmType('16'); }
+        else if (e.key === '.') { toggleDot(); }
+        else if (e.key === '+' || e.key === '=') { toggleTie(); }
+      }
     });
 
-    // --- AGRUPAR SELECCIÓN EN 1 SISTEMA ---
     function groupSelectedInSystem() {
       const dict = i18n[currentLang] || i18n['en'];
       if (selectedMeasures.length === 0) {
