@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chord Chart Studio</title>
+  <title>Chord Chart Studio - Rhythm Notation</title>
   
   <!-- Google Analytics GA4 Base -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3DTLYSJMH"></script>
@@ -20,7 +20,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
   
-  <!-- html2canvas para exportar a PNG y jsPDF para exportar a PDF -->
+  <!-- VexFlow 4.2.5 CDN para Renderizado Vectorial (SVG) de Rhythms y Slashes Exactos -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vexflow/4.2.5/vexflow-min.js"></script>
+
+  <!-- html2canvas y jsPDF para Exportación -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -31,6 +34,7 @@
       --card-border: rgba(255, 255, 255, 0.12);
       --accent-purple: #a855f7;
       --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
       --text-light: #f8fafc;
       --text-muted: #94a3b8;
       --paper-bg: #ffffff;
@@ -93,6 +97,72 @@
       outline: none;
       cursor: pointer;
       backdrop-filter: blur(10px);
+    }
+
+    /* BARRA FLOTANTE DE TECLADO RÍTMICO */
+    .rhythm-toolbar {
+      width: 100%;
+      max-width: 1100px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 16px;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 10px 25px rgba(6, 182, 212, 0.15);
+      backdrop-filter: blur(15px);
+    }
+
+    .rhythm-title {
+      font-size: 0.85em;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rhythm-buttons {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .rhythm-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-light);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .rhythm-btn:hover, .rhythm-btn.active {
+      background: rgba(6, 182, 212, 0.25);
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+
+    .key-badge {
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #38bdf8;
+      font-size: 0.75em;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-weight: 800;
     }
 
     /* LAYOUT STUDIO */
@@ -434,11 +504,11 @@
     }
 
     .measure-box {
-      height: 72px;
+      height: 90px;
       border-right: 2px solid #0f172a;
       border-top: 2px solid #0f172a;
       border-bottom: 2px solid #0f172a;
-      padding: 4px 8px;
+      padding: 4px 6px;
       display: flex;
       position: relative;
       background: #fff;
@@ -450,7 +520,7 @@
     .measure-box.selected {
       background: #f0fdf4 !important;
       border-color: #16a34a !important;
-      box-shadow: inset 0 0 0 1px #16a34a;
+      box-shadow: inset 0 0 0 1.5px #16a34a;
     }
 
     .measure-box.break-system {
@@ -479,20 +549,19 @@
       background: transparent;
     }
 
-    .rhythm-slashes {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      color: #64748b;
-      font-size: 1.15em;
-      user-select: none;
-      font-weight: 800;
+    /* CONTENEDOR VECTORIAL DE RITMO Y SLASHES SOBRE PENTAGRAMA */
+    .vex-container {
       width: 100%;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
 
-    .rhythm-slashes span {
-      display: inline-block;
-      letter-spacing: -1px;
+    .vex-container svg {
+      width: 100%;
+      height: 100%;
     }
 
     .band-annotation {
@@ -514,7 +583,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      margin-right: 6px;
+      margin-right: 4px;
       padding-right: 4px;
       border-right: 1.5px solid #0f172a;
       font-family: 'Inter', sans-serif;
@@ -523,11 +592,6 @@
       line-height: 0.88;
       color: #0f172a;
       user-select: none;
-    }
-
-    .time-sig-stack span {
-      display: block;
-      text-align: center;
     }
 
     .chart-footer {
@@ -571,6 +635,23 @@
       <option value="ru">🇷🇺 Русский</option>
       <option value="ja">🇯🇵 日本語</option>
     </select>
+  </div>
+
+  <!-- BARRA DE ESCRITURA RÍTMICA Y TECLADO RÁPIDO -->
+  <div class="rhythm-toolbar">
+    <div class="rhythm-title">
+      <span>🥁 Rhythms & Notation Studio</span>
+    </div>
+    <div class="rhythm-buttons">
+      <button class="rhythm-btn" onclick="applyRhythmType('w')"><span class="key-badge">7</span> Redonda</button>
+      <button class="rhythm-btn" onclick="applyRhythmType('h')"><span class="key-badge">6</span> Blanca</button>
+      <button class="rhythm-btn" onclick="applyRhythmType('q')"><span class="key-badge">5</span> Negra (Slash)</button>
+      <button class="rhythm-btn" onclick="applyRhythmType('8')"><span class="key-badge">4</span> Corchea</button>
+      <button class="rhythm-btn" onclick="applyRhythmType('16')"><span class="key-badge">3</span> Semicorchea</button>
+      <button class="rhythm-btn" onclick="toggleDot()"><span class="key-badge">.</span> Puntillo</button>
+      <button class="rhythm-btn" onclick="toggleTie()"><span class="key-badge">+</span> Ligadura</button>
+      <button class="rhythm-btn" style="border-color:rgba(239,68,68,0.4); color:#fca5a5;" onclick="resetMeasureRhythm()">↺ Restablecer Slashes</button>
+    </div>
   </div>
 
   <div class="studio-layout">
@@ -702,25 +783,25 @@
                 <div class="measure-box" onclick="handleMeasureClick(this, event)">
                   <div class="measure-main">
                     <input type="text" class="chord-input" placeholder="C">
-                    <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
+                    <div class="vex-container"></div>
                   </div>
                 </div>
                 <div class="measure-box" onclick="handleMeasureClick(this, event)">
                   <div class="measure-main">
                     <input type="text" class="chord-input" placeholder="G/B">
-                    <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
+                    <div class="vex-container"></div>
                   </div>
                 </div>
                 <div class="measure-box" onclick="handleMeasureClick(this, event)">
                   <div class="measure-main">
                     <input type="text" class="chord-input" placeholder="Am7">
-                    <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
+                    <div class="vex-container"></div>
                   </div>
                 </div>
                 <div class="measure-box" onclick="handleMeasureClick(this, event)">
                   <div class="measure-main">
                     <input type="text" class="chord-input" placeholder="F2">
-                    <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
+                    <div class="vex-container"></div>
                   </div>
                 </div>
               </div>
@@ -868,6 +949,10 @@
     let selectedMeasures = [];
     let lastSelectedMeasure = null;
 
+    // ESTADO RÍTMICO DEL COMPÁS ACTIVO
+    let currentDotState = false;
+    let currentTieState = false;
+
     function initLanguage() {
       let savedLang = localStorage.getItem('preferred_lang');
       if (!savedLang) {
@@ -995,6 +1080,136 @@
       selectedMeasures = [];
     }
 
+    // --- MOTOR VEXFLOW PARA RENDERIZAR RHYTHM SLASHES VECTORIALES SOBRE 5 LÍNEAS ---
+    function renderVexRhythm(container, durationType = 'q', hasDot = false, hasTie = false) {
+      if (!container) return;
+      container.innerHTML = '';
+
+      try {
+        const { Factory, StaveNote, Beam, Dot, StaveTie } = Vex.Flow;
+        const vf = new Factory({
+          renderer: { element: container, width: container.clientWidth || 150, height: 50 }
+        });
+
+        const score = vf.EasyScore();
+        const system = vf.System({ width: container.clientWidth || 150, x: 0, y: -20 });
+
+        let notesCount = 4;
+        let noteDur = 'q';
+
+        if (durationType === 'w') { notesCount = 1; noteDur = 'w'; }
+        else if (durationType === 'h') { notesCount = 2; noteDur = 'h'; }
+        else if (durationType === 'q') { notesCount = 4; noteDur = 'q'; }
+        else if (durationType === '8') { notesCount = 8; noteDur = '8'; }
+        else if (durationType === '16') { notesCount = 16; noteDur = '16'; }
+
+        let notes = [];
+        for (let i = 0; i < notesCount; i++) {
+          let sn = new StaveNote({
+            keys: ['b/4'],
+            duration: noteDur,
+            type: 'slash'
+          });
+          if (hasDot && i === 0) {
+            Dot.buildAndAppendInSpace([sn], 1);
+          }
+          notes.push(sn);
+        }
+
+        let stave = system.addStave({
+          voices: [vf.Voice().addTickables(notes)]
+        });
+
+        stave.setBegBarType(Vex.Flow.Barline.type.NONE);
+        stave.setEndBarType(Vex.Flow.Barline.type.NONE);
+
+        // Agrupación automática de plicas (Beaming)
+        if (noteDur === '8' || noteDur === '16') {
+          const beams = Beam.generateBeams(notes);
+          beams.forEach(b => vf.getContext().add(b));
+        }
+
+        // Ligadura
+        if (hasTie && notes.length >= 2) {
+          const tie = new StaveTie({
+            first_note: notes[0],
+            last_note: notes[1]
+          });
+          vf.getContext().add(tie);
+        }
+
+        vf.draw();
+      } catch (err) {
+        console.warn("VexFlow render warning:", err);
+      }
+    }
+
+    // APLICACIÓN RÍTMICA DESDE TECLADO O BOTONES
+    function applyRhythmType(type) {
+      if (selectedMeasures.length === 0) return;
+      selectedMeasures.forEach(m => {
+        const vexCont = m.querySelector('.vex-container');
+        if (vexCont) {
+          vexCont.dataset.rhythm = type;
+          renderVexRhythm(vexCont, type, currentDotState, currentTieState);
+        }
+      });
+    }
+
+    function toggleDot() {
+      currentDotState = !currentDotState;
+      if (selectedMeasures.length > 0) {
+        selectedMeasures.forEach(m => {
+          const vexCont = m.querySelector('.vex-container');
+          if (vexCont) {
+            const type = vexCont.dataset.rhythm || 'q';
+            renderVexRhythm(vexCont, type, currentDotState, currentTieState);
+          }
+        });
+      }
+    }
+
+    function toggleTie() {
+      currentTieState = !currentTieState;
+      if (selectedMeasures.length > 0) {
+        selectedMeasures.forEach(m => {
+          const vexCont = m.querySelector('.vex-container');
+          if (vexCont) {
+            const type = vexCont.dataset.rhythm || 'q';
+            renderVexRhythm(vexCont, type, currentDotState, currentTieState);
+          }
+        });
+      }
+    }
+
+    function resetMeasureRhythm() {
+      currentDotState = false;
+      currentTieState = false;
+      if (selectedMeasures.length > 0) {
+        selectedMeasures.forEach(m => {
+          const vexCont = m.querySelector('.vex-container');
+          if (vexCont) {
+            vexCont.dataset.rhythm = 'q';
+            renderVexRhythm(vexCont, 'q', false, false);
+          }
+        });
+      }
+    }
+
+    // --- ESCUCHADOR TECLADO NUMÉRICO Y AT ACOS RÁPIDOS ---
+    window.addEventListener('keydown', (e) => {
+      const isEditingInput = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable);
+      if (isEditingInput) return;
+
+      if (e.key === '7') { applyRhythmType('w'); }
+      else if (e.key === '6') { applyRhythmType('h'); }
+      else if (e.key === '5') { applyRhythmType('q'); }
+      else if (e.key === '4') { applyRhythmType('8'); }
+      else if (e.key === '3') { applyRhythmType('16'); }
+      else if (e.key === '.') { toggleDot(); }
+      else if (e.key === '+' || e.key === '=') { toggleTie(); }
+    });
+
     // --- AGRUPAR SELECCIÓN EN 1 SISTEMA ---
     function groupSelectedInSystem() {
       const dict = i18n[currentLang] || i18n['en'];
@@ -1018,26 +1233,6 @@
       clearSelections();
     }
 
-    function getSlashHTML(timeSig) {
-      switch (timeSig) {
-        case '4/4':
-          return '<span>/</span><span>/</span><span>/</span><span>/</span>';
-        case '3/4':
-          return '<span>/</span><span>/</span><span>/</span>';
-        case '2/4':
-        case '2/2':
-          return '<span>/</span><span>/</span>';
-        case '6/8':
-          return '<span>/•</span><span>/•</span>';
-        case '9/8':
-          return '<span>/•</span><span>/•</span><span>/•</span>';
-        case '12/8':
-          return '<span>/•</span><span>/•</span><span>/•</span><span>/•</span>';
-        default:
-          return '<span>/</span><span>/</span><span>/</span><span>/</span>';
-      }
-    }
-
     function createStackedTimeSigHTML(timeSigStr) {
       const parts = timeSigStr.split('/');
       if (parts.length === 2) {
@@ -1059,8 +1254,6 @@
       const startIdx = allMeasures.indexOf(startMeasure);
 
       if (startIdx !== -1) {
-        const slashHtml = getSlashHTML(val);
-        
         if (startIdx === 0) {
           const headerInput = document.getElementById('headerTimeSigInput');
           if (headerInput) headerInput.value = val;
@@ -1074,13 +1267,6 @@
           startMeasure.insertBefore(stackEl, startMeasure.firstChild);
         } else {
           stackEl.outerHTML = createStackedTimeSigHTML(val);
-        }
-
-        for (let i = startIdx; i < allMeasures.length; i++) {
-          const slashes = allMeasures[i].querySelector('.rhythm-slashes');
-          if (slashes) {
-            slashes.innerHTML = slashHtml;
-          }
         }
       }
 
@@ -1135,6 +1321,7 @@
       newBlock.appendChild(grid);
       content.appendChild(newBlock);
 
+      initAllVexRhythms();
       updateTotalPagesCounter();
     }
 
@@ -1197,14 +1384,13 @@
 
     function createMeasureElement() {
       const dict = i18n[currentLang] || i18n['en'];
-      const timeSig = document.getElementById('timeSignatureSelect').value;
       const box = document.createElement('div');
       box.className = 'measure-box';
       box.onclick = function(e) { handleMeasureClick(this, e); };
       box.innerHTML = `
         <div class="measure-main">
           <input type="text" class="chord-input" placeholder="${dict.chordPlaceholder}">
-          <div class="rhythm-slashes">${getSlashHTML(timeSig)}</div>
+          <div class="vex-container"></div>
         </div>
       `;
       return box;
@@ -1224,6 +1410,8 @@
       newBlock.innerHTML = `<span class="section-badge" contenteditable="true">${title}</span>`;
       newBlock.appendChild(grid);
       content.appendChild(newBlock);
+
+      initAllVexRhythms();
     }
 
     function addMultipleMeasures(qty) {
@@ -1244,6 +1432,8 @@
       for (let i = 0; i < count; i++) {
         targetGrid.appendChild(createMeasureElement());
       }
+
+      initAllVexRhythms();
     }
 
     function insertMeasure(position) {
@@ -1261,6 +1451,7 @@
         target.parentNode.insertBefore(newBox, target.nextSibling);
       }
 
+      initAllVexRhythms();
       handleMeasureClick(newBox, null);
     }
 
@@ -1343,7 +1534,6 @@
       windowWidth: 1200
     };
 
-    /* FUNCIONES DE ADAPTACIÓN PARA RENDEREADO LIMPIO Y SIN RECORTES */
     function prepareSubItem(inputId, printId, wrapperId, prefix = '') {
       const inputEl = document.getElementById(inputId);
       const printEl = document.getElementById(printId);
@@ -1359,7 +1549,7 @@
         wrapperEl.style.display = 'inline-flex';
       } else {
         printEl.style.display = 'none';
-        wrapperEl.style.display = 'none'; // Desaparece por completo si no se completó
+        wrapperEl.style.display = 'none';
       }
     }
 
@@ -1367,7 +1557,6 @@
       clearSelections();
       document.body.classList.add('exporting-mode');
       
-      // 1. Título principal
       const titleInput = document.getElementById('songTitleInput');
       const titlePrint = document.getElementById('songTitlePrint');
       if (titleInput && titlePrint) {
@@ -1381,7 +1570,6 @@
         titlePrint.style.display = 'block';
       }
 
-      // 2. Sub-campos del encabezado
       prepareSubItem('artistInput', 'printArtist', 'wrapArtist');
       prepareSubItem('styleInput', 'printStyle', 'wrapStyle');
       prepareSubItem('headerTimeSigInput', 'printTimeSig', 'wrapTimeSig', (i18n[currentLang]?.lblTimeSigHeader || 'Métrica') + ': ');
@@ -1468,6 +1656,16 @@
       });
     }
 
+    function initAllVexRhythms() {
+      setTimeout(() => {
+        document.querySelectorAll('.vex-container').forEach(c => {
+          if (!c.firstChild) {
+            renderVexRhythm(c, 'q', false, false);
+          }
+        });
+      }, 50);
+    }
+
     window.addEventListener('keydown', (e) => {
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedMeasures.length > 0) {
         const isEditingInput = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable);
@@ -1480,6 +1678,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       initLanguage();
+      initAllVexRhythms();
     });
   </script>
 </body>
