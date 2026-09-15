@@ -201,7 +201,7 @@
 
     .chart-paper {
       width: 794px;
-      height: 1123px; /* Tamaño A4 estricto */
+      height: 1123px;
       max-height: 1123px;
       background: var(--paper-bg);
       color: var(--paper-text);
@@ -230,7 +230,7 @@
       flex-direction: column;
       gap: 16px;
       width: 100%;
-      height: 980px; /* Límite útil vertical A4 */
+      height: 980px;
       overflow: hidden;
     }
 
@@ -244,7 +244,7 @@
       padding-bottom: 12px;
     }
 
-    /* ENCABEZADO HOJA 2 EN ADELANTE (SUTIL / GRIS) */
+    /* ENCABEZADO HOJAS SIGUIENTES (SUTIL / GRIS) */
     .chart-header-subsequent {
       display: flex;
       justify-content: space-between;
@@ -333,7 +333,6 @@
       text-transform: uppercase;
     }
 
-    /* ESTILO PARA SUBTÍTULOS / MEDLEYS */
     .medley-subtitle {
       font-size: 1.1em;
       font-weight: 800;
@@ -391,7 +390,6 @@
       background: transparent;
     }
 
-    /* SLASHES DE DURACIÓN SEGÚN MÉTRICA */
     .rhythm-slashes {
       display: flex;
       justify-content: space-around;
@@ -449,7 +447,7 @@
 </head>
 <body>
 
-  <!-- NAVEGACIÓN SUPERIOR CON BOTÓN E IDIOMA -->
+  <!-- NAVEGACIÓN SUPERIOR -->
   <div class="top-nav">
     <a href="../index.html" class="btn-back" id="btnBack">← HOME</a>
     
@@ -470,7 +468,6 @@
     <!-- PANEL LATERAL DE CONTROL -->
     <div class="toolbox-panel">
       
-      <!-- EXPORTAR & TRANSPOSICIÓN -->
       <div class="toolbox-section">
         <div class="toolbox-title" id="titleActions">⚡ Main Actions</div>
         <button class="tool-btn primary" id="btnExportPNG" onclick="exportAllPagesToPNG()">📥 Download All (PNG)</button>
@@ -481,7 +478,6 @@
         </div>
       </div>
 
-      <!-- MÉTRICA DE TIEMPO (GLOBAL / LOCAL) -->
       <div class="toolbox-section">
         <div class="toolbox-title" id="titleTimeSig">⏱️ Time Signature</div>
         <select class="select-input" id="timeSignatureSelect" onchange="updateTimeSignature(this.value)">
@@ -496,7 +492,6 @@
         <button class="tool-btn" style="margin-top:2px; border-color:var(--accent-purple); color:#d8b4fe;" onclick="applyTimeSignatureToSelected()">⏱️ Apply to Selected Measure</button>
       </div>
 
-      <!-- SECCIONES Y SUBTÍTULOS MEDLEY -->
       <div class="toolbox-section">
         <div class="toolbox-title" id="titleSections">🏷️ Sections & Medley</div>
         <button class="tool-btn custom-btn" style="width:100%; font-weight:700; margin-bottom:4px;" onclick="addMedleySubtitle()">➕ Subtitle (Medley / Song 2)</button>
@@ -510,7 +505,6 @@
         </div>
       </div>
 
-      <!-- INSERCIÓN Y AGRUPACIÓN DE COMPASES EXPANDIDA -->
       <div class="toolbox-section">
         <div class="toolbox-title" id="titleMeasures">🎼 Measures & Structure</div>
         <div class="btn-grid">
@@ -530,7 +524,6 @@
         <button class="tool-btn" style="margin-top:4px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" id="btnDelete" onclick="removeSelectedMeasure()">🗑️ Delete Selected (Shift+Click)</button>
       </div>
 
-      <!-- INDICACIONES BANDA -->
       <div class="toolbox-section">
         <div class="toolbox-title" id="titleAnnotations">📌 Band Cues</div>
         <button class="tool-btn custom-btn" id="btnCustomNote" onclick="addAnnotation(i18n[currentLang].noteDefault, true)">✏️ Custom Note</button>
@@ -548,7 +541,7 @@
     <!-- CONTENEDOR MULTI-PÁGINA A4 -->
     <div class="sheets-container" id="sheetsContainer">
       
-      <!-- PÁGINA 1 INICIAL -->
+      <!-- PÁGINA 1 -->
       <div class="chart-paper" id="paper-page-1">
         <div class="paper-inner">
           <div class="chart-header">
@@ -709,8 +702,9 @@
     };
 
     let currentLang = 'en';
-    let selectedMeasures = []; // Soporte para selección múltiple
+    let selectedMeasures = [];
     let lastSelectedMeasure = null;
+    let paginationTimeout = null;
 
     function initLanguage() {
       let savedLang = localStorage.getItem('preferred_lang');
@@ -790,14 +784,13 @@
       applyLanguage(lang);
     }
 
-    // --- MANEJO DE SELECCIÓN MÚLTIPLE (SHIFT + CLIC) ---
+    // --- MANEJO OPTIMIZADO DE SELECCIÓN MÚLTIPLE ---
     function handleMeasureClick(el, event) {
       if (el.classList.contains('break-system')) return;
 
       const allMeasures = Array.from(document.querySelectorAll('.measure-box:not(.break-system)'));
 
       if (event && event.shiftKey && lastSelectedMeasure) {
-        // Seleccionar rango
         const startIdx = allMeasures.indexOf(lastSelectedMeasure);
         const endIdx = allMeasures.indexOf(el);
 
@@ -810,7 +803,6 @@
           selectedMeasures.push(allMeasures[i]);
         }
       } else {
-        // Selección individual
         clearSelections();
         el.classList.add('selected');
         selectedMeasures = [el];
@@ -878,7 +870,6 @@
       document.querySelectorAll('.subsequent-title-ref').forEach(el => el.innerText = text);
     }
 
-    // --- AGREGAR SUBTÍTULO / MEDLEY ---
     function addMedleySubtitle() {
       const dict = i18n[currentLang] || i18n['en'];
       const targetMeasure = selectedMeasures.length > 0 ? selectedMeasures[0] : null;
@@ -897,10 +888,17 @@
         const content = getCurrentPageContent();
         content.appendChild(sub);
       }
-      checkPaginationOverflow();
+      triggerPagination();
     }
 
-    // --- MANEJO DINÁMICO DE PAGINACIÓN A4 EXACTA ---
+    // --- DEBOUNCE / RECALCULO CONTROLADO DE PAGINACIÓN ---
+    function triggerPagination() {
+      if (paginationTimeout) clearTimeout(paginationTimeout);
+      paginationTimeout = setTimeout(() => {
+        checkPaginationOverflow();
+      }, 120); // Espera 120ms para evitar congelamientos
+    }
+
     function checkPaginationOverflow() {
       const container = document.getElementById('sheetsContainer');
       let pages = Array.from(document.querySelectorAll('.chart-paper'));
@@ -910,7 +908,9 @@
         let inner = currentPage.querySelector('.paper-inner');
         let content = currentPage.querySelector('.chart-content');
 
-        while (inner.scrollHeight > 930 && content.children.length > 0) {
+        let loops = 0;
+        while (inner.scrollHeight > 930 && content.children.length > 0 && loops < 50) {
+          loops++;
           let nextPageIndex = i + 1;
           let nextPage = pages[nextPageIndex];
 
@@ -1038,7 +1038,7 @@
       newBlock.innerHTML = `<span class="section-badge" contenteditable="true">${title}</span>`;
       newBlock.appendChild(grid);
       content.appendChild(newBlock);
-      checkPaginationOverflow();
+      triggerPagination();
     }
 
     function addMultipleMeasures(qty) {
@@ -1068,7 +1068,7 @@
         }
       }
 
-      checkPaginationOverflow();
+      triggerPagination();
     }
 
     function insertMeasure(position) {
@@ -1087,7 +1087,7 @@
       }
 
       handleMeasureClick(newBox, null);
-      checkPaginationOverflow();
+      triggerPagination();
     }
 
     function toggleSystemBreak() {
@@ -1101,7 +1101,7 @@
       const breakEl = document.createElement('div');
       breakEl.className = 'measure-box break-system';
       grid.insertBefore(breakEl, target.nextSibling);
-      checkPaginationOverflow();
+      triggerPagination();
     }
 
     function removeSelectedMeasure() {
@@ -1113,8 +1113,7 @@
         });
         clearSelections();
         lastSelectedMeasure = null;
-        cleanupEmptyPages();
-        checkPaginationOverflow();
+        triggerPagination();
       }
     }
 
@@ -1179,7 +1178,6 @@
       });
     }
 
-    // SOPORTE TECLA SUPR / DELETE PARA BORRAR
     window.addEventListener('keydown', (e) => {
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedMeasures.length > 0) {
         const isEditingInput = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable);
