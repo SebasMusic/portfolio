@@ -173,21 +173,54 @@
       box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
     }
 
-    .tool-btn.pdf-btn {
-      background: linear-gradient(135deg, #ef4444, #f97316);
-      border: none;
-      color: #fff;
-      font-weight: 700;
-    }
-
-    .tool-btn.pdf-btn:hover {
-      opacity: 0.9;
-      box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
-    }
-
     .tool-btn.custom-btn {
       border: 1px dashed var(--accent-cyan);
       color: var(--accent-cyan);
+    }
+
+    /* MENÚ FLOTANTE DE DESCARGA */
+    .download-dropdown {
+      position: relative;
+      width: 100%;
+    }
+
+    .download-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #1e293b;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 6px;
+      margin-top: 4px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 100;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .download-dropdown.active .download-menu {
+      display: flex;
+    }
+
+    .download-option {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.8em;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.2s;
+    }
+
+    .download-option:hover {
+      background: rgba(168, 85, 247, 0.3);
+      border-color: var(--accent-purple);
     }
 
     .select-input {
@@ -218,7 +251,7 @@
       max-height: 1123px;
       background: var(--paper-bg);
       color: var(--paper-text);
-      padding: 45px;
+      padding: 40px 45px 45px 45px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.25);
       border-radius: 14px;
       border: 2px solid #0f172a;
@@ -226,7 +259,7 @@
       flex-direction: column;
       justify-content: space-between;
       position: relative;
-      overflow: hidden;
+      overflow: visible; /* Permite que el título Bungee renderice completo sin cortes */
     }
 
     .chart-paper::before {
@@ -244,7 +277,7 @@
       gap: 16px;
       width: 100%;
       height: 980px;
-      overflow: hidden;
+      overflow: visible;
     }
 
     /* ENCABEZADO HOJA 1 */
@@ -252,10 +285,10 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       border-bottom: 2px solid #0f172a;
       padding-bottom: 12px;
-      padding-top: 10px;
+      padding-top: 15px; /* Margen superior amplio anti-corte */
     }
 
     /* ENCABEZADO HOJAS SIGUIENTES */
@@ -285,7 +318,7 @@
 
     .song-title-editable {
       font-family: 'Bungee', cursive, sans-serif;
-      font-size: 1.85em;
+      font-size: 1.75em;
       text-transform: uppercase;
       text-align: center;
       border: none;
@@ -294,11 +327,17 @@
       color: #0f172a;
       background: transparent;
       letter-spacing: 1px;
-      line-height: 1.2;
-      padding-top: 4px;
+      line-height: 1.4;
+      padding: 6px 0;
     }
 
     .song-title-editable::placeholder { color: #cbd5e1; }
+
+    /* ESTADO DE EXPORTACIÓN IMPRESIÓN (OCULTA PLACEHOLDERS NO COMPLETADOS) */
+    body.exporting-mode .song-title-editable::placeholder,
+    body.exporting-mode .editable-sub::placeholder {
+      color: transparent !important;
+    }
 
     .header-sub-row {
       width: 100%;
@@ -437,18 +476,18 @@
       outline: none;
     }
 
-    /* BADGE DE MÉTRICA VISIBLE EN COMPÁS DE CAMBIO */
+    /* BADGE DE MÉTRICA REPOSICIONADO ARRIBA */
     .time-sig-badge {
       position: absolute;
-      bottom: 6px;
+      top: 28px;
       left: 6px;
       font-size: 0.75em;
       font-weight: 800;
       color: #0f172a;
-      background: #e2e8f0;
-      border: 1px solid #64748b;
-      padding: 1px 5px;
-      border-radius: 4px;
+      background: #f1f5f9;
+      border: 1px dashed #64748b;
+      padding: 0px 4px;
+      border-radius: 3px;
       user-select: none;
       outline: none;
     }
@@ -504,9 +543,13 @@
       <div class="toolbox-section">
         <div class="toolbox-title" id="titleActions">⚡ Main Actions</div>
         
-        <div style="display:flex; flex-direction:column; gap:6px;">
-          <button class="tool-btn primary" id="btnExportPNG" onclick="exportAllPagesToPNG()">📥 Download All (PNG)</button>
-          <button class="tool-btn pdf-btn" id="btnExportPDF" onclick="exportAllPagesToPDF()">📄 Download All (PDF)</button>
+        <!-- BOTÓN ÚNICO DE DESCARGA CON MENÚ DESPLEGABLE -->
+        <div class="download-dropdown" id="downloadDropdown">
+          <button class="tool-btn primary" style="width:100%; text-align:center;" id="btnExportMain" onclick="toggleDownloadMenu(event)">📥 Download Chart ▾</button>
+          <div class="download-menu">
+            <button class="download-option" id="optDownloadPNG" onclick="exportAllPagesToPNG()">🖼️ Export as PNG Images</button>
+            <button class="download-option" id="optDownloadPDF" onclick="exportAllPagesToPDF()">📄 Export as Single PDF File</button>
+          </div>
         </div>
 
         <button class="tool-btn custom-btn" style="margin-top:6px;" id="btnAddPage" onclick="addNewPageManual()">📄 Add New Page</button>
@@ -592,8 +635,8 @@
               <div><input type="text" class="editable-sub" id="artistInput" placeholder="Artist / Band" style="width:160px;"></div>
               <div><input type="text" class="editable-sub" id="styleInput" placeholder="Style: Worship / Pop" style="width:150px; text-align:center;"></div>
               
-              <!-- MÉTRICA DEL ENCABEZADO AHORA EDITABLE -->
-              <div><span id="lblTimeSigHeader">Time Sig</span>: <input type="text" class="editable-sub displayTimeSig" id="headerTimeSigInput" value="4/4" style="width:50px; text-align:center; font-weight:800;"></div>
+              <!-- MÉTRICA UNIFICADA EN ESTILO GRIS CON EL RESTO DEL ENCABEZADO -->
+              <div><span id="lblTimeSigHeader">Time Sig</span>: <input type="text" class="editable-sub displayTimeSig" id="headerTimeSigInput" value="4/4" style="width:45px; text-align:center; font-weight:600; color:#334155;"></div>
               
               <div><input type="text" class="editable-sub" placeholder="BPM: 120" style="width:80px; text-align:right;"></div>
             </div>
@@ -639,8 +682,9 @@
       en: {
         btnBack: "← HOME",
         titleActions: "⚡ Main Actions",
-        btnExportPNG: "📥 Download All (PNG)",
-        btnExportPDF: "📄 Download All (PDF)",
+        btnExportMain: "📥 Download Chart ▾",
+        optDownloadPNG: "🖼️ Export as PNG Images",
+        optDownloadPDF: "📄 Export as Single PDF File",
         btnAddPage: "📄 Add New Page",
         btnTranspDown: "♭ -1 Semitone",
         btnTranspUp: "♯ +1 Semitone",
@@ -699,8 +743,9 @@
       es: {
         btnBack: "← INICIO",
         titleActions: "⚡ Acciones Principales",
-        btnExportPNG: "📥 Descargar Todo (PNG)",
-        btnExportPDF: "📄 Descargar Todo (PDF)",
+        btnExportMain: "📥 Descargar Partitura ▾",
+        optDownloadPNG: "🖼️ Exportar Imagen (PNG)",
+        optDownloadPDF: "📄 Exportar Archivo PDF Único",
         btnAddPage: "📄 Crear Nueva Página",
         btnTranspDown: "♭ -1 Semitono",
         btnTranspUp: "♯ +1 Semitono",
@@ -785,8 +830,9 @@
 
       document.getElementById('btnBack').innerText = dict.btnBack;
       document.getElementById('titleActions').innerText = dict.titleActions;
-      document.getElementById('btnExportPNG').innerText = dict.btnExportPNG;
-      document.getElementById('btnExportPDF').innerText = dict.btnExportPDF;
+      document.getElementById('btnExportMain').innerText = dict.btnExportMain;
+      document.getElementById('optDownloadPNG').innerText = dict.optDownloadPNG;
+      document.getElementById('optDownloadPDF').innerText = dict.optDownloadPDF;
       document.getElementById('btnAddPage').innerText = dict.btnAddPage;
       document.getElementById('btnTranspDown').innerText = dict.btnTranspDown;
       document.getElementById('btnTranspUp').innerText = dict.btnTranspUp;
@@ -844,6 +890,18 @@
       localStorage.setItem('preferred_lang', lang);
       applyLanguage(lang);
     }
+
+    // --- MENÚ DESPLEGABLE DE DESCARGA UNIFICADO ---
+    function toggleDownloadMenu(e) {
+      e.stopPropagation();
+      const dropdown = document.getElementById('downloadDropdown');
+      dropdown.classList.toggle('active');
+    }
+
+    document.addEventListener('click', () => {
+      const dropdown = document.getElementById('downloadDropdown');
+      if (dropdown) dropdown.classList.remove('active');
+    });
 
     // --- SELECCIÓN MÚLTIPLE (SHIFT + CLIC) ---
     function handleMeasureClick(el, event) {
@@ -919,7 +977,6 @@
       }
     }
 
-    // APLICA LA MÉTRICA DESDE EL COMPÁS SELECCIONADO EN ADELANTE E INSERTA BADGE VISUAL
     function applyTimeSignatureToSelected() {
       const val = document.getElementById('timeSignatureSelect').value;
       if (selectedMeasures.length === 0) {
@@ -935,13 +992,11 @@
       if (startIdx !== -1) {
         const slashHtml = getSlashHTML(val);
         
-        // 1. Si es el primer compás de la obra, actualiza el encabezado general
         if (startIdx === 0) {
           const headerInput = document.getElementById('headerTimeSigInput');
           if (headerInput) headerInput.value = val;
         }
 
-        // 2. Inserta o actualiza el badge con la nueva métrica en el compás inicial del cambio
         let badge = startMeasure.querySelector('.time-sig-badge');
         if (!badge) {
           badge = document.createElement('span');
@@ -951,7 +1006,6 @@
         }
         badge.innerText = val;
 
-        // 3. Modifica los slashes rítmicos desde la selección hacia adelante
         for (let i = startIdx; i < allMeasures.length; i++) {
           const slashes = allMeasures[i].querySelector('.rhythm-slashes');
           if (slashes) {
@@ -1226,6 +1280,7 @@
       }
 
       clearSelections();
+      document.body.classList.add('exporting-mode');
 
       document.fonts.ready.then(() => {
         const papers = document.querySelectorAll('.chart-paper');
@@ -1236,11 +1291,13 @@
             link.download = `${title.toLowerCase().replace(/\s+/g, '-')}-page-${idx + 1}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
+            document.body.classList.remove('exporting-mode');
           });
         });
       });
     }
 
+    // --- EXPORTAR PDF MULTI-PÁGINA EN UN SOLO ARCHIVO UNIFICADO ---
     function exportAllPagesToPDF() {
       if (typeof gtag === 'function') {
         gtag('event', 'export_chart_pdf', {
@@ -1250,28 +1307,24 @@
       }
 
       clearSelections();
+      document.body.classList.add('exporting-mode');
 
-      document.fonts.ready.then(() => {
+      document.fonts.ready.then(async () => {
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('p', 'mm', 'a4');
         const papers = Array.from(document.querySelectorAll('.chart-paper'));
         const title = document.getElementById('songTitleInput').value || 'chart';
 
-        let processed = 0;
+        for (let i = 0; i < papers.length; i++) {
+          const canvas = await html2canvas(papers[i], RENDER_OPTIONS);
+          const imgData = canvas.toDataURL('image/jpeg', 0.98);
 
-        papers.forEach((paper, idx) => {
-          html2canvas(paper, RENDER_OPTIONS).then(canvas => {
-            const imgData = canvas.toDataURL('image/jpeg', 0.98);
-            if (idx > 0) pdf.addPage();
-            
-            pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
-            
-            processed++;
-            if (processed === papers.length) {
-              pdf.save(`${title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
-            }
-          });
-        });
+          if (i > 0) pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+        }
+
+        pdf.save(`${title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+        document.body.classList.remove('exporting-mode');
       });
     }
 
