@@ -20,8 +20,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- html2canvas para exportar a PNG -->
+  <!-- html2canvas para exportar a PNG y jsPDF para exportar a PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
     :root {
@@ -170,6 +171,18 @@
     .tool-btn.primary:hover {
       opacity: 0.9;
       box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+    }
+
+    .tool-btn.pdf-btn {
+      background: linear-gradient(135deg, #ef4444, #f97316);
+      border: none;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .tool-btn.pdf-btn:hover {
+      opacity: 0.9;
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
     }
 
     .tool-btn.custom-btn {
@@ -364,7 +377,7 @@
       background: #fff;
       cursor: pointer;
       transition: background 0.2s ease;
-      flex: 0 0 25%; /* DEFAULT: 4 COMPASES POR FILA EXACTOS */
+      flex: 0 0 25%;
     }
 
     .measure-box.selected {
@@ -471,8 +484,13 @@
       
       <div class="toolbox-section">
         <div class="toolbox-title" id="titleActions">⚡ Main Actions</div>
-        <button class="tool-btn primary" id="btnExportPNG" onclick="exportAllPagesToPNG()">📥 Download All (PNG)</button>
-        <button class="tool-btn custom-btn" style="margin-top:4px;" id="btnAddPage" onclick="addNewPageManual()">📄 Add New Page</button>
+        
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <button class="tool-btn primary" id="btnExportPNG" onclick="exportAllPagesToPNG()">📥 Download All (PNG)</button>
+          <button class="tool-btn pdf-btn" id="btnExportPDF" onclick="exportAllPagesToPDF()">📄 Download All (PDF)</button>
+        </div>
+
+        <button class="tool-btn custom-btn" style="margin-top:6px;" id="btnAddPage" onclick="addNewPageManual()">📄 Add New Page</button>
         
         <div style="display:flex; gap:8px; margin-top:5px;">
           <button class="tool-btn" style="flex:1;" id="btnTranspDown" onclick="transposeAll(-1)">♭ -1 Semitone</button>
@@ -600,6 +618,7 @@
         btnBack: "← HOME",
         titleActions: "⚡ Main Actions",
         btnExportPNG: "📥 Download All (PNG)",
+        btnExportPDF: "📄 Download All (PDF)",
         btnAddPage: "📄 Add New Page",
         btnTranspDown: "♭ -1 Semitone",
         btnTranspUp: "♯ +1 Semitone",
@@ -659,6 +678,7 @@
         btnBack: "← INICIO",
         titleActions: "⚡ Acciones Principales",
         btnExportPNG: "📥 Descargar Todo (PNG)",
+        btnExportPDF: "📄 Descargar Todo (PDF)",
         btnAddPage: "📄 Crear Nueva Página",
         btnTranspDown: "♭ -1 Semitono",
         btnTranspUp: "♯ +1 Semitono",
@@ -744,6 +764,7 @@
       document.getElementById('btnBack').innerText = dict.btnBack;
       document.getElementById('titleActions').innerText = dict.titleActions;
       document.getElementById('btnExportPNG').innerText = dict.btnExportPNG;
+      document.getElementById('btnExportPDF').innerText = dict.btnExportPDF;
       document.getElementById('btnAddPage').innerText = dict.btnAddPage;
       document.getElementById('btnTranspDown').innerText = dict.btnTranspDown;
       document.getElementById('btnTranspUp').innerText = dict.btnTranspUp;
@@ -911,7 +932,6 @@
       document.querySelectorAll('.subsequent-title-ref').forEach(el => el.innerText = text);
     }
 
-    // --- SUBTÍTULO DE CANCIÓN 2 ---
     function addSong2Subtitle() {
       const dict = i18n[currentLang] || i18n['en'];
       const targetMeasure = selectedMeasures.length > 0 ? selectedMeasures[0] : null;
@@ -932,7 +952,6 @@
       }
     }
 
-    // --- AGREGAR PÁGINA MANUALMENTE ---
     function addNewPageManual() {
       const pages = document.querySelectorAll('.chart-paper');
       const newPage = createNewPageElement(pages.length + 1);
@@ -1147,6 +1166,7 @@
       }
     }
 
+    // --- EXPORTAR PNG HD CON ENCUADRE A4 PERFECTO ---
     function exportAllPagesToPNG() {
       if (typeof gtag === 'function') {
         gtag('event', 'export_chart_png', {
@@ -1155,13 +1175,61 @@
         });
       }
 
+      clearSelections(); // Quitar bordes verdes de selección previa
+
       const papers = document.querySelectorAll('.chart-paper');
       papers.forEach((paper, idx) => {
-        html2canvas(paper, { scale: 2 }).then(canvas => {
+        html2canvas(paper, { 
+          scale: 2, 
+          useCORS: true,
+          width: 794,
+          height: 1123,
+          windowWidth: 1200
+        }).then(canvas => {
           const link = document.createElement('a');
-          link.download = `chart-pagina-${idx + 1}.png`;
+          const title = document.getElementById('songTitleInput').value || 'chart';
+          link.download = `${title.toLowerCase().replace(/\s+/g, '-')}-page-${idx + 1}.png`;
           link.href = canvas.toDataURL('image/png');
           link.click();
+        });
+      });
+    }
+
+    // --- EXPORTAR PDF VECTORIAL MULTI-PÁGINA ---
+    function exportAllPagesToPDF() {
+      if (typeof gtag === 'function') {
+        gtag('event', 'export_chart_pdf', {
+          'song_title': document.getElementById('songTitleInput').value || 'Sin Titulo',
+          'total_pages': document.querySelectorAll('.chart-paper').length
+        });
+      }
+
+      clearSelections();
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const papers = Array.from(document.querySelectorAll('.chart-paper'));
+      const title = document.getElementById('songTitleInput').value || 'chart';
+
+      let processed = 0;
+
+      papers.forEach((paper, idx) => {
+        html2canvas(paper, { 
+          scale: 2, 
+          useCORS: true,
+          width: 794,
+          height: 1123,
+          windowWidth: 1200
+        }).then(canvas => {
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          if (idx > 0) pdf.addPage();
+          
+          pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+          
+          processed++;
+          if (processed === papers.length) {
+            pdf.save(`${title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+          }
         });
       });
     }
