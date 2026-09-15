@@ -317,7 +317,6 @@
       max-width: 500px;
     }
 
-    /* TÍTULO EDITABLE Y REEMPLAZO ESTÁTICO PARA RENDER PERFECTO */
     .title-container {
       width: 100%;
       display: flex;
@@ -333,7 +332,7 @@
       text-align: center;
       color: #0f172a;
       letter-spacing: 2px;
-      line-height: 1.2;
+      line-height: 1.3;
       padding: 4px 0;
       width: 100%;
     }
@@ -350,12 +349,6 @@
 
     .song-title-editable::placeholder { color: #cbd5e1; }
 
-    /* ESTADO DE EXPORTACIÓN IMPRESIÓN */
-    body.exporting-mode .song-title-editable::placeholder,
-    body.exporting-mode .editable-sub::placeholder {
-      color: transparent !important;
-    }
-
     .header-sub-row {
       width: 100%;
       display: flex;
@@ -364,6 +357,13 @@
       font-size: 0.88em;
       font-weight: 600;
       color: #475569;
+      min-height: 28px;
+    }
+
+    .sub-item-wrapper {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .editable-sub {
@@ -373,9 +373,19 @@
       color: #475569;
       font-weight: 600;
       font-size: 1em;
+      line-height: 1.4;
+      padding: 2px 0;
     }
 
     .editable-sub::placeholder { color: #cbd5e1; }
+
+    .sub-print-text {
+      display: none;
+      color: #475569;
+      font-weight: 600;
+      font-size: 1em;
+      line-height: 1.4;
+    }
 
     .chart-content {
       display: flex;
@@ -451,7 +461,6 @@
       border: none !important;
     }
 
-    /* CONTENEDOR INTERNO DEL COMPÁS */
     .measure-main {
       display: flex;
       flex-direction: column;
@@ -500,7 +509,6 @@
       outline: none;
     }
 
-    /* MÉTRICA MUSICAL PROFESIONAL APILADA VERTICALMENTE (SIN LÍNEA NI FRACTION) */
     .time-sig-stack {
       display: inline-flex;
       flex-direction: column;
@@ -665,13 +673,25 @@
               <div class="song-title-print" id="songTitlePrint"></div>
             </div>
             <div class="header-sub-row">
-              <div><input type="text" class="editable-sub" id="artistInput" placeholder="Artist / Band" style="width:160px;"></div>
-              <div><input type="text" class="editable-sub" id="styleInput" placeholder="Style: Worship / Pop" style="width:150px; text-align:center;"></div>
+              <div class="sub-item-wrapper" id="wrapArtist">
+                <input type="text" class="editable-sub" id="artistInput" placeholder="Artist / Band" style="width:160px;">
+                <span class="sub-print-text" id="printArtist"></span>
+              </div>
+              <div class="sub-item-wrapper" id="wrapStyle">
+                <input type="text" class="editable-sub" id="styleInput" placeholder="Style: Worship / Pop" style="width:150px; text-align:center;">
+                <span class="sub-print-text" id="printStyle"></span>
+              </div>
               
-              <!-- MÉTRICA UNIFICADA EN ESTILO GRIS Y PESO NORMAL IGUAL AL RESTO DEL ENCABEZADO -->
-              <div><span id="lblTimeSigHeader">Time Sig</span>: <input type="text" class="editable-sub displayTimeSig" id="headerTimeSigInput" value="4/4" style="width:40px; text-align:center; font-weight:600; color:#475569;"></div>
+              <div class="sub-item-wrapper" id="wrapTimeSig">
+                <span id="lblTimeSigHeader">Time Sig</span>: 
+                <input type="text" class="editable-sub displayTimeSig" id="headerTimeSigInput" value="4/4" style="width:40px; text-align:center; font-weight:600; color:#475569;">
+                <span class="sub-print-text" id="printTimeSig"></span>
+              </div>
               
-              <div><input type="text" class="editable-sub" placeholder="BPM: 120" style="width:80px; text-align:right;"></div>
+              <div class="sub-item-wrapper" id="wrapBPM">
+                <input type="text" class="editable-sub" id="bpmInput" placeholder="BPM: 120" style="width:80px; text-align:right;">
+                <span class="sub-print-text" id="printBPM"></span>
+              </div>
             </div>
           </div>
 
@@ -1018,7 +1038,6 @@
       }
     }
 
-    // CONVIERTE CUALQUIER MÉTRICA (ej: "3/4") EN FORMATO APILADO VERTICAL PROFESIONAL
     function createStackedTimeSigHTML(timeSigStr) {
       const parts = timeSigStr.split('/');
       if (parts.length === 2) {
@@ -1047,7 +1066,6 @@
           if (headerInput) headerInput.value = val;
         }
 
-        // Inserta o actualiza la métrica apilada verticalmente a la izquierda del compás
         let stackEl = startMeasure.querySelector('.time-sig-stack');
         if (!stackEl) {
           const temp = document.createElement('div');
@@ -1058,7 +1076,6 @@
           stackEl.outerHTML = createStackedTimeSigHTML(val);
         }
 
-        // Modifica los slashes rítmicos hacia adelante
         for (let i = startIdx; i < allMeasures.length; i++) {
           const slashes = allMeasures[i].querySelector('.rhythm-slashes');
           if (slashes) {
@@ -1326,29 +1343,75 @@
       windowWidth: 1200
     };
 
+    /* FUNCIONES DE ADAPTACIÓN PARA RENDEREADO LIMPIO Y SIN RECORTES */
+    function prepareSubItem(inputId, printId, wrapperId, prefix = '') {
+      const inputEl = document.getElementById(inputId);
+      const printEl = document.getElementById(printId);
+      const wrapperEl = document.getElementById(wrapperId);
+      if (!inputEl || !printEl || !wrapperEl) return;
+
+      const val = inputEl.value.trim();
+      inputEl.style.display = 'none';
+
+      if (val !== '') {
+        printEl.innerText = prefix + val;
+        printEl.style.display = 'inline';
+        wrapperEl.style.display = 'inline-flex';
+      } else {
+        printEl.style.display = 'none';
+        wrapperEl.style.display = 'none'; // Desaparece por completo si no se completó
+      }
+    }
+
     function prepareForRender() {
       clearSelections();
       document.body.classList.add('exporting-mode');
       
+      // 1. Título principal
       const titleInput = document.getElementById('songTitleInput');
       const titlePrint = document.getElementById('songTitlePrint');
       if (titleInput && titlePrint) {
         const val = titleInput.value.trim();
-        const dict = i18n[currentLang] || i18n['en'];
-        titlePrint.innerText = val !== '' ? val : dict.titlePlaceholder;
+        if (val !== '') {
+          titlePrint.innerText = val;
+        } else {
+          titlePrint.innerText = '';
+        }
         titleInput.style.display = 'none';
         titlePrint.style.display = 'block';
       }
+
+      // 2. Sub-campos del encabezado
+      prepareSubItem('artistInput', 'printArtist', 'wrapArtist');
+      prepareSubItem('styleInput', 'printStyle', 'wrapStyle');
+      prepareSubItem('headerTimeSigInput', 'printTimeSig', 'wrapTimeSig', (i18n[currentLang]?.lblTimeSigHeader || 'Métrica') + ': ');
+      prepareSubItem('bpmInput', 'printBPM', 'wrapBPM');
     }
 
     function restoreAfterRender() {
       document.body.classList.remove('exporting-mode');
+      
       const titleInput = document.getElementById('songTitleInput');
       const titlePrint = document.getElementById('songTitlePrint');
       if (titleInput && titlePrint) {
         titleInput.style.display = 'block';
         titlePrint.style.display = 'none';
       }
+
+      ['wrapArtist', 'wrapStyle', 'wrapTimeSig', 'wrapBPM'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'inline-flex';
+      });
+
+      ['artistInput', 'styleInput', 'headerTimeSigInput', 'bpmInput'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'inline-block';
+      });
+
+      ['printArtist', 'printStyle', 'printTimeSig', 'printBPM'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
     }
 
     function exportAllPagesToPNG() {
