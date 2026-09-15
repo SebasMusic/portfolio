@@ -507,12 +507,23 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      margin-top: 14px;
+      margin-top: 18px; /* Margen base superior generoso */
+      position: relative;
+    }
+
+    /* INSIGNIA DE SECCIÓN (INTRO, VERSO) CON POSICIONAMIENTO Y MANILLA VERTICAL */
+    .section-badge-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      align-self: flex-start;
+      margin-bottom: 2px;
+      position: relative;
+      cursor: grab;
+      user-select: none;
     }
 
     .section-badge {
-      display: inline-block;
-      align-self: flex-start;
       background: #0f172a;
       color: #fff;
       font-weight: 800;
@@ -525,13 +536,25 @@
       text-transform: uppercase;
       min-width: 20px;
       min-height: 16px;
-      margin-bottom: 2px;
     }
     
     .section-badge:empty {
       display: none !important;
       margin: 0 !important;
       padding: 0 !important;
+    }
+
+    /* Manilla para arrastrar verticalmente la insignia */
+    .badge-drag-handle {
+      width: 8px;
+      height: 14px;
+      background: rgba(15, 23, 42, 0.3);
+      border-radius: 2px;
+      cursor: ns-resize;
+      display: none;
+    }
+    .section-badge-container:hover .badge-drag-handle {
+      display: block;
     }
 
     .song2-subtitle {
@@ -642,7 +665,6 @@
       padding: 0;
     }
 
-    /* MANILLA DE REDIMENSIONAMIENTO EN LA PUNTA DE LA CASILLA */
     .volta-resize-handle {
       position: absolute;
       right: -5px;
@@ -1113,7 +1135,10 @@
 
             <div class="chart-content">
               <div class="section-block">
-                <span class="section-badge" contenteditable="true" id="firstSectionBadge">INTRO</span>
+                <div class="section-badge-container">
+                  <span class="section-badge" contenteditable="true" id="firstSectionBadge">INTRO</span>
+                  <div class="badge-drag-handle" onmousedown="initBadgeResize(this, event)" title="Arrastrar para ajustar altura"></div>
+                </div>
                 <div class="measures-grid">
                   <div class="measure-box" onclick="handleMeasureClick(this, event)">
                     <div class="measure-main">
@@ -1288,8 +1313,6 @@
     let redoStack = [];
     let contextTargetMeasure = null;
 
-    let activeVoltaResize = null; // Para arrastrar el borde de la casilla
-
     function saveStateForUndo() {
       const container = document.getElementById('sheetsContainer');
       undoStack.push(container.innerHTML);
@@ -1323,6 +1346,9 @@
       });
       document.querySelectorAll('.volta-resize-handle').forEach(h => {
         h.onmousedown = function(e) { initVoltaResize(this, e); };
+      });
+      document.querySelectorAll('.badge-drag-handle').forEach(h => {
+        h.onmousedown = function(e) { initBadgeResize(this, e); };
       });
       initAllBeatMeasures();
       updateTotalPagesCounter();
@@ -1365,7 +1391,6 @@
       applyLanguage(lang);
     }
 
-    // DESELECCIÓN POR CLIC AL AIRE
     function handleBodyClick(e) {
       if (e.target.closest('.measure-box') || e.target.closest('.toolbox-panel') || e.target.closest('.rhythm-toolbar') || e.target.closest('.chart-header') || e.target.closest('.context-menu')) {
         return;
@@ -1373,14 +1398,17 @@
       clearSelections();
     }
 
+    // SELECCIÓN CON SHIFT ROBUSTA EN CUALQUIER PARTE DEL COMPÁS
     function handleMeasureClick(el, event) {
       if (el.classList.contains('break-system')) return;
       if (event) event.stopPropagation();
 
+      const measureBox = el.closest('.measure-box') || el;
+
       if (event && event.shiftKey && lastSelectedMeasure) {
         const allMeasures = Array.from(document.querySelectorAll('.measure-box:not(.break-system)'));
         const startIdx = allMeasures.indexOf(lastSelectedMeasure);
-        const endIdx = allMeasures.indexOf(el);
+        const endIdx = allMeasures.indexOf(measureBox);
 
         if (startIdx !== -1 && endIdx !== -1) {
           clearSelections();
@@ -1396,17 +1424,17 @@
       }
 
       clearSelections();
-      el.classList.add('selected');
-      selectedMeasures = [el];
-      lastSelectedMeasure = el;
+      measureBox.classList.add('selected');
+      selectedMeasures = [measureBox];
+      lastSelectedMeasure = measureBox;
 
-      const firstBeat = el.querySelector('.beat-slot');
+      const firstBeat = measureBox.querySelector('.beat-slot');
       if (firstBeat) selectBeatSlot(firstBeat, null, 0);
     }
 
     function openContextMenu(el, e) {
       e.preventDefault();
-      contextTargetMeasure = el;
+      contextTargetMeasure = el.closest('.measure-box') || el;
       const menu = document.getElementById('measureContextMenu');
       menu.style.display = 'flex';
       menu.style.left = `${e.pageX}px`;
@@ -1496,22 +1524,26 @@
       });
     }
 
-    // APLICACIÓN DE VOLTA / CASILLA AUTOMÁTICA O CON SELECCIÓN MÚLTIPLE
+    // APLICACIÓN DE VOLTA CON DESPLAZAMIENTO AUTOMÁTICO DE SECCIÓN
     function applyVolta(labelNum) {
       if (selectedMeasures.length === 0) return;
       saveStateForUndo();
 
-      // Limpiar voltas anteriores en los compases seleccionados
       selectedMeasures.forEach(m => {
         const oldV = m.querySelector('.volta-bracket');
         if (oldV) oldV.remove();
       });
 
       const first = selectedMeasures[0];
+      
+      // Auto-desplazar hacia arriba el bloque de sección (INTRO) si existe en este bloque para evitar choques
+      const block = first.closest('.section-block');
+      if (block) {
+        block.style.marginTop = '26px';
+      }
+
       let v = document.createElement('div');
       v.className = 'volta-bracket';
-      
-      // Contenido editable dentro de la casilla
       v.innerHTML = `<input type="text" class="volta-input" value="${labelNum}" onclick="event.stopPropagation()"><div class="volta-resize-handle" onmousedown="initVoltaResize(this, event)"></div>`;
       first.appendChild(v);
 
@@ -1523,7 +1555,7 @@
       }
     }
 
-    // ARRASTRE DINÁMICO DE LA MANILLA DE LA CASILLA
+    // ARRASTRE DINÁMICO DE LA ANCHURA DE LA CASILLA
     function initVoltaResize(handleEl, e) {
       e.stopPropagation();
       e.preventDefault();
@@ -1535,6 +1567,29 @@
         const diff = moveEvent.clientX - startX;
         const newWidth = Math.max(60, startWidth + diff);
         volta.style.width = `${newWidth}px`;
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    // ARRASTRE VERTICAL PARA EDITAR LA ALTURA DE LA INSIGNIA DE SECCIÓN
+    function initBadgeResize(handleEl, e) {
+      e.stopPropagation();
+      e.preventDefault();
+      const container = handleEl.closest('.section-badge-container');
+      const startY = e.clientY;
+      const startMargin = parseInt(window.getComputedStyle(container.closest('.section-block')).marginTop) || 18;
+
+      function onMouseMove(moveEvent) {
+        const diff = moveEvent.clientY - startY;
+        const newMargin = Math.max(4, startMargin + diff);
+        container.closest('.section-block').style.marginTop = `${newMargin}px`;
       }
 
       function onMouseUp() {
@@ -1869,7 +1924,12 @@
       const grid = document.createElement('div');
       grid.className = 'measures-grid';
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
-      newBlock.innerHTML = `<span class="section-badge" contenteditable="true">${dict.secNew}</span>`;
+      newBlock.innerHTML = `
+        <div class="section-badge-container">
+          <span class="section-badge" contenteditable="true">${dict.secNew}</span>
+          <div class="badge-drag-handle" onmousedown="initBadgeResize(this, event)"></div>
+        </div>
+      `;
       newBlock.appendChild(grid);
       content.appendChild(newBlock);
 
@@ -1956,7 +2016,12 @@
       const grid = document.createElement('div');
       grid.className = 'measures-grid';
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
-      newBlock.innerHTML = `<span class="section-badge" contenteditable="true">${title}</span>`;
+      newBlock.innerHTML = `
+        <div class="section-badge-container">
+          <span class="section-badge" contenteditable="true">${title}</span>
+          <div class="badge-drag-handle" onmousedown="initBadgeResize(this, event)"></div>
+        </div>
+      `;
       newBlock.appendChild(grid);
       content.appendChild(newBlock);
       rebindAllEvents();
