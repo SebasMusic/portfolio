@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chord Chart Studio - Professional Rhythmic Engraving Engine</title>
+  <title>Chord Chart Studio - Professional Notation Engine</title>
   
   <!-- Google Analytics GA4 Base -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3DTLYSJMH"></script>
@@ -207,7 +207,6 @@
       gap: 10px;
     }
 
-    /* FLECHAS UNIFICADAS Y CONSISTENTES */
     .collapsible-header {
       font-size: 0.8em;
       font-weight: 800;
@@ -709,7 +708,7 @@
 
   <!-- NAVEGACIÓN SUPERIOR -->
   <div class="top-nav">
-    <a href="../index.html" class="btn-back" id="btnBack">← HOME</a>
+    <a href="../index.html" class="btn-back" id="btnBack">← INICIO</a>
     
     <select class="lang-selector-mini" id="langSelector" onchange="changeLanguageManually(this.value)">
       <option value="en">🇬🇧 English</option>
@@ -725,22 +724,22 @@
 
   <div class="studio-layout">
     
-    <!-- PANEL LATERAL DE CONTROL (TODOS LOS MÓDULOS ENSAMBLADOS POR DEFECTO) -->
+    <!-- PANEL LATERAL DE CONTROL (SIN ICONOS NI EMOJIS DECORATIVOS) -->
     <div class="toolbox-panel">
       
       <!-- MÓDULO 1: MAIN ACTIONS -->
       <div class="toolbox-section">
-        <div class="collapsible-header collapsed" id="modMainActions" onclick="toggleModule(this)">⚡ Main Actions</div>
+        <div class="collapsible-header collapsed" id="modMainActions" onclick="toggleModule(this)">Main Actions</div>
         <div class="collapsible-body hidden">
           <div class="download-dropdown" id="downloadDropdown">
-            <button class="tool-btn primary" style="width:100%; text-align:center;" id="btnExportMain" onclick="toggleDownloadMenu(event)">📥 Download Chart ▾</button>
+            <button class="tool-btn primary" style="width:100%; text-align:center;" id="btnExportMain" onclick="toggleDownloadMenu(event)">Download Chart ▾</button>
             <div class="download-menu">
-              <button class="download-option" id="optDownloadPNG" onclick="exportAllPagesToPNG()">🖼️ Export as PNG Images</button>
-              <button class="download-option" id="optDownloadPDF" onclick="exportAllPagesToPDF()">📄 Export as Single PDF File</button>
+              <button class="download-option" id="optDownloadPNG" onclick="exportAllPagesToPNG()">Export as PNG Images</button>
+              <button class="download-option" id="optDownloadPDF" onclick="exportAllPagesToPDF()">Export as Single PDF File</button>
             </div>
           </div>
 
-          <button class="tool-btn custom-btn" style="margin-top:6px;" id="btnAddPage" onclick="addNewPageManual()">📄 Add New Page</button>
+          <button class="tool-btn custom-btn" style="margin-top:6px;" id="btnAddPage" onclick="addNewPageManual()">Add New Page</button>
           
           <div style="display:flex; gap:8px; margin-top:5px;">
             <button class="tool-btn" style="flex:1;" id="btnTranspDown" onclick="transposeAll(-1)">♭ -1 Semitone</button>
@@ -751,7 +750,7 @@
 
       <!-- MÓDULO 2: DYNAMICS & HAIRPINS -->
       <div class="toolbox-section">
-        <div class="collapsible-header collapsed" id="modDynamics" onclick="toggleModule(this)">🎻 Dynamics & Hairpins</div>
+        <div class="collapsible-header collapsed" id="modDynamics" onclick="toggleModule(this)">Dynamics & Hairpins</div>
         <div class="collapsible-body hidden">
           <div style="font-size:0.75em; color:var(--text-muted);" id="lblDynLevel">Dynamic Level:</div>
           <div class="btn-grid-3">
@@ -790,7 +789,7 @@
 
       <!-- MÓDULO 3: ARTICULATIONS -->
       <div class="toolbox-section">
-        <div class="collapsible-header collapsed" id="modArticulations" onclick="toggleModule(this)">🎼 Articulations</div>
+        <div class="collapsible-header collapsed" id="modArticulations" onclick="toggleModule(this)">Articulations</div>
         <div class="collapsible-body hidden">
           <div class="btn-grid-3">
             <button class="tool-btn" title="Staccato" onclick="applyArticulation('staccato')">Staccato (.)</button>
@@ -816,7 +815,7 @@
 
       <!-- MÓDULO 4: TIME SIGNATURE -->
       <div class="toolbox-section">
-        <div class="collapsible-header collapsed" id="modTimeSig" onclick="toggleModule(this)">⏱️ Time Signature</div>
+        <div class="collapsible-header collapsed" id="modTimeSig" onclick="toggleModule(this)">Time Signature</div>
         <div class="collapsible-body hidden">
           <select class="select-input" id="timeSignatureSelect">
             <option value="4/4" selected id="opt44">4/4 (Four-Four)</option>
@@ -827,17 +826,17 @@
             <option value="12/8" id="opt128">12/8 (Twelve-Eighths)</option>
             <option value="2/2" id="opt22">2/2 (Cut Time)</option>
           </select>
-          <button class="tool-btn" style="margin-top:2px; border-color:var(--accent-purple); color:#d8b4fe;" id="btnApplyTimeSig" onclick="applyTimeSignatureToSelected()">⏱️ Apply Time Sig from Selection</button>
+          <button class="tool-btn" style="margin-top:2px; border-color:var(--accent-purple); color:#d8b4fe;" id="btnApplyTimeSig" onclick="applyTimeSignatureToSelected()">Apply Time Sig from Selection</button>
         </div>
       </div>
 
-      <!-- MÓDULO 5: SECTIONS & SONG 2 -->
+      <!-- MÓDULO 5: SECTIONS & SUBTITLE -->
       <div class="toolbox-section">
-        <div class="collapsible-header collapsed" id="modSections" onclick="toggleModule(this)">🏷️ Sections & Song 2</div>
+        <div class="collapsible-header collapsed" id="modSections" onclick="toggleModule(this)">Sections & Subtitle</div>
         <div class="collapsible-body hidden">
-          <button class="tool-btn custom-btn" style="width:100%; font-weight:700; margin-bottom:4px;" id="btnSubSong2" onclick="addSong2Subtitle()">➕ Song 2 / Subtitle</button>
+          <button class="tool-btn custom-btn" style="width:100%; font-weight:700; margin-bottom:4px;" id="btnSubSong2" onclick="addSong2Subtitle()">+ Add Subtitle</button>
           <div class="btn-grid">
-            <button class="tool-btn custom-btn" id="btnSecEdit" onclick="addEditableSection()">✏️ EDITABLE</button>
+            <button class="tool-btn custom-btn" id="btnSecEdit" onclick="addEditableSection()">EDITABLE</button>
             <button class="tool-btn" id="btnSecIntro" onclick="addSection(i18n[currentLang].secIntro)">+ INTRO</button>
             <button class="tool-btn" id="btnSecVerse" onclick="addSection(i18n[currentLang].secVerse)">+ VERSE</button>
             <button class="tool-btn" id="btnSecChorus" onclick="addSection(i18n[currentLang].secChorus)">+ CHORUS</button>
@@ -849,9 +848,9 @@
 
       <!-- MÓDULO 6: MEASURES & STRUCTURE -->
       <div class="toolbox-section">
-        <div class="collapsible-header collapsed" id="modMeasures" onclick="toggleModule(this)">🎼 Measures & Structure</div>
+        <div class="collapsible-header collapsed" id="modMeasures" onclick="toggleModule(this)">Measures & Structure</div>
         <div class="collapsible-body hidden">
-          <button class="tool-btn primary" style="margin-bottom:6px; background:linear-gradient(135deg, #10b981, #06b6d4);" id="btnGroupSelected" onclick="groupSelectedInSystem()">🔗 Group Selected in 1 System</button>
+          <button class="tool-btn primary" style="margin-bottom:6px; background:linear-gradient(135deg, #10b981, #06b6d4);" id="btnGroupSelected" onclick="groupSelectedInSystem()">Group Selected in 1 System</button>
 
           <div class="btn-grid">
             <button class="tool-btn" id="btnAdd4" onclick="addMultipleMeasures(4)">+ 4 Measures</button>
@@ -863,19 +862,19 @@
           </div>
           <div style="font-size:0.75em; color:var(--text-muted); margin-top:6px; margin-bottom:2px;" id="lblLocation">Position relative to selection:</div>
           <div class="btn-grid">
-            <button class="tool-btn" id="btnInsertBefore" onclick="insertMeasure('before')">⬅️ Before</button>
-            <button class="tool-btn" id="btnInsertAfter" onclick="insertMeasure('after')">➡️ After</button>
+            <button class="tool-btn" id="btnInsertBefore" onclick="insertMeasure('before')">Before</button>
+            <button class="tool-btn" id="btnInsertAfter" onclick="insertMeasure('after')">After</button>
           </div>
-          <button class="tool-btn" style="margin-top:6px; background:rgba(234,179,8,0.15); border-color:rgba(234,179,8,0.4); color:#fef08a;" id="btnLineBreak" onclick="toggleSystemBreak()">↵ Line Break (Group)</button>
-          <button class="tool-btn" style="margin-top:4px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" id="btnDelete" onclick="removeSelectedMeasure()">🗑️ Delete Selected (Shift+Click)</button>
+          <button class="tool-btn" style="margin-top:6px; background:rgba(234,179,8,0.15); border-color:rgba(234,179,8,0.4); color:#fef08a;" id="btnLineBreak" onclick="toggleSystemBreak()">Line Break (Group)</button>
+          <button class="tool-btn" style="margin-top:4px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" id="btnDelete" onclick="removeSelectedMeasure()">Delete Selected (Shift+Click)</button>
         </div>
       </div>
 
       <!-- MÓDULO 7: BAND CUES -->
       <div class="toolbox-section">
-        <div class="collapsible-header collapsed" id="modBandCues" onclick="toggleModule(this)">📌 Band Cues</div>
+        <div class="collapsible-header collapsed" id="modBandCues" onclick="toggleModule(this)">Band Cues</div>
         <div class="collapsible-body hidden">
-          <button class="tool-btn custom-btn" id="btnCustomNote" onclick="addAnnotation(i18n[currentLang].noteDefault, true)">✏️ Custom Note</button>
+          <button class="tool-btn custom-btn" id="btnCustomNote" onclick="addAnnotation(i18n[currentLang].noteDefault, true)">Custom Note</button>
           <div class="btn-grid" style="margin-top:6px;">
             <button class="tool-btn" id="btnBandIn" onclick="addAnnotation(i18n[currentLang].bandIn)">Band IN</button>
             <button class="tool-btn" id="btnTutti" onclick="addAnnotation('Tutti')">Tutti</button>
@@ -894,8 +893,8 @@
       <!-- BARRA DE ESCRITURA RÍTMICA BEAT-BY-BEAT -->
       <div class="rhythm-toolbar">
         <div class="rhythm-title">
-          <span id="lblRhythmStudioTitle">🥁 Rhythms & Notation Studio</span>
-          <span style="font-size:0.8em; opacity:0.8; font-weight:600;" id="lblRhythmShortcuts">Tie Shortcut: <kbd class="key-badge">L</kbd> | Rests: <kbd class="key-badge">Ctrl</kbd> + Num</span>
+          <span id="lblRhythmStudioTitle">Rhythms & Notation Studio</span>
+          <span style="font-size:0.8em; opacity:0.8; font-weight:600;" id="lblRhythmShortcuts">Tie Shortcut: L | Rests: Ctrl + Num</span>
         </div>
         
         <!-- FIGURAS MUSICALES EN SÍMBOLOS -->
@@ -916,7 +915,7 @@
           <button class="rhythm-btn rest-btn" title="Quarter Rest (Ctrl+5)" onclick="applySubdivisionRhythm('rq')"><span class="key-badge">Ctrl+5</span> <span class="music-symbol">𝄽</span></button>
           <button class="rhythm-btn rest-btn" title="Eighth Rest (Ctrl+4)" onclick="applySubdivisionRhythm('r8')"><span class="key-badge">Ctrl+4</span> <span class="music-symbol">𝄾</span></button>
           <button class="rhythm-btn rest-btn" title="Sixteenth Rest (Ctrl+3)" onclick="applySubdivisionRhythm('r16')"><span class="key-badge">Ctrl+3</span> <span class="music-symbol">𝄿</span></button>
-          <button class="rhythm-btn" style="border-color:rgba(239,68,68,0.4); color:#fca5a5; margin-left:auto; font-size:0.8em;" id="btnResetSlashes" onclick="resetMeasureRhythm()">↺ Reset Slashes</button>
+          <button class="rhythm-btn" style="border-color:rgba(239,68,68,0.4); color:#fca5a5; margin-left:auto; font-size:0.8em;" id="btnResetSlashes" onclick="resetMeasureRhythm()">Reset Slashes</button>
         </div>
       </div>
 
@@ -1002,45 +1001,45 @@
     const i18n = {
       en: {
         btnBack: "← HOME",
-        modMainActions: "⚡ Main Actions",
-        btnExportMain: "📥 Download Chart ▾",
-        optDownloadPNG: "🖼️ Export as PNG Images",
-        optDownloadPDF: "📄 Export as Single PDF File",
-        btnAddPage: "📄 Add New Page",
+        modMainActions: "Main Actions",
+        btnExportMain: "Download Chart ▾",
+        optDownloadPNG: "Export as PNG Images",
+        optDownloadPDF: "Export as Single PDF File",
+        btnAddPage: "Add New Page",
         btnTranspDown: "♭ -1 Semitone",
         btnTranspUp: "♯ +1 Semitone",
-        modDynamics: "🎻 Dynamics & Hairpins",
+        modDynamics: "Dynamics & Hairpins",
         lblDynLevel: "Dynamic Level:",
         lblDynSize: "Font Size:",
         lblHairpins: "Volume Hairpins:",
         btnCrescendo: "< Crescendo",
         btnDecrescendo: "> Decrescendo",
         lblHairpinLength: "Length (Bars):",
-        modArticulations: "🎼 Articulations",
+        modArticulations: "Articulations",
         lblAccentScale: "Accent Scale:",
         btnRemoveArt: "Remove Articulation",
-        modTimeSig: "⏱️ Time Signature",
-        btnApplyTimeSig: "⏱️ Apply Time Sig from Selection",
-        modSections: "🏷️ Sections & Song 2",
-        btnSubSong2: "➕ Song 2 / Subtitle",
-        btnSecEdit: "✏️ EDITABLE",
-        modMeasures: "🎼 Measures & Structure",
-        btnGroupSelected: "🔗 Group Selected in 1 System",
+        modTimeSig: "Time Signature",
+        btnApplyTimeSig: "Apply Time Sig from Selection",
+        modSections: "Sections & Subtitle",
+        btnSubSong2: "+ Add Subtitle",
+        btnSecEdit: "EDITABLE",
+        modMeasures: "Measures & Structure",
+        btnGroupSelected: "Group Selected in 1 System",
         btnAdd4: "+ 4 Measures",
         btnAdd8: "+ 8 Measures",
         btnAddN: "+ Custom N",
         lblLocation: "Position relative to selection:",
-        btnInsertBefore: "⬅️ Before",
-        btnInsertAfter: "➡️ After",
-        btnLineBreak: "↵ Line Break (Group)",
-        btnDelete: "🗑️ Delete Selected (Shift+Click)",
-        modBandCues: "📌 Band Cues",
-        btnCustomNote: "✏️ Custom Note",
+        btnInsertBefore: "Before",
+        btnInsertAfter: "After",
+        btnLineBreak: "Line Break (Group)",
+        btnDelete: "Delete Selected (Shift+Click)",
+        modBandCues: "Band Cues",
+        btnCustomNote: "Custom Note",
         btnBandIn: "Band IN",
         btnCorte: "Break / Cut",
-        lblRhythmStudioTitle: "🥁 Rhythms & Notation Studio",
+        lblRhythmStudioTitle: "Rhythms & Notation Studio",
         lblRhythmShortcuts: "Tie Shortcut: L | Rests: Ctrl + Num",
-        btnResetSlashes: "↺ Reset Slashes",
+        btnResetSlashes: "Reset Slashes",
         titlePlaceholder: "SONG TITLE",
         artistPlaceholder: "Artist / Band",
         stylePlaceholder: "Style: Worship / Pop",
@@ -1053,52 +1052,52 @@
         secSolo: "SOLO",
         secNew: "NEW SECTION",
         chordPlaceholder: "Chord",
-        song2Placeholder: "SONG 2: NEW TITLE / SUBTITLE",
+        song2Placeholder: "SUBTITLE / SUBSECTION",
         noteDefault: "Band Note",
         bandIn: "Band IN",
         corte: "Break / Cut"
       },
       es: {
         btnBack: "← INICIO",
-        modMainActions: "⚡ Acciones Principales",
-        btnExportMain: "📥 Descargar Partitura ▾",
-        optDownloadPNG: "🖼️ Exportar como Imágenes PNG",
-        optDownloadPDF: "📄 Exportar como Archivo PDF",
-        btnAddPage: "📄 Agregar Nueva Página",
+        modMainActions: "Acciones Principales",
+        btnExportMain: "Descargar Partitura ▾",
+        optDownloadPNG: "Exportar como Imágenes PNG",
+        optDownloadPDF: "Exportar como Archivo PDF",
+        btnAddPage: "Agregar Nueva Página",
         btnTranspDown: "♭ -1 Semitono",
         btnTranspUp: "♯ +1 Semitono",
-        modDynamics: "🎻 Dinámicas y Reguladores",
+        modDynamics: "Dinámicas y Reguladores",
         lblDynLevel: "Nivel Dinámico:",
         lblDynSize: "Tamaño Fuente:",
         lblHairpins: "Reguladores de Volumen:",
         btnCrescendo: "< Crescendo",
         btnDecrescendo: "> Decrescendo",
         lblHairpinLength: "Largo (Compases):",
-        modArticulations: "🎼 Articulaciones",
+        modArticulations: "Articulaciones",
         lblAccentScale: "Escala Acentos:",
         btnRemoveArt: "Quitar Articulación",
-        modTimeSig: "⏱️ Métrica de Tiempo",
-        btnApplyTimeSig: "⏱️ Aplicar Métrica desde Selección",
-        modSections: "🏷️ Secciones y Canción 2",
-        btnSubSong2: "➕ Canción 2 / Subtítulo",
-        btnSecEdit: "✏️ EDITABLE",
-        modMeasures: "🎼 Compases y Estructura",
-        btnGroupSelected: "🔗 Agrupar Seleccionados en 1 Sistema",
+        modTimeSig: "Métrica de Tiempo",
+        btnApplyTimeSig: "Aplicar Métrica desde Selección",
+        modSections: "Secciones y Subtítulo",
+        btnSubSong2: "+ Agregar Subtítulo",
+        btnSecEdit: "EDITABLE",
+        modMeasures: "Compases y Estructura",
+        btnGroupSelected: "Agrupar Seleccionados en 1 Sistema",
         btnAdd4: "+ 4 Compases",
         btnAdd8: "+ 8 Compases",
         btnAddN: "+ N Personalizado",
         lblLocation: "Posición respecto a selección:",
-        btnInsertBefore: "⬅️ Antes",
-        btnInsertAfter: "➡️ Después",
-        btnLineBreak: "↵ Salto de Línea (Grupo)",
-        btnDelete: "🗑️ Eliminar Seleccionado (Shift+Clic)",
-        modBandCues: "📌 Indicaciones Banda",
-        btnCustomNote: "✏️ Nota Personalizada",
+        btnInsertBefore: "Antes",
+        btnInsertAfter: "Después",
+        btnLineBreak: "Salto de Línea (Grupo)",
+        btnDelete: "Eliminar Seleccionado (Shift+Clic)",
+        modBandCues: "Indicaciones Banda",
+        btnCustomNote: "Nota Personalizada",
         btnBandIn: "Entra Banda",
         btnCorte: "Corte / Break",
-        lblRhythmStudioTitle: "🥁 Estudio de Ritmo y Notación",
+        lblRhythmStudioTitle: "Estudio de Ritmo y Notación",
         lblRhythmShortcuts: "Atajo Ligadura: L | Silencios: Ctrl + Num",
-        btnResetSlashes: "↺ Restablecer Slashes",
+        btnResetSlashes: "Restablecer Slashes",
         titlePlaceholder: "TÍTULO DE LA CANCIÓN",
         artistPlaceholder: "Artista / Banda",
         stylePlaceholder: "Estilo: Worship / Pop",
@@ -1111,358 +1110,10 @@
         secSolo: "SOLO",
         secNew: "NUEVA SECCIÓN",
         chordPlaceholder: "Acorde",
-        song2Placeholder: "CANCIÓN 2: NUEVO TÍTULO / SUBTÍTULO",
+        song2Placeholder: "SUBTÍTULO / SUBSECCIÓN",
         noteDefault: "Nota Banda",
         bandIn: "Entra Banda",
         corte: "Corte / Break"
-      },
-      pt: {
-        btnBack: "← INÍCIO",
-        modMainActions: "⚡ Ações Principais",
-        btnExportMain: "📥 Baixar Partitura ▾",
-        optDownloadPNG: "🖼️ Exportar como Imagens PNG",
-        optDownloadPDF: "📄 Exportar como Arquivo PDF",
-        btnAddPage: "📄 Adicionar Nova Página",
-        btnTranspDown: "♭ -1 Semitom",
-        btnTranspUp: "♯ +1 Semitom",
-        modDynamics: "🎻 Dinâmicas e Reguladores",
-        lblDynLevel: "Nível Dinâmico:",
-        lblDynSize: "Tamanho da Fonte:",
-        lblHairpins: "Reguladores de Volume:",
-        btnCrescendo: "< Crescendo",
-        btnDecrescendo: "> Decrescendo",
-        lblHairpinLength: "Comprimento (Compassos):",
-        modArticulations: "🎼 Articulações",
-        lblAccentScale: "Escala de Acentos:",
-        btnRemoveArt: "Remover Articulação",
-        modTimeSig: "⏱️ Fórmula de Compasso",
-        btnApplyTimeSig: "⏱️ Aplicar Fórmula da Seleção",
-        modSections: "🏷️ Seções e Música 2",
-        btnSubSong2: "➕ Música 2 / Subtítulo",
-        btnSecEdit: "✏️ EDITÁVEL",
-        modMeasures: "🎼 Compassos e Estrutura",
-        btnGroupSelected: "🔗 Agrupar Selecionados em 1 Sistema",
-        btnAdd4: "+ 4 Compassos",
-        btnAdd8: "+ 8 Compassos",
-        btnAddN: "+ N Personalizado",
-        lblLocation: "Posição relativa à seleção:",
-        btnInsertBefore: "⬅️ Antes",
-        btnInsertAfter: "➡️ Depois",
-        btnLineBreak: "↵ Quebra de Linha (Grupo)",
-        btnDelete: "🗑️ Excluir Selecionado (Shift+Clique)",
-        modBandCues: "📌 Indicações da Banda",
-        btnCustomNote: "✏️ Nota Personalizada",
-        btnBandIn: "Entra Banda",
-        btnCorte: "Corte / Break",
-        lblRhythmStudioTitle: "🥁 Estúdio de Ritmo e Notação",
-        lblRhythmShortcuts: "Atalho Ligadura: L | Pausas: Ctrl + Num",
-        btnResetSlashes: "↺ Redefinir Slashes",
-        titlePlaceholder: "TÍTULO DA MÚSICA",
-        artistPlaceholder: "Artista / Banda",
-        stylePlaceholder: "Estilo: Worship / Pop",
-        untitledChart: "MÚSICA SEM TÍTULO",
-        pageLabel: "PÁG.",
-        secIntro: "INTRO",
-        secVerse: "VERSO",
-        secChorus: "REFRÃO",
-        secBridge: "PONTE",
-        secSolo: "SOLO",
-        secNew: "NOVA SEÇÃO",
-        chordPlaceholder: "Acorde",
-        song2Placeholder: "MÚSICA 2: NOVO TÍTULO / SUBTÍTULO",
-        noteDefault: "Nota Banda",
-        bandIn: "Entra Banda",
-        corte: "Corte / Break"
-      },
-      fr: {
-        btnBack: "← ACCUEIL",
-        modMainActions: "⚡ Actions Principales",
-        btnExportMain: "📥 Télécharger la Partition ▾",
-        optDownloadPNG: "🖼️ Exporter en Images PNG",
-        optDownloadPDF: "📄 Exporter en Fichier PDF",
-        btnAddPage: "📄 Ajouter une Page",
-        btnTranspDown: "♭ -1 Demi-ton",
-        btnTranspUp: "♯ +1 Demi-ton",
-        modDynamics: "🎻 Nuances et Soufflets",
-        lblDynLevel: "Niveau de Nuance:",
-        lblDynSize: "Taille de Police:",
-        lblHairpins: "Soufflets de Volume:",
-        btnCrescendo: "< Crescendo",
-        btnDecrescendo: "> Decrescendo",
-        lblHairpinLength: "Longueur (Mesures):",
-        modArticulations: "🎼 Articulations",
-        lblAccentScale: "Échelle des Accents:",
-        btnRemoveArt: "Supprimer l'Articulation",
-        modTimeSig: "⏱️ Signature Temporelle",
-        btnApplyTimeSig: "⏱️ Appliquer la Signature Temporelle",
-        modSections: "🏷️ Sections & Chanson 2",
-        btnSubSong2: "➕ Chanson 2 / Sous-titre",
-        btnSecEdit: "✏️ ÉDITABLE",
-        modMeasures: "🎼 Mesures & Structure",
-        btnGroupSelected: "🔗 Grouper la Sélection en 1 Système",
-        btnAdd4: "+ 4 Mesures",
-        btnAdd8: "+ 8 Mesures",
-        btnAddN: "+ N Personnalisé",
-        lblLocation: "Position par rapport à la sélection:",
-        btnInsertBefore: "⬅️ Avant",
-        btnInsertAfter: "➡️ Après",
-        btnLineBreak: "↵ Saut de Ligne (Groupe)",
-        btnDelete: "🗑️ Supprimer la Sélection (Maj+Clic)",
-        modBandCues: "📌 Indications Groupe",
-        btnCustomNote: "✏️ Note Personnalisée",
-        btnBandIn: "Entrée Groupe",
-        btnCorte: "Coupure / Break",
-        lblRhythmStudioTitle: "🥁 Studio de Rythme et Notation",
-        lblRhythmShortcuts: "Raccourci Liaison: L | Silences: Ctrl + Num",
-        btnResetSlashes: "↺ Réinitialiser les Slashes",
-        titlePlaceholder: "TITRE DE LA CHANSON",
-        artistPlaceholder: "Artiste / Groupe",
-        stylePlaceholder: "Style: Worship / Pop",
-        untitledChart: "PARTITION SANS TITRE",
-        pageLabel: "PAGE",
-        secIntro: "INTRO",
-        secVerse: "COUPLET",
-        secChorus: "REFRAIN",
-        secBridge: "PONT",
-        secSolo: "SOLO",
-        secNew: "NOUVELLE SECTION",
-        chordPlaceholder: "Accord",
-        song2Placeholder: "CHANSON 2: NOUVEAU TITRE / SOUS-TITRE",
-        noteDefault: "Note Groupe",
-        bandIn: "Entrée Groupe",
-        corte: "Coupure / Break"
-      },
-      de: {
-        btnBack: "← START",
-        modMainActions: "⚡ Hauptaktionen",
-        btnExportMain: "📥 Partitur Herunterladen ▾",
-        optDownloadPNG: "🖼️ Als PNG-Bilder Exportieren",
-        optDownloadPDF: "📄 Als PDF-Datei Exportieren",
-        btnAddPage: "📄 Neue Seite Hinzufügen",
-        btnTranspDown: "♭ -1 Halbton",
-        btnTranspUp: "♯ +1 Halbton",
-        modDynamics: "🎻 Dynamik & Lautstärke",
-        lblDynLevel: "Dynamikstufe:",
-        lblDynSize: "Schriftgröße:",
-        lblHairpins: "Lautstärkegabeln:",
-        btnCrescendo: "< Crescendo",
-        btnDecrescendo: "> Decrescendo",
-        lblHairpinLength: "Länge (Takte):",
-        modArticulations: "🎼 Artikulationen",
-        lblAccentScale: "Akzentskalierung:",
-        btnRemoveArt: "Artikulation Entfernen",
-        modTimeSig: "⏱️ Taktart",
-        btnApplyTimeSig: "⏱️ Taktart auf Auswahl Anwenden",
-        modSections: "🏷️ Abschnitte & Song 2",
-        btnSubSong2: "➕ Song 2 / Untertitel",
-        btnSecEdit: "✏️ BEARBEITBAR",
-        modMeasures: "🎼 Takte & Struktur",
-        btnGroupSelected: "🔗 Auswahl in 1 System Gruppieren",
-        btnAdd4: "+ 4 Takte",
-        btnAdd8: "+ 8 Takte",
-        btnAddN: "+ N Anpassen",
-        lblLocation: "Position relativ zur Auswahl:",
-        btnInsertBefore: "⬅️ Vorher",
-        btnInsertAfter: "➡️ Nachher",
-        btnLineBreak: "↵ Zeilenumbruch (Gruppe)",
-        btnDelete: "🗑️ Auswahl Löschen (Umschalt+Klick)",
-        modBandCues: "📌 Band-Hinweise",
-        btnCustomNote: "✏️ Eigene Notiz",
-        btnBandIn: "Band EIN",
-        btnCorte: "Break / Stopp",
-        lblRhythmStudioTitle: "🥁 Rhythmus- & Notationsstudio",
-        lblRhythmShortcuts: "Haltebogen: L | Pausen: Strg + Num",
-        btnResetSlashes: "↺ Slashes Zurücksetzen",
-        titlePlaceholder: "SONGTITEL",
-        artistPlaceholder: "Künstler / Band",
-        stylePlaceholder: "Stil: Worship / Pop",
-        untitledChart: "UNBENANNTE PARTITUR",
-        pageLabel: "SEITE",
-        secIntro: "INTRO",
-        secVerse: "STROHPE",
-        secChorus: "REFRAIN",
-        secBridge: "BRIDGE",
-        secSolo: "SOLO",
-        secNew: "NEUER ABSCHNITT",
-        chordPlaceholder: "Akkord",
-        song2Placeholder: "SONG 2: NEUER TITEL / UNTERTITEL",
-        noteDefault: "Band-Notiz",
-        bandIn: "Band EIN",
-        corte: "Break / Stopp"
-      },
-      zh: {
-        btnBack: "← 首页",
-        modMainActions: "⚡ 主要操作",
-        btnExportMain: "📥 下载乐谱 ▾",
-        optDownloadPNG: "🖼️ 导出为 PNG 图片",
-        optDownloadPDF: "📄 导出为 PDF 文件",
-        btnAddPage: "📄 添加新页面",
-        btnTranspDown: "♭ -1 半音",
-        btnTranspUp: "♯ +1 半音",
-        modDynamics: "🎻 强弱与渐变记号",
-        lblDynLevel: "强弱等级:",
-        lblDynSize: "字体大小:",
-        lblHairpins: "渐强/渐弱记号:",
-        btnCrescendo: "< 渐强",
-        btnDecrescendo: "> 渐弱",
-        lblHairpinLength: "长度 (小节):",
-        modArticulations: "🎼 演奏记号",
-        lblAccentScale: "重音缩放:",
-        btnRemoveArt: "移除演奏记号",
-        modTimeSig: "⏱️ 拍号",
-        btnApplyTimeSig: "⏱️ 将拍号应用至选中项",
-        modSections: "🏷️ 段落与歌曲2",
-        btnSubSong2: "➕ 歌曲2 / 副标题",
-        btnSecEdit: "✏️ 可编辑段落",
-        modMeasures: "🎼 小节与结构",
-        btnGroupSelected: "🔗 将选中项组合在1个行",
-        btnAdd4: "+ 4 小节",
-        btnAdd8: "+ 8 小节",
-        btnAddN: "+ 自定义 N",
-        lblLocation: "相对于选中项的位置:",
-        btnInsertBefore: "⬅️ 在前",
-        btnInsertAfter: "➡️ 在后",
-        btnLineBreak: "↵ 换行 (分组)",
-        btnDelete: "🗑️ 删除选中项 (Shift+单击)",
-        modBandCues: "📌 乐队提示",
-        btnCustomNote: "✏️ 自定义备注",
-        btnBandIn: "乐队进入",
-        btnCorte: "休止 / Break",
-        lblRhythmStudioTitle: "🥁 节奏与记谱工作室",
-        lblRhythmShortcuts: "连音线快捷键: L | 休止符: Ctrl + 数字",
-        btnResetSlashes: "↺ 重置斜线",
-        titlePlaceholder: "歌曲标题",
-        artistPlaceholder: "艺术家 / 乐队",
-        stylePlaceholder: "风格: 敬拜 / 流行",
-        untitledChart: "未命名乐谱",
-        pageLabel: "页",
-        secIntro: "前奏",
-        secVerse: "主歌",
-        secChorus: "副歌",
-        secBridge: "桥段",
-        secSolo: "独奏",
-        secNew: "新段落",
-        chordPlaceholder: "和弦",
-        song2Placeholder: "歌曲 2: 新标题 / 副标题",
-        noteDefault: "乐队备注",
-        bandIn: "乐队进入",
-        corte: "休止 / Break"
-      },
-      ru: {
-        btnBack: "← НАГАД",
-        modMainActions: "⚡ Основные Действия",
-        btnExportMain: "📥 Скачать Партитуру ▾",
-        optDownloadPNG: "🖼️ Экспорт как Изображения PNG",
-        optDownloadPDF: "📄 Экспорт как Файл PDF",
-        btnAddPage: "📄 Добавить Страницу",
-        btnTranspDown: "♭ -1 Полутон",
-        btnTranspUp: "♯ +1 Полутон",
-        modDynamics: "🎻 Динамика и Вилки",
-        lblDynLevel: "Уровень Динамики:",
-        lblDynSize: "Размер Шрифта:",
-        lblHairpins: "Вилки Громкости:",
-        btnCrescendo: "< Crescendo",
-        btnDecrescendo: "> Decrescendo",
-        lblHairpinLength: "Длина (Такты):",
-        modArticulations: "🎼 Артикуляция",
-        lblAccentScale: "Масштаб Акцентов:",
-        btnRemoveArt: "Удалить Артикуляцию",
-        modTimeSig: "⏱️ Музыкальный Размер",
-        btnApplyTimeSig: "⏱️ Применить Размер к Выделению",
-        modSections: "🏷️ Секции и Песня 2",
-        btnSubSong2: "➕ Песня 2 / Подзаголовок",
-        btnSecEdit: "✏️ РЕДАКТИРУЕМЫЙ",
-        modMeasures: "🎼 Такты и Структура",
-        btnGroupSelected: "🔗 Сгруппировать Выделенное в 1 Систему",
-        btnAdd4: "+ 4 Такта",
-        btnAdd8: "+ 8 Тактов",
-        btnAddN: "+ N Настройку",
-        lblLocation: "Позиция относительно выделения:",
-        btnInsertBefore: "⬅️ До",
-        btnInsertAfter: "➡️ После",
-        btnLineBreak: "↵ Перенос Строки (Группа)",
-        btnDelete: "🗑️ Удалить Выделенное (Shift+Клик)",
-        modBandCues: "📌 Указания Группе",
-        btnCustomNote: "✏️ Своя Заметка",
-        btnBandIn: "Вступает Группа",
-        btnCorte: "Пауза / Break",
-        lblRhythmStudioTitle: "🥁 Студия Ритма и Нотации",
-        lblRhythmShortcuts: "Лига: L | Паузы: Ctrl + Число",
-        btnResetSlashes: "↺ Сбросить Слеши",
-        titlePlaceholder: "НАЗВАНИЕ ПЕСНИ",
-        artistPlaceholder: "Исполнитель / Группа",
-        stylePlaceholder: "Стиль: Worship / Pop",
-        untitledChart: "БЕЗ НАЗВАНИЯ",
-        pageLabel: "СТР.",
-        secIntro: "ИНТРО",
-        secVerse: "КУПЛЕТ",
-        secChorus: "ПРИПЕВ",
-        secBridge: "БРИДЖ",
-        secSolo: "СОЛО",
-        secNew: "НОВАЯ СЕКЦИЯ",
-        chordPlaceholder: "Аккорд",
-        song2Placeholder: "ПЕСНЯ 2: НОВОЕ НАЗВАНИЕ / ПОДЗАГОЛОВОК",
-        noteDefault: "Заметка Группе",
-        bandIn: "Вступает Группа",
-        corte: "Пауза / Break"
-      },
-      ja: {
-        btnBack: "← ホーム",
-        modMainActions: "⚡ メイン操作",
-        btnExportMain: "📥 楽譜をダウンロード ▾",
-        optDownloadPNG: "🖼️ PNG画像として出力",
-        optDownloadPDF: "📄 PDFファイルとして出力",
-        btnAddPage: "📄 新しいページを追加",
-        btnTranspDown: "♭ -1 半音",
-        btnTranspUp: "♯ +1 半音",
-        modDynamics: "🎻 強弱記号・クレッシェンド",
-        lblDynLevel: "強弱レベル:",
-        lblDynSize: "文字サイズ:",
-        lblHairpins: "音量変化記号:",
-        btnCrescendo: "< クレッシェンド",
-        btnDecrescendo: "> デクレッシェンド",
-        lblHairpinLength: "長さ (小節):",
-        modArticulations: "🎼 奏法記号 (アーティキュレーション)",
-        lblAccentScale: "アクセントの大きさ:",
-        btnRemoveArt: "奏法記号を削除",
-        modTimeSig: "⏱️ 拍子記号",
-        btnApplyTimeSig: "⏱️ 選択範囲に拍子を適用",
-        modSections: "🏷️ セクション・曲2",
-        btnSubSong2: "➕ 曲2 / サブタイトル",
-        btnSecEdit: "✏️ 編集可能",
-        modMeasures: "🎼 小節・構成",
-        btnGroupSelected: "🔗 選択項目を1行にまとめる",
-        btnAdd4: "+ 4 小節",
-        btnAdd8: "+ 8 小節",
-        btnAddN: "+ カスタム N",
-        lblLocation: "選択位置に対する挿入場所:",
-        btnInsertBefore: "⬅️ 前に挿入",
-        btnInsertAfter: "➡️ 後ろに挿入",
-        btnLineBreak: "↵ 改行 (グループ)",
-        btnDelete: "🗑️ 選択項目を削除 (Shift+クリック)",
-        modBandCues: "📌 バンド指示",
-        btnCustomNote: "✏️ カスタムメモ",
-        btnBandIn: "バンドイン",
-        btnCorte: "ブレイク / キープ",
-        lblRhythmStudioTitle: "🥁 リズム＆表記スタジオ",
-        lblRhythmShortcuts: "タイのショートカット: L | 休符: Ctrl + 数字",
-        btnResetSlashes: "↺ スラッシュをリセット",
-        titlePlaceholder: "曲のタイトル",
-        artistPlaceholder: "アーティスト / バンド",
-        stylePlaceholder: "スタイル: Worship / Pop",
-        untitledChart: "無題の楽譜",
-        pageLabel: "ページ",
-        secIntro: "イントロ",
-        secVerse: "Aメロ",
-        secChorus: "サビ",
-        secBridge: "Cメロ",
-        secSolo: "ソロ",
-        secNew: "新規セクション",
-        chordPlaceholder: "コード",
-        song2Placeholder: "曲 2: 新しいタイトル / サブタイトル",
-        noteDefault: "バンドメモ",
-        bandIn: "バンドイン",
-        corte: "ブレイク"
       }
     };
 
@@ -1490,7 +1141,6 @@
       currentLang = lang;
       const dict = i18n[lang] || i18n['en'];
       
-      // Actualizar todos los elementos con ID
       Object.keys(dict).forEach(key => {
         const el = document.getElementById(key);
         if (el) {
@@ -1564,7 +1214,49 @@
       renderBeatSlot(slotEl);
     }
 
-    // MOTOR PROFESIONAL DE GRABADO RÍTMICO (ENGRAVING ENGINE)
+    function toggleSubdivisionDot() {
+      if (!activeBeatSlot) return;
+      const measureBox = activeBeatSlot.closest('.measure-box');
+      if (!measureBox) return;
+
+      const allSlots = Array.from(measureBox.querySelectorAll('.beat-slot'));
+      const slotIndex = allSlots.indexOf(activeBeatSlot);
+      let items = getBeatData(activeBeatSlot);
+
+      if (items[activeSubIndex]) {
+        const isDottedNow = !items[activeSubIndex].dot;
+        items[activeSubIndex].dot = isDottedNow;
+
+        const currentType = items[activeSubIndex].type.replace('r', '');
+
+        if (isDottedNow && (currentType === 'q' || currentType === 'slash')) {
+          items[activeSubIndex].type = 'q';
+          setBeatData(activeBeatSlot, items);
+
+          const nextSlot = allSlots[slotIndex + 1];
+          if (nextSlot) {
+            setBeatData(nextSlot, [{ type: '8', dot: false, tie: false, articulation: '', scale: 1.4 }]);
+          }
+        } 
+        else if (isDottedNow && currentType === '8') {
+          items = [
+            { type: items[activeSubIndex].type, dot: true, tie: false, articulation: items[activeSubIndex].articulation || '', scale: 1.4 },
+            { type: '16', dot: false, tie: false, articulation: '', scale: 1.4 }
+          ];
+          setBeatData(activeBeatSlot, items);
+        }
+        else if (isDottedNow && currentType === 'h') {
+          items[activeSubIndex].type = 'h';
+          setBeatData(activeBeatSlot, items);
+
+          if (allSlots[slotIndex + 1]) setBeatData(allSlots[slotIndex + 1], [{ type: 'slash', dot: false, tie: false, articulation: '', scale: 1.4 }]);
+          if (allSlots[slotIndex + 2]) setBeatData(allSlots[slotIndex + 2], [{ type: 'slash', dot: false, tie: false, articulation: '', scale: 1.4 }]);
+        } else {
+          setBeatData(activeBeatSlot, items);
+        }
+      }
+    }
+
     function renderBeatSlot(slotEl) {
       const items = getBeatData(slotEl);
       const totalItems = items.length;
@@ -1572,9 +1264,6 @@
       let svgHTML = `<svg viewBox="0 0 40 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">`;
       const step = 40 / (totalItems + 1);
       const stemYBottom = 38;
-
-      let hasSixteenths = false;
-      let hasEighths = false;
 
       const xPositions = items.map((_, i) => step * (i + 1));
 
@@ -1584,9 +1273,6 @@
         const type = item.type;
         const isRest = type.startsWith('r');
         const pureType = isRest ? type.substring(1) : type;
-
-        if (pureType === '16' && !isRest) hasSixteenths = true;
-        if ((pureType === '8' || pureType === '16') && !isRest) hasEighths = true;
 
         svgHTML += `<g class="sub-item-target" onclick="handleSubItemClick(this.closest('.beat-slot'), ${i}, event)">`;
 
@@ -1610,31 +1296,24 @@
             svgHTML += `<rect x="${x - 5}" y="18" width="10" height="5" fill="#1e293b" />`;
           }
         } else {
-          // NOTACIÓN Y CABEZAS RÍTMICAS EXPLÍCITAS:
           if (pureType === 'slash') {
-            // Slash simple por defecto sin plica
             svgHTML += `<line x1="${x - 3.5}" y1="26" x2="${x + 3.5}" y2="10" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" />`;
           } else if (pureType === 'q') {
-            // NEGRA RÍTMICA: Slash relleno como cabeza + Plica explícita descendente
             svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x + 3.5}" y2="14" stroke="#1e293b" stroke-width="4.5" stroke-linecap="round" />`;
             svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
           } else if (pureType === 'h') {
-            // BLANCA RÍTMICA: Cabeza de slash abierta/hueca + Plica explícita
             svgHTML += `<path d="M ${x - 3.5} 22 L ${x + 3.5} 14" stroke="#1e293b" stroke-width="4.5" stroke-linecap="round" />`;
             svgHTML += `<path d="M ${x - 2.5} 21 L ${x + 2.5} 15" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />`;
             svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
           } else if (pureType === 'w') {
-            // REDONDA RÍTMICA: Cabeza de slash abierta sin plica
             svgHTML += `<path d="M ${x - 4.5} 22 L ${x + 4.5} 14" stroke="#1e293b" stroke-width="5" stroke-linecap="round" />`;
             svgHTML += `<path d="M ${x - 3} 21 L ${x + 3} 15" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />`;
           } else {
-            // CORCHEAS Y SEMICORCHEAS
             svgHTML += `<line x1="${x - 3.5}" y1="26" x2="${x + 3.5}" y2="10" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" />`;
             svgHTML += `<line x1="${x - 3.5}" y1="26" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
           }
         }
 
-        // DIBUJO DE ARTICULACIONES
         if (item.articulation) {
           const artY = 5;
           const s = item.scale || currentArticulationScale || 1.4;
@@ -1656,10 +1335,9 @@
         }
 
         if (item.dot) {
-          svgHTML += `<circle cx="${x + 7}" cy="18" r="1.8" fill="#1e293b" />`;
+          svgHTML += `<circle cx="${x + 6.5}" cy="18" r="1.8" fill="#1e293b" />`;
         }
 
-        // LIGADURA DE CABEZA A CABEZA (TIE)
         if (item.tie) {
           svgHTML += `<path d="M ${x - 3} 14 Q ${x + 8} 6 ${x + 18} 14" fill="none" stroke="#1e293b" stroke-width="2" stroke-linecap="round" />`;
         }
@@ -1667,7 +1345,6 @@
         svgHTML += `</g>`;
       });
 
-      // BARRAS / UNIONES SUPERIORES (BEAMS)
       const nonRestIndices = items.map((it, idx) => (!it.type.startsWith('r') && (it.type.endsWith('8') || it.type.endsWith('16'))) ? idx : -1).filter(i => i !== -1);
 
       if (nonRestIndices.length >= 2) {
@@ -1734,24 +1411,6 @@
       }
 
       setBeatData(activeBeatSlot, items);
-    }
-
-    function toggleSubdivisionDot() {
-      if (!activeBeatSlot) return;
-      let items = getBeatData(activeBeatSlot);
-      if (items[activeSubIndex]) {
-        const newState = !items[activeSubIndex].dot;
-        items[activeSubIndex].dot = newState;
-
-        if (newState && items[activeSubIndex].type.endsWith('8')) {
-          items = [
-            { type: items[activeSubIndex].type, dot: true, tie: false, articulation: items[activeSubIndex].articulation, scale: 1.4 },
-            { type: '16', dot: false, tie: false, articulation: '', scale: 1.4 }
-          ];
-        }
-
-        setBeatData(activeBeatSlot, items);
-      }
     }
 
     function toggleSubdivisionTie() {
@@ -1854,7 +1513,6 @@
       }
     }
 
-    // TECLADO NUMÉRICO Y ATAJO 'L' PARA LIGADURA
     window.addEventListener('keydown', (e) => {
       const isEditingInput = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable);
       if (isEditingInput) return;
