@@ -570,6 +570,52 @@
       border: none !important;
     }
 
+    .measure-box.repeat-start {
+      border-left: 5px solid #0f172a !important;
+    }
+
+    .measure-box.repeat-start::before {
+      content: '•';
+      position: absolute;
+      left: 3px;
+      top: 32px;
+      font-size: 1.2em;
+      font-weight: 900;
+      color: #0f172a;
+      line-height: 0;
+    }
+
+    .measure-box.repeat-end {
+      border-right: 5px solid #0f172a !important;
+    }
+
+    .measure-box.repeat-end::after {
+      content: '•';
+      position: absolute;
+      right: 3px;
+      top: 32px;
+      font-size: 1.2em;
+      font-weight: 900;
+      color: #0f172a;
+      line-height: 0;
+    }
+
+    .volta-bracket {
+      position: absolute;
+      top: -14px;
+      left: -2px;
+      right: -2px;
+      height: 12px;
+      border-top: 2px solid #0f172a;
+      border-left: 2px solid #0f172a;
+      font-size: 0.65em;
+      font-weight: 800;
+      padding-left: 3px;
+      line-height: 1;
+      color: #0f172a;
+      pointer-events: none;
+    }
+
     .measure-main {
       display: flex;
       flex-direction: column;
@@ -696,6 +742,44 @@
       color: #334155;
     }
 
+    /* MENÚ CONTEXTUAL PROFESIONAL */
+    .context-menu {
+      display: none;
+      position: absolute;
+      background: #1e293b;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      padding: 6px;
+      z-index: 1000;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 180px;
+    }
+
+    .context-menu-item {
+      background: transparent;
+      border: none;
+      color: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.8em;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .context-menu-item:hover {
+      background: rgba(168, 85, 247, 0.3);
+      color: #fff;
+    }
+
+    .context-menu-item.danger:hover {
+      background: rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
     @media (max-width: 950px) {
       .studio-layout { grid-template-columns: 1fr; }
       .sheets-container { padding: 10px; }
@@ -705,6 +789,16 @@
   </style>
 </head>
 <body>
+
+  <!-- MENÚ CONTEXTUAL FLOTANTE -->
+  <div class="context-menu" id="measureContextMenu">
+    <button class="context-menu-item" onclick="contextAction('clear')">Limpiar Contenido (Supr)</button>
+    <button class="context-menu-item" onclick="contextAction('insertBefore')">Insertar Compás Antes</button>
+    <button class="context-menu-item" onclick="contextAction('insertAfter')">Insertar Compás Después</button>
+    <button class="context-menu-item" onclick="contextAction('repeatStart')">Alternar Repetición (||:)</button>
+    <button class="context-menu-item" onclick="contextAction('repeatEnd')">Alternar Repetición (:||)</button>
+    <button class="context-menu-item danger" onclick="contextAction('delete')">Eliminar Compás Físicamente</button>
+  </div>
 
   <!-- NAVEGACIÓN SUPERIOR -->
   <div class="top-nav">
@@ -724,7 +818,7 @@
 
   <div class="studio-layout">
     
-    <!-- PANEL LATERAL DE CONTROL (SIN ICONOS NI EMOJIS DECORATIVOS) -->
+    <!-- PANEL LATERAL DE CONTROL -->
     <div class="toolbox-panel">
       
       <!-- MÓDULO 1: MAIN ACTIONS -->
@@ -813,7 +907,29 @@
         </div>
       </div>
 
-      <!-- MÓDULO 4: TIME SIGNATURE -->
+      <!-- MÓDULO 4: STRUCTURE & REPEATS -->
+      <div class="toolbox-section">
+        <div class="collapsible-header collapsed" id="modStructure" onclick="toggleModule(this)">Structure & Repeats</div>
+        <div class="collapsible-body hidden">
+          <div style="font-size:0.75em; color:var(--text-muted);">Repeat Barlines & Voltas:</div>
+          <div class="btn-grid">
+            <button class="tool-btn custom-btn" onclick="toggleRepeat('start')">||: Start Repeat</button>
+            <button class="tool-btn custom-btn" onclick="toggleRepeat('end')">:|| End Repeat</button>
+            <button class="tool-btn" onclick="applyVolta(1)">Volta [1.]</button>
+            <button class="tool-btn" onclick="applyVolta(2)">Volta [2.]</button>
+          </div>
+
+          <div style="font-size:0.75em; color:var(--text-muted); margin-top:4px;">Barlines & Navigation:</div>
+          <div class="btn-grid">
+            <button class="tool-btn" onclick="addAnnotation('𝄌 Segno')">𝄌 Segno</button>
+            <button class="tool-btn" onclick="addAnnotation('𝄍 Coda')">𝄍 Coda</button>
+            <button class="tool-btn" onclick="addAnnotation('D.C. al Coda')">D.C. al Coda</button>
+            <button class="tool-btn" onclick="addAnnotation('D.S. al Coda')">D.S. al Coda</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 5: TIME SIGNATURE -->
       <div class="toolbox-section">
         <div class="collapsible-header collapsed" id="modTimeSig" onclick="toggleModule(this)">Time Signature</div>
         <div class="collapsible-body hidden">
@@ -830,7 +946,7 @@
         </div>
       </div>
 
-      <!-- MÓDULO 5: SECTIONS & SUBTITLE -->
+      <!-- MÓDULO 6: SECTIONS & SUBTITLE -->
       <div class="toolbox-section">
         <div class="collapsible-header collapsed" id="modSections" onclick="toggleModule(this)">Sections & Subtitle</div>
         <div class="collapsible-body hidden">
@@ -846,7 +962,7 @@
         </div>
       </div>
 
-      <!-- MÓDULO 6: MEASURES & STRUCTURE -->
+      <!-- MÓDULO 7: MEASURES & STRUCTURE -->
       <div class="toolbox-section">
         <div class="collapsible-header collapsed" id="modMeasures" onclick="toggleModule(this)">Measures & Structure</div>
         <div class="collapsible-body hidden">
@@ -866,11 +982,10 @@
             <button class="tool-btn" id="btnInsertAfter" onclick="insertMeasure('after')">After</button>
           </div>
           <button class="tool-btn" style="margin-top:6px; background:rgba(234,179,8,0.15); border-color:rgba(234,179,8,0.4); color:#fef08a;" id="btnLineBreak" onclick="toggleSystemBreak()">Line Break (Group)</button>
-          <button class="tool-btn" style="margin-top:4px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" id="btnDelete" onclick="removeSelectedMeasure()">Delete Selected (Shift+Click)</button>
         </div>
       </div>
 
-      <!-- MÓDULO 7: BAND CUES -->
+      <!-- MÓDULO 8: BAND CUES -->
       <div class="toolbox-section">
         <div class="collapsible-header collapsed" id="modBandCues" onclick="toggleModule(this)">Band Cues</div>
         <div class="collapsible-body hidden">
@@ -894,7 +1009,7 @@
       <div class="rhythm-toolbar">
         <div class="rhythm-title">
           <span id="lblRhythmStudioTitle">Rhythms & Notation Studio</span>
-          <span style="font-size:0.8em; opacity:0.8; font-weight:600;" id="lblRhythmShortcuts">Tie Shortcut: L | Rests: Ctrl + Num</span>
+          <span style="font-size:0.8em; opacity:0.8; font-weight:600;" id="lblRhythmShortcuts">Undo: Ctrl+Z | Redo: Ctrl+Y | Copy: Ctrl+C | Paste: Ctrl+V</span>
         </div>
         
         <!-- FIGURAS MUSICALES EN SÍMBOLOS -->
@@ -1018,6 +1133,7 @@
         modArticulations: "Articulations",
         lblAccentScale: "Accent Scale:",
         btnRemoveArt: "Remove Articulation",
+        modStructure: "Structure & Repeats",
         modTimeSig: "Time Signature",
         btnApplyTimeSig: "Apply Time Sig from Selection",
         modSections: "Sections & Subtitle",
@@ -1032,13 +1148,12 @@
         btnInsertBefore: "Before",
         btnInsertAfter: "After",
         btnLineBreak: "Line Break (Group)",
-        btnDelete: "Delete Selected (Shift+Click)",
         modBandCues: "Band Cues",
         btnCustomNote: "Custom Note",
         btnBandIn: "Band IN",
         btnCorte: "Break / Cut",
         lblRhythmStudioTitle: "Rhythms & Notation Studio",
-        lblRhythmShortcuts: "Tie Shortcut: L | Rests: Ctrl + Num",
+        lblRhythmShortcuts: "Undo: Ctrl+Z | Redo: Ctrl+Y | Copy: Ctrl+C",
         btnResetSlashes: "Reset Slashes",
         titlePlaceholder: "SONG TITLE",
         artistPlaceholder: "Artist / Band",
@@ -1076,6 +1191,7 @@
         modArticulations: "Articulaciones",
         lblAccentScale: "Escala Acentos:",
         btnRemoveArt: "Quitar Articulación",
+        modStructure: "Estructura y Repeticiones",
         modTimeSig: "Métrica de Tiempo",
         btnApplyTimeSig: "Aplicar Métrica desde Selección",
         modSections: "Secciones y Subtítulo",
@@ -1090,13 +1206,12 @@
         btnInsertBefore: "Antes",
         btnInsertAfter: "Después",
         btnLineBreak: "Salto de Línea (Grupo)",
-        btnDelete: "Eliminar Seleccionado (Shift+Clic)",
         modBandCues: "Indicaciones Banda",
         btnCustomNote: "Nota Personalizada",
         btnBandIn: "Entra Banda",
         btnCorte: "Corte / Break",
         lblRhythmStudioTitle: "Estudio de Ritmo y Notación",
-        lblRhythmShortcuts: "Atajo Ligadura: L | Silencios: Ctrl + Num",
+        lblRhythmShortcuts: "Deshacer: Ctrl+Z | Rehacer: Ctrl+Y | Copiar: Ctrl+C",
         btnResetSlashes: "Restablecer Slashes",
         titlePlaceholder: "TÍTULO DE LA CANCIÓN",
         artistPlaceholder: "Artista / Banda",
@@ -1123,6 +1238,49 @@
     let activeBeatSlot = null;
     let activeSubIndex = 0;
     let currentArticulationScale = 1.4;
+
+    // PORTAPAPELES Y HISTORIAL UNDO/REDO
+    let clipboardMeasureData = null;
+    let undoStack = [];
+    let redoStack = [];
+    let contextTargetMeasure = null;
+
+    function saveStateForUndo() {
+      const container = document.getElementById('sheetsContainer');
+      undoStack.push(container.innerHTML);
+      if (undoStack.length > 50) undoStack.shift();
+      redoStack = []; // Limpiar redo al hacer nueva acción
+    }
+
+    function undoAction() {
+      if (undoStack.length === 0) return;
+      const container = document.getElementById('sheetsContainer');
+      redoStack.push(container.innerHTML);
+      const prevState = undoStack.pop();
+      container.innerHTML = prevState;
+      rebindAllEvents();
+    }
+
+    function redoAction() {
+      if (redoStack.length === 0) return;
+      const container = document.getElementById('sheetsContainer');
+      undoStack.push(container.innerHTML);
+      const nextState = redoStack.pop();
+      container.innerHTML = nextState;
+      rebindAllEvents();
+    }
+
+    function rebindAllEvents() {
+      document.querySelectorAll('.measure-box').forEach(m => {
+        m.onclick = function(e) { handleMeasureClick(this, e); };
+        m.oncontextmenu = function(e) { openContextMenu(this, e); };
+      });
+      document.querySelectorAll('.beat-slot').forEach(b => {
+        b.onclick = function(e) { selectBeatSlot(this, e, 0); };
+      });
+      initAllBeatMeasures();
+      updateTotalPagesCounter();
+    }
 
     function toggleModule(headerEl) {
       headerEl.classList.toggle('collapsed');
@@ -1172,6 +1330,48 @@
       if (firstBeat) selectBeatSlot(firstBeat, null, 0);
     }
 
+    // MENÚ CONTEXTUAL (CLIC DERECHO)
+    function openContextMenu(el, e) {
+      e.preventDefault();
+      contextTargetMeasure = el;
+      const menu = document.getElementById('measureContextMenu');
+      menu.style.display = 'flex';
+      menu.style.left = `${e.pageX}pfx` || `${e.clientX}px`;
+      menu.style.top = `${e.pageY}px` || `${e.clientY}px`;
+    }
+
+    window.addEventListener('click', () => {
+      const menu = document.getElementById('measureContextMenu');
+      if (menu) menu.style.display = 'none';
+    });
+
+    function contextAction(action) {
+      if (!contextTargetMeasure) return;
+      saveStateForUndo();
+
+      if (action === 'clear') {
+        clearMeasureContent(contextTargetMeasure);
+      } else if (action === 'insertBefore') {
+        const newBox = createMeasureElement();
+        contextTargetMeasure.parentNode.insertBefore(newBox, contextTargetMeasure);
+        rebindAllEvents();
+      } else if (action === 'insertAfter') {
+        const newBox = createMeasureElement();
+        contextTargetMeasure.parentNode.insertBefore(newBox, contextTargetMeasure.nextSibling);
+        rebindAllEvents();
+      } else if (action === 'repeatStart') {
+        contextTargetMeasure.classList.toggle('repeat-start');
+      } else if (action === 'repeatEnd') {
+        contextTargetMeasure.classList.toggle('repeat-end');
+      } else if (action === 'delete') {
+        if (contextTargetMeasure.parentNode) {
+          contextTargetMeasure.parentNode.removeChild(contextTargetMeasure);
+          clearSelections();
+          cleanupEmptyPages();
+        }
+      }
+    }
+
     function clearSelections() {
       document.querySelectorAll('.measure-box.selected').forEach(m => m.classList.remove('selected'));
       document.querySelectorAll('.beat-slot.active-beat').forEach(b => b.classList.remove('active-beat'));
@@ -1214,11 +1414,37 @@
       renderBeatSlot(slotEl);
     }
 
+    function toggleRepeat(type) {
+      if (selectedMeasures.length === 0) return;
+      saveStateForUndo();
+      selectedMeasures.forEach(m => {
+        if (type === 'start') {
+          m.classList.toggle('repeat-start');
+        } else if (type === 'end') {
+          m.classList.toggle('repeat-end');
+        }
+      });
+    }
+
+    function applyVolta(num) {
+      if (selectedMeasures.length === 0) return;
+      saveStateForUndo();
+      const target = selectedMeasures[0];
+      let v = target.querySelector('.volta-bracket');
+      if (!v) {
+        v = document.createElement('div');
+        v.className = 'volta-bracket';
+        target.appendChild(v);
+      }
+      v.innerText = `${num}.`;
+    }
+
     function toggleSubdivisionDot() {
       if (!activeBeatSlot) return;
       const measureBox = activeBeatSlot.closest('.measure-box');
       if (!measureBox) return;
 
+      saveStateForUndo();
       const allSlots = Array.from(measureBox.querySelectorAll('.beat-slot'));
       const slotIndex = allSlots.indexOf(activeBeatSlot);
       let items = getBeatData(activeBeatSlot);
@@ -1226,13 +1452,11 @@
       if (items[activeSubIndex]) {
         const isDottedNow = !items[activeSubIndex].dot;
         items[activeSubIndex].dot = isDottedNow;
-
         const currentType = items[activeSubIndex].type.replace('r', '');
 
         if (isDottedNow && (currentType === 'q' || currentType === 'slash')) {
           items[activeSubIndex].type = 'q';
           setBeatData(activeBeatSlot, items);
-
           const nextSlot = allSlots[slotIndex + 1];
           if (nextSlot) {
             setBeatData(nextSlot, [{ type: '8', dot: false, tie: false, articulation: '', scale: 1.4 }]);
@@ -1244,13 +1468,6 @@
             { type: '16', dot: false, tie: false, articulation: '', scale: 1.4 }
           ];
           setBeatData(activeBeatSlot, items);
-        }
-        else if (isDottedNow && currentType === 'h') {
-          items[activeSubIndex].type = 'h';
-          setBeatData(activeBeatSlot, items);
-
-          if (allSlots[slotIndex + 1]) setBeatData(allSlots[slotIndex + 1], [{ type: 'slash', dot: false, tie: false, articulation: '', scale: 1.4 }]);
-          if (allSlots[slotIndex + 2]) setBeatData(allSlots[slotIndex + 2], [{ type: 'slash', dot: false, tie: false, articulation: '', scale: 1.4 }]);
         } else {
           setBeatData(activeBeatSlot, items);
         }
@@ -1263,8 +1480,7 @@
       
       let svgHTML = `<svg viewBox="0 0 40 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">`;
       const step = 40 / (totalItems + 1);
-      const stemYBottom = 38;
-
+      const stemYBottom = 31;
       const xPositions = items.map((_, i) => step * (i + 1));
 
       items.forEach((item, i) => {
@@ -1277,69 +1493,71 @@
         svgHTML += `<g class="sub-item-target" onclick="handleSubItemClick(this.closest('.beat-slot'), ${i}, event)">`;
 
         if (isSelected) {
-          svgHTML += `<rect x="${x - 5.5}" y="3" width="11" height="35" fill="none" stroke="#06b6d4" stroke-width="1.3" stroke-dasharray="2,2" rx="2" />`;
+          svgHTML += `<rect x="${x - 5.5}" y="2" width="11" height="34" fill="none" stroke="#06b6d4" stroke-width="1.3" stroke-dasharray="2,2" rx="2" />`;
         }
 
         if (isRest) {
           if (pureType === 'q') {
-            svgHTML += `<path d="M ${x-2} 10 L ${x+3} 16 L ${x-3} 22 L ${x+2} 28 C ${x-4} 30 ${x-4} 34 ${x+1} 34" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round" />`;
+            svgHTML += `<path d="M ${x-2} 8 L ${x+3} 14 L ${x-3} 20 L ${x+2} 26 C ${x-4} 28 ${x-4} 31 ${x+1} 31" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round" />`;
           } else if (pureType === '8') {
-            svgHTML += `<circle cx="${x-2}" cy="16" r="1.8" fill="#1e293b" />`;
-            svgHTML += `<path d="M ${x-2} 16 Q ${x+2} 14 ${x+1} 20 L ${x-3} 32" fill="none" stroke="#1e293b" stroke-width="1.8" stroke-linecap="round" />`;
+            svgHTML += `<circle cx="${x-2}" cy="14" r="1.8" fill="#1e293b" />`;
+            svgHTML += `<path d="M ${x-2} 14 Q ${x+2} 12 ${x+1} 18 L ${x-3} 28" fill="none" stroke="#1e293b" stroke-width="1.8" stroke-linecap="round" />`;
           } else if (pureType === '16') {
-            svgHTML += `<circle cx="${x-2}" cy="14" r="1.5" fill="#1e293b" />`;
-            svgHTML += `<circle cx="${x-3}" cy="20" r="1.5" fill="#1e293b" />`;
-            svgHTML += `<path d="M ${x-2} 14 Q ${x+2} 12 ${x+1} 18 L ${x-3} 32" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" />`;
+            svgHTML += `<circle cx="${x-2}" cy="12" r="1.5" fill="#1e293b" />`;
+            svgHTML += `<circle cx="${x-3}" cy="18" r="1.5" fill="#1e293b" />`;
+            svgHTML += `<path d="M ${x-2} 12 Q ${x+2} 10 ${x+1} 16 L ${x-3} 28" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" />`;
           } else if (pureType === 'w') {
-            svgHTML += `<rect x="${x - 5}" y="12" width="10" height="5" fill="#1e293b" />`;
+            svgHTML += `<rect x="${x - 5}" y="10" width="10" height="5" fill="#1e293b" />`;
           } else if (pureType === 'h') {
-            svgHTML += `<rect x="${x - 5}" y="18" width="10" height="5" fill="#1e293b" />`;
+            svgHTML += `<rect x="${x - 5}" y="16" width="10" height="5" fill="#1e293b" />`;
           }
         } else {
           if (pureType === 'slash') {
-            svgHTML += `<line x1="${x - 3.5}" y1="26" x2="${x + 3.5}" y2="10" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" />`;
+            svgHTML += `<line x1="${x - 3.5}" y1="24" x2="${x + 3.5}" y2="8" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" />`;
           } else if (pureType === 'q') {
-            svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x + 3.5}" y2="14" stroke="#1e293b" stroke-width="4.5" stroke-linecap="round" />`;
-            svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
+            svgHTML += `<line x1="${x - 3.5}" y1="20" x2="${x + 3.5}" y2="12" stroke="#1e293b" stroke-width="4.5" stroke-linecap="round" />`;
+            svgHTML += `<line x1="${x - 3.5}" y1="20" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
           } else if (pureType === 'h') {
-            svgHTML += `<path d="M ${x - 3.5} 22 L ${x + 3.5} 14" stroke="#1e293b" stroke-width="4.5" stroke-linecap="round" />`;
-            svgHTML += `<path d="M ${x - 2.5} 21 L ${x + 2.5} 15" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />`;
-            svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
+            svgHTML += `<path d="M ${x - 3.5} 20 L ${x + 3.5} 12" stroke="#1e293b" stroke-width="4.5" stroke-linecap="round" />`;
+            svgHTML += `<path d="M ${x - 2.5} 19 L ${x + 2.5} 13" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />`;
+            svgHTML += `<line x1="${x - 3.5}" y1="20" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
           } else if (pureType === 'w') {
-            svgHTML += `<path d="M ${x - 4.5} 22 L ${x + 4.5} 14" stroke="#1e293b" stroke-width="5" stroke-linecap="round" />`;
-            svgHTML += `<path d="M ${x - 3} 21 L ${x + 3} 15" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />`;
+            svgHTML += `<path d="M ${x - 4.5} 20 L ${x + 4.5} 12" stroke="#1e293b" stroke-width="5" stroke-linecap="round" />`;
+            svgHTML += `<path d="M ${x - 3} 19 L ${x + 3} 13" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />`;
           } else {
-            svgHTML += `<line x1="${x - 3.5}" y1="26" x2="${x + 3.5}" y2="10" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" />`;
-            svgHTML += `<line x1="${x - 3.5}" y1="26" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
+            svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x + 3.5}" y2="8" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" />`;
+            svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
+
+            if (totalItems === 1) {
+              if (pureType === '8') {
+                svgHTML += `<path d="M ${x - 3.5} ${stemYBottom} Q ${x + 4} ${stemYBottom - 4} ${x + 2} ${stemYBottom - 10}" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round" />`;
+              } else if (pureType === '16') {
+                svgHTML += `<path d="M ${x - 3.5} ${stemYBottom} Q ${x + 4} ${stemYBottom - 4} ${x + 2} ${stemYBottom - 10}" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round" />`;
+                svgHTML += `<path d="M ${x - 3.5} ${stemYBottom - 4} Q ${x + 4} ${stemYBottom - 8} ${x + 2} ${stemYBottom - 14}" fill="none" stroke="#1e293b" stroke-width="2" stroke-linecap="round" />`;
+              }
+            }
           }
         }
 
         if (item.articulation) {
-          const artY = 5;
+          const artY = 4;
           const s = item.scale || currentArticulationScale || 1.4;
 
           if (item.articulation === 'staccato') {
             svgHTML += `<circle cx="${x + 3.5}" cy="${artY}" r="${2 * s}" fill="#1e293b" />`;
-          } else if (item.articulation === 'staccatissimo') {
-            svgHTML += `<polygon points="${x+3.5-2*s},${artY-2*s} ${x+3.5+2*s},${artY-2*s} ${x+3.5},${artY+3*s}" fill="#1e293b" />`;
           } else if (item.articulation === 'accent') {
             svgHTML += `<path d="M ${x+3.5-3*s} ${artY-2.5*s} L ${x+3.5+3*s} ${artY} L ${x+3.5-3*s} ${artY+2.5*s}" fill="none" stroke="#1e293b" stroke-width="${1.8*s}" stroke-linecap="round" stroke-linejoin="round" />`;
           } else if (item.articulation === 'tenuto') {
             svgHTML += `<line x1="${x+3.5-3*s}" y1="${artY}" x2="${x+3.5+3*s}" y2="${artY}" stroke="#1e293b" stroke-width="${2.2*s}" stroke-linecap="round" />`;
-          } else if (item.articulation === 'marcato') {
-            svgHTML += `<path d="M ${x+3.5-3*s} ${artY+2.5*s} L ${x+3.5} ${artY-2.5*s} L ${x+3.5+3*s} ${artY+2.5*s}" fill="none" stroke="#1e293b" stroke-width="${1.8*s}" stroke-linecap="round" stroke-linejoin="round" />`;
-          } else if (item.articulation === 'fermata') {
-            svgHTML += `<path d="M ${x+3.5-4*s} ${artY+1.5*s} A ${4*s} ${4*s} 0 0 1 ${x+3.5+4*s} ${artY+1.5*s}" fill="none" stroke="#1e293b" stroke-width="${1.5*s}" />`;
-            svgHTML += `<circle cx="${x+3.5}" cy="${artY}" r="${1.2*s}" fill="#1e293b" />`;
           }
         }
 
         if (item.dot) {
-          svgHTML += `<circle cx="${x + 6.5}" cy="18" r="1.8" fill="#1e293b" />`;
+          svgHTML += `<circle cx="${x + 6.5}" cy="16" r="1.8" fill="#1e293b" />`;
         }
 
         if (item.tie) {
-          svgHTML += `<path d="M ${x - 3} 14 Q ${x + 8} 6 ${x + 18} 14" fill="none" stroke="#1e293b" stroke-width="2" stroke-linecap="round" />`;
+          svgHTML += `<path d="M ${x - 3} 12 Q ${x + 8} 4 ${x + 18} 12" fill="none" stroke="#1e293b" stroke-width="2" stroke-linecap="round" />`;
         }
 
         svgHTML += `</g>`;
@@ -1350,23 +1568,7 @@
       if (nonRestIndices.length >= 2) {
         const firstX = xPositions[nonRestIndices[0]] - 3.5;
         const lastX = xPositions[nonRestIndices[nonRestIndices.length - 1]] - 3.5;
-
         svgHTML += `<line x1="${firstX}" y1="${stemYBottom}" x2="${lastX}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="3" />`;
-
-        for (let idx = 0; idx < items.length; idx++) {
-          const pureType = items[idx].type.replace('r', '');
-          if (pureType === '16' && !items[idx].type.startsWith('r')) {
-            const currentX = xPositions[idx] - 3.5;
-
-            if (items[idx + 1] && items[idx + 1].type.replace('r', '') === '16' && !items[idx + 1].type.startsWith('r')) {
-              const nextX = xPositions[idx + 1] - 3.5;
-              svgHTML += `<line x1="${currentX}" y1="${stemYBottom - 4}" x2="${nextX}" y2="${stemYBottom - 4}" stroke="#1e293b" stroke-width="2.5" />`;
-              idx++;
-            } else {
-              svgHTML += `<line x1="${currentX - 4}" y1="${stemYBottom - 4}" x2="${currentX}" y2="${stemYBottom - 4}" stroke="#1e293b" stroke-width="2.5" />`;
-            }
-          }
-        }
       }
 
       svgHTML += `</svg>`;
@@ -1375,6 +1577,7 @@
 
     function applySubdivisionRhythm(type) {
       if (!activeBeatSlot) return;
+      saveStateForUndo();
       let items = getBeatData(activeBeatSlot);
 
       if (type === '16' || type === 'r16') {
@@ -1384,7 +1587,6 @@
           { type: type, dot: false, tie: false, articulation: '', scale: 1.4 }
         ];
         items.splice(activeSubIndex, 1, ...newSubItems);
-
       } else if (type === '8' || type === 'r8') {
         if (items.length === 1 && (items[0].type === 'q' || items[0].type === 'slash')) {
           items = [
@@ -1395,26 +1597,16 @@
         } else if (items[activeSubIndex]) {
           items[activeSubIndex].type = type;
         }
-      } else if (type === 'q' || type === 'rq') {
-        items = [{ type: type, dot: false, tie: false, articulation: '', scale: 1.4 }];
-        activeSubIndex = 0;
-      } else if (type === 'h' || type === 'rh' || type === 'w' || type === 'rw') {
-        items = [{ type: type, dot: false, tie: false, articulation: '', scale: 1.4 }];
-        activeSubIndex = 0;
       } else {
-        if (items[activeSubIndex]) {
-          items[activeSubIndex].type = type;
-        } else {
-          items = [{ type: type, dot: false, tie: false, articulation: '', scale: 1.4 }];
-          activeSubIndex = 0;
-        }
+        items = [{ type: type, dot: false, tie: false, articulation: '', scale: 1.4 }];
+        activeSubIndex = 0;
       }
-
       setBeatData(activeBeatSlot, items);
     }
 
     function toggleSubdivisionTie() {
       if (!activeBeatSlot) return;
+      saveStateForUndo();
       let items = getBeatData(activeBeatSlot);
       if (items[activeSubIndex]) {
         items[activeSubIndex].tie = !items[activeSubIndex].tie;
@@ -1424,27 +1616,17 @@
 
     function applyArticulation(artType) {
       if (!activeBeatSlot) return;
+      saveStateForUndo();
       let items = getBeatData(activeBeatSlot);
       if (items[activeSubIndex]) {
         items[activeSubIndex].articulation = artType;
-        items[activeSubIndex].scale = currentArticulationScale;
         setBeatData(activeBeatSlot, items);
-      }
-    }
-
-    function setArticulationScale(scaleVal) {
-      currentArticulationScale = scaleVal;
-      if (activeBeatSlot) {
-        let items = getBeatData(activeBeatSlot);
-        if (items[activeSubIndex]) {
-          items[activeSubIndex].scale = scaleVal;
-          setBeatData(activeBeatSlot, items);
-        }
       }
     }
 
     function removeArticulation() {
       if (!activeBeatSlot) return;
+      saveStateForUndo();
       let items = getBeatData(activeBeatSlot);
       if (items[activeSubIndex]) {
         items[activeSubIndex].articulation = '';
@@ -1454,6 +1636,7 @@
 
     function applyDynamicText(text) {
       if (selectedMeasures.length === 0) return;
+      saveStateForUndo();
       const target = selectedMeasures[0];
       let dynBox = target.querySelector('.measure-dynamics-container');
       if (!dynBox) {
@@ -1467,95 +1650,112 @@
     function setDynamicFontSize(sizeCss) {
       if (selectedMeasures.length > 0) {
         const dynText = selectedMeasures[0].querySelector('.measure-dynamics-container span');
-        if (dynText) {
-          dynText.style.fontSize = sizeCss;
-        }
+        if (dynText) dynText.style.fontSize = sizeCss;
       }
     }
 
     function applyHairpin(type) {
       if (selectedMeasures.length === 0) return;
+      saveStateForUndo();
       const target = selectedMeasures[0];
-      const bars = parseInt(document.getElementById('hairpinLength').value) || 1;
-      
       let dynBox = target.querySelector('.measure-dynamics-container');
       if (!dynBox) {
         dynBox = document.createElement('div');
         dynBox.className = 'measure-dynamics-container';
         target.appendChild(dynBox);
       }
-
-      const svgHairpin = type === 'crescendo' 
-        ? `<svg width="${100 * bars}%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 7 L 100 0 M 0 7 L 100 14" stroke="#0f172a" stroke-width="1.8" fill="none"/></svg>`
-        : `<svg width="${100 * bars}%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 0 L 100 7 M 0 14 L 100 7" stroke="#0f172a" stroke-width="1.8" fill="none"/></svg>`;
-
-      dynBox.innerHTML = svgHairpin;
-    }
-
-    function updateHairpinLength(lengthVal) {
-      if (selectedMeasures.length > 0) {
-        const dynBox = selectedMeasures[0].querySelector('.measure-dynamics-container svg');
-        if (dynBox) {
-          dynBox.setAttribute('width', `${100 * lengthVal}%`);
-        }
-      }
+      dynBox.innerHTML = type === 'crescendo' 
+        ? `<svg width="100%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 7 L 100 0 M 0 7 L 100 14" stroke="#0f172a" stroke-width="1.8" fill="none"/></svg>`
+        : `<svg width="100%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 0 L 100 7 M 0 14 L 100 7" stroke="#0f172a" stroke-width="1.8" fill="none"/></svg>`;
     }
 
     function resetMeasureRhythm() {
       if (selectedMeasures.length > 0) {
+        saveStateForUndo();
         selectedMeasures.forEach(m => {
-          const slots = m.querySelectorAll('.beat-slot');
-          slots.forEach(b => {
+          m.querySelectorAll('.beat-slot').forEach(b => {
             setBeatData(b, [{ type: 'slash', dot: false, tie: false, articulation: '', scale: 1.4 }]);
           });
-          if (slots[0]) selectBeatSlot(slots[0], null, 0);
         });
       }
     }
 
+    // LIMPIAR CONTENIDO DE COMPÁS (SUPRIMIR)
+    function clearMeasureContent(measureEl) {
+      const chordInput = measureEl.querySelector('.chord-input');
+      if (chordInput) chordInput.value = '';
+      measureEl.querySelectorAll('.beat-slot').forEach(b => {
+        setBeatData(b, [{ type: 'slash', dot: false, tie: false, articulation: '', scale: 1.4 }]);
+      });
+      const dyn = measureEl.querySelector('.measure-dynamics-container');
+      if (dyn) dyn.remove();
+      const annot = measureEl.querySelector('.band-annotation');
+      if (annot) annot.remove();
+    }
+
+    // ATAJOS DE TECLADO (COPIAR, PEGAR, DESHACER, SUPRIMIR)
     window.addEventListener('keydown', (e) => {
       const isEditingInput = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable);
-      if (isEditingInput) return;
-
       const isCtrl = e.ctrlKey || e.metaKey;
 
-      if (isCtrl) {
-        if (e.key === '7') { e.preventDefault(); applySubdivisionRhythm('rw'); }
-        else if (e.key === '6') { e.preventDefault(); applySubdivisionRhythm('rh'); }
-        else if (e.key === '5') { e.preventDefault(); applySubdivisionRhythm('rq'); }
-        else if (e.key === '4') { e.preventDefault(); applySubdivisionRhythm('r8'); }
-        else if (e.key === '3') { e.preventDefault(); applySubdivisionRhythm('r16'); }
-      } else {
-        if (e.key === '7') { applySubdivisionRhythm('w'); }
-        else if (e.key === '6') { applySubdivisionRhythm('h'); }
-        else if (e.key === '5') { applySubdivisionRhythm('q'); }
-        else if (e.key === '4') { applySubdivisionRhythm('8'); }
-        else if (e.key === '3') { applySubdivisionRhythm('16'); }
-        else if (e.key === '.') { toggleSubdivisionDot(); }
-        else if (e.key === '+' || e.key === '=') { toggleSubdivisionTie(); }
-        else if (e.key.toLowerCase() === 'l') { toggleSubdivisionTie(); }
+      if (isCtrl && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        undoAction();
+        return;
+      }
+      if (isCtrl && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) {
+        e.preventDefault();
+        redoAction();
+        return;
+      }
+
+      if (isEditingInput) return;
+
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedMeasures.length > 0) {
+          e.preventDefault();
+          saveStateForUndo();
+          selectedMeasures.forEach(m => clearMeasureContent(m));
+        }
+      }
+
+      if (isCtrl && e.key.toLowerCase() === 'c') {
+        if (selectedMeasures.length > 0) {
+          e.preventDefault();
+          clipboardMeasureData = selectedMeasures[0].innerHTML;
+        }
+      }
+
+      if (isCtrl && e.key.toLowerCase() === 'v') {
+        if (selectedMeasures.length > 0 && clipboardMeasureData) {
+          e.preventDefault();
+          saveStateForUndo();
+          selectedMeasures[0].innerHTML = clipboardMeasureData;
+          rebindAllEvents();
+        }
+      }
+
+      if (isCtrl && e.key.toLowerCase() === 'x') {
+        if (selectedMeasures.length > 0) {
+          e.preventDefault();
+          saveStateForUndo();
+          clipboardMeasureData = selectedMeasures[0].innerHTML;
+          clearMeasureContent(selectedMeasures[0]);
+        }
       }
     });
 
     function groupSelectedInSystem() {
-      const dict = i18n[currentLang] || i18n['en'];
-      if (selectedMeasures.length === 0) {
-        alert(dict.alertGroupSelect || "Select measures to group");
-        return;
-      }
-
+      if (selectedMeasures.length === 0) return;
+      saveStateForUndo();
       const percent = (100 / selectedMeasures.length).toFixed(2);
-      selectedMeasures.forEach(m => {
-        m.style.flex = `0 0 ${percent}%`;
-      });
-
+      selectedMeasures.forEach(m => m.style.flex = `0 0 ${percent}%`);
       const last = selectedMeasures[selectedMeasures.length - 1];
       if (last && last.parentNode) {
         const breakEl = document.createElement('div');
         breakEl.className = 'measure-box break-system';
         last.parentNode.insertBefore(breakEl, last.nextSibling);
       }
-
       clearSelections();
     }
 
@@ -1570,26 +1770,15 @@
     function applyTimeSignatureToSelected() {
       const val = document.getElementById('timeSignatureSelect').value;
       if (selectedMeasures.length === 0) return;
-
+      saveStateForUndo();
       const startMeasure = selectedMeasures[0];
-      const allMeasures = Array.from(document.querySelectorAll('.measure-box:not(.break-system)'));
-      const startIdx = allMeasures.indexOf(startMeasure);
-
-      if (startIdx !== -1) {
-        if (startIdx === 0) {
-          const headerInput = document.getElementById('headerTimeSigInput');
-          if (headerInput) headerInput.value = val;
-        }
-
-        let stackEl = startMeasure.querySelector('.time-sig-stack');
-        if (!stackEl) {
-          const temp = document.createElement('div');
-          temp.innerHTML = createStackedTimeSigHTML(val);
-          stackEl = temp.firstElementChild;
-          startMeasure.insertBefore(stackEl, startMeasure.firstChild);
-        } else {
-          stackEl.outerHTML = createStackedTimeSigHTML(val);
-        }
+      let stackEl = startMeasure.querySelector('.time-sig-stack');
+      if (!stackEl) {
+        const temp = document.createElement('div');
+        temp.innerHTML = createStackedTimeSigHTML(val);
+        startMeasure.insertBefore(temp.firstElementChild, startMeasure.firstChild);
+      } else {
+        stackEl.outerHTML = createStackedTimeSigHTML(val);
       }
     }
 
@@ -1602,8 +1791,8 @@
 
     function addSong2Subtitle() {
       const dict = i18n[currentLang] || i18n['en'];
+      saveStateForUndo();
       const targetMeasure = selectedMeasures.length > 0 ? selectedMeasures[0] : null;
-
       const sub = document.createElement('div');
       sub.className = 'song2-subtitle';
       sub.contentEditable = 'true';
@@ -1611,54 +1800,43 @@
 
       if (targetMeasure && targetMeasure.parentNode) {
         const block = targetMeasure.closest('.section-block');
-        if (block) {
-          block.parentNode.insertBefore(sub, block);
-        }
+        if (block) block.parentNode.insertBefore(sub, block);
       } else {
-        const content = getCurrentPageContent();
-        content.appendChild(sub);
+        getCurrentPageContent().appendChild(sub);
       }
     }
 
     function addNewPageManual() {
+      saveStateForUndo();
       const pages = document.querySelectorAll('.chart-paper');
       const newPage = createNewPageElement(pages.length + 1);
       document.getElementById('sheetsContainer').appendChild(newPage);
       
       const dict = i18n[currentLang] || i18n['en'];
       const content = newPage.querySelector('.chart-content');
-      
       const newBlock = document.createElement('div');
       newBlock.className = 'section-block';
       const grid = document.createElement('div');
       grid.className = 'measures-grid';
-      for (let i = 0; i < 4; i++) {
-        grid.appendChild(createMeasureElement());
-      }
+      for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `<span class="section-badge" contenteditable="true">${dict.secNew}</span>`;
       newBlock.appendChild(grid);
       content.appendChild(newBlock);
 
-      initAllBeatMeasures();
-      updateTotalPagesCounter();
+      rebindAllEvents();
     }
 
     function getCurrentPageContent() {
       const pages = document.querySelectorAll('.chart-paper');
-      const lastPage = pages[pages.length - 1];
-      return lastPage.querySelector('.chart-content');
+      return pages[pages.length - 1].querySelector('.chart-content');
     }
 
     function cleanupEmptyPages() {
       const pages = Array.from(document.querySelectorAll('.chart-paper'));
       for (let i = pages.length - 1; i > 0; i--) {
-        let page = pages[i];
-        let measures = page.querySelectorAll('.measure-box:not(.break-system)');
-        if (measures.length === 0) {
-          page.parentNode.removeChild(page);
-        } else {
-          break; 
-        }
+        if (pages[i].querySelectorAll('.measure-box:not(.break-system)').length === 0) {
+          pages[i].remove();
+        } else break;
       }
       updateTotalPagesCounter();
     }
@@ -1666,11 +1844,8 @@
     function createNewPageElement(pageNum) {
       const dict = i18n[currentLang] || i18n['en'];
       const titleText = document.getElementById('songTitleInput').value.toUpperCase() || dict.untitledChart;
-
       const newPaper = document.createElement('div');
       newPaper.className = 'chart-paper';
-      newPaper.id = `paper-page-${pageNum}`;
-
       newPaper.innerHTML = `
         <div class="paper-inner">
           <div class="chart-header-subsequent">
@@ -1697,7 +1872,7 @@
 
     function addEditableSection() {
       const dict = i18n[currentLang] || i18n['en'];
-      addSection(dict.secNew, true);
+      addSection(dict.secNew);
     }
 
     function createMeasureElement() {
@@ -1705,93 +1880,69 @@
       const box = document.createElement('div');
       box.className = 'measure-box';
       box.onclick = function(e) { handleMeasureClick(this, e); };
+      box.oncontextmenu = function(e) { openContextMenu(this, e); };
       box.innerHTML = `
         <div class="measure-main">
           <input type="text" class="chord-input" placeholder="${dict.chordPlaceholder}">
           <div class="rhythm-beats-container"></div>
         </div>
       `;
+      const container = box.querySelector('.rhythm-beats-container');
+      for (let i = 0; i < 4; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'beat-slot';
+        slot.onclick = function(e) { selectBeatSlot(this, e, 0); };
+        setBeatData(slot, [{ type: 'slash', dot: false, tie: false, articulation: '', scale: 1.4 }]);
+        container.appendChild(slot);
+      }
       return box;
     }
 
-    function addSection(title, isEditable = false) {
+    function addSection(title) {
+      saveStateForUndo();
       const content = getCurrentPageContent();
       const newBlock = document.createElement('div');
       newBlock.className = 'section-block';
-
       const grid = document.createElement('div');
       grid.className = 'measures-grid';
-      for (let i = 0; i < 4; i++) {
-        grid.appendChild(createMeasureElement());
-      }
-
+      for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `<span class="section-badge" contenteditable="true">${title}</span>`;
       newBlock.appendChild(grid);
       content.appendChild(newBlock);
-
-      initAllBeatMeasures();
+      rebindAllEvents();
     }
 
     function addMultipleMeasures(qty) {
       const count = qty || parseInt(document.getElementById('customMeasureQty').value) || 1;
+      saveStateForUndo();
       const content = getCurrentPageContent();
       let targetGrid;
-
       const blocks = content.querySelectorAll('.section-block');
       if (blocks.length > 0) {
         targetGrid = blocks[blocks.length - 1].querySelector('.measures-grid');
       } else {
-        const dict = i18n[currentLang] || i18n['en'];
-        addSection(dict.secNew);
+        addSection(i18n[currentLang].secNew);
         const newBlocks = content.querySelectorAll('.section-block');
         targetGrid = newBlocks[newBlocks.length - 1].querySelector('.measures-grid');
       }
-
-      for (let i = 0; i < count; i++) {
-        targetGrid.appendChild(createMeasureElement());
-      }
-
-      initAllBeatMeasures();
+      for (let i = 0; i < count; i++) targetGrid.appendChild(createMeasureElement());
+      rebindAllEvents();
     }
 
     function insertMeasure(position) {
       if (selectedMeasures.length === 0) return;
+      saveStateForUndo();
       const target = selectedMeasures[0];
       const newBox = createMeasureElement();
-      if (position === 'before') {
-        target.parentNode.insertBefore(newBox, target);
-      } else {
-        target.parentNode.insertBefore(newBox, target.nextSibling);
-      }
-
-      initAllBeatMeasures();
+      if (position === 'before') target.parentNode.insertBefore(newBox, target);
+      else target.parentNode.insertBefore(newBox, target.nextSibling);
+      rebindAllEvents();
       handleMeasureClick(newBox, null);
     }
 
-    function toggleSystemBreak() {
+    function addAnnotation(text) {
       if (selectedMeasures.length === 0) return;
-      const target = selectedMeasures[selectedMeasures.length - 1];
-      const grid = target.parentNode;
-      const breakEl = document.createElement('div');
-      breakEl.className = 'measure-box break-system';
-      grid.insertBefore(breakEl, target.nextSibling);
-    }
-
-    function removeSelectedMeasure() {
-      if (selectedMeasures.length > 0) {
-        selectedMeasures.forEach(m => {
-          if (m && m.parentNode) {
-            m.parentNode.removeChild(m);
-          }
-        });
-        clearSelections();
-        lastSelectedMeasure = null;
-        cleanupEmptyPages();
-      }
-    }
-
-    function addAnnotation(text, isEditable = false) {
-      if (selectedMeasures.length === 0) return;
+      saveStateForUndo();
       const target = selectedMeasures[0];
       let badge = target.querySelector('.band-annotation');
       if (!badge) {
@@ -1811,39 +1962,26 @@
         let index = notesChromatic.indexOf(match);
         if (index === -1) index = notesFlats.indexOf(match);
         if (index === -1) return match;
-        let newIndex = (index + semitones + 12) % 12;
-        return notesChromatic[newIndex];
+        return notesChromatic[(index + semitones + 12) % 12];
       });
     }
 
     function transposeAll(semitones) {
+      saveStateForUndo();
       document.querySelectorAll('.chord-input').forEach(input => {
-        if (input.value.trim() !== '') {
-          input.value = transposeChord(input.value, semitones);
-        }
+        if (input.value.trim() !== '') input.value = transposeChord(input.value, semitones);
       });
     }
 
-    const RENDER_OPTIONS = {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      scrollX: 0,
-      scrollY: 0,
-      width: 794,
-      height: 1123,
-      windowWidth: 1200
-    };
+    const RENDER_OPTIONS = { scale: 2, useCORS: true, allowTaint: true, width: 794, height: 1123, windowWidth: 1200 };
 
     function prepareSubItem(inputId, printId, wrapperId, prefix = '') {
       const inputEl = document.getElementById(inputId);
       const printEl = document.getElementById(printId);
       const wrapperEl = document.getElementById(wrapperId);
       if (!inputEl || !printEl || !wrapperEl) return;
-
       const val = inputEl.value.trim();
       inputEl.style.display = 'none';
-
       if (val !== '') {
         printEl.innerText = prefix + val;
         printEl.style.display = 'inline';
@@ -1856,21 +1994,13 @@
 
     function prepareForRender() {
       clearSelections();
-      document.body.classList.add('exporting-mode');
-      
       const titleInput = document.getElementById('songTitleInput');
       const titlePrint = document.getElementById('songTitlePrint');
       if (titleInput && titlePrint) {
-        const val = titleInput.value.trim();
-        if (val !== '') {
-          titlePrint.innerText = val;
-        } else {
-          titlePrint.innerText = '';
-        }
+        titlePrint.innerText = titleInput.value.trim() !== '' ? titleInput.value.trim() : '';
         titleInput.style.display = 'none';
         titlePrint.style.display = 'block';
       }
-
       prepareSubItem('artistInput', 'printArtist', 'wrapArtist');
       prepareSubItem('styleInput', 'printStyle', 'wrapStyle');
       prepareSubItem('headerTimeSigInput', 'printTimeSig', 'wrapTimeSig');
@@ -1878,25 +2008,20 @@
     }
 
     function restoreAfterRender() {
-      document.body.classList.remove('exporting-mode');
-      
       const titleInput = document.getElementById('songTitleInput');
       const titlePrint = document.getElementById('songTitlePrint');
       if (titleInput && titlePrint) {
         titleInput.style.display = 'block';
         titlePrint.style.display = 'none';
       }
-
       ['wrapArtist', 'wrapStyle', 'wrapTimeSig', 'wrapBPM'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'inline-flex';
       });
-
       ['artistInput', 'styleInput', 'headerTimeSigInput', 'bpmInput'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'inline-block';
       });
-
       ['printArtist', 'printStyle', 'printTimeSig', 'printBPM'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -1906,8 +2031,7 @@
     function exportAllPagesToPNG() {
       prepareForRender();
       document.fonts.ready.then(() => {
-        const papers = document.querySelectorAll('.chart-paper');
-        papers.forEach((paper, idx) => {
+        document.querySelectorAll('.chart-paper').forEach((paper, idx) => {
           html2canvas(paper, RENDER_OPTIONS).then(canvas => {
             const link = document.createElement('a');
             const title = document.getElementById('songTitleInput').value || 'chart';
@@ -1930,18 +2054,18 @@
 
         for (let i = 0; i < papers.length; i++) {
           const canvas = await html2canvas(papers[i], RENDER_OPTIONS);
-          const imgData = canvas.toDataURL('image/jpeg', 0.98);
-
           if (i > 0) pdf.addPage();
-          pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+          pdf.addImage(canvas.toDataURL('image/jpeg', 0.98), 'JPEG', 0, 0, 210, 297);
         }
-
         pdf.save(`${title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
         restoreAfterRender();
       });
     }
 
     function initAllBeatMeasures() {
+      document.querySelectorAll('.measure-box').forEach(m => {
+        m.oncontextmenu = function(e) { openContextMenu(this, e); };
+      });
       document.querySelectorAll('.rhythm-beats-container').forEach(c => {
         if (!c.firstChild) {
           c.innerHTML = '';
@@ -1955,16 +2079,6 @@
         }
       });
     }
-
-    window.addEventListener('keydown', (e) => {
-      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedMeasures.length > 0) {
-        const isEditingInput = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable);
-        if (!isEditingInput) {
-          e.preventDefault();
-          removeSelectedMeasure();
-        }
-      }
-    });
 
     window.addEventListener('DOMContentLoaded', () => {
       initLanguage();
