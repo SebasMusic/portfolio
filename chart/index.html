@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chord Chart Studio - Beat-by-Beat Notation</title>
+  <title>Chord Chart Studio - Advanced Subdivisions</title>
   
   <!-- Google Analytics GA4 Base -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3DTLYSJMH"></script>
@@ -595,6 +595,20 @@
       border-radius: 4px;
     }
 
+    /* ESTILO DE SUB-ELEMENTOS SELECCIONABLES DENTRO DEL TIEMPO */
+    .sub-item-target {
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+
+    .sub-item-target:hover {
+      opacity: 0.7;
+    }
+
+    .sub-item-target.active-sub-item {
+      outline: 2px dashed #06b6d4;
+    }
+
     .beat-slot svg {
       width: 100%;
       height: 100%;
@@ -763,7 +777,7 @@
     <!-- COLUMNA PRINCIPAL DERECHA -->
     <div class="right-main-column">
 
-      <!-- BARRA DE ESCRITURA RÍTMICA BEAT-BY-BEAT -->
+      <!-- BARRA DE ESCRITURA RÍTMICA BEAT-BY-BEAT CON SUBDIVISIONES EDITABLES -->
       <div class="rhythm-toolbar">
         <div class="rhythm-title">
           <span>🥁 Rhythms & Notation Studio</span>
@@ -772,22 +786,22 @@
         
         <!-- FIGURAS MUSICALES EN SÍMBOLOS -->
         <div class="rhythm-buttons">
-          <button class="rhythm-btn" title="Redonda (7)" onclick="applyBeatRhythm('w')"><span class="key-badge">7</span> <span class="music-symbol">𝅝</span></button>
-          <button class="rhythm-btn" title="Blanca (6)" onclick="applyBeatRhythm('h')"><span class="key-badge">6</span> <span class="music-symbol">𝅗𝅥</span></button>
-          <button class="rhythm-btn" title="Negra (5)" onclick="applyBeatRhythm('q')"><span class="key-badge">5</span> <span class="music-symbol">𝅘𝅥</span></button>
-          <button class="rhythm-btn" title="Corchea (4)" onclick="applyBeatRhythm('8')"><span class="key-badge">4</span> <span class="music-symbol">𝅘𝅥𝅮</span></button>
-          <button class="rhythm-btn" title="Semicorchea (3)" onclick="applyBeatRhythm('16')"><span class="key-badge">3</span> <span class="music-symbol">𝅘𝅥𝅯</span></button>
-          <button class="rhythm-btn" title="Puntillo (.)" onclick="toggleBeatDot()"><span class="key-badge">.</span> <span class="music-symbol">•</span></button>
-          <button class="rhythm-btn" title="Ligadura (+)" onclick="toggleBeatTie()"><span class="key-badge">+</span> <span class="music-symbol">‿</span></button>
+          <button class="rhythm-btn" title="Redonda (7)" onclick="applySubdivisionRhythm('w')"><span class="key-badge">7</span> <span class="music-symbol">𝅝</span></button>
+          <button class="rhythm-btn" title="Blanca (6)" onclick="applySubdivisionRhythm('h')"><span class="key-badge">6</span> <span class="music-symbol">𝅗𝅥</span></button>
+          <button class="rhythm-btn" title="Negra (5)" onclick="applySubdivisionRhythm('q')"><span class="key-badge">5</span> <span class="music-symbol">𝅘𝅥</span></button>
+          <button class="rhythm-btn" title="Corchea (4)" onclick="applySubdivisionRhythm('8')"><span class="key-badge">4</span> <span class="music-symbol">𝅘𝅥𝅮</span></button>
+          <button class="rhythm-btn" title="Semicorchea (3)" onclick="applySubdivisionRhythm('16')"><span class="key-badge">3</span> <span class="music-symbol">𝅘𝅥𝅯</span></button>
+          <button class="rhythm-btn" title="Puntillo (.)" onclick="toggleSubdivisionDot()"><span class="key-badge">.</span> <span class="music-symbol">•</span></button>
+          <button class="rhythm-btn" title="Ligadura (+)" onclick="toggleSubdivisionTie()"><span class="key-badge">+</span> <span class="music-symbol">‿</span></button>
         </div>
 
         <!-- SILENCIOS MUSICALES EN SÍMBOLOS -->
         <div class="rhythm-buttons">
-          <button class="rhythm-btn rest-btn" title="Silencio de Redonda (Ctrl+7)" onclick="applyBeatRhythm('rw')"><span class="key-badge">Ctrl+7</span> <span class="music-symbol">𝄻</span></button>
-          <button class="rhythm-btn rest-btn" title="Silencio de Blanca (Ctrl+6)" onclick="applyBeatRhythm('rh')"><span class="key-badge">Ctrl+6</span> <span class="music-symbol">𝄼</span></button>
-          <button class="rhythm-btn rest-btn" title="Silencio de Negra (Ctrl+5)" onclick="applyBeatRhythm('rq')"><span class="key-badge">Ctrl+5</span> <span class="music-symbol">𝄽</span></button>
-          <button class="rhythm-btn rest-btn" title="Silencio de Corchea (Ctrl+4)" onclick="applyBeatRhythm('r8')"><span class="key-badge">Ctrl+4</span> <span class="music-symbol">𝄾</span></button>
-          <button class="rhythm-btn rest-btn" title="Silencio de Semicorchea (Ctrl+3)" onclick="applyBeatRhythm('r16')"><span class="key-badge">Ctrl+3</span> <span class="music-symbol">𝄿</span></button>
+          <button class="rhythm-btn rest-btn" title="Silencio de Redonda (Ctrl+7)" onclick="applySubdivisionRhythm('rw')"><span class="key-badge">Ctrl+7</span> <span class="music-symbol">𝄻</span></button>
+          <button class="rhythm-btn rest-btn" title="Silencio de Blanca (Ctrl+6)" onclick="applySubdivisionRhythm('rh')"><span class="key-badge">Ctrl+6</span> <span class="music-symbol">𝄼</span></button>
+          <button class="rhythm-btn rest-btn" title="Silencio de Negra (Ctrl+5)" onclick="applySubdivisionRhythm('rq')"><span class="key-badge">Ctrl+5</span> <span class="music-symbol">𝄽</span></button>
+          <button class="rhythm-btn rest-btn" title="Silencio de Corchea (Ctrl+4)" onclick="applySubdivisionRhythm('r8')"><span class="key-badge">Ctrl+4</span> <span class="music-symbol">𝄾</span></button>
+          <button class="rhythm-btn rest-btn" title="Silencio de Semicorchea (Ctrl+3)" onclick="applySubdivisionRhythm('r16')"><span class="key-badge">Ctrl+3</span> <span class="music-symbol">𝄿</span></button>
           <button class="rhythm-btn" style="border-color:rgba(239,68,68,0.4); color:#fca5a5; margin-left:auto; font-size:0.8em;" onclick="resetMeasureRhythm()">↺ Restablecer Slashes</button>
         </div>
       </div>
@@ -947,7 +961,7 @@
         opt34: "3/4 (Tres por Cuatro)",
         opt24: "2/4 (Dos por Cuatro)",
         opt68: "6/8 (Seis por Ocho)",
-        opt98: "9/8 (Nueve por Ocho)",
+        opt98: "Nueve por Ocho",
         opt128: "12/8 (Doce por Ocho)",
         opt22: "2/2 (Dos por Dos)",
         btnApplyTimeSig: "⏱️ Aplicar Métrica desde Selección",
@@ -999,7 +1013,8 @@
     let currentLang = 'en';
     let selectedMeasures = [];
     let lastSelectedMeasure = null;
-    let activeBeatSlot = null; // Slot/Beat individual seleccionado en un compás
+    let activeBeatSlot = null; // Slot de beat activo
+    let activeSubIndex = 0;   // Índice del elemento seleccionado dentro de la subdivisión del beat
 
     function initLanguage() {
       let savedLang = localStorage.getItem('preferred_lang');
@@ -1118,9 +1133,8 @@
         selectedMeasures = [el];
         lastSelectedMeasure = el;
 
-        // Seleccionar primer slot por defecto si no hay uno activo en este compás
         const firstBeat = el.querySelector('.beat-slot');
-        if (firstBeat) selectBeatSlot(firstBeat);
+        if (firstBeat) selectBeatSlot(firstBeat, null, 0);
       }
     }
 
@@ -1129,13 +1143,15 @@
       document.querySelectorAll('.beat-slot.active-beat').forEach(b => b.classList.remove('active-beat'));
       selectedMeasures = [];
       activeBeatSlot = null;
+      activeSubIndex = 0;
     }
 
-    function selectBeatSlot(slotEl, e) {
+    function selectBeatSlot(slotEl, e, subIdx = 0) {
       if (e) e.stopPropagation();
       document.querySelectorAll('.beat-slot.active-beat').forEach(b => b.classList.remove('active-beat'));
       slotEl.classList.add('active-beat');
       activeBeatSlot = slotEl;
+      activeSubIndex = subIdx;
 
       const measureBox = slotEl.closest('.measure-box');
       if (measureBox) {
@@ -1146,31 +1162,55 @@
       }
     }
 
-    // --- DIBUJO DE BEAT INDIVIDUAL CON ORIENTACIÓN CORRECTA ---
-    // Slash: Inclinado a la derecha (/), Plica (Stem): Nace en el extremo IZQUIERDO del Slash (x-3.5, y=10)
-    function renderBeatSVG(beatType = 'q', hasDot = false, hasTie = false) {
-      if (beatType === 'empty') return `<svg viewBox="0 0 40 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"></svg>`;
+    // INTERRUPTOR DE CLIC EN SUB-ELEMENTO INDIVIDUAL DENTRO DEL SVG
+    function handleSubItemClick(slotEl, subIdx, e) {
+      if (e) e.stopPropagation();
+      selectBeatSlot(slotEl, null, subIdx);
+      renderBeatSlot(slotEl);
+    }
 
-      let isRest = beatType.startsWith('r');
-      let pureType = isRest ? beatType.substring(1) : beatType;
+    // ESTRUCTURA DE DATOS PARA UN BEAT: Array de figuras/silencios por pulso
+    // por defecto 1 tiempo = ['q']
+    function getBeatData(slotEl) {
+      if (!slotEl.dataset.items) {
+        slotEl.dataset.items = JSON.stringify([{ type: 'q', dot: false, tie: false }]);
+      }
+      return JSON.parse(slotEl.dataset.items);
+    }
 
-      let subCount = 1;
-      let strokeWidth = 3.5;
-      let showStems = false;
-      let beamCount = 0;
+    function setBeatData(slotEl, items) {
+      slotEl.dataset.items = JSON.stringify(items);
+      renderBeatSlot(slotEl);
+    }
 
-      if (pureType === 'q') { subCount = 1; strokeWidth = 3.5; }
-      else if (pureType === '8') { subCount = 2; showStems = !isRest; beamCount = 1; }
-      else if (pureType === '16') { subCount = 4; showStems = !isRest; beamCount = 2; }
-      else if (pureType === 'w' || pureType === 'h') { subCount = 1; strokeWidth = 3.5; }
-
-      let svgHTML = `<svg viewBox="0 0 40 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">`;
+    // DIBUJO RÍTMICO SVG DE SUBDIVISIONES COMBINADAS
+    function renderBeatSlot(slotEl) {
+      const items = getBeatData(slotEl);
+      const totalItems = items.length;
       
-      const step = 40 / (subCount + 1);
+      let svgHTML = `<svg viewBox="0 0 40 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">`;
+      const step = 40 / (totalItems + 1);
       const stemYBottom = 38;
 
-      for (let i = 1; i <= subCount; i++) {
-        const x = step * i;
+      let hasSixteenthBeams = false;
+      let hasEighthBeams = false;
+
+      items.forEach((item, i) => {
+        const x = step * (i + 1);
+        const isSelected = (i === activeSubIndex && slotEl.classList.contains('active-beat'));
+        const type = item.type;
+        const isRest = type.startsWith('r');
+        const pureType = isRest ? type.substring(1) : type;
+
+        if (pureType === '16' && !isRest) hasSixteenthBeams = true;
+        if ((pureType === '8' || pureType === '16') && !isRest) hasEighthBeams = true;
+
+        // Zona interactiva del sub-elemento
+        svgHTML += `<g class="sub-item-target" onclick="handleSubItemClick(this.closest('.beat-slot'), ${i}, event)">`;
+
+        if (isSelected) {
+          svgHTML += `<rect x="${x - 4.5}" y="6" width="9" height="32" fill="none" stroke="#06b6d4" stroke-width="1.2" stroke-dasharray="2,2" rx="2" />`;
+        }
 
         if (isRest) {
           if (pureType === 'q') {
@@ -1188,101 +1228,91 @@
             svgHTML += `<rect x="${x - 5}" y="18" width="10" height="5" fill="#1e293b" />`;
           }
         } else {
-          // Slash inclinado hacia la derecha: de (x-3.5, 26) a (x+3.5, 10)
-          svgHTML += `<line x1="${x - 3.5}" y1="26" x2="${x + 3.5}" y2="10" stroke="#1e293b" stroke-width="${strokeWidth}" stroke-linecap="round" />`;
+          // Slash inclinado a la derecha
+          svgHTML += `<line x1="${x - 3.5}" y1="26" x2="${x + 3.5}" y2="10" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" />`;
 
-          // CORRECCIÓN EXACTA DE LA PLICA: Nace en el extremo IZQUIERDO del slash (x-3.5, y=26) o (x-3.5, y=10 según requerimiento visual)
-          if (showStems) {
+          // Plica desde el extremo izquierdo superior del slash (x-3.5, y=26)
+          if (pureType === '8' || pureType === '16') {
             svgHTML += `<line x1="${x - 3.5}" y1="26" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
           }
         }
 
-        if (hasDot && i === 1) {
+        if (item.dot) {
           svgHTML += `<circle cx="${x + 7}" cy="18" r="1.8" fill="#1e293b" />`;
         }
-      }
 
-      // Barras de agrupación (Beams)
-      if (!isRest && beamCount >= 1 && subCount >= 2) {
+        if (item.tie) {
+          svgHTML += `<path d="M ${x - 4} 28 Q ${x} 34 ${x + 4} 28" fill="none" stroke="#1e293b" stroke-width="1.8" />`;
+        }
+
+        svgHTML += `</g>`;
+      });
+
+      // Dibujo de Barras superiores / de unión (Beams)
+      if (totalItems >= 2 && hasEighthBeams) {
         const xFirst = step * 1 - 3.5;
-        const xLast = step * subCount - 3.5;
+        const xLast = step * totalItems - 3.5;
         svgHTML += `<line x1="${xFirst}" y1="${stemYBottom}" x2="${xLast}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="3" />`;
-        
-        if (beamCount >= 2) {
+
+        if (hasSixteenthBeams) {
           svgHTML += `<line x1="${xFirst}" y1="${stemYBottom - 4}" x2="${xLast}" y2="${stemYBottom - 4}" stroke="#1e293b" stroke-width="2.5" />`;
         }
       }
 
-      // Ligadura (Tie)
-      if (!isRest && hasTie) {
-        svgHTML += `<path d="M 6 28 Q 20 36 34 28" fill="none" stroke="#1e293b" stroke-width="2" />`;
-      }
-
       svgHTML += `</svg>`;
-      return svgHTML;
+      slotEl.innerHTML = svgHTML;
     }
 
-    // APLICAR RITMO EXCLUSIVAMENTE AL SLASH / BEAT SELECCIONADO
-    function applyBeatRhythm(type) {
+    // APLICAR RITMO O SUBDIVISIÓN AL ELEMENTO ACTIVO
+    function applySubdivisionRhythm(type) {
       if (!activeBeatSlot) return;
 
-      const container = activeBeatSlot.closest('.rhythm-beats-container');
-      const allSlots = Array.from(container.children);
-      const currentIndex = allSlots.indexOf(activeBeatSlot);
+      let items = getBeatData(activeBeatSlot);
 
-      // Si la figura es de mayor duración (Blanca u Ocupación de compás completo)
-      if (type === 'h' || type === 'rh') {
-        // Blanca: Modifica el slot actual y vacía el siguiente
-        activeBeatSlot.dataset.rhythm = type;
-        activeBeatSlot.innerHTML = renderBeatSVG(type, activeBeatSlot.dataset.dot === 'true', activeBeatSlot.dataset.tie === 'true');
-        
-        if (allSlots[currentIndex + 1]) {
-          allSlots[currentIndex + 1].dataset.rhythm = 'empty';
-          allSlots[currentIndex + 1].innerHTML = renderBeatSVG('empty');
-        }
-
-        const nextTarget = allSlots[currentIndex + 2] || allSlots[currentIndex + 1];
-        if (nextTarget) selectBeatSlot(nextTarget);
-
-      } else if (type === 'w' || type === 'rw') {
-        // Redonda: Ocupa todo el compás
-        allSlots.forEach((slot, idx) => {
-          if (idx === 0) {
-            slot.dataset.rhythm = type;
-            slot.innerHTML = renderBeatSVG(type, slot.dataset.dot === 'true', slot.dataset.tie === 'true');
-          } else {
-            slot.dataset.rhythm = 'empty';
-            slot.innerHTML = renderBeatSVG('empty');
-          }
-        });
-        selectBeatSlot(allSlots[0]);
-
+      if (type === '16' || type === 'r16') {
+        // Subdivisión de Semicorcheas (4 elementos)
+        items = [
+          { type: type, dot: false, tie: false },
+          { type: type, dot: false, tie: false },
+          { type: type, dot: false, tie: false },
+          { type: type, dot: false, tie: false }
+        ];
+        activeSubIndex = 0;
+      } else if (type === '8' || type === 'r8') {
+        // Subdivisión de Corcheas (2 elementos)
+        items = [
+          { type: type, dot: false, tie: false },
+          { type: type, dot: false, tie: false }
+        ];
+        activeSubIndex = 0;
       } else {
-        // Figuras estándar de 1 tiempo (Negra, Corchea, Semicorchea, etc.)
-        activeBeatSlot.dataset.rhythm = type;
-        activeBeatSlot.innerHTML = renderBeatSVG(type, activeBeatSlot.dataset.dot === 'true', activeBeatSlot.dataset.tie === 'true');
-        
-        // Avanzar al siguiente slash para fluidez al escribir
-        const nextSlot = allSlots[currentIndex + 1];
-        if (nextSlot) selectBeatSlot(nextSlot);
+        // Reemplazar o cambiar solo el sub-elemento seleccionado
+        if (items[activeSubIndex]) {
+          items[activeSubIndex].type = type;
+        } else {
+          items = [{ type: type, dot: false, tie: false }];
+          activeSubIndex = 0;
+        }
+      }
+
+      setBeatData(activeBeatSlot, items);
+    }
+
+    function toggleSubdivisionDot() {
+      if (!activeBeatSlot) return;
+      let items = getBeatData(activeBeatSlot);
+      if (items[activeSubIndex]) {
+        items[activeSubIndex].dot = !items[activeSubIndex].dot;
+        setBeatData(activeBeatSlot, items);
       }
     }
 
-    function toggleBeatDot() {
-      if (activeBeatSlot) {
-        const curState = activeBeatSlot.dataset.dot === 'true';
-        activeBeatSlot.dataset.dot = !curState;
-        const type = activeBeatSlot.dataset.rhythm || 'q';
-        activeBeatSlot.innerHTML = renderBeatSVG(type, !curState, activeBeatSlot.dataset.tie === 'true');
-      }
-    }
-
-    function toggleBeatTie() {
-      if (activeBeatSlot) {
-        const curState = activeBeatSlot.dataset.tie === 'true';
-        activeBeatSlot.dataset.tie = !curState;
-        const type = activeBeatSlot.dataset.rhythm || 'q';
-        activeBeatSlot.innerHTML = renderBeatSVG(type, activeBeatSlot.dataset.dot === 'true', !curState);
+    function toggleSubdivisionTie() {
+      if (!activeBeatSlot) return;
+      let items = getBeatData(activeBeatSlot);
+      if (items[activeSubIndex]) {
+        items[activeSubIndex].tie = !items[activeSubIndex].tie;
+        setBeatData(activeBeatSlot, items);
       }
     }
 
@@ -1291,12 +1321,9 @@
         selectedMeasures.forEach(m => {
           const slots = m.querySelectorAll('.beat-slot');
           slots.forEach(b => {
-            b.dataset.rhythm = 'q';
-            b.dataset.dot = 'false';
-            b.dataset.tie = 'false';
-            b.innerHTML = renderBeatSVG('q', false, false);
+            setBeatData(b, [{ type: 'q', dot: false, tie: false }]);
           });
-          if (slots[0]) selectBeatSlot(slots[0]);
+          if (slots[0]) selectBeatSlot(slots[0], null, 0);
         });
       }
     }
@@ -1309,19 +1336,19 @@
       const isCtrl = e.ctrlKey || e.metaKey;
 
       if (isCtrl) {
-        if (e.key === '7') { e.preventDefault(); applyBeatRhythm('rw'); }
-        else if (e.key === '6') { e.preventDefault(); applyBeatRhythm('rh'); }
-        else if (e.key === '5') { e.preventDefault(); applyBeatRhythm('rq'); }
-        else if (e.key === '4') { e.preventDefault(); applyBeatRhythm('r8'); }
-        else if (e.key === '3') { e.preventDefault(); applyBeatRhythm('r16'); }
+        if (e.key === '7') { e.preventDefault(); applySubdivisionRhythm('rw'); }
+        else if (e.key === '6') { e.preventDefault(); applySubdivisionRhythm('rh'); }
+        else if (e.key === '5') { e.preventDefault(); applySubdivisionRhythm('rq'); }
+        else if (e.key === '4') { e.preventDefault(); applySubdivisionRhythm('r8'); }
+        else if (e.key === '3') { e.preventDefault(); applySubdivisionRhythm('r16'); }
       } else {
-        if (e.key === '7') { applyBeatRhythm('w'); }
-        else if (e.key === '6') { applyBeatRhythm('h'); }
-        else if (e.key === '5') { applyBeatRhythm('q'); }
-        else if (e.key === '4') { applyBeatRhythm('8'); }
-        else if (e.key === '3') { applyBeatRhythm('16'); }
-        else if (e.key === '.') { toggleBeatDot(); }
-        else if (e.key === '+' || e.key === '=') { toggleBeatTie(); }
+        if (e.key === '7') { applySubdivisionRhythm('w'); }
+        else if (e.key === '6') { applySubdivisionRhythm('h'); }
+        else if (e.key === '5') { applySubdivisionRhythm('q'); }
+        else if (e.key === '4') { applySubdivisionRhythm('8'); }
+        else if (e.key === '3') { applySubdivisionRhythm('16'); }
+        else if (e.key === '.') { toggleSubdivisionDot(); }
+        else if (e.key === '+' || e.key === '=') { toggleSubdivisionTie(); }
       }
     });
 
@@ -1777,11 +1804,8 @@
           for (let i = 0; i < 4; i++) {
             const slot = document.createElement('div');
             slot.className = 'beat-slot';
-            slot.dataset.rhythm = 'q';
-            slot.dataset.dot = 'false';
-            slot.dataset.tie = 'false';
-            slot.onclick = function(e) { selectBeatSlot(this, e); };
-            slot.innerHTML = renderBeatSVG('q', false, false);
+            slot.onclick = function(e) { selectBeatSlot(this, e, 0); };
+            setBeatData(slot, [{ type: 'q', dot: false, tie: false }]);
             c.appendChild(slot);
           }
         }
