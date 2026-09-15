@@ -488,11 +488,27 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      margin-top: 16px;
+      margin-top: 24px;
       position: relative;
     }
 
-    /* INSIGNIA DE SECCIÓN FLOTANTE E INDEPENDIENTE */
+    .block-v-handle {
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      width: 6px;
+      height: 24px;
+      background: #94a3b8;
+      border-radius: 2px;
+      cursor: ns-resize;
+      transform: translateY(-50%);
+      display: none;
+      z-index: 15;
+    }
+    .section-block:hover .block-v-handle {
+      display: block;
+    }
+
     .section-badge-container {
       position: absolute;
       top: -24px;
@@ -559,7 +575,7 @@
       border-right: 1.5px solid #0f172a;
       border-top: 1.5px solid #0f172a;
       border-bottom: 1.5px solid #0f172a;
-      padding: 6px 8px;
+      padding: 6px 8px 6px 12px;
       display: flex;
       position: relative;
       background: #fff;
@@ -582,37 +598,45 @@
       border: none !important;
     }
 
+    /* BARRAS DE REPETICIÓN ESTÉTICAS Y DEFINIDAS */
     .measure-box.repeat-start {
-      border-left: 4px solid #0f172a !important;
+      border-left: 5px solid #0f172a !important;
+      box-shadow: inset 3px 0 0 0 #fff, inset 5px 0 0 0 #0f172a;
     }
 
     .measure-box.repeat-start::before {
-      content: '•';
+      content: '• •';
       position: absolute;
-      left: 2px;
-      top: 40px;
-      font-size: 1.1em;
+      left: 8px;
+      top: 35px;
+      font-size: 0.9em;
       font-weight: 900;
       color: #0f172a;
-      line-height: 0;
+      line-height: 1.2;
+      letter-spacing: 2px;
+      z-index: 5;
     }
 
     .measure-box.repeat-end {
-      border-right: 4px solid #0f172a !important;
+      border-right: 5px solid #0f172a !important;
+      padding-right: 14px;
+      box-shadow: inset -3px 0 0 0 #fff, inset -5px 0 0 0 #0f172a;
     }
 
     .measure-box.repeat-end::after {
-      content: '•';
+      content: '• •';
       position: absolute;
-      right: 2px;
-      top: 40px;
-      font-size: 1.1em;
+      right: 8px;
+      top: 35px;
+      font-size: 0.9em;
       font-weight: 900;
       color: #0f172a;
-      line-height: 0;
+      line-height: 1.2;
+      letter-spacing: 2px;
+      z-index: 5;
     }
 
-    /* VOLTA / CASILLA DE REPETICIÓN INDEPENDIENTE CON MANILLA VERTICAL Y HORIZONTAL */
+    /* VOLTA / CASILLA CON TIRADORES */
     .volta-bracket {
       position: absolute;
       top: -24px;
@@ -644,9 +668,8 @@
       padding: 0;
     }
 
-    .volta-resize-handle {
+    .volta-resize-left, .volta-resize-right {
       position: absolute;
-      right: -4px;
       top: -2px;
       width: 8px;
       height: 10px;
@@ -655,8 +678,9 @@
       border-radius: 1px;
       z-index: 15;
     }
+    .volta-resize-left { left: -4px; }
+    .volta-resize-right { right: -4px; }
 
-    /* Manilla vertical independiente para la casilla (Volta) */
     .volta-v-handle {
       position: absolute;
       left: 50%;
@@ -681,6 +705,7 @@
       flex: 1;
       height: 100%;
       padding-top: 14px;
+      position: relative;
     }
 
     .chord-input {
@@ -732,7 +757,54 @@
       height: 100%;
     }
 
-    /* DINÁMICAS / REGULADORES CON MANILLA VERTICAL INDEPENDIENTE */
+    /* LIGADURAS (TIES) CON TIRADORES DE MOVIMIENTO VERTICAL Y DOBLE REDISEÑO HORIZONTAL */
+    .custom-tie-overlay {
+      position: absolute;
+      top: 4px;
+      left: 0px;
+      width: 60px;
+      height: 16px;
+      cursor: ns-resize;
+      z-index: 25;
+      display: flex;
+      align-items: center;
+    }
+
+    .tie-v-handle {
+      position: absolute;
+      left: 50%;
+      top: -6px;
+      width: 10px;
+      height: 5px;
+      background: #94a3b8;
+      border-radius: 2px;
+      transform: translateX(-50%);
+      display: none;
+      cursor: ns-resize;
+    }
+    .custom-tie-overlay:hover .tie-v-handle {
+      display: block;
+    }
+
+    .tie-resize-handle {
+      position: absolute;
+      top: 50%;
+      width: 6px;
+      height: 8px;
+      background: #0f172a;
+      cursor: ew-resize;
+      border-radius: 1px;
+      transform: translateY(-50%);
+      z-index: 28;
+      display: none;
+    }
+    .tie-resize-left { left: -3px; }
+    .tie-resize-right { right: -3px; }
+
+    .custom-tie-overlay:hover .tie-resize-handle {
+      display: block;
+    }
+
     .measure-dynamics-container {
       position: absolute;
       bottom: -22px;
@@ -762,6 +834,25 @@
       display: none;
     }
     .measure-dynamics-container:hover .dyn-v-handle {
+      display: block;
+    }
+
+    .dyn-resize-handle {
+      position: absolute;
+      top: 50%;
+      width: 8px;
+      height: 10px;
+      background: #0f172a;
+      cursor: ew-resize;
+      border-radius: 1px;
+      transform: translateY(-50%);
+      z-index: 15;
+      display: none;
+    }
+    .dyn-resize-left { left: -4px; }
+    .dyn-resize-right { right: -4px; }
+
+    .measure-dynamics-container:hover .dyn-resize-handle {
       display: block;
     }
 
@@ -904,10 +995,17 @@
           </div>
 
           <button class="tool-btn custom-btn" style="margin-top:6px;" id="btnAddPage" onclick="addNewPageManual()">Add New Page</button>
-          
-          <div style="display:flex; gap:6px; margin-top:5px;">
-            <button class="tool-btn" style="flex:1;" id="btnTranspDown" onclick="transposeAll(-1)">♭ -1 Semitone</button>
-            <button class="tool-btn" style="flex:1;" id="btnTranspUp" onclick="transposeAll(1)">♯ +1 Semitone</button>
+        </div>
+      </div>
+
+      <!-- MÓDULO NUEVO: TRANSPOSITION -->
+      <div class="toolbox-section">
+        <div class="collapsible-header collapsed" id="modTranspose" onclick="toggleModule(this)">Transposición</div>
+        <div class="collapsible-body hidden">
+          <div style="font-size:0.75em; color:var(--text-muted);" id="lblTransposeDesc">Transportar toda la partitura:</div>
+          <div style="display:flex; gap:6px;">
+            <button class="tool-btn" style="flex:1;" id="btnTranspDown" onclick="transposeAll(-1)">♭ -1 Semitono</button>
+            <button class="tool-btn" style="flex:1;" id="btnTranspUp" onclick="transposeAll(1)">♯ +1 Semitono</button>
           </div>
         </div>
       </div>
@@ -944,10 +1042,6 @@
             <button class="tool-btn custom-btn" id="btnCrescendo" onclick="applyHairpin('crescendo')"><i>&lt;</i> Crescendo</button>
             <button class="tool-btn custom-btn" id="btnDecrescendo" onclick="applyHairpin('decrescendo')"><i>&gt;</i> Decrescendo</button>
           </div>
-          <div style="display:flex; gap:6px; align-items:center; margin-top:4px;">
-            <span style="font-size:0.75em; color:var(--text-muted);" id="lblHairpinLength">Length (Bars):</span>
-            <input type="number" id="hairpinLength" value="1" min="1" max="8" class="select-input" style="width:50px; text-align:center;" onchange="updateHairpinLength(this.value)">
-          </div>
         </div>
       </div>
 
@@ -963,17 +1057,7 @@
             <button class="tool-btn" title="Marcato" onclick="applyArticulation('marcato')">Marcato (^)</button>
             <button class="tool-btn" title="Fermata" onclick="applyArticulation('fermata')">Fermata (𝄐)</button>
           </div>
-
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-            <span style="font-size:0.75em; color:var(--text-muted);" id="lblAccentScale">Accent Scale:</span>
-            <div style="display:flex; gap:4px;">
-              <button class="tool-btn" style="padding:2px 6px;" onclick="setArticulationScale(1.0)">1.0x</button>
-              <button class="tool-btn" style="padding:2px 6px;" onclick="setArticulationScale(1.4)">1.4x</button>
-              <button class="tool-btn" style="padding:2px 6px;" onclick="setArticulationScale(1.8)">1.8x</button>
-            </div>
-          </div>
-
-          <button class="tool-btn" style="margin-top:4px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" id="btnRemoveArt" onclick="removeArticulation()">Remove Articulation</button>
+          <button class="tool-btn" style="margin-top:6px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" id="btnRemoveArt" onclick="removeArticulation()">Remove Articulation</button>
         </div>
       </div>
 
@@ -1090,7 +1174,7 @@
           <button class="rhythm-btn" title="Eighth (4)" onclick="applySubdivisionRhythm('8')"><span class="key-badge">4</span> <span class="music-symbol">𝅘𝅥𝅮</span></button>
           <button class="rhythm-btn" title="Sixteenth (3)" onclick="applySubdivisionRhythm('16')"><span class="key-badge">3</span> <span class="music-symbol">𝅘𝅥𝅯</span></button>
           <button class="rhythm-btn" title="Dot (.)" onclick="toggleSubdivisionDot()"><span class="key-badge">.</span> <span class="music-symbol">•</span></button>
-          <button class="rhythm-btn" title="Tie (L)" onclick="toggleSubdivisionTie()"><span class="key-badge">L</span> <span class="music-symbol">‿</span></button>
+          <button class="rhythm-btn" title="Tie / Ligadura (L)" onclick="toggleSubdivisionTie()"><span class="key-badge">L</span> <span class="music-symbol">‿</span></button>
         </div>
 
         <!-- SILENCIOS MUSICALES EN SÍMBOLOS -->
@@ -1138,7 +1222,8 @@
             </div>
 
             <div class="chart-content">
-              <div class="section-block">
+              <div class="section-block" style="margin-top: 24px;">
+                <div class="block-v-handle" onmousedown="initBlockVerticalResize(this, event)" title="Arrastrar para subir/bajar bloque de sistema"></div>
                 <div class="section-badge-container" style="top: -24px;" onmousedown="initBadgeResize(this, event)">
                   <span class="section-badge" contenteditable="true" id="firstSectionBadge">INTRO</span>
                   <div class="badge-drag-handle"></div>
@@ -1190,21 +1275,21 @@
       en: {
         btnBack: "← HOME",
         modMainActions: "Main Actions",
+        modTranspose: "Transposition",
+        lblTransposeDesc: "Transpose entire chart:",
+        btnTranspDown: "♭ -1 Semitone",
+        btnTranspUp: "♯ +1 Semitone",
         btnExportMain: "Download Chart ▾",
         optDownloadPNG: "Export as PNG Images",
         optDownloadPDF: "Export as Single PDF File",
         btnAddPage: "Add New Page",
-        btnTranspDown: "♭ -1 Semitone",
-        btnTranspUp: "♯ +1 Semitone",
         modDynamics: "Dynamics & Hairpins",
         lblDynLevel: "Dynamic Level:",
         lblDynSize: "Font Size:",
         lblHairpins: "Volume Hairpins:",
         btnCrescendo: "< Crescendo",
         btnDecrescendo: "> Decrescendo",
-        lblHairpinLength: "Length (Bars):",
         modArticulations: "Articulations",
-        lblAccentScale: "Accent Scale:",
         btnRemoveArt: "Remove Articulation",
         modStructure: "Structure & Repeats",
         modTimeSig: "Time Signature",
@@ -1248,21 +1333,21 @@
       es: {
         btnBack: "← INICIO",
         modMainActions: "Acciones Principales",
+        modTranspose: "Transposición",
+        lblTransposeDesc: "Transportar toda la partitura:",
+        btnTranspDown: "♭ -1 Semitono",
+        btnTranspUp: "♯ +1 Semitono",
         btnExportMain: "Descargar Partitura ▾",
         optDownloadPNG: "Exportar como Imágenes PNG",
         optDownloadPDF: "Exportar como Archivo PDF",
         btnAddPage: "Agregar Nueva Página",
-        btnTranspDown: "♭ -1 Semitono",
-        btnTranspUp: "♯ +1 Semitono",
         modDynamics: "Dinámicas y Reguladores",
         lblDynLevel: "Nivel Dinámico:",
         lblDynSize: "Tamaño Fuente:",
         lblHairpins: "Reguladores de Volumen:",
         btnCrescendo: "< Crescendo",
         btnDecrescendo: "> Decrescendo",
-        lblHairpinLength: "Largo (Compases):",
         modArticulations: "Articulaciones",
-        lblAccentScale: "Escala Acentos:",
         btnRemoveArt: "Quitar Articulación",
         modStructure: "Estructura y Repeticiones",
         modTimeSig: "Métrica de Tiempo",
@@ -1348,8 +1433,11 @@
       document.querySelectorAll('.beat-slot').forEach(b => {
         b.onclick = function(e) { selectBeatSlot(this, e, 0); };
       });
-      document.querySelectorAll('.volta-resize-handle').forEach(h => {
-        h.onmousedown = function(e) { initVoltaResize(this, e); };
+      document.querySelectorAll('.volta-resize-right').forEach(h => {
+        h.onmousedown = function(e) { initVoltaResizeRight(this, e); };
+      });
+      document.querySelectorAll('.volta-resize-left').forEach(h => {
+        h.onmousedown = function(e) { initVoltaResizeLeft(this, e); };
       });
       document.querySelectorAll('.volta-v-handle').forEach(h => {
         h.onmousedown = function(e) { initVoltaVerticalResize(this, e); };
@@ -1357,8 +1445,26 @@
       document.querySelectorAll('.section-badge-container').forEach(h => {
         h.onmousedown = function(e) { initBadgeResize(this, e); };
       });
+      document.querySelectorAll('.block-v-handle').forEach(h => {
+        h.onmousedown = function(e) { initBlockVerticalResize(this, e); };
+      });
+      document.querySelectorAll('.custom-tie-overlay').forEach(t => {
+        t.onmousedown = function(e) { initTieMove(this, e); };
+      });
+      document.querySelectorAll('.tie-resize-right').forEach(h => {
+        h.onmousedown = function(e) { initTieResizeRight(this, e); };
+      });
+      document.querySelectorAll('.tie-resize-left').forEach(h => {
+        h.onmousedown = function(e) { initTieResizeLeft(this, e); };
+      });
       document.querySelectorAll('.measure-dynamics-container').forEach(d => {
         d.onmousedown = function(e) { initDynamicsResize(this, e); };
+      });
+      document.querySelectorAll('.dyn-resize-right').forEach(h => {
+        h.onmousedown = function(e) { initDynResizeRight(this, e); };
+      });
+      document.querySelectorAll('.dyn-resize-left').forEach(h => {
+        h.onmousedown = function(e) { initDynResizeLeft(this, e); };
       });
       document.querySelectorAll('.band-annotation').forEach(a => {
         a.onmousedown = function(e) { initAnnotationResize(this, e); };
@@ -1536,7 +1642,6 @@
       });
     }
 
-    // APLICACIÓN DE VOLTA CON POSICIONAMIENTO FLOTANTE INDEPENDIENTE
     function applyVolta(labelNum) {
       if (selectedMeasures.length === 0) return;
       saveStateForUndo();
@@ -1551,10 +1656,12 @@
       let v = document.createElement('div');
       v.className = 'volta-bracket';
       v.style.top = '-24px';
+      v.style.left = '0px';
       v.innerHTML = `
         <input type="text" class="volta-input" value="${labelNum}" onclick="event.stopPropagation()">
+        <div class="volta-resize-left" onmousedown="initVoltaResizeLeft(this, event)" title="Estirar desde la izquierda"></div>
         <div class="volta-v-handle" onmousedown="initVoltaVerticalResize(this, event)" title="Ajustar altura"></div>
-        <div class="volta-resize-handle" onmousedown="initVoltaResize(this, event)"></div>
+        <div class="volta-resize-right" onmousedown="initVoltaResizeRight(this, event)" title="Estirar desde la derecha"></div>
       `;
       first.appendChild(v);
 
@@ -1566,7 +1673,7 @@
       }
     }
 
-    function initVoltaResize(handleEl, e) {
+    function initVoltaResizeRight(handleEl, e) {
       e.stopPropagation();
       e.preventDefault();
       const volta = handleEl.closest('.volta-bracket');
@@ -1575,8 +1682,35 @@
 
       function onMouseMove(moveEvent) {
         const diff = moveEvent.clientX - startX;
-        const newWidth = Math.max(60, startWidth + diff);
+        const newWidth = Math.max(40, startWidth + diff);
         volta.style.width = `${newWidth}px`;
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    function initVoltaResizeLeft(handleEl, e) {
+      e.stopPropagation();
+      e.preventDefault();
+      const volta = handleEl.closest('.volta-bracket');
+      const startX = e.clientX;
+      const startWidth = volta.offsetWidth;
+      const startLeft = parseFloat(volta.style.left) || 0;
+
+      function onMouseMove(moveEvent) {
+        const diff = moveEvent.clientX - startX;
+        const newWidth = Math.max(40, startWidth - diff);
+        const newLeft = startLeft + diff;
+        if (newWidth > 40) {
+          volta.style.width = `${newWidth}px`;
+          volta.style.left = `${newLeft}px`;
+        }
       }
 
       function onMouseUp() {
@@ -1597,7 +1731,7 @@
 
       function onMouseMove(moveEvent) {
         const diff = moveEvent.clientY - startY;
-        const newTop = startTop + diff; // Arriba es negativo
+        const newTop = startTop + diff;
         volta.style.top = `${newTop}px`;
       }
 
@@ -1610,7 +1744,6 @@
       window.addEventListener('mouseup', onMouseUp);
     }
 
-    // ARRASTRE VERTICAL INDEPENDIENTE DE LA INSIGNIA DE SECCIÓN (INTRO, VERSO)
     function initBadgeResize(containerEl, e) {
       if (e.target.tagName === 'SPAN' && e.target.isContentEditable) return;
       e.preventDefault();
@@ -1632,16 +1765,106 @@
       window.addEventListener('mouseup', onMouseUp);
     }
 
-    // ARRASTRE VERTICAL INDEPENDIENTE DE DINÁMICAS
+    function initBlockVerticalResize(handleEl, e) {
+      e.preventDefault();
+      const block = handleEl.closest('.section-block');
+      const startY = e.clientY;
+      const startMargin = parseInt(window.getComputedStyle(block).marginTop) || 24;
+
+      function onMouseMove(moveEvent) {
+        const diff = moveEvent.clientY - startY;
+        const newMargin = Math.max(4, startMargin + diff);
+        block.style.marginTop = `${newMargin}px`;
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    function initTieMove(tieEl, e) {
+      if (e.target.classList.contains('tie-resize-handle')) return;
+      e.preventDefault();
+      const startY = e.clientY;
+      const startTop = parseInt(tieEl.style.top) || 4;
+
+      function onMouseMove(moveEvent) {
+        const diff = moveEvent.clientY - startY;
+        const newTop = startTop + diff;
+        tieEl.style.top = `${newTop}px`;
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    function initTieResizeRight(handleEl, e) {
+      e.stopPropagation();
+      e.preventDefault();
+      const tie = handleEl.closest('.custom-tie-overlay');
+      const startX = e.clientX;
+      const startWidth = tie.offsetWidth;
+
+      function onMouseMove(moveEvent) {
+        const diff = moveEvent.clientX - startX;
+        const newWidth = Math.max(20, startWidth + diff);
+        tie.style.width = `${newWidth}px`;
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    function initTieResizeLeft(handleEl, e) {
+      e.stopPropagation();
+      e.preventDefault();
+      const tie = handleEl.closest('.custom-tie-overlay');
+      const startX = e.clientX;
+      const startWidth = tie.offsetWidth;
+      const startLeft = parseFloat(tie.style.left) || 0;
+
+      function onMouseMove(moveEvent) {
+        const diff = moveEvent.clientX - startX;
+        const newWidth = Math.max(20, startWidth - diff);
+        const newLeft = startLeft + diff;
+        if (newWidth > 20) {
+          tie.style.width = `${newWidth}px`;
+          tie.style.left = `${newLeft}px`;
+        }
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
     function initDynamicsResize(dynEl, e) {
-      if (e.target.tagName === 'INPUT') return;
+      if (e.target.tagName === 'INPUT' || e.target.classList.contains('dyn-resize-handle')) return;
       e.preventDefault();
       const startY = e.clientY;
       const startBottom = parseInt(window.getComputedStyle(dynEl).bottom) || -22;
 
       function onMouseMove(moveEvent) {
         const diff = moveEvent.clientY - startY;
-        const newBottom = startBottom - diff; // Invertido porque usa bottom
+        const newBottom = startBottom - diff;
         dynEl.style.bottom = `${newBottom}px`;
       }
 
@@ -1654,7 +1877,55 @@
       window.addEventListener('mouseup', onMouseUp);
     }
 
-    // ARRASTRE VERTICAL INDEPENDIENTE DE ANOTACIONES DE BANDA
+    function initDynResizeRight(handleEl, e) {
+      e.stopPropagation();
+      e.preventDefault();
+      const dyn = handleEl.closest('.measure-dynamics-container');
+      const startX = e.clientX;
+      const startWidth = dyn.offsetWidth;
+
+      function onMouseMove(moveEvent) {
+        const diff = moveEvent.clientX - startX;
+        const newWidth = Math.max(30, startWidth + diff);
+        dyn.style.width = `${newWidth}px`;
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    function initDynResizeLeft(handleEl, e) {
+      e.stopPropagation();
+      e.preventDefault();
+      const dyn = handleEl.closest('.measure-dynamics-container');
+      const startX = e.clientX;
+      const startWidth = dyn.offsetWidth;
+      const startLeft = parseFloat(dyn.style.left) || 0;
+
+      function onMouseMove(moveEvent) {
+        const diff = moveEvent.clientX - startX;
+        const newWidth = Math.max(30, startWidth - diff);
+        const newLeft = startLeft + diff;
+        if (newWidth > 30) {
+          dyn.style.width = `${newWidth}px`;
+          dyn.style.left = `${newLeft}px`;
+        }
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
     function initAnnotationResize(annotEl, e) {
       if (e.target.isContentEditable) return;
       e.preventDefault();
@@ -1757,10 +2028,6 @@
           svgHTML += `<circle cx="${x + 6}" cy="16" r="1.6" fill="#0f172a" />`;
         }
 
-        if (item.tie) {
-          svgHTML += `<path d="M ${x - 3} 12 Q ${x + 8} 4 ${x + 18} 12" fill="none" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round" />`;
-        }
-
         svgHTML += `</g>`;
       });
 
@@ -1800,13 +2067,29 @@
       setBeatData(activeBeatSlot, items);
     }
 
+    // CREACIÓN Y GESTIÓN DE LIGADURAS (TIES) LIBRES ENTRE COMPASES
     function toggleSubdivisionTie() {
       if (!activeBeatSlot) return;
       saveStateForUndo();
-      let items = getBeatData(activeBeatSlot);
-      if (items[activeSubIndex]) {
-        items[activeSubIndex].tie = !items[activeSubIndex].tie;
-        setBeatData(activeBeatSlot, items);
+      const measureMain = activeBeatSlot.closest('.measure-main');
+      if (!measureMain) return;
+
+      let tieOverlay = measureMain.querySelector('.custom-tie-overlay');
+      if (tieOverlay) {
+        tieOverlay.remove();
+      } else {
+        tieOverlay = document.createElement('div');
+        tieOverlay.className = 'custom-tie-overlay';
+        tieOverlay.style.top = '4px';
+        tieOverlay.style.left = '10px';
+        tieOverlay.innerHTML = `
+          <div class="tie-resize-handle tie-resize-left" onmousedown="initTieResizeLeft(this, event)" title="Estirar izquierda"></div>
+          <div class="tie-v-handle" title="Mover arriba/abajo"></div>
+          <svg width="100%" height="16" viewBox="0 0 100 16" preserveAspectRatio="none"><path d="M 0 12 Q 50 2 100 12" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/></svg>
+          <div class="tie-resize-handle tie-resize-right" onmousedown="initTieResizeRight(this, event)" title="Estirar derecha"></div>
+        `;
+        tieOverlay.onmousedown = function(e) { initTieMove(this, e); };
+        measureMain.appendChild(tieOverlay);
       }
     }
 
@@ -1838,10 +2121,17 @@
       if (!dynBox) {
         dynBox = document.createElement('div');
         dynBox.className = 'measure-dynamics-container';
+        dynBox.style.left = '0px';
+        dynBox.style.width = '100%';
         dynBox.onmousedown = function(e) { initDynamicsResize(this, e); };
         target.appendChild(dynBox);
       }
-      dynBox.innerHTML = `<span style="font-size:1.1em;">${text}</span><div class="dyn-v-handle"></div>`;
+      dynBox.innerHTML = `
+        <div class="dyn-resize-handle dyn-resize-left" onmousedown="initDynResizeLeft(this, event)" title="Estirar izquierda"></div>
+        <span style="font-size:1.1em; margin: 0 auto;">${text}</span>
+        <div class="dyn-v-handle"></div>
+        <div class="dyn-resize-handle dyn-resize-right" onmousedown="initDynResizeRight(this, event)" title="Estirar derecha"></div>
+      `;
     }
 
     function applyHairpin(type) {
@@ -1852,13 +2142,20 @@
       if (!dynBox) {
         dynBox = document.createElement('div');
         dynBox.className = 'measure-dynamics-container';
+        dynBox.style.left = '0px';
+        dynBox.style.width = '100%';
         dynBox.onmousedown = function(e) { initDynamicsResize(this, e); };
         target.appendChild(dynBox);
       }
       const svgContent = type === 'crescendo' 
         ? `<svg width="100%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 7 L 100 0 M 0 7 L 100 14" stroke="#0f172a" stroke-width="1.5" fill="none"/></svg>`
         : `<svg width="100%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 0 L 100 7 M 0 14 L 100 7" stroke="#0f172a" stroke-width="1.5" fill="none"/></svg>`;
-      dynBox.innerHTML = `${svgContent}<div class="dyn-v-handle"></div>`;
+      dynBox.innerHTML = `
+        <div class="dyn-resize-handle dyn-resize-left" onmousedown="initDynResizeLeft(this, event)" title="Estirar izquierda"></div>
+        <div style="flex:1; height:100%; display:flex; align-items:center;">${svgContent}</div>
+        <div class="dyn-v-handle"></div>
+        <div class="dyn-resize-handle dyn-resize-right" onmousedown="initDynResizeRight(this, event)" title="Estirar derecha"></div>
+      `;
     }
 
     function resetMeasureRhythm() {
@@ -1884,6 +2181,8 @@
       if (annot) annot.remove();
       const volta = measureEl.querySelector('.volta-bracket');
       if (volta) volta.remove();
+      const tie = measureEl.querySelector('.custom-tie-overlay');
+      if (tie) tie.remove();
     }
 
     window.addEventListener('keydown', (e) => {
@@ -2003,6 +2302,7 @@
       grid.className = 'measures-grid';
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `
+        <div class="block-v-handle" onmousedown="initBlockVerticalResize(this, event)"></div>
         <div class="section-badge-container" style="top: -24px;" onmousedown="initBadgeResize(this, event)">
           <span class="section-badge" contenteditable="true">${dict.secNew}</span>
           <div class="badge-drag-handle"></div>
@@ -2095,6 +2395,7 @@
       grid.className = 'measures-grid';
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `
+        <div class="block-v-handle" onmousedown="initBlockVerticalResize(this, event)"></div>
         <div class="section-badge-container" style="top: -24px;" onmousedown="initBadgeResize(this, event)">
           <span class="section-badge" contenteditable="true">${title}</span>
           <div class="badge-drag-handle"></div>
