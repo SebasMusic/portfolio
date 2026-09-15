@@ -437,6 +437,22 @@
       outline: none;
     }
 
+    /* ESTILO PARA INDICADOR VISUAL DE NUEVA MÉTRICA */
+    .time-sig-badge {
+      position: absolute;
+      top: 2px;
+      left: 4px;
+      font-size: 0.65em;
+      font-weight: 800;
+      color: #0f172a;
+      background: #f1f5f9;
+      border: 1px solid #94a3b8;
+      padding: 0px 4px;
+      border-radius: 3px;
+      user-select: none;
+      pointer-events: none;
+    }
+
     .chart-footer {
       border-top: 1.5px dashed #cbd5e1;
       padding-top: 10px;
@@ -690,7 +706,7 @@
         opt34: "3/4 (Tres por Cuatro)",
         opt24: "2/4 (Dos por Cuatro)",
         opt68: "6/8 (Seis por Ocho)",
-        opt98: "Nueve por Ocho",
+        opt98: "9/8 (Nueve por Ocho)",
         opt128: "12/8 (Doce por Ocho)",
         opt22: "2/2 (Dos por Dos)",
         btnApplyTimeSig: "⏱️ Aplicar Métrica desde Selección",
@@ -900,7 +916,7 @@
       }
     }
 
-    // APLICA LA MÉTRICA DESDE EL COMPÁS SELECCIONADO EN ADELANTE (SIN AFECTAR LOS ANTERIORES)
+    // APLICA LA MÉTRICA DESDE EL COMPÁS SELECCIONADO EN ADELANTE Y AGREGA EL INDICADOR VISUAL
     function applyTimeSignatureToSelected() {
       const val = document.getElementById('timeSignatureSelect').value;
       if (selectedMeasures.length === 0) {
@@ -915,6 +931,17 @@
 
       if (startIdx !== -1) {
         const slashHtml = getSlashHTML(val);
+        
+        // 1. Agregar o actualizar el distintivo visual con la nueva métrica en el primer compás del cambio
+        let badge = startMeasure.querySelector('.time-sig-badge');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'time-sig-badge';
+          startMeasure.appendChild(badge);
+        }
+        badge.innerText = val;
+
+        // 2. Actualizar los slashes rítmicos desde el compás seleccionado en adelante
         for (let i = startIdx; i < allMeasures.length; i++) {
           const slashes = allMeasures[i].querySelector('.rhythm-slashes');
           if (slashes) {
@@ -1169,7 +1196,6 @@
       }
     }
 
-    // CONFIGURACIÓN DE SEGURIDAD PARA CAPTURA SIN CORTES VERTICALES
     const RENDER_OPTIONS = {
       scale: 2,
       useCORS: true,
@@ -1181,7 +1207,6 @@
       windowWidth: 1200
     };
 
-    // --- EXPORTAR PNG HD ---
     function exportAllPagesToPNG() {
       if (typeof gtag === 'function') {
         gtag('event', 'export_chart_png', {
@@ -1206,7 +1231,6 @@
       });
     }
 
-    // --- EXPORTAR PDF MULTI-PÁGINA ---
     function exportAllPagesToPDF() {
       if (typeof gtag === 'function') {
         gtag('event', 'export_chart_pdf', {
