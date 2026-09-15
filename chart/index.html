@@ -18,7 +18,7 @@
   <!-- Tipografía Montserrat e Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
   
   <!-- html2canvas y jsPDF para Exportación -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -26,16 +26,14 @@
 
   <style>
     :root {
-      --bg-dark: #090c15;
-      --panel-bg: rgba(18, 22, 38, 0.85);
-      --card-border: rgba(255, 255, 255, 0.12);
-      --accent-purple: #a855f7;
-      --accent-cyan: #06b6d4;
-      --accent-green: #10b981;
+      --bg-dark: #121212;
+      --panel-bg: #1e1e1e;
+      --card-border: #333333;
+      --accent-main: #f8fafc;
       --text-light: #f8fafc;
       --text-muted: #94a3b8;
       --paper-bg: #ffffff;
-      --paper-text: #1e293b;
+      --paper-text: #0f172a;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -45,7 +43,7 @@
       color: var(--text-light);
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       min-height: 100vh;
-      padding: 20px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -57,49 +55,46 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
 
     .btn-back {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: #1e1e1e;
+      border: 1px solid var(--card-border);
       color: var(--text-muted);
       text-decoration: none;
-      padding: 8px 18px;
-      border-radius: 20px;
+      padding: 8px 16px;
+      border-radius: 8px;
       font-size: 0.85em;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
+      font-weight: 500;
+      transition: all 0.2s ease;
     }
 
     .btn-back:hover {
       color: #fff;
-      border-color: var(--accent-purple);
-      background: rgba(168, 85, 247, 0.2);
-      transform: translateX(-3px);
+      border-color: #555;
+      background: #2a2a2a;
     }
 
     .lang-selector-mini {
-      background: rgba(18, 22, 38, 0.85);
+      background: #1e1e1e;
       border: 1px solid var(--card-border);
       color: #fff;
       padding: 6px 12px;
-      border-radius: 12px;
+      border-radius: 8px;
       font-size: 0.8em;
       outline: none;
       cursor: pointer;
-      backdrop-filter: blur(10px);
     }
 
     .studio-layout {
       width: 100%;
       max-width: 1100px;
       display: grid;
-      grid-template-columns: 320px 1fr;
+      grid-template-columns: 300px 1fr;
       gap: 24px;
       align-items: start;
     }
@@ -113,22 +108,20 @@
 
     .rhythm-toolbar {
       width: 100%;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid var(--accent-cyan);
-      border-radius: 16px;
-      padding: 12px 18px;
+      background: var(--panel-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px 18px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      box-shadow: 0 10px 25px rgba(6, 182, 212, 0.15);
-      backdrop-filter: blur(15px);
     }
 
     .rhythm-title {
-      font-size: 0.82em;
-      font-weight: 800;
-      letter-spacing: 1px;
-      color: var(--accent-cyan);
+      font-size: 0.78em;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
       text-transform: uppercase;
       display: flex;
       align-items: center;
@@ -142,78 +135,76 @@
     }
 
     .rhythm-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: #262626;
+      border: 1px solid #3f3f46;
       color: var(--text-light);
       padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 1.1em;
-      font-weight: 700;
+      border-radius: 6px;
+      font-size: 1.05em;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
     .rhythm-btn:hover, .rhythm-btn.active {
-      background: rgba(6, 182, 212, 0.25);
-      border-color: var(--accent-cyan);
+      background: #3f3f46;
+      border-color: #71717a;
       color: #fff;
     }
 
     .rhythm-btn.rest-btn {
-      border-color: rgba(234, 179, 8, 0.4);
-      color: #fef08a;
+      border-color: #52525b;
+      color: #e4e4e7;
     }
 
     .rhythm-btn.rest-btn:hover {
-      background: rgba(234, 179, 8, 0.25);
+      background: #3f3f46;
     }
 
     .key-badge {
-      background: #0f172a;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: #38bdf8;
-      font-size: 0.68em;
-      padding: 1px 5px;
+      background: #121212;
+      border: 1px solid #3f3f46;
+      color: #a1a1aa;
+      font-size: 0.65em;
+      padding: 1px 4px;
       border-radius: 4px;
-      font-weight: 800;
+      font-weight: 700;
       font-family: 'Inter', sans-serif;
     }
 
     .music-symbol {
-      font-size: 1.2em;
+      font-size: 1.15em;
       line-height: 1;
     }
 
     .toolbox-panel {
       background: var(--panel-bg);
       border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 20px;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+      border-radius: 12px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
       position: sticky;
-      top: 20px;
+      top: 24px;
     }
 
     .toolbox-section {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .collapsible-header {
-      font-size: 0.8em;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      color: var(--accent-cyan);
+      font-size: 0.78em;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
       text-transform: uppercase;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid var(--card-border);
       padding-bottom: 6px;
       cursor: pointer;
       display: flex;
@@ -245,7 +236,7 @@
     .btn-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
+      gap: 6px;
     }
 
     .btn-grid-3 {
@@ -255,39 +246,38 @@
     }
 
     .tool-btn {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: #262626;
+      border: 1px solid var(--card-border);
       color: var(--text-light);
-      padding: 8px 10px;
-      border-radius: 10px;
-      font-size: 0.8em;
-      font-weight: 600;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 0.78em;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
       text-align: center;
     }
 
     .tool-btn:hover {
-      background: rgba(168, 85, 247, 0.25);
-      border-color: var(--accent-purple);
+      background: #333333;
+      border-color: #555;
       color: #fff;
     }
 
     .tool-btn.primary {
-      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
-      border: none;
-      color: #fff;
-      font-weight: 700;
+      background: #f8fafc;
+      border: 1px solid #f8fafc;
+      color: #0f172a;
+      font-weight: 600;
     }
 
     .tool-btn.primary:hover {
-      opacity: 0.9;
-      box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+      background: #e2e8f0;
     }
 
     .tool-btn.custom-btn {
-      border: 1px dashed var(--accent-cyan);
-      color: var(--accent-cyan);
+      border: 1px dashed #52525b;
+      color: #d4d4d8;
     }
 
     .download-dropdown {
@@ -301,9 +291,9 @@
       top: 100%;
       left: 0;
       right: 0;
-      background: #1e293b;
+      background: #1e1e1e;
       border: 1px solid var(--card-border);
-      border-radius: 12px;
+      border-radius: 8px;
       padding: 6px;
       margin-top: 4px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
@@ -317,43 +307,43 @@
     }
 
     .download-option {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: #262626;
+      border: 1px solid var(--card-border);
       color: #fff;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 0.8em;
-      font-weight: 700;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 0.78em;
+      font-weight: 600;
       cursor: pointer;
       text-align: left;
-      transition: background 0.2s;
+      transition: background 0.15s;
     }
 
     .download-option:hover {
-      background: rgba(168, 85, 247, 0.3);
-      border-color: var(--accent-purple);
+      background: #333333;
     }
 
     .select-input {
       width: 100%;
-      background: rgba(0,0,0,0.4);
+      background: #121212;
       border: 1px solid var(--card-border);
       color: #fff;
-      padding: 8px 12px;
-      border-radius: 10px;
-      font-size: 0.85em;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 0.8em;
       outline: none;
     }
 
     .sheets-container {
       display: flex;
       flex-direction: column;
-      gap: 40px;
-      background: #e2e8f0;
-      padding: 30px;
-      border-radius: 20px;
+      gap: 30px;
+      background: #18181b;
+      padding: 24px;
+      border-radius: 12px;
       align-items: center;
       width: 100%;
+      border: 1px solid var(--card-border);
     }
 
     .chart-paper {
@@ -362,10 +352,10 @@
       max-height: 1123px;
       background: var(--paper-bg);
       color: var(--paper-text);
-      padding: 40px 45px 45px 45px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-      border-radius: 14px;
-      border: 2px solid #0f172a;
+      padding: 45px 50px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -373,19 +363,10 @@
       overflow: visible;
     }
 
-    .chart-paper::before {
-      content: '';
-      position: absolute;
-      top: 10px; left: 10px; right: 10px; bottom: 10px;
-      border: 1px dashed rgba(15, 23, 42, 0.25);
-      border-radius: 8px;
-      pointer-events: none;
-    }
-
     .paper-inner {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
       width: 100%;
       height: 980px;
       overflow: visible;
@@ -395,9 +376,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       border-bottom: 2px solid #0f172a;
-      padding-bottom: 12px;
+      padding-bottom: 14px;
       padding-top: 10px;
       width: 100%;
     }
@@ -409,8 +390,8 @@
       border-bottom: 1px solid #cbd5e1;
       padding-bottom: 8px;
       margin-bottom: 4px;
-      font-size: 0.85em;
-      font-weight: 700;
+      font-size: 0.8em;
+      font-weight: 600;
       color: #64748b;
       letter-spacing: 0.5px;
       text-transform: uppercase;
@@ -419,7 +400,7 @@
 
     .subsequent-title-ref {
       color: #64748b;
-      font-weight: 700;
+      font-weight: 600;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -435,13 +416,13 @@
 
     .song-title-editable, .song-title-print {
       font-family: 'Montserrat', sans-serif;
-      font-weight: 900;
-      font-size: 1.85em;
+      font-weight: 800;
+      font-size: 1.7em;
       text-transform: uppercase;
       text-align: center;
       color: #0f172a;
-      letter-spacing: 2px;
-      line-height: 1.3;
+      letter-spacing: 1.5px;
+      line-height: 1.2;
       padding: 4px 0;
       width: 100%;
     }
@@ -463,10 +444,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.88em;
-      font-weight: 600;
+      font-size: 0.85em;
+      font-weight: 500;
       color: #475569;
-      min-height: 28px;
+      min-height: 26px;
     }
 
     .sub-item-wrapper {
@@ -480,8 +461,8 @@
       outline: none;
       background: transparent;
       color: #475569;
-      font-weight: 600;
-      font-size: 1em;
+      font-weight: 500;
+      font-size: 0.95em;
       line-height: 1.4;
       padding: 2px 0;
     }
@@ -491,15 +472,15 @@
     .sub-print-text {
       display: none;
       color: #475569;
-      font-weight: 600;
-      font-size: 1em;
+      font-weight: 500;
+      font-size: 0.95em;
       line-height: 1.4;
     }
 
     .chart-content {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 18px;
       flex: 1;
     }
 
@@ -507,11 +488,10 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      margin-top: 18px; /* Margen base superior generoso */
+      margin-top: 20px;
       position: relative;
     }
 
-    /* INSIGNIA DE SECCIÓN (INTRO, VERSO) CON POSICIONAMIENTO Y MANILLA VERTICAL */
     .section-badge-container {
       display: inline-flex;
       align-items: center;
@@ -526,16 +506,16 @@
     .section-badge {
       background: #0f172a;
       color: #fff;
-      font-weight: 800;
-      font-size: 0.82em;
-      padding: 3px 9px;
-      border-radius: 4px;
-      letter-spacing: 1px;
+      font-weight: 700;
+      font-size: 0.78em;
+      padding: 2px 8px;
+      border-radius: 3px;
+      letter-spacing: 0.8px;
       border: none;
       outline: none;
       text-transform: uppercase;
-      min-width: 20px;
-      min-height: 16px;
+      min-width: 18px;
+      min-height: 14px;
     }
     
     .section-badge:empty {
@@ -544,11 +524,10 @@
       padding: 0 !important;
     }
 
-    /* Manilla para arrastrar verticalmente la insignia */
     .badge-drag-handle {
-      width: 8px;
-      height: 14px;
-      background: rgba(15, 23, 42, 0.3);
+      width: 6px;
+      height: 12px;
+      background: #cbd5e1;
       border-radius: 2px;
       cursor: ns-resize;
       display: none;
@@ -558,12 +537,12 @@
     }
 
     .song2-subtitle {
-      font-size: 1.1em;
-      font-weight: 800;
-      color: #0369a1;
-      border-bottom: 2px solid #38bdf8;
+      font-size: 1.05em;
+      font-weight: 700;
+      color: #0f172a;
+      border-bottom: 1.5px solid #0f172a;
       padding-bottom: 2px;
-      margin: 14px 0 6px 0;
+      margin: 16px 0 6px 0;
       outline: none;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -572,27 +551,27 @@
     .measures-grid {
       display: flex;
       flex-wrap: wrap;
-      border-left: 2px solid #0f172a;
+      border-left: 1.5px solid #0f172a;
     }
 
     .measure-box {
-      height: 90px;
-      border-right: 2px solid #0f172a;
-      border-top: 2px solid #0f172a;
-      border-bottom: 2px solid #0f172a;
-      padding: 4px 6px;
+      height: 94px;
+      border-right: 1.5px solid #0f172a;
+      border-top: 1.5px solid #0f172a;
+      border-bottom: 1.5px solid #0f172a;
+      padding: 6px 8px;
       display: flex;
       position: relative;
       background: #fff;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: background 0.15s ease;
       flex: 0 0 25%;
     }
 
     .measure-box.selected {
-      background: #f0fdf4 !important;
-      border-color: #16a34a !important;
-      box-shadow: inset 0 0 0 1.5px #16a34a;
+      background: #f1f5f9 !important;
+      border-color: #0f172a !important;
+      box-shadow: inset 0 0 0 1px #0f172a;
     }
 
     .measure-box.break-system {
@@ -604,46 +583,45 @@
     }
 
     .measure-box.repeat-start {
-      border-left: 5px solid #0f172a !important;
+      border-left: 4px solid #0f172a !important;
     }
 
     .measure-box.repeat-start::before {
       content: '•';
       position: absolute;
-      left: 3px;
-      top: 38px;
-      font-size: 1.2em;
+      left: 2px;
+      top: 40px;
+      font-size: 1.1em;
       font-weight: 900;
       color: #0f172a;
       line-height: 0;
     }
 
     .measure-box.repeat-end {
-      border-right: 5px solid #0f172a !important;
+      border-right: 4px solid #0f172a !important;
     }
 
     .measure-box.repeat-end::after {
       content: '•';
       position: absolute;
-      right: 3px;
-      top: 38px;
-      font-size: 1.2em;
+      right: 2px;
+      top: 40px;
+      font-size: 1.1em;
       font-weight: 900;
       color: #0f172a;
       line-height: 0;
     }
 
-    /* VOLTA / CASILLA DE REPETICIÓN PROFESIONAL MULTI-COMPÁS */
     .volta-bracket {
       position: absolute;
-      top: -24px;
+      top: -22px;
       left: 0;
-      height: 18px;
-      border-top: 2px solid #0f172a;
-      border-left: 2px solid #0f172a;
-      border-right: 2px solid #0f172a;
-      font-size: 0.75em;
-      font-weight: 800;
+      height: 16px;
+      border-top: 1.5px solid #0f172a;
+      border-left: 1.5px solid #0f172a;
+      border-right: 1.5px solid #0f172a;
+      font-size: 0.72em;
+      font-weight: 700;
       padding-left: 5px;
       line-height: 1.2;
       color: #0f172a;
@@ -667,18 +645,14 @@
 
     .volta-resize-handle {
       position: absolute;
-      right: -5px;
-      top: -3px;
-      width: 10px;
-      height: 12px;
+      right: -4px;
+      top: -2px;
+      width: 8px;
+      height: 10px;
       background: #0f172a;
       cursor: ew-resize;
-      border-radius: 2px;
+      border-radius: 1px;
       z-index: 15;
-      transition: background 0.2s;
-    }
-    .volta-resize-handle:hover {
-      background: var(--accent-cyan);
     }
 
     .measure-main {
@@ -691,13 +665,14 @@
     }
 
     .chord-input {
-      font-size: 1.15em;
-      font-weight: 800;
+      font-size: 1.1em;
+      font-weight: 700;
       border: none;
       outline: none;
       width: 100%;
       color: #0f172a;
       background: transparent;
+      font-family: 'Inter', sans-serif;
     }
 
     .rhythm-beats-container {
@@ -715,28 +690,22 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 4px;
-      transition: background 0.15s ease;
+      border-radius: 2px;
+      transition: background 0.1s ease;
       cursor: pointer;
     }
 
     .beat-slot:hover {
-      background: rgba(6, 182, 212, 0.12);
+      background: #f1f5f9;
     }
 
     .beat-slot.active-beat {
-      background: rgba(16, 185, 129, 0.2) !important;
-      box-shadow: inset 0 0 0 1.5px #10b981;
-      border-radius: 4px;
+      background: #e2e8f0 !important;
+      box-shadow: inset 0 0 0 1px #64748b;
     }
 
     .sub-item-target {
       cursor: pointer;
-      transition: opacity 0.15s ease;
-    }
-
-    .sub-item-target:hover {
-      opacity: 0.7;
     }
 
     .beat-slot svg {
@@ -746,10 +715,10 @@
 
     .measure-dynamics-container {
       position: absolute;
-      bottom: -22px;
+      bottom: -20px;
       left: 0;
       right: 0;
-      height: 20px;
+      height: 18px;
       display: flex;
       align-items: center;
       justify-content: flex-start;
@@ -764,14 +733,14 @@
     .band-annotation {
       position: absolute;
       top: -14px;
-      right: 6px;
-      font-size: 0.7em;
-      font-weight: 700;
-      color: #2563eb;
-      background: #eff6ff;
-      padding: 1px 6px;
-      border-radius: 4px;
-      border: 1px solid #bfdbfe;
+      right: 4px;
+      font-size: 0.68em;
+      font-weight: 600;
+      color: #334155;
+      background: #f1f5f9;
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid #cbd5e1;
       outline: none;
       z-index: 5;
     }
@@ -781,68 +750,67 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      margin-right: 4px;
-      padding-right: 4px;
+      margin-right: 6px;
+      padding-right: 6px;
       border-right: 1.5px solid #0f172a;
       font-family: 'Inter', sans-serif;
-      font-weight: 900;
-      font-size: 0.95em;
-      line-height: 0.88;
+      font-weight: 800;
+      font-size: 0.9em;
+      line-height: 0.85;
       color: #0f172a;
       user-select: none;
     }
 
     .chart-footer {
-      border-top: 1.5px dashed #cbd5e1;
+      border-top: 1px solid #cbd5e1;
       padding-top: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.8em;
-      font-weight: 700;
+      font-size: 0.75em;
+      font-weight: 600;
       color: #64748b;
       letter-spacing: 0.5px;
     }
 
     .footer-title-ref {
       text-transform: uppercase;
-      color: #334155;
+      color: #475569;
     }
 
     .context-menu {
       display: none;
       position: absolute;
-      background: #1e293b;
+      background: #1e1e1e;
       border: 1px solid var(--card-border);
-      border-radius: 10px;
+      border-radius: 8px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.6);
       padding: 6px;
       z-index: 1000;
       flex-direction: column;
       gap: 3px;
-      min-width: 190px;
+      min-width: 180px;
     }
 
     .context-menu-item {
       background: transparent;
       border: none;
       color: #f8fafc;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 0.8em;
-      font-weight: 600;
+      padding: 7px 10px;
+      border-radius: 4px;
+      font-size: 0.78em;
+      font-weight: 500;
       text-align: left;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.15s;
     }
 
     .context-menu-item:hover {
-      background: rgba(168, 85, 247, 0.3);
-      color: #fff;
+      background: #2a2a2a;
     }
 
     .context-menu-item.danger:hover {
-      background: rgba(239, 68, 68, 0.3);
+      background: rgba(239, 68, 68, 0.2);
       color: #fca5a5;
     }
 
@@ -901,7 +869,7 @@
 
           <button class="tool-btn custom-btn" style="margin-top:6px;" id="btnAddPage" onclick="addNewPageManual()">Add New Page</button>
           
-          <div style="display:flex; gap:8px; margin-top:5px;">
+          <div style="display:flex; gap:6px; margin-top:5px;">
             <button class="tool-btn" style="flex:1;" id="btnTranspDown" onclick="transposeAll(-1)">♭ -1 Semitone</button>
             <button class="tool-btn" style="flex:1;" id="btnTranspUp" onclick="transposeAll(1)">♯ +1 Semitone</button>
           </div>
@@ -942,7 +910,7 @@
           </div>
           <div style="display:flex; gap:6px; align-items:center; margin-top:4px;">
             <span style="font-size:0.75em; color:var(--text-muted);" id="lblHairpinLength">Length (Bars):</span>
-            <input type="number" id="hairpinLength" value="1" min="1" max="8" class="select-input" style="width:60px; text-align:center;" onchange="updateHairpinLength(this.value)">
+            <input type="number" id="hairpinLength" value="1" min="1" max="8" class="select-input" style="width:50px; text-align:center;" onchange="updateHairpinLength(this.value)">
           </div>
         </div>
       </div>
@@ -1008,7 +976,7 @@
             <option value="12/8" id="opt128">12/8 (Doce Octavos)</option>
             <option value="2/2" id="opt22">2/2 (Compás de Blanquita)</option>
           </select>
-          <button class="tool-btn" style="margin-top:2px; border-color:var(--accent-purple); color:#d8b4fe;" id="btnApplyTimeSig" onclick="applyTimeSignatureToSelected()">Aplicar Métrica a Selección</button>
+          <button class="tool-btn" style="margin-top:2px;" id="btnApplyTimeSig" onclick="applyTimeSignatureToSelected()">Aplicar Métrica a Selección</button>
         </div>
       </div>
 
@@ -1016,7 +984,7 @@
       <div class="toolbox-section">
         <div class="collapsible-header collapsed" id="modSections" onclick="toggleModule(this)">Secciones y Subtítulos</div>
         <div class="collapsible-body hidden">
-          <button class="tool-btn custom-btn" style="width:100%; font-weight:700; margin-bottom:4px;" id="btnSubSong2" onclick="addSong2Subtitle()">+ Agregar Subtítulo</button>
+          <button class="tool-btn custom-btn" style="width:100%; font-weight:600; margin-bottom:4px;" id="btnSubSong2" onclick="addSong2Subtitle()">+ Agregar Subtítulo</button>
           <div class="btn-grid">
             <button class="tool-btn custom-btn" id="btnSecEdit" onclick="addEditableSection()">EDITABLE</button>
             <button class="tool-btn" id="btnSecIntro" onclick="addSection(i18n[currentLang].secIntro)">+ INTRO</button>
@@ -1032,14 +1000,14 @@
       <div class="toolbox-section">
         <div class="collapsible-header collapsed" id="modMeasures" onclick="toggleModule(this)">Compases y Estructura</div>
         <div class="collapsible-body hidden">
-          <button class="tool-btn primary" style="margin-bottom:6px; background:linear-gradient(135deg, #10b981, #06b6d4);" id="btnGroupSelected" onclick="groupSelectedInSystem()">Agrupar Selección en 1 Sistema</button>
+          <button class="tool-btn primary" style="margin-bottom:6px;" id="btnGroupSelected" onclick="groupSelectedInSystem()">Agrupar Selección en 1 Sistema</button>
 
           <div class="btn-grid">
             <button class="tool-btn" id="btnAdd4" onclick="addMultipleMeasures(4)">+ 4 Compases</button>
             <button class="tool-btn" id="btnAdd8" onclick="addMultipleMeasures(8)">+ 8 Compases</button>
           </div>
           <div style="display:flex; gap:6px; margin-top:4px;">
-            <input type="number" id="customMeasureQty" value="12" min="1" max="100" class="select-input" style="width:70px; text-align:center;">
+            <input type="number" id="customMeasureQty" value="12" min="1" max="100" class="select-input" style="width:60px; text-align:center;">
             <button class="tool-btn" style="flex:1;" id="btnAddN" onclick="addMultipleMeasures()">+ N Personalizado</button>
           </div>
           <div style="font-size:0.75em; color:var(--text-muted); margin-top:6px; margin-bottom:2px;" id="lblLocation">Posición respecto a selección:</div>
@@ -1047,7 +1015,7 @@
             <button class="tool-btn" id="btnInsertBefore" onclick="insertMeasure('before')">Antes</button>
             <button class="tool-btn" id="btnInsertAfter" onclick="insertMeasure('after')">Después</button>
           </div>
-          <button class="tool-btn" style="margin-top:6px; background:rgba(234,179,8,0.15); border-color:rgba(234,179,8,0.4); color:#fef08a;" id="btnLineBreak" onclick="toggleSystemBreak()">Salto de Línea (Grupo)</button>
+          <button class="tool-btn" style="margin-top:6px; border-color:#52525b; color:#d4d4d8;" id="btnLineBreak" onclick="toggleSystemBreak()">Salto de Línea (Grupo)</button>
         </div>
       </div>
 
@@ -1075,7 +1043,7 @@
       <div class="rhythm-toolbar">
         <div class="rhythm-title">
           <span id="lblRhythmStudioTitle">Rhythms & Notation Studio</span>
-          <span style="font-size:0.8em; opacity:0.8; font-weight:600;" id="lblRhythmShortcuts">Shift+Click: Rango | Deshacer: Ctrl+Z | Copiar: Ctrl+C</span>
+          <span style="font-size:0.75em; opacity:0.7; font-weight:500;" id="lblRhythmShortcuts">Shift+Click: Rango | Deshacer: Ctrl+Z | Copiar: Ctrl+C</span>
         </div>
         
         <!-- FIGURAS MUSICALES EN SÍMBOLOS -->
@@ -1096,7 +1064,7 @@
           <button class="rhythm-btn rest-btn" title="Quarter Rest (Ctrl+5)" onclick="applySubdivisionRhythm('rq')"><span class="key-badge">Ctrl+5</span> <span class="music-symbol">𝄽</span></button>
           <button class="rhythm-btn rest-btn" title="Eighth Rest (Ctrl+4)" onclick="applySubdivisionRhythm('r8')"><span class="key-badge">Ctrl+4</span> <span class="music-symbol">𝄾</span></button>
           <button class="rhythm-btn rest-btn" title="Sixteenth Rest (Ctrl+3)" onclick="applySubdivisionRhythm('r16')"><span class="key-badge">Ctrl+3</span> <span class="music-symbol">𝄿</span></button>
-          <button class="rhythm-btn" style="border-color:rgba(239,68,68,0.4); color:#fca5a5; margin-left:auto; font-size:0.8em;" id="btnResetSlashes" onclick="resetMeasureRhythm()">Reset Slashes</button>
+          <button class="rhythm-btn" style="border-color:#7f1d1d; color:#fca5a5; margin-left:auto; font-size:0.78em;" id="btnResetSlashes" onclick="resetMeasureRhythm()">Reset Slashes</button>
         </div>
       </div>
 
@@ -1536,10 +1504,9 @@
 
       const first = selectedMeasures[0];
       
-      // Auto-desplazar hacia arriba el bloque de sección (INTRO) si existe en este bloque para evitar choques
       const block = first.closest('.section-block');
       if (block) {
-        block.style.marginTop = '26px';
+        block.style.marginTop = '28px';
       }
 
       let v = document.createElement('div');
@@ -1549,13 +1516,12 @@
 
       if (selectedMeasures.length > 1) {
         const totalFlex = selectedMeasures.reduce((acc, m) => acc + (parseFloat(m.style.flexBasis) || 25), 0);
-        v.style.width = `calc(${totalFlex}% + ${(selectedMeasures.length - 1) * 2}px)`;
+        v.style.width = `calc(${totalFlex}% + ${(selectedMeasures.length - 1) * 1.5}px)`;
       } else {
         v.style.width = '100%';
       }
     }
 
-    // ARRASTRE DINÁMICO DE LA ANCHURA DE LA CASILLA
     function initVoltaResize(handleEl, e) {
       e.stopPropagation();
       e.preventDefault();
@@ -1578,13 +1544,12 @@
       window.addEventListener('mouseup', onMouseUp);
     }
 
-    // ARRASTRE VERTICAL PARA EDITAR LA ALTURA DE LA INSIGNIA DE SECCIÓN
     function initBadgeResize(handleEl, e) {
       e.stopPropagation();
       e.preventDefault();
       const container = handleEl.closest('.section-badge-container');
       const startY = e.clientY;
-      const startMargin = parseInt(window.getComputedStyle(container.closest('.section-block')).marginTop) || 18;
+      const startMargin = parseInt(window.getComputedStyle(container.closest('.section-block')).marginTop) || 20;
 
       function onMouseMove(moveEvent) {
         const diff = moveEvent.clientY - startY;
@@ -1648,42 +1613,42 @@
         svgHTML += `<g class="sub-item-target" onclick="handleSubItemClick(this.closest('.beat-slot'), ${i}, event)">`;
 
         if (isSelected) {
-          svgHTML += `<rect x="${x - 5.5}" y="2" width="11" height="34" fill="none" stroke="#06b6d4" stroke-width="1.3" stroke-dasharray="2,2" rx="2" />`;
+          svgHTML += `<rect x="${x - 5.5}" y="2" width="11" height="34" fill="none" stroke="#64748b" stroke-width="1.2" stroke-dasharray="2,2" rx="2" />`;
         }
 
         if (isRest) {
           if (pureType === 'q') {
-            svgHTML += `<path d="M ${x-2} 8 L ${x+3} 14 L ${x-3} 20 L ${x+2} 26 C ${x-4} 28 ${x-4} 31 ${x+1} 31" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round" />`;
+            svgHTML += `<path d="M ${x-2} 8 L ${x+3} 14 L ${x-3} 20 L ${x+2} 26 C ${x-4} 28 ${x-4} 31 ${x+1} 31" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />`;
           } else if (pureType === '8') {
-            svgHTML += `<circle cx="${x-2}" cy="14" r="1.8" fill="#1e293b" />`;
-            svgHTML += `<path d="M ${x-2} 14 Q ${x+2} 12 ${x+1} 18 L ${x-3} 28" fill="none" stroke="#1e293b" stroke-width="1.8" stroke-linecap="round" />`;
+            svgHTML += `<circle cx="${x-2}" cy="14" r="1.6" fill="#0f172a" />`;
+            svgHTML += `<path d="M ${x-2} 14 Q ${x+2} 12 ${x+1} 18 L ${x-3} 28" fill="none" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round" />`;
           } else if (pureType === '16') {
-            svgHTML += `<circle cx="${x-2}" cy="12" r="1.5" fill="#1e293b" />`;
-            svgHTML += `<circle cx="${x-3}" cy="18" r="1.5" fill="#1e293b" />`;
-            svgHTML += `<path d="M ${x-2} 12 Q ${x+2} 10 ${x+1} 16 L ${x-3} 28" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" />`;
+            svgHTML += `<circle cx="${x-2}" cy="12" r="1.4" fill="#0f172a" />`;
+            svgHTML += `<circle cx="${x-3}" cy="18" r="1.4" fill="#0f172a" />`;
+            svgHTML += `<path d="M ${x-2} 12 Q ${x+2} 10 ${x+1} 16 L ${x-3} 28" fill="none" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round" />`;
           }
         } else {
           if (pureType === 'slash') {
-            svgHTML += `<line x1="${x - 3.5}" y1="24" x2="${x + 3.5}" y2="8" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" />`;
+            svgHTML += `<line x1="${x - 3.5}" y1="24" x2="${x + 3.5}" y2="8" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />`;
           } else if (pureType === 'q') {
-            svgHTML += `<line x1="${x - 3.5}" y1="20" x2="${x + 3.5}" y2="12" stroke="#1e293b" stroke-width="4.5" stroke-linecap="round" />`;
-            svgHTML += `<line x1="${x - 3.5}" y1="20" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
+            svgHTML += `<line x1="${x - 3.5}" y1="20" x2="${x + 3.5}" y2="12" stroke="#0f172a" stroke-width="4" stroke-linecap="round" />`;
+            svgHTML += `<line x1="${x - 3.5}" y1="20" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#0f172a" stroke-width="1.8" />`;
           } else if (pureType === 'h') {
-            svgHTML += `<path d="M ${x - 3.5} 20 L ${x + 3.5} 12" stroke="#1e293b" stroke-width="4.5" stroke-linecap="round" />`;
-            svgHTML += `<path d="M ${x - 2.5} 19 L ${x + 2.5} 13" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />`;
-            svgHTML += `<line x1="${x - 3.5}" y1="20" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
+            svgHTML += `<path d="M ${x - 3.5} 20 L ${x + 3.5} 12" stroke="#0f172a" stroke-width="4" stroke-linecap="round" />`;
+            svgHTML += `<path d="M ${x - 2.5} 19 L ${x + 2.5} 13" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />`;
+            svgHTML += `<line x1="${x - 3.5}" y1="20" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#0f172a" stroke-width="1.8" />`;
           } else {
-            svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x + 3.5}" y2="8" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" />`;
-            svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
+            svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x + 3.5}" y2="8" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />`;
+            svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#0f172a" stroke-width="1.8" />`;
           }
         }
 
         if (item.dot) {
-          svgHTML += `<circle cx="${x + 6.5}" cy="16" r="1.8" fill="#1e293b" />`;
+          svgHTML += `<circle cx="${x + 6}" cy="16" r="1.6" fill="#0f172a" />`;
         }
 
         if (item.tie) {
-          svgHTML += `<path d="M ${x - 3} 12 Q ${x + 8} 4 ${x + 18} 12" fill="none" stroke="#1e293b" stroke-width="2" stroke-linecap="round" />`;
+          svgHTML += `<path d="M ${x - 3} 12 Q ${x + 8} 4 ${x + 18} 12" fill="none" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round" />`;
         }
 
         svgHTML += `</g>`;
@@ -1697,9 +1662,9 @@
         
         const isSixteenthGroup = items.some(it => it.type === '16');
         
-        svgHTML += `<line x1="${firstX}" y1="${stemYBottom}" x2="${lastX}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="3" />`;
+        svgHTML += `<line x1="${firstX}" y1="${stemYBottom}" x2="${lastX}" y2="${stemYBottom}" stroke="#0f172a" stroke-width="2.5" />`;
         if (isSixteenthGroup) {
-          svgHTML += `<line x1="${firstX}" y1="${stemYBottom - 4}" x2="${lastX}" y2="${stemYBottom - 4}" stroke="#1e293b" stroke-width="3" />`;
+          svgHTML += `<line x1="${firstX}" y1="${stemYBottom - 3.5}" x2="${lastX}" y2="${stemYBottom - 3.5}" stroke="#0f172a" stroke-width="2.5" />`;
         }
       }
 
@@ -1779,8 +1744,8 @@
         target.appendChild(dynBox);
       }
       dynBox.innerHTML = type === 'crescendo' 
-        ? `<svg width="100%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 7 L 100 0 M 0 7 L 100 14" stroke="#0f172a" stroke-width="1.8" fill="none"/></svg>`
-        : `<svg width="100%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 0 L 100 7 M 0 14 L 100 7" stroke="#0f172a" stroke-width="1.8" fill="none"/></svg>`;
+        ? `<svg width="100%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 7 L 100 0 M 0 7 L 100 14" stroke="#0f172a" stroke-width="1.5" fill="none"/></svg>`
+        : `<svg width="100%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 0 L 100 7 M 0 14 L 100 7" stroke="#0f172a" stroke-width="1.5" fill="none"/></svg>`;
     }
 
     function resetMeasureRhythm() {
@@ -2146,6 +2111,7 @@
     function exportAllPagesToPNG() {
       prepareForRender();
       document.fonts.ready.then(() => {
+        document.querySelectorAll('.chart-paper').files = []; // reset
         document.querySelectorAll('.chart-paper').forEach((paper, idx) => {
           html2canvas(paper, RENDER_OPTIONS).then(canvas => {
             const link = document.createElement('a');
