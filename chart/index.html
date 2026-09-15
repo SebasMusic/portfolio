@@ -784,7 +784,7 @@
       applyLanguage(lang);
     }
 
-    // --- MANEJO OPTIMIZADO DE SELECCIÓN MÚLTIPLE ---
+    // --- SELECCIÓN MÚLTIPLE OPTIMIZADA ---
     function handleMeasureClick(el, event) {
       if (el.classList.contains('break-system')) return;
 
@@ -891,12 +891,14 @@
       triggerPagination();
     }
 
-    // --- DEBOUNCE / RECALCULO CONTROLADO DE PAGINACIÓN ---
+    // --- CONTROL DE PAGINACIÓN FLUIDA A4 (SIN BUCLES RECURSIVOS) ---
     function triggerPagination() {
       if (paginationTimeout) clearTimeout(paginationTimeout);
       paginationTimeout = setTimeout(() => {
-        checkPaginationOverflow();
-      }, 120); // Espera 120ms para evitar congelamientos
+        requestAnimationFrame(() => {
+          checkPaginationOverflow();
+        });
+      }, 50);
     }
 
     function checkPaginationOverflow() {
@@ -908,9 +910,9 @@
         let inner = currentPage.querySelector('.paper-inner');
         let content = currentPage.querySelector('.chart-content');
 
-        let loops = 0;
-        while (inner.scrollHeight > 930 && content.children.length > 0 && loops < 50) {
-          loops++;
+        let maxSafetyCounter = 0;
+        while (inner.scrollHeight > 930 && content.children.length > 0 && maxSafetyCounter < 30) {
+          maxSafetyCounter++;
           let nextPageIndex = i + 1;
           let nextPage = pages[nextPageIndex];
 
@@ -1041,6 +1043,7 @@
       triggerPagination();
     }
 
+    // --- INSERCIÓN EN LOTE FLUIDO (+8 COMPASES / CUSTOM N) ---
     function addMultipleMeasures(qty) {
       const count = qty || parseInt(document.getElementById('customMeasureQty').value) || 1;
       const lastSelected = selectedMeasures.length > 0 ? selectedMeasures[selectedMeasures.length - 1] : null;
@@ -1059,13 +1062,16 @@
         targetGrid = document.querySelectorAll('.measures-grid')[0];
       }
 
+      // Usar DocumentFragment para insertar los 8 compases de un solo golpe en la memoria
+      const fragment = document.createDocumentFragment();
       for (let i = 0; i < count; i++) {
-        const box = createMeasureElement();
-        if (lastSelected && lastSelected.parentNode === targetGrid) {
-          targetGrid.insertBefore(box, lastSelected.nextSibling);
-        } else {
-          targetGrid.appendChild(box);
-        }
+        fragment.appendChild(createMeasureElement());
+      }
+
+      if (lastSelected && lastSelected.parentNode === targetGrid) {
+        targetGrid.insertBefore(fragment, lastSelected.nextSibling);
+      } else {
+        targetGrid.appendChild(fragment);
       }
 
       triggerPagination();
