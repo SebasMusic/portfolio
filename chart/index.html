@@ -333,7 +333,7 @@
       text-transform: uppercase;
     }
 
-    .medley-subtitle {
+    .song2-subtitle {
       font-size: 1.1em;
       font-weight: 800;
       color: #0369a1;
@@ -364,7 +364,7 @@
       background: #fff;
       cursor: pointer;
       transition: background 0.2s ease;
-      flex-grow: 1; /* Permite adaptación flexible si hay 2, 3 o 4 por fila */
+      flex: 0 0 25%; /* DEFAULT: 4 COMPASES POR FILA EXACTOS */
     }
 
     .measure-box.selected {
@@ -373,7 +373,6 @@
       box-shadow: inset 0 0 0 1px #16a34a;
     }
 
-    /* FORZAR SALTO DE FILA */
     .measure-box.break-system {
       flex-basis: 100% !important;
       height: 0 !important;
@@ -473,6 +472,7 @@
       <div class="toolbox-section">
         <div class="toolbox-title" id="titleActions">⚡ Main Actions</div>
         <button class="tool-btn primary" id="btnExportPNG" onclick="exportAllPagesToPNG()">📥 Download All (PNG)</button>
+        <button class="tool-btn custom-btn" style="margin-top:4px;" id="btnAddPage" onclick="addNewPageManual()">📄 Add New Page</button>
         
         <div style="display:flex; gap:8px; margin-top:5px;">
           <button class="tool-btn" style="flex:1;" id="btnTranspDown" onclick="transposeAll(-1)">♭ -1 Semitone</button>
@@ -491,12 +491,12 @@
           <option value="12/8" id="opt128">12/8 (Twelve-Eighths)</option>
           <option value="2/2" id="opt22">2/2 (Cut Time)</option>
         </select>
-        <button class="tool-btn" style="margin-top:2px; border-color:var(--accent-purple); color:#d8b4fe;" onclick="applyTimeSignatureToSelected()">⏱️ Apply to Selected Measure</button>
+        <button class="tool-btn" style="margin-top:2px; border-color:var(--accent-purple); color:#d8b4fe;" id="btnApplyTimeSig" onclick="applyTimeSignatureToSelected()">⏱️ Apply to Selected Measure</button>
       </div>
 
       <div class="toolbox-section">
-        <div class="toolbox-title" id="titleSections">🏷️ Sections & Medley</div>
-        <button class="tool-btn custom-btn" style="width:100%; font-weight:700; margin-bottom:4px;" onclick="addMedleySubtitle()">➕ Subtitle (Medley / Song 2)</button>
+        <div class="toolbox-title" id="titleSections">🏷️ Sections & Song 2</div>
+        <button class="tool-btn custom-btn" style="width:100%; font-weight:700; margin-bottom:4px;" id="btnSubSong2" onclick="addSong2Subtitle()">➕ Song 2 / Subtitle</button>
         <div class="btn-grid">
           <button class="tool-btn custom-btn" id="btnSecEdit" onclick="addEditableSection()">✏️ EDITABLE</button>
           <button class="tool-btn" id="btnSecIntro" onclick="addSection(i18n[currentLang].secIntro)">+ INTRO</button>
@@ -509,6 +509,9 @@
 
       <div class="toolbox-section">
         <div class="toolbox-title" id="titleMeasures">🎼 Measures & Structure</div>
+        
+        <button class="tool-btn primary" style="margin-bottom:6px; background:linear-gradient(135deg, #10b981, #06b6d4);" id="btnGroupSelected" onclick="groupSelectedInSystem()">🔗 Group Selected in 1 System</button>
+
         <div class="btn-grid">
           <button class="tool-btn" id="btnAdd4" onclick="addMultipleMeasures(4)">+ 4 Measures</button>
           <button class="tool-btn" id="btnAdd8" onclick="addMultipleMeasures(8)">+ 8 Measures</button>
@@ -560,19 +563,19 @@
             <div class="section-block">
               <span class="section-badge" contenteditable="true" id="firstSectionBadge">INTRO</span>
               <div class="measures-grid">
-                <div class="measure-box" style="flex: 0 0 25%;" onclick="handleMeasureClick(this, event)">
+                <div class="measure-box" onclick="handleMeasureClick(this, event)">
                   <input type="text" class="chord-input" placeholder="C">
                   <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
                 </div>
-                <div class="measure-box" style="flex: 0 0 25%;" onclick="handleMeasureClick(this, event)">
+                <div class="measure-box" onclick="handleMeasureClick(this, event)">
                   <input type="text" class="chord-input" placeholder="G/B">
                   <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
                 </div>
-                <div class="measure-box" style="flex: 0 0 25%;" onclick="handleMeasureClick(this, event)">
+                <div class="measure-box" onclick="handleMeasureClick(this, event)">
                   <input type="text" class="chord-input" placeholder="Am7">
                   <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
                 </div>
-                <div class="measure-box" style="flex: 0 0 25%;" onclick="handleMeasureClick(this, event)">
+                <div class="measure-box" onclick="handleMeasureClick(this, event)">
                   <input type="text" class="chord-input" placeholder="F2">
                   <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
                 </div>
@@ -597,6 +600,7 @@
         btnBack: "← HOME",
         titleActions: "⚡ Main Actions",
         btnExportPNG: "📥 Download All (PNG)",
+        btnAddPage: "📄 Add New Page",
         btnTranspDown: "♭ -1 Semitone",
         btnTranspUp: "♯ +1 Semitone",
         titleTimeSig: "⏱️ Time Signature",
@@ -607,7 +611,9 @@
         opt98: "9/8 (Nine-Eighths)",
         opt128: "12/8 (Twelve-Eighths)",
         opt22: "2/2 (Cut Time)",
-        titleSections: "🏷️ Sections & Medley",
+        btnApplyTimeSig: "⏱️ Apply to Selected Measure",
+        titleSections: "🏷️ Sections & Song 2",
+        btnSubSong2: "➕ Song 2 / Subtitle",
         btnSecEdit: "✏️ EDITABLE",
         btnSecIntro: "+ INTRO",
         btnSecVerse: "+ VERSE",
@@ -621,6 +627,7 @@
         secSolo: "SOLO",
         secNew: "NEW SECTION",
         titleMeasures: "🎼 Measures & Structure",
+        btnGroupSelected: "🔗 Group Selected in 1 System",
         btnAdd4: "+ 4 Measures",
         btnAdd8: "+ 8 Measures",
         btnAddN: "+ Custom N",
@@ -644,13 +651,15 @@
         alertSelectMeasure: "Please click on a measure first to select the insertion spot.",
         alertSelectBreak: "Select a measure to group or create a line break.",
         alertSelectNote: "Click on the measure where you want to add the cue.",
+        alertGroupSelect: "Please select measures using Shift + Click to group them into a single line.",
         chordPlaceholder: "Chord",
-        medleyPlaceholder: "SONG 2: NEW TITLE / MEDLEY"
+        song2Placeholder: "SONG 2: NEW TITLE / SUBTITLE"
       },
       es: {
         btnBack: "← INICIO",
         titleActions: "⚡ Acciones Principales",
         btnExportPNG: "📥 Descargar Todo (PNG)",
+        btnAddPage: "📄 Crear Nueva Página",
         btnTranspDown: "♭ -1 Semitono",
         btnTranspUp: "♯ +1 Semitono",
         titleTimeSig: "⏱️ Métrica de Tiempo",
@@ -661,7 +670,9 @@
         opt98: "9/8 (Nueve por Ocho)",
         opt128: "12/8 (Doce por Ocho)",
         opt22: "2/2 (Dos por Dos)",
-        titleSections: "🏷️ Secciones y Medley",
+        btnApplyTimeSig: "⏱️ Aplicar a Compás Seleccionado",
+        titleSections: "🏷️ Secciones y Canción 2",
+        btnSubSong2: "➕ Canción 2 / Subtítulo",
         btnSecEdit: "✏️ EDITABLE",
         btnSecIntro: "+ INTRO",
         btnSecVerse: "+ VERSO",
@@ -675,6 +686,7 @@
         secSolo: "SOLO",
         secNew: "NUEVA SECCIÓN",
         titleMeasures: "🎼 Compases & Estructura",
+        btnGroupSelected: "🔗 Agrupar Seleccionados en 1 Sistema",
         btnAdd4: "+ 4 Compases",
         btnAdd8: "+ 8 Compases",
         btnAddN: "+ Cantidad N",
@@ -698,15 +710,15 @@
         alertSelectMeasure: "Por favor haz clic primero en un compás para elegir la posición de inserción.",
         alertSelectBreak: "Selecciona un compás para agrupar o hacer un salto de línea.",
         alertSelectNote: "Haz clic en el compás donde quieres poner la indicación.",
+        alertGroupSelect: "Por favor selecciona los compases con Shift + Clic que deseas agrupar en una misma fila.",
         chordPlaceholder: "Acorde",
-        medleyPlaceholder: "CANCIÓN 2: NUEVO TÍTULO / MEDLEY"
+        song2Placeholder: "CANCIÓN 2: NUEVO TÍTULO / SUBTÍTULO"
       }
     };
 
     let currentLang = 'en';
     let selectedMeasures = [];
     let lastSelectedMeasure = null;
-    const MAX_ROWS_PER_PAGE = 12; // Límite exacto de 12 filas/sistemas horizontales por A4
 
     function initLanguage() {
       let savedLang = localStorage.getItem('preferred_lang');
@@ -732,6 +744,7 @@
       document.getElementById('btnBack').innerText = dict.btnBack;
       document.getElementById('titleActions').innerText = dict.titleActions;
       document.getElementById('btnExportPNG').innerText = dict.btnExportPNG;
+      document.getElementById('btnAddPage').innerText = dict.btnAddPage;
       document.getElementById('btnTranspDown').innerText = dict.btnTranspDown;
       document.getElementById('btnTranspUp').innerText = dict.btnTranspUp;
 
@@ -743,8 +756,10 @@
       document.getElementById('opt98').innerText = dict.opt98;
       document.getElementById('opt128').innerText = dict.opt128;
       document.getElementById('opt22').innerText = dict.opt22;
+      document.getElementById('btnApplyTimeSig').innerText = dict.btnApplyTimeSig;
 
       document.getElementById('titleSections').innerText = dict.titleSections;
+      document.getElementById('btnSubSong2').innerText = dict.btnSubSong2;
       document.getElementById('btnSecEdit').innerText = dict.btnSecEdit;
       document.getElementById('btnSecIntro').innerText = dict.btnSecIntro;
       document.getElementById('btnSecVerse').innerText = dict.btnSecVerse;
@@ -753,6 +768,7 @@
       document.getElementById('btnSecSolo').innerText = dict.btnSecSolo;
 
       document.getElementById('titleMeasures').innerText = dict.titleMeasures;
+      document.getElementById('btnGroupSelected').innerText = dict.btnGroupSelected;
       document.getElementById('btnAdd4').innerText = dict.btnAdd4;
       document.getElementById('btnAdd8').innerText = dict.btnAdd8;
       document.getElementById('btnAddN').innerText = dict.btnAddN;
@@ -786,7 +802,7 @@
       applyLanguage(lang);
     }
 
-    // --- SELECCIÓN MÚLTIPLE ---
+    // --- SELECCIÓN MÚLTIPLE (SHIFT + CLIC) ---
     function handleMeasureClick(el, event) {
       if (el.classList.contains('break-system')) return;
 
@@ -815,6 +831,29 @@
     function clearSelections() {
       document.querySelectorAll('.measure-box.selected').forEach(m => m.classList.remove('selected'));
       selectedMeasures = [];
+    }
+
+    // --- AGRUPAR SELECCIÓN EN 1 SISTEMA ---
+    function groupSelectedInSystem() {
+      const dict = i18n[currentLang] || i18n['en'];
+      if (selectedMeasures.length === 0) {
+        alert(dict.alertGroupSelect);
+        return;
+      }
+
+      const percent = (100 / selectedMeasures.length).toFixed(2);
+      selectedMeasures.forEach(m => {
+        m.style.flex = `0 0 ${percent}%`;
+      });
+
+      const last = selectedMeasures[selectedMeasures.length - 1];
+      if (last && last.parentNode) {
+        const breakEl = document.createElement('div');
+        breakEl.className = 'measure-box break-system';
+        last.parentNode.insertBefore(breakEl, last.nextSibling);
+      }
+
+      clearSelections();
     }
 
     function getSlashHTML(timeSig) {
@@ -872,14 +911,15 @@
       document.querySelectorAll('.subsequent-title-ref').forEach(el => el.innerText = text);
     }
 
-    function addMedleySubtitle() {
+    // --- SUBTÍTULO DE CANCIÓN 2 ---
+    function addSong2Subtitle() {
       const dict = i18n[currentLang] || i18n['en'];
       const targetMeasure = selectedMeasures.length > 0 ? selectedMeasures[0] : null;
 
       const sub = document.createElement('div');
-      sub.className = 'medley-subtitle';
+      sub.className = 'song2-subtitle';
       sub.contentEditable = 'true';
-      sub.innerText = dict.medleyPlaceholder;
+      sub.innerText = dict.song2Placeholder;
 
       if (targetMeasure && targetMeasure.parentNode) {
         const block = targetMeasure.closest('.section-block');
@@ -887,54 +927,37 @@
           block.parentNode.insertBefore(sub, block);
         }
       } else {
-        const content = getTargetPageForNewRow();
+        const content = getCurrentPageContent();
         content.appendChild(sub);
       }
     }
 
-    // --- CÁLCULO DE FILAS HORIZONTALES POR PÁGINA (SISTEMAS) ---
-    function countRowsInPage(page) {
-      let rowCount = 0;
-      const grids = page.querySelectorAll('.measures-grid');
+    // --- AGREGAR PÁGINA MANUALMENTE ---
+    function addNewPageManual() {
+      const pages = document.querySelectorAll('.chart-paper');
+      const newPage = createNewPageElement(pages.length + 1);
+      document.getElementById('sheetsContainer').appendChild(newPage);
       
-      grids.forEach(grid => {
-        let currentItemsInRow = 0;
-        const boxes = grid.children;
-        
-        for (let i = 0; i < boxes.length; i++) {
-          const box = boxes[i];
-          if (box.classList.contains('break-system')) {
-            if (currentItemsInRow > 0) {
-              rowCount++;
-              currentItemsInRow = 0;
-            }
-          } else {
-            currentItemsInRow++;
-            if (currentItemsInRow === 4) { // Cada 4 compases automáticos equivale a 1 fila
-              rowCount++;
-              currentItemsInRow = 0;
-            }
-          }
-        }
-        if (currentItemsInRow > 0) {
-          rowCount++; // Fila parcial restante (ej: 2 o 3 compases sueltos al final)
-        }
-      });
+      const dict = i18n[currentLang] || i18n['en'];
+      const content = newPage.querySelector('.chart-content');
+      
+      const newBlock = document.createElement('div');
+      newBlock.className = 'section-block';
+      const grid = document.createElement('div');
+      grid.className = 'measures-grid';
+      for (let i = 0; i < 4; i++) {
+        grid.appendChild(createMeasureElement());
+      }
+      newBlock.innerHTML = `<span class="section-badge" contenteditable="true">${dict.secNew}</span>`;
+      newBlock.appendChild(grid);
+      content.appendChild(newBlock);
 
-      return rowCount;
+      updateTotalPagesCounter();
     }
 
-    function getTargetPageForNewRow() {
+    function getCurrentPageContent() {
       const pages = document.querySelectorAll('.chart-paper');
-      let lastPage = pages[pages.length - 1];
-      let rowCount = countRowsInPage(lastPage);
-
-      if (rowCount >= MAX_ROWS_PER_PAGE) {
-        lastPage = createNewPageElement(pages.length + 1);
-        document.getElementById('sheetsContainer').appendChild(lastPage);
-        updateTotalPagesCounter();
-      }
-
+      const lastPage = pages[pages.length - 1];
       return lastPage.querySelector('.chart-content');
     }
 
@@ -1003,7 +1026,7 @@
     }
 
     function addSection(title, isEditable = false) {
-      const content = getTargetPageForNewRow();
+      const content = getCurrentPageContent();
       const newBlock = document.createElement('div');
       newBlock.className = 'section-block';
 
@@ -1020,21 +1043,20 @@
 
     function addMultipleMeasures(qty) {
       const count = qty || parseInt(document.getElementById('customMeasureQty').value) || 1;
-      
+      const content = getCurrentPageContent();
+      let targetGrid;
+
+      const blocks = content.querySelectorAll('.section-block');
+      if (blocks.length > 0) {
+        targetGrid = blocks[blocks.length - 1].querySelector('.measures-grid');
+      } else {
+        const dict = i18n[currentLang] || i18n['en'];
+        addSection(dict.secNew);
+        const newBlocks = content.querySelectorAll('.section-block');
+        targetGrid = newBlocks[newBlocks.length - 1].querySelector('.measures-grid');
+      }
+
       for (let i = 0; i < count; i++) {
-        const content = getTargetPageForNewRow();
-        let targetGrid;
-
-        const blocks = content.querySelectorAll('.section-block');
-        if (blocks.length > 0) {
-          targetGrid = blocks[blocks.length - 1].querySelector('.measures-grid');
-        } else {
-          const dict = i18n[currentLang] || i18n['en'];
-          addSection(dict.secNew);
-          const newBlocks = content.querySelectorAll('.section-block');
-          targetGrid = newBlocks[newBlocks.length - 1].querySelector('.measures-grid');
-        }
-
         targetGrid.appendChild(createMeasureElement());
       }
     }
