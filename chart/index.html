@@ -15,10 +15,10 @@
     gtag('config', 'G-Q3DTLYSJMH');
   </script>
 
-  <!-- Tipografía Bungee exacta para el título e Inter para el cuerpo -->
+  <!-- Tipografía Montserrat (900/800) para el título e Inter para el cuerpo -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
   
   <!-- html2canvas para exportar a PNG y jsPDF para exportar a PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -259,7 +259,7 @@
       flex-direction: column;
       justify-content: space-between;
       position: relative;
-      overflow: visible; /* Permite que el título Bungee renderice completo sin cortes */
+      overflow: visible;
     }
 
     .chart-paper::before {
@@ -288,7 +288,7 @@
       gap: 12px;
       border-bottom: 2px solid #0f172a;
       padding-bottom: 12px;
-      padding-top: 15px; /* Margen superior amplio anti-corte */
+      padding-top: 10px;
     }
 
     /* ENCABEZADO HOJAS SIGUIENTES */
@@ -316,9 +316,11 @@
       max-width: 500px;
     }
 
+    /* TÍTULO CON MONTSERRAT 900: CENTRADO PERFECTO Y SIN CORTES */
     .song-title-editable {
-      font-family: 'Bungee', cursive, sans-serif;
-      font-size: 1.75em;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 1.85em;
       text-transform: uppercase;
       text-align: center;
       border: none;
@@ -326,9 +328,9 @@
       width: 100%;
       color: #0f172a;
       background: transparent;
-      letter-spacing: 1px;
-      line-height: 1.4;
-      padding: 6px 0;
+      letter-spacing: 2px;
+      line-height: 1.2;
+      padding: 4px 0;
     }
 
     .song-title-editable::placeholder { color: #cbd5e1; }
@@ -353,7 +355,7 @@
       border: none;
       outline: none;
       background: transparent;
-      color: #334155;
+      color: #475569;
       font-weight: 600;
       font-size: 1em;
     }
@@ -476,20 +478,22 @@
       outline: none;
     }
 
-    /* BADGE DE MÉTRICA REPOSICIONADO ARRIBA */
+    /* BADGE DE MÉTRICA PEQUEÑO, PEGADO A LA ESQUINA SUPERIOR Y SIN TOCAR SLASHES */
     .time-sig-badge {
       position: absolute;
-      top: 28px;
-      left: 6px;
-      font-size: 0.75em;
+      top: 3px;
+      left: 4px;
+      font-size: 0.65em;
       font-weight: 800;
-      color: #0f172a;
-      background: #f1f5f9;
-      border: 1px dashed #64748b;
-      padding: 0px 4px;
+      color: #475569;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      padding: 0px 3px;
       border-radius: 3px;
       user-select: none;
       outline: none;
+      line-height: 1.1;
+      z-index: 2;
     }
 
     .chart-footer {
@@ -635,8 +639,8 @@
               <div><input type="text" class="editable-sub" id="artistInput" placeholder="Artist / Band" style="width:160px;"></div>
               <div><input type="text" class="editable-sub" id="styleInput" placeholder="Style: Worship / Pop" style="width:150px; text-align:center;"></div>
               
-              <!-- MÉTRICA UNIFICADA EN ESTILO GRIS CON EL RESTO DEL ENCABEZADO -->
-              <div><span id="lblTimeSigHeader">Time Sig</span>: <input type="text" class="editable-sub displayTimeSig" id="headerTimeSigInput" value="4/4" style="width:45px; text-align:center; font-weight:600; color:#334155;"></div>
+              <!-- MÉTRICA UNIFICADA EN ESTILO GRIS Y PESO NORMAL IGUAL AL RESTO DEL ENCABEZADO -->
+              <div><span id="lblTimeSigHeader">Time Sig</span>: <input type="text" class="editable-sub displayTimeSig" id="headerTimeSigInput" value="4/4" style="width:40px; text-align:center; font-weight:600; color:#475569;"></div>
               
               <div><input type="text" class="editable-sub" placeholder="BPM: 120" style="width:80px; text-align:right;"></div>
             </div>
