@@ -255,6 +255,7 @@
       gap: 8px;
       border-bottom: 2px solid #0f172a;
       padding-bottom: 12px;
+      padding-top: 10px;
     }
 
     /* ENCABEZADO HOJAS SIGUIENTES */
@@ -284,7 +285,7 @@
 
     .song-title-editable {
       font-family: 'Bungee', cursive, sans-serif;
-      font-size: 2em;
+      font-size: 1.85em;
       text-transform: uppercase;
       text-align: center;
       border: none;
@@ -293,6 +294,8 @@
       color: #0f172a;
       background: transparent;
       letter-spacing: 1px;
+      line-height: 1.2;
+      padding-top: 4px;
     }
 
     .song-title-editable::placeholder { color: #cbd5e1; }
@@ -500,7 +503,7 @@
 
       <div class="toolbox-section">
         <div class="toolbox-title" id="titleTimeSig">⏱️ Time Signature</div>
-        <select class="select-input" id="timeSignatureSelect" onchange="updateTimeSignature(this.value)">
+        <select class="select-input" id="timeSignatureSelect">
           <option value="4/4" selected id="opt44">4/4 (Four-Four)</option>
           <option value="3/4" id="opt34">3/4 (Three-Four)</option>
           <option value="2/4" id="opt24">2/4 (Two-Four)</option>
@@ -509,7 +512,7 @@
           <option value="12/8" id="opt128">12/8 (Twelve-Eighths)</option>
           <option value="2/2" id="opt22">2/2 (Cut Time)</option>
         </select>
-        <button class="tool-btn" style="margin-top:2px; border-color:var(--accent-purple); color:#d8b4fe;" id="btnApplyTimeSig" onclick="applyTimeSignatureToSelected()">⏱️ Apply to Selected Measure</button>
+        <button class="tool-btn" style="margin-top:2px; border-color:var(--accent-purple); color:#d8b4fe;" id="btnApplyTimeSig" onclick="applyTimeSignatureToSelected()">⏱️ Apply Time Sig from Selection</button>
       </div>
 
       <div class="toolbox-section">
@@ -630,7 +633,7 @@
         opt98: "9/8 (Nine-Eighths)",
         opt128: "12/8 (Twelve-Eighths)",
         opt22: "2/2 (Cut Time)",
-        btnApplyTimeSig: "⏱️ Apply to Selected Measure",
+        btnApplyTimeSig: "⏱️ Apply Time Sig from Selection",
         titleSections: "🏷️ Sections & Song 2",
         btnSubSong2: "➕ Song 2 / Subtitle",
         btnSecEdit: "✏️ EDITABLE",
@@ -667,7 +670,7 @@
         untitledChart: "UNTITLED CHART",
         pageLabel: "PAGE",
         continuation: "Continuation",
-        alertSelectMeasure: "Please click on a measure first to select the insertion spot.",
+        alertSelectMeasure: "Please click on a measure first to select the starting spot for the time signature change.",
         alertSelectBreak: "Select a measure to group or create a line break.",
         alertSelectNote: "Click on the measure where you want to add the cue.",
         alertGroupSelect: "Please select measures using Shift + Click to group them into a single line.",
@@ -687,10 +690,10 @@
         opt34: "3/4 (Tres por Cuatro)",
         opt24: "2/4 (Dos por Cuatro)",
         opt68: "6/8 (Seis por Ocho)",
-        opt98: "9/8 (Nueve por Ocho)",
+        opt98: "Nueve por Ocho",
         opt128: "12/8 (Doce por Ocho)",
         opt22: "2/2 (Dos por Dos)",
-        btnApplyTimeSig: "⏱️ Aplicar a Compás Seleccionado",
+        btnApplyTimeSig: "⏱️ Aplicar Métrica desde Selección",
         titleSections: "🏷️ Secciones y Canción 2",
         btnSubSong2: "➕ Canción 2 / Subtítulo",
         btnSecEdit: "✏️ EDITABLE",
@@ -727,7 +730,7 @@
         untitledChart: "CANCIÓN SIN TÍTULO",
         pageLabel: "PÁG.",
         continuation: "Continuación",
-        alertSelectMeasure: "Por favor haz clic primero en un compás para elegir la posición de inserción.",
+        alertSelectMeasure: "Por favor haz clic en un compás para elegir desde dónde cambia la métrica.",
         alertSelectBreak: "Selecciona un compás para agrupar o hacer un salto de línea.",
         alertSelectNote: "Haz clic en el compás donde quieres poner la indicación.",
         alertGroupSelect: "Por favor selecciona los compases con Shift + Clic que deseas agrupar en una misma fila.",
@@ -897,18 +900,7 @@
       }
     }
 
-    function updateTimeSignature(val) {
-      document.querySelectorAll('.displayTimeSig').forEach(el => el.innerText = val);
-      const html = getSlashHTML(val);
-      document.querySelectorAll('.rhythm-slashes').forEach(el => {
-        el.innerHTML = html;
-      });
-
-      if (typeof gtag === 'function') {
-        gtag('event', 'change_time_signature', { 'time_sig': val });
-      }
-    }
-
+    // APLICA LA MÉTRICA DESDE EL COMPÁS SELECCIONADO EN ADELANTE (SIN AFECTAR LOS ANTERIORES)
     function applyTimeSignatureToSelected() {
       const val = document.getElementById('timeSignatureSelect').value;
       if (selectedMeasures.length === 0) {
@@ -917,12 +909,23 @@
         return;
       }
 
-      selectedMeasures.forEach(m => {
-        const slashes = m.querySelector('.rhythm-slashes');
-        if (slashes) {
-          slashes.innerHTML = getSlashHTML(val);
+      const startMeasure = selectedMeasures[0];
+      const allMeasures = Array.from(document.querySelectorAll('.measure-box:not(.break-system)'));
+      const startIdx = allMeasures.indexOf(startMeasure);
+
+      if (startIdx !== -1) {
+        const slashHtml = getSlashHTML(val);
+        for (let i = startIdx; i < allMeasures.length; i++) {
+          const slashes = allMeasures[i].querySelector('.rhythm-slashes');
+          if (slashes) {
+            slashes.innerHTML = slashHtml;
+          }
         }
-      });
+      }
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'change_time_signature_forward', { 'time_sig': val });
+      }
     }
 
     function updateFooterTitle(val) {
@@ -1166,7 +1169,19 @@
       }
     }
 
-    // --- EXPORTAR PNG HD CON ENCUADRE A4 PERFECTO ---
+    // CONFIGURACIÓN DE SEGURIDAD PARA CAPTURA SIN CORTES VERTICALES
+    const RENDER_OPTIONS = {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      scrollX: 0,
+      scrollY: 0,
+      width: 794,
+      height: 1123,
+      windowWidth: 1200
+    };
+
+    // --- EXPORTAR PNG HD ---
     function exportAllPagesToPNG() {
       if (typeof gtag === 'function') {
         gtag('event', 'export_chart_png', {
@@ -1175,27 +1190,23 @@
         });
       }
 
-      clearSelections(); // Quitar bordes verdes de selección previa
+      clearSelections();
 
-      const papers = document.querySelectorAll('.chart-paper');
-      papers.forEach((paper, idx) => {
-        html2canvas(paper, { 
-          scale: 2, 
-          useCORS: true,
-          width: 794,
-          height: 1123,
-          windowWidth: 1200
-        }).then(canvas => {
-          const link = document.createElement('a');
-          const title = document.getElementById('songTitleInput').value || 'chart';
-          link.download = `${title.toLowerCase().replace(/\s+/g, '-')}-page-${idx + 1}.png`;
-          link.href = canvas.toDataURL('image/png');
-          link.click();
+      document.fonts.ready.then(() => {
+        const papers = document.querySelectorAll('.chart-paper');
+        papers.forEach((paper, idx) => {
+          html2canvas(paper, RENDER_OPTIONS).then(canvas => {
+            const link = document.createElement('a');
+            const title = document.getElementById('songTitleInput').value || 'chart';
+            link.download = `${title.toLowerCase().replace(/\s+/g, '-')}-page-${idx + 1}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          });
         });
       });
     }
 
-    // --- EXPORTAR PDF VECTORIAL MULTI-PÁGINA ---
+    // --- EXPORTAR PDF MULTI-PÁGINA ---
     function exportAllPagesToPDF() {
       if (typeof gtag === 'function') {
         gtag('event', 'export_chart_pdf', {
@@ -1206,30 +1217,26 @@
 
       clearSelections();
 
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const papers = Array.from(document.querySelectorAll('.chart-paper'));
-      const title = document.getElementById('songTitleInput').value || 'chart';
+      document.fonts.ready.then(() => {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const papers = Array.from(document.querySelectorAll('.chart-paper'));
+        const title = document.getElementById('songTitleInput').value || 'chart';
 
-      let processed = 0;
+        let processed = 0;
 
-      papers.forEach((paper, idx) => {
-        html2canvas(paper, { 
-          scale: 2, 
-          useCORS: true,
-          width: 794,
-          height: 1123,
-          windowWidth: 1200
-        }).then(canvas => {
-          const imgData = canvas.toDataURL('image/jpeg', 0.95);
-          if (idx > 0) pdf.addPage();
-          
-          pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
-          
-          processed++;
-          if (processed === papers.length) {
-            pdf.save(`${title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
-          }
+        papers.forEach((paper, idx) => {
+          html2canvas(paper, RENDER_OPTIONS).then(canvas => {
+            const imgData = canvas.toDataURL('image/jpeg', 0.98);
+            if (idx > 0) pdf.addPage();
+            
+            pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+            
+            processed++;
+            if (processed === papers.length) {
+              pdf.save(`${title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+            }
+          });
         });
       });
     }
