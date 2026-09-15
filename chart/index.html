@@ -1037,7 +1037,7 @@
       <div class="rhythm-toolbar">
         <div class="rhythm-title">
           <span id="lblRhythmStudioTitle">Rhythms & Notation Studio</span>
-          <span style="font-size:0.75em; opacity:0.7; font-weight:500;" id="lblRhythmShortcuts">Shift+Click: Rango | Deshacer: Ctrl+Z | Copiar: Ctrl+C</span>
+          <span style="font-size:0.75em; opacity:0.7; font-weight:500;" id="lblRhythmShortcuts">Teclas 7, 6, 5, 4, 3 | Shift+Click: Rango | Ctrl+Z: Deshacer</span>
         </div>
         
         <!-- FIGURAS MUSICALES EN SÍMBOLOS -->
@@ -1183,7 +1183,7 @@
         btnBandIn: "Band IN",
         btnCorte: "Break / Cut",
         lblRhythmStudioTitle: "Rhythms & Notation Studio",
-        lblRhythmShortcuts: "Shift+Click: Range | Undo: Ctrl+Z | Copy: Ctrl+C",
+        lblRhythmShortcuts: "Keys 7,6,5,4,3 | Shift+Click: Range | Ctrl+Z: Undo",
         btnResetSlashes: "Reset Slashes",
         titlePlaceholder: "SONG TITLE",
         artistPlaceholder: "Artist / Band",
@@ -1241,7 +1241,7 @@
         btnBandIn: "Entra Banda",
         btnCorte: "Corte / Break",
         lblRhythmStudioTitle: "Estudio de Ritmo y Notación",
-        lblRhythmShortcuts: "Shift+Clic: Rango | Deshacer: Ctrl+Z | Copiar: Ctrl+C",
+        lblRhythmShortcuts: "Teclas 7,6,5,4,3 | Shift+Clic: Rango | Ctrl+Z: Deshacer",
         btnResetSlashes: "Restablecer Slashes",
         titlePlaceholder: "TÍTULO DE LA CANCIÓN",
         artistPlaceholder: "Artista / Banda",
@@ -1327,7 +1327,6 @@
       updateTotalPagesCounter();
     }
 
-    // MOTOR UNIFICADO DE ARRASTRE DIRECTO (CLIC SOSTENIDO)
     function initDirectDrag(el, e, type) {
       if (e.target.tagName === 'INPUT' && type === 'volta') return;
       if (e.target.isContentEditable && (type === 'badge' || type === 'subtitle' || type === 'annotation')) return;
@@ -1349,17 +1348,12 @@
         const diffX = moveEvent.clientX - startX;
         const diffY = moveEvent.clientY - startY;
 
-        // Movimiento Vertical (Subir / Bajar)
         const newTop = startTop + diffY;
         targetEl.style.top = `${newTop}px`;
 
-        // Movimiento Horizontal / Redimensionamiento (Izquierda / Derecha)
         if (type === 'volta' || type === 'tie' || type === 'dynamics') {
           const newWidth = Math.max(30, startWidth + diffX);
           targetEl.style.width = `${newWidth}px`;
-        } else if (type === 'block') {
-          const newMargin = Math.max(4, parseInt(targetEl.style.marginTop || 24) + diffY);
-          targetEl.style.marginTop = `${newMargin}px`;
         }
       }
 
@@ -1598,6 +1592,7 @@
       }
     }
 
+    // RENDERIZADOR MEJORADO: SOPORTE DE BANDERILLAS INDIVIDUALES (FLAGS)
     function renderBeatSlot(slotEl) {
       const items = getBeatData(slotEl);
       const totalItems = items.length;
@@ -1606,6 +1601,10 @@
       const step = 40 / (totalItems + 1);
       const stemYBottom = 31;
       const xPositions = items.map((_, i) => step * (i + 1));
+
+      // Verificamos si hay notas agrupadas por barra (beam)
+      const nonRestIndices = items.map((it, idx) => (!it.type.startsWith('r') && (it.type.endsWith('8') || it.type.endsWith('16'))) ? idx : -1).filter(i => i !== -1);
+      const hasBeam = nonRestIndices.length >= 2;
 
       items.forEach((item, i) => {
         const x = xPositions[i];
@@ -1641,9 +1640,21 @@
             svgHTML += `<path d="M ${x - 3.5} 20 L ${x + 3.5} 12" stroke="#0f172a" stroke-width="4" stroke-linecap="round" />`;
             svgHTML += `<path d="M ${x - 2.5} 19 L ${x + 2.5} 13" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />`;
             svgHTML += `<line x1="${x - 3.5}" y1="20" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#0f172a" stroke-width="1.8" />`;
-          } else {
+          } else if (pureType === '8') {
+            // Corchea con plica y banderilla individual si no está en un grupo de barra
             svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x + 3.5}" y2="8" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />`;
             svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#0f172a" stroke-width="1.8" />`;
+            if (!hasBeam || !nonRestIndices.includes(i)) {
+              svgHTML += `<path d="M ${x - 3.5} ${stemYBottom} Q ${x + 5} ${stemYBottom - 4} ${x + 3} ${stemYBottom - 9}" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />`;
+            }
+          } else if (pureType === '16') {
+            // Semicorchea con plica y doble banderilla individual si no está agrupada
+            svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x + 3.5}" y2="8" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />`;
+            svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#0f172a" stroke-width="1.8" />`;
+            if (!hasBeam || !nonRestIndices.includes(i)) {
+              svgHTML += `<path d="M ${x - 3.5} ${stemYBottom} Q ${x + 5} ${stemYBottom - 4} ${x + 3} ${stemYBottom - 9}" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />`;
+              svgHTML += `<path d="M ${x - 3.5} ${stemYBottom - 4} Q ${x + 5} ${stemYBottom - 8} ${x + 3} ${stemYBottom - 13}" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />`;
+            }
           }
         }
 
@@ -1654,9 +1665,7 @@
         svgHTML += `</g>`;
       });
 
-      const nonRestIndices = items.map((it, idx) => (!it.type.startsWith('r') && (it.type.endsWith('8') || it.type.endsWith('16'))) ? idx : -1).filter(i => i !== -1);
-
-      if (nonRestIndices.length >= 2) {
+      if (hasBeam) {
         const firstX = xPositions[nonRestIndices[0]] - 3.5;
         const lastX = xPositions[nonRestIndices[nonRestIndices.length - 1]] - 3.5;
         
@@ -1794,6 +1803,7 @@
       if (tie) tie.remove();
     }
 
+    // ESCUCHA GLOBAL DE TECLADO (ATAJOS NUMÉRICOS 7, 6, 5, 4, 3 Y COPIAR/PEGAR/DESHACER)
     window.addEventListener('keydown', (e) => {
       const isEditingInput = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable);
       const isCtrl = e.ctrlKey || e.metaKey;
@@ -1810,6 +1820,17 @@
       }
 
       if (isEditingInput) return;
+
+      // Atajos de figuras rítmicas por número de teclado
+      if (!isCtrl) {
+        if (e.key === '7') { applySubdivisionRhythm('w'); return; }
+        if (e.key === '6') { applySubdivisionRhythm('h'); return; }
+        if (e.key === '5') { applySubdivisionRhythm('q'); return; }
+        if (e.key === '4') { applySubdivisionRhythm('8'); return; }
+        if (e.key === '3') { applySubdivisionRhythm('16'); return; }
+        if (e.key === '.') { toggleSubdivisionDot(); return; }
+        if (e.key.toLowerCase() === 'l') { toggleSubdivisionTie(); return; }
+      }
 
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (selectedMeasures.length > 0) {
