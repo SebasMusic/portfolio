@@ -244,7 +244,7 @@
       padding-bottom: 12px;
     }
 
-    /* ENCABEZADO HOJAS SIGUIENTES (SUTIL / GRIS) */
+    /* ENCABEZADO HOJAS SIGUIENTES */
     .chart-header-subsequent {
       display: flex;
       justify-content: space-between;
@@ -364,6 +364,7 @@
       background: #fff;
       cursor: pointer;
       transition: background 0.2s ease;
+      flex-grow: 1; /* Permite adaptación flexible si hay 2, 3 o 4 por fila */
     }
 
     .measure-box.selected {
@@ -372,6 +373,7 @@
       box-shadow: inset 0 0 0 1px #16a34a;
     }
 
+    /* FORZAR SALTO DE FILA */
     .measure-box.break-system {
       flex-basis: 100% !important;
       height: 0 !important;
@@ -704,7 +706,7 @@
     let currentLang = 'en';
     let selectedMeasures = [];
     let lastSelectedMeasure = null;
-    let paginationTimeout = null;
+    const MAX_ROWS_PER_PAGE = 12; // Límite exacto de 12 filas/sistemas horizontales por A4
 
     function initLanguage() {
       let savedLang = localStorage.getItem('preferred_lang');
@@ -784,7 +786,7 @@
       applyLanguage(lang);
     }
 
-    // --- SELECCIÓN MÚLTIPLE OPTIMIZADA ---
+    // --- SELECCIÓN MÚLTIPLE ---
     function handleMeasureClick(el, event) {
       if (el.classList.contains('break-system')) return;
 
@@ -885,88 +887,69 @@
           block.parentNode.insertBefore(sub, block);
         }
       } else {
-        const content = getCurrentPageContent();
+        const content = getTargetPageForNewRow();
         content.appendChild(sub);
       }
-      triggerPagination();
     }
 
-    // --- CONTROL DE PAGINACIÓN FLUIDA A4 (SIN BUCLES RECURSIVOS) ---
-    function triggerPagination() {
-      if (paginationTimeout) clearTimeout(paginationTimeout);
-      paginationTimeout = setTimeout(() => {
-        requestAnimationFrame(() => {
-          checkPaginationOverflow();
-        });
-      }, 50);
-    }
-
-    function checkPaginationOverflow() {
-      const container = document.getElementById('sheetsContainer');
-      let pages = Array.from(document.querySelectorAll('.chart-paper'));
-
-      for (let i = 0; i < pages.length; i++) {
-        let currentPage = pages[i];
-        let inner = currentPage.querySelector('.paper-inner');
-        let content = currentPage.querySelector('.chart-content');
-
-        let maxSafetyCounter = 0;
-        while (inner.scrollHeight > 930 && content.children.length > 0 && maxSafetyCounter < 30) {
-          maxSafetyCounter++;
-          let nextPageIndex = i + 1;
-          let nextPage = pages[nextPageIndex];
-
-          if (!nextPage) {
-            nextPage = createNewPageElement(nextPageIndex + 1);
-            container.appendChild(nextPage);
-            pages.push(nextPage);
-          }
-
-          let nextContent = nextPage.querySelector('.chart-content');
-          let lastBlock = content.lastElementChild;
-
-          if (lastBlock && lastBlock.classList.contains('section-block')) {
-            let grid = lastBlock.querySelector('.measures-grid');
-            if (grid && grid.children.length > 1) {
-              let firstBlockInNext = nextContent.firstElementChild;
-              if (!firstBlockInNext || !firstBlockInNext.classList.contains('section-block')) {
-                let newBlock = document.createElement('div');
-                newBlock.className = 'section-block';
-                let newGrid = document.createElement('div');
-                newGrid.className = 'measures-grid';
-                newBlock.appendChild(newGrid);
-                nextContent.insertBefore(newBlock, nextContent.firstChild);
-                firstBlockInNext = newBlock;
-              }
-              let targetGrid = firstBlockInNext.querySelector('.measures-grid');
-              let lastMeasure = grid.lastElementChild;
-              if (lastMeasure) {
-                targetGrid.insertBefore(lastMeasure, targetGrid.firstChild);
-              }
-            } else {
-              nextContent.insertBefore(lastBlock, nextContent.firstChild);
+    // --- CÁLCULO DE FILAS HORIZONTALES POR PÁGINA (SISTEMAS) ---
+    function countRowsInPage(page) {
+      let rowCount = 0;
+      const grids = page.querySelectorAll('.measures-grid');
+      
+      grids.forEach(grid => {
+        let currentItemsInRow = 0;
+        const boxes = grid.children;
+        
+        for (let i = 0; i < boxes.length; i++) {
+          const box = boxes[i];
+          if (box.classList.contains('break-system')) {
+            if (currentItemsInRow > 0) {
+              rowCount++;
+              currentItemsInRow = 0;
             }
           } else {
-            nextContent.insertBefore(lastBlock, nextContent.firstChild);
+            currentItemsInRow++;
+            if (currentItemsInRow === 4) { // Cada 4 compases automáticos equivale a 1 fila
+              rowCount++;
+              currentItemsInRow = 0;
+            }
           }
         }
+        if (currentItemsInRow > 0) {
+          rowCount++; // Fila parcial restante (ej: 2 o 3 compases sueltos al final)
+        }
+      });
+
+      return rowCount;
+    }
+
+    function getTargetPageForNewRow() {
+      const pages = document.querySelectorAll('.chart-paper');
+      let lastPage = pages[pages.length - 1];
+      let rowCount = countRowsInPage(lastPage);
+
+      if (rowCount >= MAX_ROWS_PER_PAGE) {
+        lastPage = createNewPageElement(pages.length + 1);
+        document.getElementById('sheetsContainer').appendChild(lastPage);
+        updateTotalPagesCounter();
       }
 
-      cleanupEmptyPages();
-      updateTotalPagesCounter();
+      return lastPage.querySelector('.chart-content');
     }
 
     function cleanupEmptyPages() {
       const pages = Array.from(document.querySelectorAll('.chart-paper'));
       for (let i = pages.length - 1; i > 0; i--) {
         let page = pages[i];
-        let content = page.querySelector('.chart-content');
-        if (!content || content.children.length === 0 || content.innerText.trim() === "") {
+        let measures = page.querySelectorAll('.measure-box:not(.break-system)');
+        if (measures.length === 0) {
           page.parentNode.removeChild(page);
         } else {
           break; 
         }
       }
+      updateTotalPagesCounter();
     }
 
     function createNewPageElement(pageNum) {
@@ -993,12 +976,6 @@
       return newPaper;
     }
 
-    function getCurrentPageContent() {
-      const pages = document.querySelectorAll('.chart-paper');
-      const lastPage = pages[pages.length - 1];
-      return lastPage.querySelector('.chart-content');
-    }
-
     function updateTotalPagesCounter() {
       const dict = i18n[currentLang] || i18n['en'];
       const total = document.querySelectorAll('.chart-paper').length;
@@ -1017,7 +994,6 @@
       const timeSig = document.getElementById('timeSignatureSelect').value;
       const box = document.createElement('div');
       box.className = 'measure-box';
-      box.style.flex = '0 0 25%';
       box.onclick = function(e) { handleMeasureClick(this, e); };
       box.innerHTML = `
         <input type="text" class="chord-input" placeholder="${dict.chordPlaceholder}">
@@ -1027,7 +1003,7 @@
     }
 
     function addSection(title, isEditable = false) {
-      const content = getCurrentPageContent();
+      const content = getTargetPageForNewRow();
       const newBlock = document.createElement('div');
       newBlock.className = 'section-block';
 
@@ -1040,41 +1016,27 @@
       newBlock.innerHTML = `<span class="section-badge" contenteditable="true">${title}</span>`;
       newBlock.appendChild(grid);
       content.appendChild(newBlock);
-      triggerPagination();
     }
 
-    // --- INSERCIÓN EN LOTE FLUIDO (+8 COMPASES / CUSTOM N) ---
     function addMultipleMeasures(qty) {
       const count = qty || parseInt(document.getElementById('customMeasureQty').value) || 1;
-      const lastSelected = selectedMeasures.length > 0 ? selectedMeasures[selectedMeasures.length - 1] : null;
-
-      let targetGrid;
-      if (lastSelected && lastSelected.parentNode) {
-        targetGrid = lastSelected.parentNode;
-      } else {
-        const grids = document.querySelectorAll('.measures-grid');
-        targetGrid = grids[grids.length - 1];
-      }
-
-      if (!targetGrid) {
-        const dict = i18n[currentLang] || i18n['en'];
-        addSection(dict.secNew);
-        targetGrid = document.querySelectorAll('.measures-grid')[0];
-      }
-
-      // Usar DocumentFragment para insertar los 8 compases de un solo golpe en la memoria
-      const fragment = document.createDocumentFragment();
+      
       for (let i = 0; i < count; i++) {
-        fragment.appendChild(createMeasureElement());
-      }
+        const content = getTargetPageForNewRow();
+        let targetGrid;
 
-      if (lastSelected && lastSelected.parentNode === targetGrid) {
-        targetGrid.insertBefore(fragment, lastSelected.nextSibling);
-      } else {
-        targetGrid.appendChild(fragment);
-      }
+        const blocks = content.querySelectorAll('.section-block');
+        if (blocks.length > 0) {
+          targetGrid = blocks[blocks.length - 1].querySelector('.measures-grid');
+        } else {
+          const dict = i18n[currentLang] || i18n['en'];
+          addSection(dict.secNew);
+          const newBlocks = content.querySelectorAll('.section-block');
+          targetGrid = newBlocks[newBlocks.length - 1].querySelector('.measures-grid');
+        }
 
-      triggerPagination();
+        targetGrid.appendChild(createMeasureElement());
+      }
     }
 
     function insertMeasure(position) {
@@ -1093,7 +1055,6 @@
       }
 
       handleMeasureClick(newBox, null);
-      triggerPagination();
     }
 
     function toggleSystemBreak() {
@@ -1107,7 +1068,6 @@
       const breakEl = document.createElement('div');
       breakEl.className = 'measure-box break-system';
       grid.insertBefore(breakEl, target.nextSibling);
-      triggerPagination();
     }
 
     function removeSelectedMeasure() {
@@ -1119,7 +1079,7 @@
         });
         clearSelections();
         lastSelectedMeasure = null;
-        triggerPagination();
+        cleanupEmptyPages();
       }
     }
 
