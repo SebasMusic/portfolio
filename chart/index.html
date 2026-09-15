@@ -488,10 +488,11 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      margin-top: 20px;
+      margin-top: 22px; /* Margen superior generoso para evitar superposición inicial con casillas */
       position: relative;
     }
 
+    /* INSIGNIA DE SECCIÓN CON SOPORTE DE ARRASTRE VERTICAL (DRAG) */
     .section-badge-container {
       display: inline-flex;
       align-items: center;
@@ -499,7 +500,7 @@
       align-self: flex-start;
       margin-bottom: 2px;
       position: relative;
-      cursor: grab;
+      cursor: ns-resize;
       user-select: none;
     }
 
@@ -527,7 +528,7 @@
     .badge-drag-handle {
       width: 6px;
       height: 12px;
-      background: #cbd5e1;
+      background: #94a3b8;
       border-radius: 2px;
       cursor: ns-resize;
       display: none;
@@ -614,7 +615,7 @@
 
     .volta-bracket {
       position: absolute;
-      top: -22px;
+      top: -24px;
       left: 0;
       height: 16px;
       border-top: 1.5px solid #0f172a;
@@ -840,7 +841,7 @@
     
     <select class="lang-selector-mini" id="langSelector" onchange="changeLanguageManually(this.value)">
       <option value="en">🇬🇧 English</option>
-      <option value="es">🇪🇸 Español</option>
+      <option value="es" selected>🇪🇸 Español</option>
       <option value="pt">🇧🇷 Português</option>
       <option value="fr">🇫🇷 Français</option>
       <option value="de">🇩🇪 Deutsch</option>
@@ -1103,9 +1104,9 @@
 
             <div class="chart-content">
               <div class="section-block">
-                <div class="section-badge-container">
+                <div class="section-badge-container" onmousedown="initBadgeResize(this, event)" title="Arrastrar para ajustar altura">
                   <span class="section-badge" contenteditable="true" id="firstSectionBadge">INTRO</span>
-                  <div class="badge-drag-handle" onmousedown="initBadgeResize(this, event)" title="Arrastrar para ajustar altura"></div>
+                  <div class="badge-drag-handle"></div>
                 </div>
                 <div class="measures-grid">
                   <div class="measure-box" onclick="handleMeasureClick(this, event)">
@@ -1315,7 +1316,7 @@
       document.querySelectorAll('.volta-resize-handle').forEach(h => {
         h.onmousedown = function(e) { initVoltaResize(this, e); };
       });
-      document.querySelectorAll('.badge-drag-handle').forEach(h => {
+      document.querySelectorAll('.section-badge-container').forEach(h => {
         h.onmousedown = function(e) { initBadgeResize(this, e); };
       });
       initAllBeatMeasures();
@@ -1366,7 +1367,6 @@
       clearSelections();
     }
 
-    // SELECCIÓN CON SHIFT ROBUSTA EN CUALQUIER PARTE DEL COMPÁS
     function handleMeasureClick(el, event) {
       if (el.classList.contains('break-system')) return;
       if (event) event.stopPropagation();
@@ -1504,9 +1504,13 @@
 
       const first = selectedMeasures[0];
       
+      // Desplazamiento automático de margen superior del bloque para dejar espacio al corchete
       const block = first.closest('.section-block');
       if (block) {
-        block.style.marginTop = '28px';
+        const currentMargin = parseInt(window.getComputedStyle(block).marginTop) || 22;
+        if (currentMargin < 32) {
+          block.style.marginTop = '32px';
+        }
       }
 
       let v = document.createElement('div');
@@ -1544,17 +1548,18 @@
       window.addEventListener('mouseup', onMouseUp);
     }
 
-    function initBadgeResize(handleEl, e) {
-      e.stopPropagation();
+    // ARRASTRE VERTICAL PARA EDITAR LA ALTURA DE LA INSIGNIA DE SECCIÓN
+    function initBadgeResize(containerEl, e) {
+      if (e.target.tagName === 'SPAN' && e.target.isContentEditable) return; // Permitir edición de texto
       e.preventDefault();
-      const container = handleEl.closest('.section-badge-container');
+      const block = containerEl.closest('.section-block');
       const startY = e.clientY;
-      const startMargin = parseInt(window.getComputedStyle(container.closest('.section-block')).marginTop) || 20;
+      const startMargin = parseInt(window.getComputedStyle(block).marginTop) || 22;
 
       function onMouseMove(moveEvent) {
         const diff = moveEvent.clientY - startY;
         const newMargin = Math.max(4, startMargin + diff);
-        container.closest('.section-block').style.marginTop = `${newMargin}px`;
+        block.style.marginTop = `${newMargin}px`;
       }
 
       function onMouseUp() {
@@ -1890,9 +1895,9 @@
       grid.className = 'measures-grid';
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `
-        <div class="section-badge-container">
+        <div class="section-badge-container" onmousedown="initBadgeResize(this, event)">
           <span class="section-badge" contenteditable="true">${dict.secNew}</span>
-          <div class="badge-drag-handle" onmousedown="initBadgeResize(this, event)"></div>
+          <div class="badge-drag-handle"></div>
         </div>
       `;
       newBlock.appendChild(grid);
@@ -1982,9 +1987,9 @@
       grid.className = 'measures-grid';
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `
-        <div class="section-badge-container">
+        <div class="section-badge-container" onmousedown="initBadgeResize(this, event)">
           <span class="section-badge" contenteditable="true">${title}</span>
-          <div class="badge-drag-handle" onmousedown="initBadgeResize(this, event)"></div>
+          <div class="badge-drag-handle"></div>
         </div>
       `;
       newBlock.appendChild(grid);
@@ -2111,7 +2116,6 @@
     function exportAllPagesToPNG() {
       prepareForRender();
       document.fonts.ready.then(() => {
-        document.querySelectorAll('.chart-paper').files = []; // reset
         document.querySelectorAll('.chart-paper').forEach((paper, idx) => {
           html2canvas(paper, RENDER_OPTIONS).then(canvas => {
             const link = document.createElement('a');
