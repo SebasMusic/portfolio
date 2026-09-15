@@ -488,18 +488,19 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      margin-top: 22px; /* Margen superior generoso para evitar superposición inicial con casillas */
+      margin-top: 16px;
       position: relative;
     }
 
-    /* INSIGNIA DE SECCIÓN CON SOPORTE DE ARRASTRE VERTICAL (DRAG) */
+    /* INSIGNIA DE SECCIÓN FLOTANTE E INDEPENDIENTE */
     .section-badge-container {
+      position: absolute;
+      top: -24px;
+      left: 0;
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      align-self: flex-start;
-      margin-bottom: 2px;
-      position: relative;
+      z-index: 12;
       cursor: ns-resize;
       user-select: none;
     }
@@ -521,8 +522,6 @@
     
     .section-badge:empty {
       display: none !important;
-      margin: 0 !important;
-      padding: 0 !important;
     }
 
     .badge-drag-handle {
@@ -613,6 +612,7 @@
       line-height: 0;
     }
 
+    /* VOLTA / CASILLA DE REPETICIÓN INDEPENDIENTE CON MANILLA VERTICAL Y HORIZONTAL */
     .volta-bracket {
       position: absolute;
       top: -24px;
@@ -654,6 +654,24 @@
       cursor: ew-resize;
       border-radius: 1px;
       z-index: 15;
+    }
+
+    /* Manilla vertical independiente para la casilla (Volta) */
+    .volta-v-handle {
+      position: absolute;
+      left: 50%;
+      top: -10px;
+      width: 12px;
+      height: 6px;
+      background: #94a3b8;
+      border-radius: 2px;
+      cursor: ns-resize;
+      transform: translateX(-50%);
+      display: none;
+      z-index: 18;
+    }
+    .volta-bracket:hover .volta-v-handle {
+      display: block;
     }
 
     .measure-main {
@@ -714,9 +732,10 @@
       height: 100%;
     }
 
+    /* DINÁMICAS / REGULADORES CON MANILLA VERTICAL INDEPENDIENTE */
     .measure-dynamics-container {
       position: absolute;
-      bottom: -20px;
+      bottom: -22px;
       left: 0;
       right: 0;
       height: 18px;
@@ -728,12 +747,27 @@
       font-style: italic;
       font-weight: bold;
       color: #0f172a;
-      pointer-events: none;
+      cursor: ns-resize;
+    }
+
+    .dyn-v-handle {
+      position: absolute;
+      right: 2px;
+      top: 50%;
+      width: 6px;
+      height: 10px;
+      background: #94a3b8;
+      border-radius: 2px;
+      transform: translateY(-50%);
+      display: none;
+    }
+    .measure-dynamics-container:hover .dyn-v-handle {
+      display: block;
     }
 
     .band-annotation {
       position: absolute;
-      top: -14px;
+      top: -16px;
       right: 4px;
       font-size: 0.68em;
       font-weight: 600;
@@ -744,6 +778,7 @@
       border: 1px solid #cbd5e1;
       outline: none;
       z-index: 5;
+      cursor: ns-resize;
     }
 
     .time-sig-stack {
@@ -1104,7 +1139,7 @@
 
             <div class="chart-content">
               <div class="section-block">
-                <div class="section-badge-container" onmousedown="initBadgeResize(this, event)" title="Arrastrar para ajustar altura">
+                <div class="section-badge-container" style="top: -24px;" onmousedown="initBadgeResize(this, event)">
                   <span class="section-badge" contenteditable="true" id="firstSectionBadge">INTRO</span>
                   <div class="badge-drag-handle"></div>
                 </div>
@@ -1316,8 +1351,17 @@
       document.querySelectorAll('.volta-resize-handle').forEach(h => {
         h.onmousedown = function(e) { initVoltaResize(this, e); };
       });
+      document.querySelectorAll('.volta-v-handle').forEach(h => {
+        h.onmousedown = function(e) { initVoltaVerticalResize(this, e); };
+      });
       document.querySelectorAll('.section-badge-container').forEach(h => {
         h.onmousedown = function(e) { initBadgeResize(this, e); };
+      });
+      document.querySelectorAll('.measure-dynamics-container').forEach(d => {
+        d.onmousedown = function(e) { initDynamicsResize(this, e); };
+      });
+      document.querySelectorAll('.band-annotation').forEach(a => {
+        a.onmousedown = function(e) { initAnnotationResize(this, e); };
       });
       initAllBeatMeasures();
       updateTotalPagesCounter();
@@ -1492,7 +1536,7 @@
       });
     }
 
-    // APLICACIÓN DE VOLTA CON DESPLAZAMIENTO AUTOMÁTICO DE SECCIÓN
+    // APLICACIÓN DE VOLTA CON POSICIONAMIENTO FLOTANTE INDEPENDIENTE
     function applyVolta(labelNum) {
       if (selectedMeasures.length === 0) return;
       saveStateForUndo();
@@ -1504,18 +1548,14 @@
 
       const first = selectedMeasures[0];
       
-      // Desplazamiento automático de margen superior del bloque para dejar espacio al corchete
-      const block = first.closest('.section-block');
-      if (block) {
-        const currentMargin = parseInt(window.getComputedStyle(block).marginTop) || 22;
-        if (currentMargin < 32) {
-          block.style.marginTop = '32px';
-        }
-      }
-
       let v = document.createElement('div');
       v.className = 'volta-bracket';
-      v.innerHTML = `<input type="text" class="volta-input" value="${labelNum}" onclick="event.stopPropagation()"><div class="volta-resize-handle" onmousedown="initVoltaResize(this, event)"></div>`;
+      v.style.top = '-24px';
+      v.innerHTML = `
+        <input type="text" class="volta-input" value="${labelNum}" onclick="event.stopPropagation()">
+        <div class="volta-v-handle" onmousedown="initVoltaVerticalResize(this, event)" title="Ajustar altura"></div>
+        <div class="volta-resize-handle" onmousedown="initVoltaResize(this, event)"></div>
+      `;
       first.appendChild(v);
 
       if (selectedMeasures.length > 1) {
@@ -1548,18 +1588,83 @@
       window.addEventListener('mouseup', onMouseUp);
     }
 
-    // ARRASTRE VERTICAL PARA EDITAR LA ALTURA DE LA INSIGNIA DE SECCIÓN
-    function initBadgeResize(containerEl, e) {
-      if (e.target.tagName === 'SPAN' && e.target.isContentEditable) return; // Permitir edición de texto
+    function initVoltaVerticalResize(handleEl, e) {
+      e.stopPropagation();
       e.preventDefault();
-      const block = containerEl.closest('.section-block');
+      const volta = handleEl.closest('.volta-bracket');
       const startY = e.clientY;
-      const startMargin = parseInt(window.getComputedStyle(block).marginTop) || 22;
+      const startTop = parseInt(volta.style.top) || -24;
 
       function onMouseMove(moveEvent) {
         const diff = moveEvent.clientY - startY;
-        const newMargin = Math.max(4, startMargin + diff);
-        block.style.marginTop = `${newMargin}px`;
+        const newTop = startTop + diff; // Arriba es negativo
+        volta.style.top = `${newTop}px`;
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    // ARRASTRE VERTICAL INDEPENDIENTE DE LA INSIGNIA DE SECCIÓN (INTRO, VERSO)
+    function initBadgeResize(containerEl, e) {
+      if (e.target.tagName === 'SPAN' && e.target.isContentEditable) return;
+      e.preventDefault();
+      const startY = e.clientY;
+      const startTop = parseInt(containerEl.style.top) || -24;
+
+      function onMouseMove(moveEvent) {
+        const diff = moveEvent.clientY - startY;
+        const newTop = startTop + diff;
+        containerEl.style.top = `${newTop}px`;
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    // ARRASTRE VERTICAL INDEPENDIENTE DE DINÁMICAS
+    function initDynamicsResize(dynEl, e) {
+      if (e.target.tagName === 'INPUT') return;
+      e.preventDefault();
+      const startY = e.clientY;
+      const startBottom = parseInt(window.getComputedStyle(dynEl).bottom) || -22;
+
+      function onMouseMove(moveEvent) {
+        const diff = moveEvent.clientY - startY;
+        const newBottom = startBottom - diff; // Invertido porque usa bottom
+        dynEl.style.bottom = `${newBottom}px`;
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    // ARRASTRE VERTICAL INDEPENDIENTE DE ANOTACIONES DE BANDA
+    function initAnnotationResize(annotEl, e) {
+      if (e.target.isContentEditable) return;
+      e.preventDefault();
+      const startY = e.clientY;
+      const startTop = parseInt(window.getComputedStyle(annotEl).top) || -16;
+
+      function onMouseMove(moveEvent) {
+        const diff = moveEvent.clientY - startY;
+        const newTop = startTop + diff;
+        annotEl.style.top = `${newTop}px`;
       }
 
       function onMouseUp() {
@@ -1733,9 +1838,10 @@
       if (!dynBox) {
         dynBox = document.createElement('div');
         dynBox.className = 'measure-dynamics-container';
+        dynBox.onmousedown = function(e) { initDynamicsResize(this, e); };
         target.appendChild(dynBox);
       }
-      dynBox.innerHTML = `<span style="font-size:1.1em;">${text}</span>`;
+      dynBox.innerHTML = `<span style="font-size:1.1em;">${text}</span><div class="dyn-v-handle"></div>`;
     }
 
     function applyHairpin(type) {
@@ -1746,11 +1852,13 @@
       if (!dynBox) {
         dynBox = document.createElement('div');
         dynBox.className = 'measure-dynamics-container';
+        dynBox.onmousedown = function(e) { initDynamicsResize(this, e); };
         target.appendChild(dynBox);
       }
-      dynBox.innerHTML = type === 'crescendo' 
+      const svgContent = type === 'crescendo' 
         ? `<svg width="100%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 7 L 100 0 M 0 7 L 100 14" stroke="#0f172a" stroke-width="1.5" fill="none"/></svg>`
         : `<svg width="100%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 0 L 100 7 M 0 14 L 100 7" stroke="#0f172a" stroke-width="1.5" fill="none"/></svg>`;
+      dynBox.innerHTML = `${svgContent}<div class="dyn-v-handle"></div>`;
     }
 
     function resetMeasureRhythm() {
@@ -1895,7 +2003,7 @@
       grid.className = 'measures-grid';
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `
-        <div class="section-badge-container" onmousedown="initBadgeResize(this, event)">
+        <div class="section-badge-container" style="top: -24px;" onmousedown="initBadgeResize(this, event)">
           <span class="section-badge" contenteditable="true">${dict.secNew}</span>
           <div class="badge-drag-handle"></div>
         </div>
@@ -1987,7 +2095,7 @@
       grid.className = 'measures-grid';
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `
-        <div class="section-badge-container" onmousedown="initBadgeResize(this, event)">
+        <div class="section-badge-container" style="top: -24px;" onmousedown="initBadgeResize(this, event)">
           <span class="section-badge" contenteditable="true">${title}</span>
           <div class="badge-drag-handle"></div>
         </div>
@@ -2034,6 +2142,8 @@
         badge = document.createElement('span');
         badge.className = 'band-annotation';
         badge.contentEditable = 'true';
+        badge.style.top = '-16px';
+        badge.onmousedown = function(e) { initAnnotationResize(this, e); };
         target.appendChild(badge);
       }
       badge.innerText = text;
