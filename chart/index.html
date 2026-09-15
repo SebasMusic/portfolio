@@ -350,7 +350,7 @@
 
     .song-title-editable::placeholder { color: #cbd5e1; }
 
-    /* ESTADO DE EXPORTACIÓN IMPRESIÓN (OCULTA PLACEHOLDERS NO COMPLETADOS) */
+    /* ESTADO DE EXPORTACIÓN IMPRESIÓN */
     body.exporting-mode .song-title-editable::placeholder,
     body.exporting-mode .editable-sub::placeholder {
       color: transparent !important;
@@ -428,10 +428,8 @@
       border-right: 2px solid #0f172a;
       border-top: 2px solid #0f172a;
       border-bottom: 2px solid #0f172a;
-      padding: 6px 12px;
+      padding: 4px 8px;
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
       position: relative;
       background: #fff;
       cursor: pointer;
@@ -451,6 +449,15 @@
       padding: 0 !important;
       margin: 0 !important;
       border: none !important;
+    }
+
+    /* CONTENEDOR INTERNO DEL COMPÁS */
+    .measure-main {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex: 1;
+      height: 100%;
     }
 
     .chord-input {
@@ -493,22 +500,26 @@
       outline: none;
     }
 
-    /* BADGE DE MÉTRICA PEQUEÑO, PEGADO A LA ESQUINA SUPERIOR Y SIN TOCAR SLASHES */
-    .time-sig-badge {
-      position: absolute;
-      top: 3px;
-      left: 4px;
-      font-size: 0.65em;
-      font-weight: 800;
-      color: #475569;
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      padding: 0px 3px;
-      border-radius: 3px;
+    /* MÉTRICA MUSICAL PROFESIONAL APILADA VERTICALMENTE (SIN LÍNEA NI FRACTION) */
+    .time-sig-stack {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-right: 6px;
+      padding-right: 4px;
+      border-right: 1.5px solid #0f172a;
+      font-family: 'Inter', sans-serif;
+      font-weight: 900;
+      font-size: 0.95em;
+      line-height: 0.88;
+      color: #0f172a;
       user-select: none;
-      outline: none;
-      line-height: 1.1;
-      z-index: 2;
+    }
+
+    .time-sig-stack span {
+      display: block;
+      text-align: center;
     }
 
     .chart-footer {
@@ -669,20 +680,28 @@
               <span class="section-badge" contenteditable="true" id="firstSectionBadge">INTRO</span>
               <div class="measures-grid">
                 <div class="measure-box" onclick="handleMeasureClick(this, event)">
-                  <input type="text" class="chord-input" placeholder="C">
-                  <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
+                  <div class="measure-main">
+                    <input type="text" class="chord-input" placeholder="C">
+                    <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
+                  </div>
                 </div>
                 <div class="measure-box" onclick="handleMeasureClick(this, event)">
-                  <input type="text" class="chord-input" placeholder="G/B">
-                  <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
+                  <div class="measure-main">
+                    <input type="text" class="chord-input" placeholder="G/B">
+                    <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
+                  </div>
                 </div>
                 <div class="measure-box" onclick="handleMeasureClick(this, event)">
-                  <input type="text" class="chord-input" placeholder="Am7">
-                  <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
+                  <div class="measure-main">
+                    <input type="text" class="chord-input" placeholder="Am7">
+                    <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
+                  </div>
                 </div>
                 <div class="measure-box" onclick="handleMeasureClick(this, event)">
-                  <input type="text" class="chord-input" placeholder="F2">
-                  <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
+                  <div class="measure-main">
+                    <input type="text" class="chord-input" placeholder="F2">
+                    <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -999,6 +1018,15 @@
       }
     }
 
+    // CONVIERTE CUALQUIER MÉTRICA (ej: "3/4") EN FORMATO APILADO VERTICAL PROFESIONAL
+    function createStackedTimeSigHTML(timeSigStr) {
+      const parts = timeSigStr.split('/');
+      if (parts.length === 2) {
+        return `<div class="time-sig-stack"><span>${parts[0]}</span><span>${parts[1]}</span></div>`;
+      }
+      return `<div class="time-sig-stack"><span>${timeSigStr}</span></div>`;
+    }
+
     function applyTimeSignatureToSelected() {
       const val = document.getElementById('timeSignatureSelect').value;
       if (selectedMeasures.length === 0) {
@@ -1019,15 +1047,18 @@
           if (headerInput) headerInput.value = val;
         }
 
-        let badge = startMeasure.querySelector('.time-sig-badge');
-        if (!badge) {
-          badge = document.createElement('span');
-          badge.className = 'time-sig-badge';
-          badge.contentEditable = 'true';
-          startMeasure.appendChild(badge);
+        // Inserta o actualiza la métrica apilada verticalmente a la izquierda del compás
+        let stackEl = startMeasure.querySelector('.time-sig-stack');
+        if (!stackEl) {
+          const temp = document.createElement('div');
+          temp.innerHTML = createStackedTimeSigHTML(val);
+          stackEl = temp.firstElementChild;
+          startMeasure.insertBefore(stackEl, startMeasure.firstChild);
+        } else {
+          stackEl.outerHTML = createStackedTimeSigHTML(val);
         }
-        badge.innerText = val;
 
+        // Modifica los slashes rítmicos hacia adelante
         for (let i = startIdx; i < allMeasures.length; i++) {
           const slashes = allMeasures[i].querySelector('.rhythm-slashes');
           if (slashes) {
@@ -1154,8 +1185,10 @@
       box.className = 'measure-box';
       box.onclick = function(e) { handleMeasureClick(this, e); };
       box.innerHTML = `
-        <input type="text" class="chord-input" placeholder="${dict.chordPlaceholder}">
-        <div class="rhythm-slashes">${getSlashHTML(timeSig)}</div>
+        <div class="measure-main">
+          <input type="text" class="chord-input" placeholder="${dict.chordPlaceholder}">
+          <div class="rhythm-slashes">${getSlashHTML(timeSig)}</div>
+        </div>
       `;
       return box;
     }
@@ -1293,12 +1326,10 @@
       windowWidth: 1200
     };
 
-    /* FUNCIONES AUXILIARES DE PREPARACIÓN PARA IMPRESIÓN/CAPTURA PERFECTA */
     function prepareForRender() {
       clearSelections();
       document.body.classList.add('exporting-mode');
       
-      // Reemplaza el input por texto estático durante la captura
       const titleInput = document.getElementById('songTitleInput');
       const titlePrint = document.getElementById('songTitlePrint');
       if (titleInput && titlePrint) {
