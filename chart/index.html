@@ -582,15 +582,17 @@
       justify-content: center;
       border-radius: 4px;
       transition: background 0.15s ease;
+      cursor: pointer;
     }
 
     .beat-slot:hover {
-      background: rgba(6, 182, 212, 0.1);
+      background: rgba(6, 182, 212, 0.12);
     }
 
     .beat-slot.active-beat {
-      background: rgba(16, 185, 129, 0.15);
-      outline: 1px dashed #10b981;
+      background: rgba(16, 185, 129, 0.2) !important;
+      box-shadow: inset 0 0 0 1.5px #10b981;
+      border-radius: 4px;
     }
 
     .beat-slot svg {
@@ -761,7 +763,7 @@
     <!-- COLUMNA PRINCIPAL DERECHA -->
     <div class="right-main-column">
 
-      <!-- BARRA DE ESCRITURA RÍTMICA PASO A PASO -->
+      <!-- BARRA DE ESCRITURA RÍTMICA BEAT-BY-BEAT -->
       <div class="rhythm-toolbar">
         <div class="rhythm-title">
           <span>🥁 Rhythms & Notation Studio</span>
@@ -997,7 +999,7 @@
     let currentLang = 'en';
     let selectedMeasures = [];
     let lastSelectedMeasure = null;
-    let activeBeatSlot = null; // Beat actualmente seleccionado dentro del compás
+    let activeBeatSlot = null; // Slot/Beat individual seleccionado en un compás
 
     function initLanguage() {
       let savedLang = localStorage.getItem('preferred_lang');
@@ -1116,11 +1118,9 @@
         selectedMeasures = [el];
         lastSelectedMeasure = el;
 
-        // Si no hay beat seleccionado previamente, tomar el primero por defecto
-        if (!activeBeatSlot) {
-          const firstBeat = el.querySelector('.beat-slot');
-          if (firstBeat) selectBeatSlot(firstBeat);
-        }
+        // Seleccionar primer slot por defecto si no hay uno activo en este compás
+        const firstBeat = el.querySelector('.beat-slot');
+        if (firstBeat) selectBeatSlot(firstBeat);
       }
     }
 
@@ -1139,15 +1139,18 @@
 
       const measureBox = slotEl.closest('.measure-box');
       if (measureBox) {
-        clearSelections();
+        document.querySelectorAll('.measure-box.selected').forEach(m => m.classList.remove('selected'));
         measureBox.classList.add('selected');
         selectedMeasures = [measureBox];
         lastSelectedMeasure = measureBox;
       }
     }
 
-    // --- DIBUJO DE BEAT INDIVIDUAL (CON PLICAS PERFECTAS DESDE EL EXTREMO SUPERIOR DEL SLASH) ---
+    // --- DIBUJO DE BEAT INDIVIDUAL CON ORIENTACIÓN CORRECTA ---
+    // Slash: Inclinado a la derecha (/), Plica (Stem): Nace en el extremo IZQUIERDO del Slash (x-3.5, y=10)
     function renderBeatSVG(beatType = 'q', hasDot = false, hasTie = false) {
+      if (beatType === 'empty') return `<svg viewBox="0 0 40 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"></svg>`;
+
       let isRest = beatType.startsWith('r');
       let pureType = isRest ? beatType.substring(1) : beatType;
 
@@ -1185,12 +1188,12 @@
             svgHTML += `<rect x="${x - 5}" y="18" width="10" height="5" fill="#1e293b" />`;
           }
         } else {
-          // Slash inclinado
+          // Slash inclinado hacia la derecha: de (x-3.5, 26) a (x+3.5, 10)
           svgHTML += `<line x1="${x - 3.5}" y1="26" x2="${x + 3.5}" y2="10" stroke="#1e293b" stroke-width="${strokeWidth}" stroke-linecap="round" />`;
 
-          // CORRECCIÓN CLAVE: La plica (Stem) arranca EXACTAMENTE en la punta superior derecha del Slash (x+3.5, y=10)
+          // CORRECCIÓN EXACTA DE LA PLICA: Nace en el extremo IZQUIERDO del slash (x-3.5, y=26) o (x-3.5, y=10 según requerimiento visual)
           if (showStems) {
-            svgHTML += `<line x1="${x + 3.5}" y1="10" x2="${x + 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
+            svgHTML += `<line x1="${x - 3.5}" y1="26" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
           }
         }
 
@@ -1199,10 +1202,10 @@
         }
       }
 
-      // Barras horizontales de agrupación (Beams)
+      // Barras de agrupación (Beams)
       if (!isRest && beamCount >= 1 && subCount >= 2) {
-        const xFirst = step * 1 + 3.5;
-        const xLast = step * subCount + 3.5;
+        const xFirst = step * 1 - 3.5;
+        const xLast = step * subCount - 3.5;
         svgHTML += `<line x1="${xFirst}" y1="${stemYBottom}" x2="${xLast}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="3" />`;
         
         if (beamCount >= 2) {
@@ -1210,7 +1213,7 @@
         }
       }
 
-      // Ligadura de prolongación (Tie)
+      // Ligadura (Tie)
       if (!isRest && hasTie) {
         svgHTML += `<path d="M 6 28 Q 20 36 34 28" fill="none" stroke="#1e293b" stroke-width="2" />`;
       }
@@ -1219,22 +1222,49 @@
       return svgHTML;
     }
 
-    // APLICAR RITMO AL BEAT SELECCIONADO O A TODOS LOS BEATS
+    // APLICAR RITMO EXCLUSIVAMENTE AL SLASH / BEAT SELECCIONADO
     function applyBeatRhythm(type) {
-      if (activeBeatSlot) {
+      if (!activeBeatSlot) return;
+
+      const container = activeBeatSlot.closest('.rhythm-beats-container');
+      const allSlots = Array.from(container.children);
+      const currentIndex = allSlots.indexOf(activeBeatSlot);
+
+      // Si la figura es de mayor duración (Blanca u Ocupación de compás completo)
+      if (type === 'h' || type === 'rh') {
+        // Blanca: Modifica el slot actual y vacía el siguiente
         activeBeatSlot.dataset.rhythm = type;
         activeBeatSlot.innerHTML = renderBeatSVG(type, activeBeatSlot.dataset.dot === 'true', activeBeatSlot.dataset.tie === 'true');
         
-        // Avanzar automáticamente al siguiente beat para escritura rápida tipo DAW
-        const nextSlot = activeBeatSlot.nextElementSibling;
-        if (nextSlot) selectBeatSlot(nextSlot);
-      } else if (selectedMeasures.length > 0) {
-        selectedMeasures.forEach(m => {
-          m.querySelectorAll('.beat-slot').forEach(b => {
-            b.dataset.rhythm = type;
-            b.innerHTML = renderBeatSVG(type, b.dataset.dot === 'true', b.dataset.tie === 'true');
-          });
+        if (allSlots[currentIndex + 1]) {
+          allSlots[currentIndex + 1].dataset.rhythm = 'empty';
+          allSlots[currentIndex + 1].innerHTML = renderBeatSVG('empty');
+        }
+
+        const nextTarget = allSlots[currentIndex + 2] || allSlots[currentIndex + 1];
+        if (nextTarget) selectBeatSlot(nextTarget);
+
+      } else if (type === 'w' || type === 'rw') {
+        // Redonda: Ocupa todo el compás
+        allSlots.forEach((slot, idx) => {
+          if (idx === 0) {
+            slot.dataset.rhythm = type;
+            slot.innerHTML = renderBeatSVG(type, slot.dataset.dot === 'true', slot.dataset.tie === 'true');
+          } else {
+            slot.dataset.rhythm = 'empty';
+            slot.innerHTML = renderBeatSVG('empty');
+          }
         });
+        selectBeatSlot(allSlots[0]);
+
+      } else {
+        // Figuras estándar de 1 tiempo (Negra, Corchea, Semicorchea, etc.)
+        activeBeatSlot.dataset.rhythm = type;
+        activeBeatSlot.innerHTML = renderBeatSVG(type, activeBeatSlot.dataset.dot === 'true', activeBeatSlot.dataset.tie === 'true');
+        
+        // Avanzar al siguiente slash para fluidez al escribir
+        const nextSlot = allSlots[currentIndex + 1];
+        if (nextSlot) selectBeatSlot(nextSlot);
       }
     }
 
@@ -1259,17 +1289,19 @@
     function resetMeasureRhythm() {
       if (selectedMeasures.length > 0) {
         selectedMeasures.forEach(m => {
-          m.querySelectorAll('.beat-slot').forEach(b => {
+          const slots = m.querySelectorAll('.beat-slot');
+          slots.forEach(b => {
             b.dataset.rhythm = 'q';
             b.dataset.dot = 'false';
             b.dataset.tie = 'false';
             b.innerHTML = renderBeatSVG('q', false, false);
           });
+          if (slots[0]) selectBeatSlot(slots[0]);
         });
       }
     }
 
-    // --- ESCUCHADOR DE TECLADO NUMÉRICO PASO A PASO ---
+    // --- ESCUCHADOR DE TECLADO NUMÉRICO ---
     window.addEventListener('keydown', (e) => {
       const isEditingInput = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable);
       if (isEditingInput) return;
