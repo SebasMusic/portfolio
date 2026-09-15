@@ -234,6 +234,7 @@
       overflow: hidden;
     }
 
+    /* ENCABEZADO HOJA 1 */
     .chart-header {
       display: flex;
       flex-direction: column;
@@ -241,6 +242,31 @@
       gap: 8px;
       border-bottom: 2px solid #0f172a;
       padding-bottom: 12px;
+    }
+
+    /* ENCABEZADO HOJA 2 EN ADELANTE (SUTIL / GRIS) */
+    .chart-header-subsequent {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #cbd5e1;
+      padding-bottom: 8px;
+      margin-bottom: 4px;
+      font-size: 0.85em;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      user-select: none;
+    }
+
+    .subsequent-title-ref {
+      color: #64748b;
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 500px;
     }
 
     .song-title-editable {
@@ -307,6 +333,19 @@
       text-transform: uppercase;
     }
 
+    /* ESTILO PARA SUBTÍTULOS / MEDLEYS */
+    .medley-subtitle {
+      font-size: 1.1em;
+      font-weight: 800;
+      color: #0369a1;
+      border-bottom: 2px solid #38bdf8;
+      padding-bottom: 2px;
+      margin: 12px 0 6px 0;
+      outline: none;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
     .measures-grid {
       display: flex;
       flex-wrap: wrap;
@@ -329,8 +368,9 @@
     }
 
     .measure-box.selected {
-      background: #f0fdf4;
+      background: #f0fdf4 !important;
       border-color: #16a34a !important;
+      box-shadow: inset 0 0 0 1px #16a34a;
     }
 
     .measure-box.break-system {
@@ -441,7 +481,7 @@
         </div>
       </div>
 
-      <!-- MÉTRICA DE TIEMPO -->
+      <!-- MÉTRICA DE TIEMPO (GLOBAL / LOCAL) -->
       <div class="toolbox-section">
         <div class="toolbox-title" id="titleTimeSig">⏱️ Time Signature</div>
         <select class="select-input" id="timeSignatureSelect" onchange="updateTimeSignature(this.value)">
@@ -453,11 +493,13 @@
           <option value="12/8" id="opt128">12/8 (Twelve-Eighths)</option>
           <option value="2/2" id="opt22">2/2 (Cut Time)</option>
         </select>
+        <button class="tool-btn" style="margin-top:2px; border-color:var(--accent-purple); color:#d8b4fe;" onclick="applyTimeSignatureToSelected()">⏱️ Apply to Selected Measure</button>
       </div>
 
-      <!-- SECCIONES -->
+      <!-- SECCIONES Y SUBTÍTULOS MEDLEY -->
       <div class="toolbox-section">
-        <div class="toolbox-title" id="titleSections">🏷️ Sections</div>
+        <div class="toolbox-title" id="titleSections">🏷️ Sections & Medley</div>
+        <button class="tool-btn custom-btn" style="width:100%; font-weight:700; margin-bottom:4px;" onclick="addMedleySubtitle()">➕ Subtitle (Medley / Song 2)</button>
         <div class="btn-grid">
           <button class="tool-btn custom-btn" id="btnSecEdit" onclick="addEditableSection()">✏️ EDITABLE</button>
           <button class="tool-btn" id="btnSecIntro" onclick="addSection(i18n[currentLang].secIntro)">+ INTRO</button>
@@ -485,7 +527,7 @@
           <button class="tool-btn" id="btnInsertAfter" onclick="insertMeasure('after')">➡️ After</button>
         </div>
         <button class="tool-btn" style="margin-top:6px; background:rgba(234,179,8,0.15); border-color:rgba(234,179,8,0.4); color:#fef08a;" id="btnLineBreak" onclick="toggleSystemBreak()">↵ Line Break (Group)</button>
-        <button class="tool-btn" style="margin-top:4px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" id="btnDelete" onclick="removeSelectedMeasure()">🗑️ Delete Selected</button>
+        <button class="tool-btn" style="margin-top:4px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" id="btnDelete" onclick="removeSelectedMeasure()">🗑️ Delete Selected (Shift+Click)</button>
       </div>
 
       <!-- INDICACIONES BANDA -->
@@ -512,9 +554,10 @@
           <div class="chart-header">
             <input type="text" class="song-title-editable" id="songTitleInput" placeholder="SONG TITLE" oninput="updateFooterTitle(this.value)">
             <div class="header-sub-row">
-              <div><input type="text" class="editable-sub" id="artistInput" placeholder="Artist / Band" style="width:200px;"></div>
+              <div><input type="text" class="editable-sub" id="artistInput" placeholder="Artist / Band" style="width:160px;"></div>
+              <div><input type="text" class="editable-sub" id="styleInput" placeholder="Style: Worship / Pop" style="width:150px; text-align:center;"></div>
               <div><span id="lblTimeSigHeader">Time Sig</span>: <span class="displayTimeSig">4/4</span></div>
-              <div><input type="text" class="editable-sub" placeholder="BPM: 120" style="width:90px; text-align:right;"></div>
+              <div><input type="text" class="editable-sub" placeholder="BPM: 120" style="width:80px; text-align:right;"></div>
             </div>
           </div>
 
@@ -522,19 +565,19 @@
             <div class="section-block">
               <span class="section-badge" contenteditable="true" id="firstSectionBadge">INTRO</span>
               <div class="measures-grid">
-                <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
+                <div class="measure-box" style="flex: 0 0 25%;" onclick="handleMeasureClick(this, event)">
                   <input type="text" class="chord-input" placeholder="C">
                   <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
                 </div>
-                <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
+                <div class="measure-box" style="flex: 0 0 25%;" onclick="handleMeasureClick(this, event)">
                   <input type="text" class="chord-input" placeholder="G/B">
                   <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
                 </div>
-                <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
+                <div class="measure-box" style="flex: 0 0 25%;" onclick="handleMeasureClick(this, event)">
                   <input type="text" class="chord-input" placeholder="Am7">
                   <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
                 </div>
-                <div class="measure-box" style="flex: 0 0 25%;" onclick="selectMeasure(this)">
+                <div class="measure-box" style="flex: 0 0 25%;" onclick="handleMeasureClick(this, event)">
                   <input type="text" class="chord-input" placeholder="F2">
                   <div class="rhythm-slashes"><span>/</span><span>/</span><span>/</span><span>/</span></div>
                 </div>
@@ -569,7 +612,7 @@
         opt98: "9/8 (Nine-Eighths)",
         opt128: "12/8 (Twelve-Eighths)",
         opt22: "2/2 (Cut Time)",
-        titleSections: "🏷️ Sections",
+        titleSections: "🏷️ Sections & Medley",
         btnSecEdit: "✏️ EDITABLE",
         btnSecIntro: "+ INTRO",
         btnSecVerse: "+ VERSE",
@@ -598,14 +641,16 @@
         corte: "Break / Cut",
         titlePlaceholder: "SONG TITLE",
         artistPlaceholder: "Artist / Band",
+        stylePlaceholder: "Style: Worship / Pop",
         lblTimeSigHeader: "Time Sig",
         untitledChart: "UNTITLED CHART",
         pageLabel: "PAGE",
-        continuation: "Continuation Page",
+        continuation: "Continuation",
         alertSelectMeasure: "Please click on a measure first to select the insertion spot.",
         alertSelectBreak: "Select a measure to group or create a line break.",
         alertSelectNote: "Click on the measure where you want to add the cue.",
-        chordPlaceholder: "Chord"
+        chordPlaceholder: "Chord",
+        medleyPlaceholder: "SONG 2: NEW TITLE / MEDLEY"
       },
       es: {
         btnBack: "← INICIO",
@@ -621,7 +666,7 @@
         opt98: "9/8 (Nueve por Ocho)",
         opt128: "12/8 (Doce por Ocho)",
         opt22: "2/2 (Dos por Dos)",
-        titleSections: "🏷️ Secciones",
+        titleSections: "🏷️ Secciones y Medley",
         btnSecEdit: "✏️ EDITABLE",
         btnSecIntro: "+ INTRO",
         btnSecVerse: "+ VERSO",
@@ -642,7 +687,7 @@
         btnInsertBefore: "⬅️ Antes",
         btnInsertAfter: "➡️ Después",
         btnLineBreak: "↵ Salto de Línea (Agrupar)",
-        btnDelete: "🗑️ Eliminar Seleccionado",
+        btnDelete: "🗑️ Eliminar Seleccionados",
         titleAnnotations: "📌 Indicaciones Banda",
         btnCustomNote: "✏️ Nota Personalizada",
         noteDefault: "✏️ Tu Nota",
@@ -650,348 +695,34 @@
         corte: "Corte",
         titlePlaceholder: "TÍTULO DE LA CANCIÓN",
         artistPlaceholder: "Artista / Banda",
+        stylePlaceholder: "Estilo: Worship / Pop",
         lblTimeSigHeader: "Métrica",
         untitledChart: "CANCIÓN SIN TÍTULO",
         pageLabel: "PÁG.",
-        continuation: "Continuación Hoja",
+        continuation: "Continuación",
         alertSelectMeasure: "Por favor haz clic primero en un compás para elegir la posición de inserción.",
         alertSelectBreak: "Selecciona un compás para agrupar o hacer un salto de línea.",
         alertSelectNote: "Haz clic en el compás donde quieres poner la indicación.",
-        chordPlaceholder: "Acorde"
-      },
-      pt: {
-        btnBack: "← INÍCIO",
-        titleActions: "⚡ Ações Principais",
-        btnExportPNG: "📥 Baixar Tudo (PNG)",
-        btnTranspDown: "♭ -1 Semitom",
-        btnTranspUp: "♯ +1 Semitom",
-        titleTimeSig: "⏱️ Fórmula de Compasso",
-        opt44: "4/4 (Quatro por Quatro)",
-        opt34: "3/4 (Três por Quatro)",
-        opt24: "2/4 (Dois por Quatro)",
-        opt68: "6/8 (Seis por Oito)",
-        opt98: "9/8 (Nove por Oito)",
-        opt128: "12/8 (Doze por Oito)",
-        opt22: "2/2 (Dois por Dois)",
-        titleSections: "🏷️ Seções",
-        btnSecEdit: "✏️ EDITÁVEL",
-        btnSecIntro: "+ INTRO",
-        btnSecVerse: "+ VERSO",
-        btnSecChorus: "+ REFRÃO",
-        btnSecBridge: "+ PONTE",
-        btnSecSolo: "+ SOLO",
-        secIntro: "INTRO",
-        secVerse: "VERSO",
-        secChorus: "REFRÃO",
-        secBridge: "PONTE",
-        secSolo: "SOLO",
-        secNew: "NOVA SEÇÃO",
-        titleMeasures: "🎼 Compassos e Estrutura",
-        btnAdd4: "+ 4 Compassos",
-        btnAdd8: "+ 8 Compassos",
-        btnAddN: "+ Qtd N",
-        lblLocation: "Posição por seleção:",
-        btnInsertBefore: "⬅️ Antes",
-        btnInsertAfter: "➡️ Depois",
-        btnLineBreak: "↵ Quebra de Linha",
-        btnDelete: "🗑️ Excluir Selecionado",
-        titleAnnotations: "📌 Indicações da Banda",
-        btnCustomNote: "✏️ Nota Personalizada",
-        noteDefault: "✏️ Sua Nota",
-        bandIn: "Banda IN",
-        corte: "Corte",
-        titlePlaceholder: "TÍTULO DA MÚSICA",
-        artistPlaceholder: "Artista / Banda",
-        lblTimeSigHeader: "Compasso",
-        untitledChart: "MÚSICA SEM TÍTULO",
-        pageLabel: "PÁG.",
-        continuation: "Continuação Página",
-        alertSelectMeasure: "Por favor, clique primeiro em um compasso para escolher a posição.",
-        alertSelectBreak: "Selecione um compasso para agrupar ou criar uma quebra de linha.",
-        alertSelectNote: "Clique no compasso onde deseja colocar a indicação.",
-        chordPlaceholder: "Acorde"
-      },
-      fr: {
-        btnBack: "← ACCUEIL",
-        titleActions: "⚡ Actions Principales",
-        btnExportPNG: "📥 Télécharger Tout (PNG)",
-        btnTranspDown: "♭ -1 Demi-ton",
-        btnTranspUp: "♯ +1 Demi-ton",
-        titleTimeSig: "⏱️ Signature Temporelle",
-        opt44: "4/4 (Quatre-Quatre)",
-        opt34: "3/4 (Trois-Quatre)",
-        opt24: "2/4 (Deux-Quatre)",
-        opt68: "6/8 (Six-Huitièmes)",
-        opt98: "9/8 (Neuf-Huitièmes)",
-        opt128: "12/8 (Douze-Huitièmes)",
-        opt22: "2/2 (Deux-Deux)",
-        titleSections: "🏷️ Sections",
-        btnSecEdit: "✏️ ÉDITABLE",
-        btnSecIntro: "+ INTRO",
-        btnSecVerse: "+ COUPLET",
-        btnSecChorus: "+ REFRAIN",
-        btnSecBridge: "+ PONT",
-        btnSecSolo: "+ SOLO",
-        secIntro: "INTRO",
-        secVerse: "COUPLET",
-        secChorus: "REFRAIN",
-        secBridge: "PONT",
-        secSolo: "SOLO",
-        secNew: "NOUVELLE SECTION",
-        titleMeasures: "🎼 Mesures & Structure",
-        btnAdd4: "+ 4 Mesures",
-        btnAdd8: "+ 8 Mesures",
-        btnAddN: "+ Quantité N",
-        lblLocation: "Position par rapport à la sélection:",
-        btnInsertBefore: "⬅️ Avant",
-        btnInsertAfter: "➡️ Après",
-        btnLineBreak: "↵ Saut de Ligne",
-        btnDelete: "🗑️ Supprimer Sélection",
-        titleAnnotations: "📌 Annotations Groupe",
-        btnCustomNote: "✏️ Note Personnalisée",
-        noteDefault: "✏️ Votre Note",
-        bandIn: "Groupe IN",
-        corte: "Coupure",
-        titlePlaceholder: "TITRE DE LA CHANSON",
-        artistPlaceholder: "Artiste / Groupe",
-        lblTimeSigHeader: "Mesure",
-        untitledChart: "PARTITION SANS TITRE",
-        pageLabel: "PAGE",
-        continuation: "Suite Page",
-        alertSelectMeasure: "Veuillez d'abord cliquer sur une mesure pour choisir l'emplacement.",
-        alertSelectBreak: "Sélectionnez une mesure pour grouper ou ajouter un saut de ligne.",
-        alertSelectNote: "Cliquez sur la mesure où vous souhaitez ajouter l'annotation.",
-        chordPlaceholder: "Accord"
-      },
-      de: {
-        btnBack: "← STARTSEITE",
-        titleActions: "⚡ Hauptaktionen",
-        btnExportPNG: "📥 Alles herunterladen (PNG)",
-        btnTranspDown: "♭ -1 Halbton",
-        btnTranspUp: "♯ +1 Halbton",
-        titleTimeSig: "⏱️ Taktart",
-        opt44: "4/4 (Viertel-Takt)",
-        opt34: "3/4 (Drei-Viertel)",
-        opt24: "2/4 (Zwei-Viertel)",
-        opt68: "6/8 (Sechs-Achtel)",
-        opt98: "9/8 (Neun-Achtel)",
-        opt128: "12/8 (Zwölf-Achtel)",
-        opt22: "2/2 (Alla Breve)",
-        titleSections: "🏷️ Abschnitte",
-        btnSecEdit: "✏️ EDITIERBAR",
-        btnSecIntro: "+ INTRO",
-        btnSecVerse: "+ STROPHE",
-        btnSecChorus: "+ REFRAIN",
-        btnSecBridge: "+ BRIDGE",
-        btnSecSolo: "+ SOLO",
-        secIntro: "INTRO",
-        secVerse: "STROPHE",
-        secChorus: "REFRAIN",
-        secBridge: "BRIDGE",
-        secSolo: "SOLO",
-        secNew: "NEUER ABSCHNITT",
-        titleMeasures: "🎼 Takte & Struktur",
-        btnAdd4: "+ 4 Takte",
-        btnAdd8: "+ 8 Takte",
-        btnAddN: "+ Benutzerdefiniert N",
-        lblLocation: "Position relativ zur Auswahl:",
-        btnInsertBefore: "⬅️ Vorher",
-        btnInsertAfter: "➡️ Nachher",
-        btnLineBreak: "↵ Zeilenumbruch",
-        btnDelete: "🗑️ Auswahl löschen",
-        titleAnnotations: "📌 Band-Hinweise",
-        btnCustomNote: "✏️ Eigene Notiz",
-        noteDefault: "✏️ Deine Notiz",
-        bandIn: "Band IN",
-        corte: "Stopp / Break",
-        titlePlaceholder: "SONGTITEL",
-        artistPlaceholder: "Künstler / Band",
-        lblTimeSigHeader: "Taktart",
-        untitledChart: "UNBENANNTER CHART",
-        pageLabel: "SEITE",
-        continuation: "Fortsetzung Seite",
-        alertSelectMeasure: "Bitte klicke zuerst auf einen Takt, um die Einfügeposition zu wählen.",
-        alertSelectBreak: "Wähle einen Takt aus, um einen Zeilenumbruch einzufügen.",
-        alertSelectNote: "Klicke auf den Takt, dem du eine Anmerkung hinzufügen möchtest.",
-        chordPlaceholder: "Akkord"
-      },
-      zh: {
-        btnBack: "← 首页",
-        titleActions: "⚡ 主要操作",
-        btnExportPNG: "📥 下载全部 (PNG)",
-        btnTranspDown: "♭ -1 半音",
-        btnTranspUp: "♯ +1 半音",
-        titleTimeSig: "⏱️ 拍号",
-        opt44: "4/4 拍",
-        opt34: "3/4 拍",
-        opt24: "2/4 拍",
-        opt68: "6/8 拍",
-        opt98: "9/8 拍",
-        opt128: "12/8 拍",
-        opt22: "2/2 拍",
-        titleSections: "🏷️ 乐段",
-        btnSecEdit: "✏️ 自定义",
-        btnSecIntro: "+ 前奏",
-        btnSecVerse: "+ 主歌",
-        btnSecChorus: "+ 副歌",
-        btnSecBridge: "+ 桥段",
-        btnSecSolo: "+ 独奏",
-        secIntro: "INTRO",
-        secVerse: "VERSE",
-        secChorus: "CHORUS",
-        secBridge: "BRIDGE",
-        secSolo: "SOLO",
-        secNew: "新乐段",
-        titleMeasures: "🎼 小节与结构",
-        btnAdd4: "+ 4 小节",
-        btnAdd8: "+ 8 小节",
-        btnAddN: "+ 自定义数量 N",
-        lblLocation: "插入位置:",
-        btnInsertBefore: "⬅️ 向前",
-        btnInsertAfter: "➡️ 向后",
-        btnLineBreak: "↵ 换行 (分组)",
-        btnDelete: "🗑️ 删除所选",
-        titleAnnotations: "📌 乐队标记",
-        btnCustomNote: "✏️ 自定义备注",
-        noteDefault: "✏️ 你的备注",
-        bandIn: "Band IN",
-        corte: "休止",
-        titlePlaceholder: "歌曲标题",
-        artistPlaceholder: "歌手 / 乐队",
-        lblTimeSigHeader: "拍号",
-        untitledChart: "未命名和弦谱",
-        pageLabel: "页",
-        continuation: "续页",
-        alertSelectMeasure: "请先点击选择一个小节作为插入位置。",
-        alertSelectBreak: "请选择一个小节以进行换行或分组。",
-        alertSelectNote: "请点击需要添加标记的小节。",
-        chordPlaceholder: "和弦"
-      },
-      ru: {
-        btnBack: "← НА ГЛАВНУЮ",
-        titleActions: "⚡ Главные действия",
-        btnExportPNG: "📥 Скачать всё (PNG)",
-        btnTranspDown: "♭ -1 Полутон",
-        btnTranspUp: "♯ +1 Полутон",
-        titleTimeSig: "⏱️ Музыкальный размер",
-        opt44: "4/4 (Четыре четверти)",
-        opt34: "3/4 (Три четверти)",
-        opt24: "2/4 (Две четверти)",
-        opt68: "6/8 (Шесть восьмых)",
-        opt98: "9/8 (Девять восьмых)",
-        opt128: "12/8 (Двенадцать восьмых)",
-        opt22: "2/2 (Две вторые)",
-        titleSections: "🏷️ Секции",
-        btnSecEdit: "✏️ СВОЯ СЕКЦИЯ",
-        btnSecIntro: "+ ИНТРО",
-        btnSecVerse: "+ КУПЛЕТ",
-        btnSecChorus: "+ ПРИПЕВ",
-        btnSecBridge: "+ БРИДЖ",
-        btnSecSolo: "+ СОЛО",
-        secIntro: "ИНТРО",
-        secVerse: "КУПЛЕТ",
-        secChorus: "ПРИПЕВ",
-        secBridge: "БРИДЖ",
-        secSolo: "СОЛО",
-        secNew: "НОВАЯ СЕКЦИЯ",
-        titleMeasures: "🎼 Такты и Структура",
-        btnAdd4: "+ 4 Такта",
-        btnAdd8: "+ 8 Тактов",
-        btnAddN: "+ Своё число N",
-        lblLocation: "Позиция вставки:",
-        btnInsertBefore: "⬅️ До",
-        btnInsertAfter: "➡️ После",
-        btnLineBreak: "↵ Перенос строки",
-        btnDelete: "🗑️ Удалить выбранное",
-        titleAnnotations: "📌 Указания для группы",
-        btnCustomNote: "✏️ Своя заметка",
-        noteDefault: "✏️ Заметка",
-        bandIn: "Вступает группа",
-        corte: "Пауза / Сбив",
-        titlePlaceholder: "НАЗВАНИЕ ПЕСНИ",
-        artistPlaceholder: "Исполнитель / Группа",
-        lblTimeSigHeader: "Размер",
-        untitledChart: "БЕЗ НАЗВАНИЯ",
-        pageLabel: "СМ.",
-        continuation: "Продолжение стр.",
-        alertSelectMeasure: "Сначала нажмите на такт, чтобы выбрать место вставки.",
-        alertSelectBreak: "Выберите такт для переноса строки.",
-        alertSelectNote: "Нажмите на такт, чтобы добавить указание.",
-        chordPlaceholder: "Аккорд"
-      },
-      ja: {
-        btnBack: "← ホーム",
-        titleActions: "⚡ 主な操作",
-        btnExportPNG: "📥 全てダウンロード (PNG)",
-        btnTranspDown: "♭ -1 半音",
-        btnTranspUp: "♯ +1 半音",
-        titleTimeSig: "⏱️ 拍子記号",
-        opt44: "4/4 拍子",
-        opt34: "3/4 拍子",
-        opt24: "2/4 拍子",
-        opt68: "6/8 拍子",
-        opt98: "9/8 拍子",
-        opt128: "12/8 拍子",
-        opt22: "2/2 拍子",
-        titleSections: "🏷️ セクション",
-        btnSecEdit: "✏️ 編集可能",
-        btnSecIntro: "+ イントロ",
-        btnSecVerse: "+ Aメロ (Verse)",
-        btnSecChorus: "+ サビ (Chorus)",
-        btnSecBridge: "+ Cメロ (Bridge)",
-        btnSecSolo: "+ ソロ",
-        secIntro: "INTRO",
-        secVerse: "VERSE",
-        secChorus: "CHORUS",
-        secBridge: "BRIDGE",
-        secSolo: "SOLO",
-        secNew: "新規セクション",
-        titleMeasures: "🎼 小節と構成",
-        btnAdd4: "+ 4 小節",
-        btnAdd8: "+ 8 小節",
-        btnAddN: "+ 指定数 N",
-        lblLocation: "挿入位置:",
-        btnInsertBefore: "⬅️ 前へ",
-        btnInsertAfter: "➡️ 後ろへ",
-        btnLineBreak: "↵ 改行 (グループ化)",
-        btnDelete: "🗑️ 選択した小節を削除",
-        titleAnnotations: "📌 バンド指示",
-        btnCustomNote: "✏️ カスタムメモ",
-        noteDefault: "✏️ メモ",
-        bandIn: "Band IN",
-        corte: "ブレイク",
-        titlePlaceholder: "曲のタイトル",
-        artistPlaceholder: "アーティスト / バンド",
-        lblTimeSigHeader: "拍子",
-        untitledChart: "無題のチャート",
-        pageLabel: "ページ",
-        continuation: "続き ページ",
-        alertSelectMeasure: "最初に小節をクリックして挿入位置を選択してください。",
-        alertSelectBreak: "改行またはグループ化する小節を選択してください。",
-        alertSelectNote: "指示を追加したい小節をクリックしてください。",
-        chordPlaceholder: "コード"
+        chordPlaceholder: "Acorde",
+        medleyPlaceholder: "CANCIÓN 2: NUEVO TÍTULO / MEDLEY"
       }
     };
 
     let currentLang = 'en';
-    let selectedMeasure = null;
+    let selectedMeasures = []; // Soporte para selección múltiple
+    let lastSelectedMeasure = null;
 
     function initLanguage() {
       let savedLang = localStorage.getItem('preferred_lang');
-
       if (!savedLang) {
         const urlParams = new URLSearchParams(window.location.search);
         savedLang = urlParams.get('lang');
       }
-
       if (!savedLang) {
         const userNavLang = (navigator.language || navigator.userLanguage || '').split('-')[0];
         savedLang = userNavLang;
       }
-
-      if (!i18n[savedLang]) {
-        savedLang = 'en';
-      }
+      if (!i18n[savedLang]) savedLang = 'en';
 
       currentLang = savedLang;
       document.getElementById('langSelector').value = currentLang;
@@ -1042,6 +773,7 @@
 
       document.getElementById('songTitleInput').placeholder = dict.titlePlaceholder;
       document.getElementById('artistInput').placeholder = dict.artistPlaceholder;
+      document.getElementById('styleInput').placeholder = dict.stylePlaceholder;
       document.getElementById('lblTimeSigHeader').innerText = dict.lblTimeSigHeader;
       
       const badgeIntro = document.getElementById('firstSectionBadge');
@@ -1058,10 +790,37 @@
       applyLanguage(lang);
     }
 
-    function selectMeasure(el) {
-      if (selectedMeasure) selectedMeasure.classList.remove('selected');
-      selectedMeasure = el;
-      selectedMeasure.classList.add('selected');
+    // --- MANEJO DE SELECCIÓN MÚLTIPLE (SHIFT + CLIC) ---
+    function handleMeasureClick(el, event) {
+      if (el.classList.contains('break-system')) return;
+
+      const allMeasures = Array.from(document.querySelectorAll('.measure-box:not(.break-system)'));
+
+      if (event && event.shiftKey && lastSelectedMeasure) {
+        // Seleccionar rango
+        const startIdx = allMeasures.indexOf(lastSelectedMeasure);
+        const endIdx = allMeasures.indexOf(el);
+
+        const min = Math.min(startIdx, endIdx);
+        const max = Math.max(startIdx, endIdx);
+
+        clearSelections();
+        for (let i = min; i <= max; i++) {
+          allMeasures[i].classList.add('selected');
+          selectedMeasures.push(allMeasures[i]);
+        }
+      } else {
+        // Selección individual
+        clearSelections();
+        el.classList.add('selected');
+        selectedMeasures = [el];
+        lastSelectedMeasure = el;
+      }
+    }
+
+    function clearSelections() {
+      document.querySelectorAll('.measure-box.selected').forEach(m => m.classList.remove('selected'));
+      selectedMeasures = [];
     }
 
     function getSlashHTML(timeSig) {
@@ -1096,10 +855,49 @@
       }
     }
 
+    function applyTimeSignatureToSelected() {
+      const val = document.getElementById('timeSignatureSelect').value;
+      if (selectedMeasures.length === 0) {
+        const dict = i18n[currentLang] || i18n['en'];
+        alert(dict.alertSelectMeasure);
+        return;
+      }
+
+      selectedMeasures.forEach(m => {
+        const slashes = m.querySelector('.rhythm-slashes');
+        if (slashes) {
+          slashes.innerHTML = getSlashHTML(val);
+        }
+      });
+    }
+
     function updateFooterTitle(val) {
       const dict = i18n[currentLang] || i18n['en'];
       const text = val.trim() !== '' ? val.toUpperCase() : dict.untitledChart;
       document.querySelectorAll('.footer-title-ref').forEach(el => el.innerText = text);
+      document.querySelectorAll('.subsequent-title-ref').forEach(el => el.innerText = text);
+    }
+
+    // --- AGREGAR SUBTÍTULO / MEDLEY ---
+    function addMedleySubtitle() {
+      const dict = i18n[currentLang] || i18n['en'];
+      const targetMeasure = selectedMeasures.length > 0 ? selectedMeasures[0] : null;
+
+      const sub = document.createElement('div');
+      sub.className = 'medley-subtitle';
+      sub.contentEditable = 'true';
+      sub.innerText = dict.medleyPlaceholder;
+
+      if (targetMeasure && targetMeasure.parentNode) {
+        const block = targetMeasure.closest('.section-block');
+        if (block) {
+          block.parentNode.insertBefore(sub, block);
+        }
+      } else {
+        const content = getCurrentPageContent();
+        content.appendChild(sub);
+      }
+      checkPaginationOverflow();
     }
 
     // --- MANEJO DINÁMICO DE PAGINACIÓN A4 EXACTA ---
@@ -1112,7 +910,6 @@
         let inner = currentPage.querySelector('.paper-inner');
         let content = currentPage.querySelector('.chart-content');
 
-        // Mientras el contenido supere los 920px de espacio útil en A4
         while (inner.scrollHeight > 930 && content.children.length > 0) {
           let nextPageIndex = i + 1;
           let nextPage = pages[nextPageIndex];
@@ -1126,7 +923,6 @@
           let nextContent = nextPage.querySelector('.chart-content');
           let lastBlock = content.lastElementChild;
 
-          // Si el último bloque tiene una grilla con compases, mover solo compases si es posible
           if (lastBlock && lastBlock.classList.contains('section-block')) {
             let grid = lastBlock.querySelector('.measures-grid');
             if (grid && grid.children.length > 1) {
@@ -1146,7 +942,6 @@
                 targetGrid.insertBefore(lastMeasure, targetGrid.firstChild);
               }
             } else {
-              // Mover el bloque completo si tiene un solo compás o está vacío
               nextContent.insertBefore(lastBlock, nextContent.firstChild);
             }
           } else {
@@ -1167,7 +962,7 @@
         if (!content || content.children.length === 0 || content.innerText.trim() === "") {
           page.parentNode.removeChild(page);
         } else {
-          break; // Detener en cuanto encontremos una página con contenido
+          break; 
         }
       }
     }
@@ -1175,7 +970,6 @@
     function createNewPageElement(pageNum) {
       const dict = i18n[currentLang] || i18n['en'];
       const titleText = document.getElementById('songTitleInput').value.toUpperCase() || dict.untitledChart;
-      const timeSig = document.getElementById('timeSignatureSelect').value;
 
       const newPaper = document.createElement('div');
       newPaper.className = 'chart-paper';
@@ -1183,12 +977,9 @@
 
       newPaper.innerHTML = `
         <div class="paper-inner">
-          <div class="chart-header">
-            <div style="font-family:'Bungee', cursive; font-size:1.4em; text-align:center; text-transform:uppercase;">${titleText} (CONT.)</div>
-            <div class="header-sub-row">
-              <div>${dict.lblTimeSigHeader}: <span class="displayTimeSig">${timeSig}</span></div>
-              <div>${dict.continuation} ${pageNum}</div>
-            </div>
+          <div class="chart-header-subsequent">
+            <span class="subsequent-title-ref">${titleText}</span>
+            <span>(CONT.)</span>
           </div>
           <div class="chart-content"></div>
         </div>
@@ -1225,7 +1016,7 @@
       const box = document.createElement('div');
       box.className = 'measure-box';
       box.style.flex = '0 0 25%';
-      box.onclick = function() { selectMeasure(this); };
+      box.onclick = function(e) { handleMeasureClick(this, e); };
       box.innerHTML = `
         <input type="text" class="chord-input" placeholder="${dict.chordPlaceholder}">
         <div class="rhythm-slashes">${getSlashHTML(timeSig)}</div>
@@ -1252,10 +1043,11 @@
 
     function addMultipleMeasures(qty) {
       const count = qty || parseInt(document.getElementById('customMeasureQty').value) || 1;
-      
+      const lastSelected = selectedMeasures.length > 0 ? selectedMeasures[selectedMeasures.length - 1] : null;
+
       let targetGrid;
-      if (selectedMeasure && selectedMeasure.parentNode) {
-        targetGrid = selectedMeasure.parentNode;
+      if (lastSelected && lastSelected.parentNode) {
+        targetGrid = lastSelected.parentNode;
       } else {
         const grids = document.querySelectorAll('.measures-grid');
         targetGrid = grids[grids.length - 1];
@@ -1269,9 +1061,8 @@
 
       for (let i = 0; i < count; i++) {
         const box = createMeasureElement();
-        if (selectedMeasure && selectedMeasure.parentNode === targetGrid) {
-          targetGrid.insertBefore(box, selectedMeasure.nextSibling);
-          selectedMeasure = box;
+        if (lastSelected && lastSelected.parentNode === targetGrid) {
+          targetGrid.insertBefore(box, lastSelected.nextSibling);
         } else {
           targetGrid.appendChild(box);
         }
@@ -1282,40 +1073,46 @@
 
     function insertMeasure(position) {
       const dict = i18n[currentLang] || i18n['en'];
-      if (!selectedMeasure) {
+      if (selectedMeasures.length === 0) {
         alert(dict.alertSelectMeasure);
         return;
       }
 
+      const target = selectedMeasures[0];
       const newBox = createMeasureElement();
       if (position === 'before') {
-        selectedMeasure.parentNode.insertBefore(newBox, selectedMeasure);
+        target.parentNode.insertBefore(newBox, target);
       } else {
-        selectedMeasure.parentNode.insertBefore(newBox, selectedMeasure.nextSibling);
+        target.parentNode.insertBefore(newBox, target.nextSibling);
       }
 
-      selectMeasure(newBox);
+      handleMeasureClick(newBox, null);
       checkPaginationOverflow();
     }
 
     function toggleSystemBreak() {
       const dict = i18n[currentLang] || i18n['en'];
-      if (!selectedMeasure) {
+      if (selectedMeasures.length === 0) {
         alert(dict.alertSelectBreak);
         return;
       }
-      const grid = selectedMeasure.parentNode;
+      const target = selectedMeasures[selectedMeasures.length - 1];
+      const grid = target.parentNode;
       const breakEl = document.createElement('div');
       breakEl.className = 'measure-box break-system';
-      grid.insertBefore(breakEl, selectedMeasure.nextSibling);
+      grid.insertBefore(breakEl, target.nextSibling);
       checkPaginationOverflow();
     }
 
     function removeSelectedMeasure() {
-      if (selectedMeasure && selectedMeasure.parentNode) {
-        let grid = selectedMeasure.parentNode;
-        grid.removeChild(selectedMeasure);
-        selectedMeasure = null;
+      if (selectedMeasures.length > 0) {
+        selectedMeasures.forEach(m => {
+          if (m && m.parentNode) {
+            m.parentNode.removeChild(m);
+          }
+        });
+        clearSelections();
+        lastSelectedMeasure = null;
         cleanupEmptyPages();
         checkPaginationOverflow();
       }
@@ -1323,16 +1120,17 @@
 
     function addAnnotation(text, isEditable = false) {
       const dict = i18n[currentLang] || i18n['en'];
-      if (!selectedMeasure) {
+      if (selectedMeasures.length === 0) {
         alert(dict.alertSelectNote);
         return;
       }
-      let badge = selectedMeasure.querySelector('.band-annotation');
+      const target = selectedMeasures[0];
+      let badge = target.querySelector('.band-annotation');
       if (!badge) {
         badge = document.createElement('span');
         badge.className = 'band-annotation';
         badge.contentEditable = 'true';
-        selectedMeasure.appendChild(badge);
+        target.appendChild(badge);
       }
       badge.innerText = text;
     }
@@ -1380,6 +1178,17 @@
         });
       });
     }
+
+    // SOPORTE TECLA SUPR / DELETE PARA BORRAR
+    window.addEventListener('keydown', (e) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedMeasures.length > 0) {
+        const isEditingInput = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable);
+        if (!isEditingInput) {
+          e.preventDefault();
+          removeSelectedMeasure();
+        }
+      }
+    });
 
     window.addEventListener('DOMContentLoaded', () => {
       initLanguage();
