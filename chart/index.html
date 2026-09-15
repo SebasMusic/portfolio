@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chord Chart Studio - Artica & Dynamics</title>
+  <title>Chord Chart Studio - Advanced Subdivisions & Dynamics</title>
   
   <!-- Google Analytics GA4 Base -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3DTLYSJMH"></script>
@@ -15,7 +15,7 @@
     gtag('config', 'G-Q3DTLYSJMH');
   </script>
 
-  <!-- Tipografía Montserrat para el título e Inter para el cuerpo -->
+  <!-- Tipografía Montserrat e Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
@@ -642,21 +642,20 @@
       height: 100%;
     }
 
-    /* CONTENEDOR DE DINÁMICAS INFERIOR (MATICES) Y DYNAMICS HAIRPIN */
+    /* MATICES Y DINÁMICAS INFERIORES */
     .measure-dynamics-container {
       position: absolute;
-      bottom: -18px;
+      bottom: -22px;
       left: 0;
       right: 0;
-      height: 16px;
+      height: 20px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       padding: 0 4px;
       font-family: 'Times New Roman', serif;
       font-style: italic;
       font-weight: bold;
-      font-size: 0.82em;
       color: #0f172a;
       pointer-events: none;
     }
@@ -759,7 +758,7 @@
         </div>
       </div>
 
-      <!-- MÓDULO DESPLEGABLE 1: MATICES Y DINÁMICAS (CRESCENDO / DIMINUENDO) -->
+      <!-- MÓDULO DESPLEGABLE 1: MATICES Y DINÁMICAS -->
       <div class="toolbox-section">
         <div class="collapsible-header" onclick="toggleModule(this)">🎻 Dynamics & Hairpins</div>
         <div class="collapsible-body hidden">
@@ -774,6 +773,16 @@
             <button class="tool-btn" onclick="applyDynamicText('fff')"><i>fff</i></button>
             <button class="tool-btn" onclick="applyDynamicText('sfz')"><i>sfz</i></button>
             <button class="tool-btn" onclick="applyDynamicText('fp')"><i>fp</i></button>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+            <span style="font-size:0.75em; color:var(--text-muted);">Tamaño Matiz:</span>
+            <div style="display:flex; gap:4px;">
+              <button class="tool-btn" style="padding:2px 6px;" onclick="setDynamicFontSize('0.85em')">P</button>
+              <button class="tool-btn" style="padding:2px 6px;" onclick="setDynamicFontSize('1.1em')">M</button>
+              <button class="tool-btn" style="padding:2px 6px;" onclick="setDynamicFontSize('1.35em')">G</button>
+              <button class="tool-btn" style="padding:2px 6px;" onclick="setDynamicFontSize('1.6em')">XG</button>
+            </div>
           </div>
           
           <div style="font-size:0.75em; color:var(--text-muted); margin-top:6px;">Reguladores de Volumen:</div>
@@ -800,6 +809,16 @@
             <button class="tool-btn" title="Marcato" onclick="applyArticulation('marcato')">Marcato (^)</button>
             <button class="tool-btn" title="Fermata" onclick="applyArticulation('fermata')">Calderón (𝄐)</button>
           </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+            <span style="font-size:0.75em; color:var(--text-muted);">Escala Acentos:</span>
+            <div style="display:flex; gap:4px;">
+              <button class="tool-btn" style="padding:2px 6px;" onclick="setArticulationScale(1.0)">1.0x</button>
+              <button class="tool-btn" style="padding:2px 6px;" onclick="setArticulationScale(1.4)">1.4x</button>
+              <button class="tool-btn" style="padding:2px 6px;" onclick="setArticulationScale(1.8)">1.8x</button>
+            </div>
+          </div>
+
           <button class="tool-btn" style="margin-top:4px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="removeArticulation()">Quitar Articulación</button>
         </div>
       </div>
@@ -1027,6 +1046,7 @@
     let lastSelectedMeasure = null;
     let activeBeatSlot = null;
     let activeSubIndex = 0;
+    let currentArticulationScale = 1.4;
 
     function toggleModule(headerEl) {
       headerEl.classList.toggle('collapsed');
@@ -1100,7 +1120,7 @@
 
     function getBeatData(slotEl) {
       if (!slotEl.dataset.items) {
-        slotEl.dataset.items = JSON.stringify([{ type: 'q', dot: false, tie: false, articulation: '' }]);
+        slotEl.dataset.items = JSON.stringify([{ type: 'q', dot: false, tie: false, articulation: '', scale: 1.4 }]);
       }
       return JSON.parse(slotEl.dataset.items);
     }
@@ -1134,7 +1154,7 @@
         svgHTML += `<g class="sub-item-target" onclick="handleSubItemClick(this.closest('.beat-slot'), ${i}, event)">`;
 
         if (isSelected) {
-          svgHTML += `<rect x="${x - 4.5}" y="6" width="9" height="32" fill="none" stroke="#06b6d4" stroke-width="1.2" stroke-dasharray="2,2" rx="2" />`;
+          svgHTML += `<rect x="${x - 5.5}" y="3" width="11" height="35" fill="none" stroke="#06b6d4" stroke-width="1.3" stroke-dasharray="2,2" rx="2" />`;
         }
 
         if (isRest) {
@@ -1162,22 +1182,24 @@
           }
         }
 
-        // DIBUJO DE ARTICULACIONES
+        // DIBUJO DE ARTICULACIONES MÁS GRANDES
         if (item.articulation) {
           const artY = 5;
+          const s = item.scale || currentArticulationScale || 1.4;
+
           if (item.articulation === 'staccato') {
-            svgHTML += `<circle cx="${x + 3.5}" cy="${artY}" r="1.5" fill="#1e293b" />`;
+            svgHTML += `<circle cx="${x + 3.5}" cy="${artY}" r="${2 * s}" fill="#1e293b" />`;
           } else if (item.articulation === 'staccatissimo') {
-            svgHTML += `<polygon points="${x+2},${artY-2} ${x+5},${artY-2} ${x+3.5},${artY+3}" fill="#1e293b" />`;
+            svgHTML += `<polygon points="${x+3.5-2*s},${artY-2*s} ${x+3.5+2*s},${artY-2*s} ${x+3.5},${artY+3*s}" fill="#1e293b" />`;
           } else if (item.articulation === 'accent') {
-            svgHTML += `<path d="M ${x+1} ${artY-2} L ${x+6} ${artY} L ${x+1} ${artY+2}" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" />`;
+            svgHTML += `<path d="M ${x+3.5-3*s} ${artY-2.5*s} L ${x+3.5+3*s} ${artY} L ${x+3.5-3*s} ${artY+2.5*s}" fill="none" stroke="#1e293b" stroke-width="${1.8*s}" stroke-linecap="round" stroke-linejoin="round" />`;
           } else if (item.articulation === 'tenuto') {
-            svgHTML += `<line x1="${x+1}" y1="${artY}" x2="${x+6}" y2="${artY}" stroke="#1e293b" stroke-width="1.8" />`;
+            svgHTML += `<line x1="${x+3.5-3*s}" y1="${artY}" x2="${x+3.5+3*s}" y2="${artY}" stroke="#1e293b" stroke-width="${2.2*s}" stroke-linecap="round" />`;
           } else if (item.articulation === 'marcato') {
-            svgHTML += `<path d="M ${x+1} ${artY+2} L ${x+3.5} ${artY-2} L ${x+6} ${artY+2}" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" />`;
+            svgHTML += `<path d="M ${x+3.5-3*s} ${artY+2.5*s} L ${x+3.5} ${artY-2.5*s} L ${x+3.5+3*s} ${artY+2.5*s}" fill="none" stroke="#1e293b" stroke-width="${1.8*s}" stroke-linecap="round" stroke-linejoin="round" />`;
           } else if (item.articulation === 'fermata') {
-            svgHTML += `<path d="M ${x+1} ${artY+1} A 3 3 0 0 1 ${x+6} ${artY+1}" fill="none" stroke="#1e293b" stroke-width="1.2" />`;
-            svgHTML += `<circle cx="${x+3.5}" cy="${artY}" r="1" fill="#1e293b" />`;
+            svgHTML += `<path d="M ${x+3.5-4*s} ${artY+1.5*s} A ${4*s} ${4*s} 0 0 1 ${x+3.5+4*s} ${artY+1.5*s}" fill="none" stroke="#1e293b" stroke-width="${1.5*s}" />`;
+            svgHTML += `<circle cx="${x+3.5}" cy="${artY}" r="${1.2*s}" fill="#1e293b" />`;
           }
         }
 
@@ -1207,29 +1229,37 @@
       slotEl.innerHTML = svgHTML;
     }
 
+    // SUBDIVISIÓN PROGRESIVA HACIA ADELANTE (Mantiene intactas las figuras anteriores)
     function applySubdivisionRhythm(type) {
       if (!activeBeatSlot) return;
       let items = getBeatData(activeBeatSlot);
 
       if (type === '16' || type === 'r16') {
-        items = [
-          { type: type, dot: false, tie: false, articulation: '' },
-          { type: type, dot: false, tie: false, articulation: '' },
-          { type: type, dot: false, tie: false, articulation: '' },
-          { type: type, dot: false, tie: false, articulation: '' }
+        // Subdividir SOLO la posición seleccionada en 2 semicorcheas hacia adelante
+        const currentItem = items[activeSubIndex] || { type: '8', dot: false, tie: false, articulation: '', scale: 1.4 };
+        
+        const newSubItems = [
+          { type: type, dot: false, tie: false, articulation: currentItem.articulation || '', scale: currentItem.scale || 1.4 },
+          { type: type, dot: false, tie: false, articulation: '', scale: 1.4 }
         ];
-        activeSubIndex = 0;
+
+        items.splice(activeSubIndex, 1, ...newSubItems);
+
       } else if (type === '8' || type === 'r8') {
-        items = [
-          { type: type, dot: false, tie: false, articulation: '' },
-          { type: type, dot: false, tie: false, articulation: '' }
-        ];
-        activeSubIndex = 0;
+        if (items.length === 1 && items[0].type === 'q') {
+          items = [
+            { type: type, dot: false, tie: false, articulation: '', scale: 1.4 },
+            { type: type, dot: false, tie: false, articulation: '', scale: 1.4 }
+          ];
+          activeSubIndex = 0;
+        } else if (items[activeSubIndex]) {
+          items[activeSubIndex].type = type;
+        }
       } else {
         if (items[activeSubIndex]) {
           items[activeSubIndex].type = type;
         } else {
-          items = [{ type: type, dot: false, tie: false, articulation: '' }];
+          items = [{ type: type, dot: false, tie: false, articulation: '', scale: 1.4 }];
           activeSubIndex = 0;
         }
       }
@@ -1255,13 +1285,25 @@
       }
     }
 
-    // APLICAR Y QUITAR ARTICULACIONES
+    // ARTICULACIONES
     function applyArticulation(artType) {
       if (!activeBeatSlot) return;
       let items = getBeatData(activeBeatSlot);
       if (items[activeSubIndex]) {
         items[activeSubIndex].articulation = artType;
+        items[activeSubIndex].scale = currentArticulationScale;
         setBeatData(activeBeatSlot, items);
+      }
+    }
+
+    function setArticulationScale(scaleVal) {
+      currentArticulationScale = scaleVal;
+      if (activeBeatSlot) {
+        let items = getBeatData(activeBeatSlot);
+        if (items[activeSubIndex]) {
+          items[activeSubIndex].scale = scaleVal;
+          setBeatData(activeBeatSlot, items);
+        }
       }
     }
 
@@ -1274,7 +1316,7 @@
       }
     }
 
-    // APLICAR TEXTO DE DINÁMICA (MATIZ) O CRESCENDO/DECRESCENDO REGULADOR
+    // DINÁMICAS Y MATICES
     function applyDynamicText(text) {
       if (selectedMeasures.length === 0) return;
       const target = selectedMeasures[0];
@@ -1284,7 +1326,16 @@
         dynBox.className = 'measure-dynamics-container';
         target.appendChild(dynBox);
       }
-      dynBox.innerHTML = `<span>${text}</span>`;
+      dynBox.innerHTML = `<span style="font-size:1.1em;">${text}</span>`;
+    }
+
+    function setDynamicFontSize(sizeCss) {
+      if (selectedMeasures.length > 0) {
+        const dynText = selectedMeasures[0].querySelector('.measure-dynamics-container span');
+        if (dynText) {
+          dynText.style.fontSize = sizeCss;
+        }
+      }
     }
 
     function applyHairpin(type) {
@@ -1300,8 +1351,8 @@
       }
 
       const svgHairpin = type === 'crescendo' 
-        ? `<svg width="${100 * bars}%" height="12" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M 0 6 L 100 0 M 0 6 L 100 12" stroke="#0f172a" stroke-width="1.5" fill="none"/></svg>`
-        : `<svg width="${100 * bars}%" height="12" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M 0 0 L 100 6 M 0 12 L 100 6" stroke="#0f172a" stroke-width="1.5" fill="none"/></svg>`;
+        ? `<svg width="${100 * bars}%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 7 L 100 0 M 0 7 L 100 14" stroke="#0f172a" stroke-width="1.8" fill="none"/></svg>`
+        : `<svg width="${100 * bars}%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 0 L 100 7 M 0 14 L 100 7" stroke="#0f172a" stroke-width="1.8" fill="none"/></svg>`;
 
       dynBox.innerHTML = svgHairpin;
     }
@@ -1320,7 +1371,7 @@
         selectedMeasures.forEach(m => {
           const slots = m.querySelectorAll('.beat-slot');
           slots.forEach(b => {
-            setBeatData(b, [{ type: 'q', dot: false, tie: false, articulation: '' }]);
+            setBeatData(b, [{ type: 'q', dot: false, tie: false, articulation: '', scale: 1.4 }]);
           });
           if (slots[0]) selectBeatSlot(slots[0], null, 0);
         });
@@ -1763,7 +1814,7 @@
             const slot = document.createElement('div');
             slot.className = 'beat-slot';
             slot.onclick = function(e) { selectBeatSlot(this, e, 0); };
-            setBeatData(slot, [{ type: 'q', dot: false, tie: false, articulation: '' }]);
+            setBeatData(slot, [{ type: 'q', dot: false, tie: false, articulation: '', scale: 1.4 }]);
             c.appendChild(slot);
           }
         }
