@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chord Chart Studio - Advanced Subdivisions</title>
+  <title>Chord Chart Studio - Artica & Dynamics</title>
   
   <!-- Google Analytics GA4 Base -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3DTLYSJMH"></script>
@@ -190,7 +190,7 @@
       line-height: 1;
     }
 
-    /* PANEL LATERAL DE CONTROL */
+    /* PANEL LATERAL DE CONTROL Y MÓDULOS DESPLEGABLES */
     .toolbox-panel {
       background: var(--panel-bg);
       border: 1px solid var(--card-border);
@@ -200,7 +200,7 @@
       box-shadow: 0 15px 35px rgba(0,0,0,0.5);
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
       position: sticky;
       top: 20px;
     }
@@ -211,7 +211,8 @@
       gap: 10px;
     }
 
-    .toolbox-title {
+    /* ACORDEÓN / SECCIONES DESPLEGABLES */
+    .collapsible-header {
       font-size: 0.8em;
       font-weight: 800;
       letter-spacing: 1.5px;
@@ -219,12 +220,43 @@
       text-transform: uppercase;
       border-bottom: 1px solid rgba(255,255,255,0.1);
       padding-bottom: 6px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .collapsible-header::after {
+      content: '▾';
+      font-size: 1.1em;
+      transition: transform 0.2s ease;
+    }
+
+    .collapsible-header.collapsed::after {
+      transform: rotate(-90deg);
+    }
+
+    .collapsible-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .collapsible-body.hidden {
+      display: none;
     }
 
     .btn-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 8px;
+    }
+
+    .btn-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
     }
 
     .tool-btn {
@@ -572,6 +604,7 @@
       display: flex;
       align-items: center;
       justify-content: space-around;
+      position: relative;
     }
 
     .beat-slot {
@@ -595,7 +628,6 @@
       border-radius: 4px;
     }
 
-    /* ESTILO DE SUB-ELEMENTOS SELECCIONABLES DENTRO DEL TIEMPO */
     .sub-item-target {
       cursor: pointer;
       transition: opacity 0.15s ease;
@@ -605,13 +637,28 @@
       opacity: 0.7;
     }
 
-    .sub-item-target.active-sub-item {
-      outline: 2px dashed #06b6d4;
-    }
-
     .beat-slot svg {
       width: 100%;
       height: 100%;
+    }
+
+    /* CONTENEDOR DE DINÁMICAS INFERIOR (MATICES) Y DYNAMICS HAIRPIN */
+    .measure-dynamics-container {
+      position: absolute;
+      bottom: -18px;
+      left: 0;
+      right: 0;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+      font-family: 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: bold;
+      font-size: 0.82em;
+      color: #0f172a;
+      pointer-events: none;
     }
 
     .band-annotation {
@@ -689,86 +736,139 @@
 
   <div class="studio-layout">
     
-    <!-- PANEL LATERAL DE CONTROL -->
+    <!-- PANEL LATERAL DE CONTROL CON MÓDULOS DESPLEGABLES -->
     <div class="toolbox-panel">
       
       <div class="toolbox-section">
-        <div class="toolbox-title" id="titleActions">⚡ Main Actions</div>
-        
-        <div class="download-dropdown" id="downloadDropdown">
-          <button class="tool-btn primary" style="width:100%; text-align:center;" id="btnExportMain" onclick="toggleDownloadMenu(event)">📥 Download Chart ▾</button>
-          <div class="download-menu">
-            <button class="download-option" id="optDownloadPNG" onclick="exportAllPagesToPNG()">🖼️ Export as PNG Images</button>
-            <button class="download-option" id="optDownloadPDF" onclick="exportAllPagesToPDF()">📄 Export as Single PDF File</button>
+        <div class="collapsible-header" onclick="toggleModule(this)">⚡ Main Actions</div>
+        <div class="collapsible-body">
+          <div class="download-dropdown" id="downloadDropdown">
+            <button class="tool-btn primary" style="width:100%; text-align:center;" id="btnExportMain" onclick="toggleDownloadMenu(event)">📥 Download Chart ▾</button>
+            <div class="download-menu">
+              <button class="download-option" id="optDownloadPNG" onclick="exportAllPagesToPNG()">🖼️ Export as PNG Images</button>
+              <button class="download-option" id="optDownloadPDF" onclick="exportAllPagesToPDF()">📄 Export as Single PDF File</button>
+            </div>
+          </div>
+
+          <button class="tool-btn custom-btn" style="margin-top:6px;" id="btnAddPage" onclick="addNewPageManual()">📄 Add New Page</button>
+          
+          <div style="display:flex; gap:8px; margin-top:5px;">
+            <button class="tool-btn" style="flex:1;" id="btnTranspDown" onclick="transposeAll(-1)">♭ -1 Semitone</button>
+            <button class="tool-btn" style="flex:1;" id="btnTranspUp" onclick="transposeAll(1)">♯ +1 Semitone</button>
           </div>
         </div>
+      </div>
 
-        <button class="tool-btn custom-btn" style="margin-top:6px;" id="btnAddPage" onclick="addNewPageManual()">📄 Add New Page</button>
-        
-        <div style="display:flex; gap:8px; margin-top:5px;">
-          <button class="tool-btn" style="flex:1;" id="btnTranspDown" onclick="transposeAll(-1)">♭ -1 Semitone</button>
-          <button class="tool-btn" style="flex:1;" id="btnTranspUp" onclick="transposeAll(1)">♯ +1 Semitone</button>
+      <!-- MÓDULO DESPLEGABLE 1: MATICES Y DINÁMICAS (CRESCENDO / DIMINUENDO) -->
+      <div class="toolbox-section">
+        <div class="collapsible-header" onclick="toggleModule(this)">🎻 Dynamics & Hairpins</div>
+        <div class="collapsible-body hidden">
+          <div style="font-size:0.75em; color:var(--text-muted);">Dynamic Level:</div>
+          <div class="btn-grid-3">
+            <button class="tool-btn" onclick="applyDynamicText('pp')"><i>pp</i></button>
+            <button class="tool-btn" onclick="applyDynamicText('p')"><i>p</i></button>
+            <button class="tool-btn" onclick="applyDynamicText('mp')"><i>mp</i></button>
+            <button class="tool-btn" onclick="applyDynamicText('mf')"><i>mf</i></button>
+            <button class="tool-btn" onclick="applyDynamicText('f')"><i>f</i></button>
+            <button class="tool-btn" onclick="applyDynamicText('ff')"><i>ff</i></button>
+            <button class="tool-btn" onclick="applyDynamicText('fff')"><i>fff</i></button>
+            <button class="tool-btn" onclick="applyDynamicText('sfz')"><i>sfz</i></button>
+            <button class="tool-btn" onclick="applyDynamicText('fp')"><i>fp</i></button>
+          </div>
+          
+          <div style="font-size:0.75em; color:var(--text-muted); margin-top:6px;">Reguladores de Volumen:</div>
+          <div class="btn-grid">
+            <button class="tool-btn custom-btn" onclick="applyHairpin('crescendo')"><i>&lt;</i> Crescendo</button>
+            <button class="tool-btn custom-btn" onclick="applyHairpin('decrescendo')"><i>&gt;</i> Decrescendo</button>
+          </div>
+          <div style="display:flex; gap:6px; align-items:center; margin-top:4px;">
+            <span style="font-size:0.75em; color:var(--text-muted);">Largo (Compases):</span>
+            <input type="number" id="hairpinLength" value="1" min="1" max="8" class="select-input" style="width:60px; text-align:center;" onchange="updateHairpinLength(this.value)">
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO DESPLEGABLE 2: ARTICULACIONES -->
+      <div class="toolbox-section">
+        <div class="collapsible-header" onclick="toggleModule(this)">🎼 Articulations</div>
+        <div class="collapsible-body hidden">
+          <div class="btn-grid-3">
+            <button class="tool-btn" title="Staccato" onclick="applyArticulation('staccato')">Staccato (.)</button>
+            <button class="tool-btn" title="Staccatissimo" onclick="applyArticulation('staccatissimo')">Staccat. (▼)</button>
+            <button class="tool-btn" title="Accent" onclick="applyArticulation('accent')">Acento (&gt;)</button>
+            <button class="tool-btn" title="Tenuto" onclick="applyArticulation('tenuto')">Tenuto (-)</button>
+            <button class="tool-btn" title="Marcato" onclick="applyArticulation('marcato')">Marcato (^)</button>
+            <button class="tool-btn" title="Fermata" onclick="applyArticulation('fermata')">Calderón (𝄐)</button>
+          </div>
+          <button class="tool-btn" style="margin-top:4px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="removeArticulation()">Quitar Articulación</button>
         </div>
       </div>
 
       <div class="toolbox-section">
-        <div class="toolbox-title" id="titleTimeSig">⏱️ Time Signature</div>
-        <select class="select-input" id="timeSignatureSelect">
-          <option value="4/4" selected id="opt44">4/4 (Four-Four)</option>
-          <option value="3/4" id="opt34">3/4 (Three-Four)</option>
-          <option value="2/4" id="opt24">2/4 (Two-Four)</option>
-          <option value="6/8" id="opt68">6/8 (Six-Eighths)</option>
-          <option value="9/8" id="opt98">9/8 (Nine-Eighths)</option>
-          <option value="12/8" id="opt128">12/8 (Twelve-Eighths)</option>
-          <option value="2/2" id="opt22">2/2 (Cut Time)</option>
-        </select>
-        <button class="tool-btn" style="margin-top:2px; border-color:var(--accent-purple); color:#d8b4fe;" id="btnApplyTimeSig" onclick="applyTimeSignatureToSelected()">⏱️ Apply Time Sig from Selection</button>
-      </div>
-
-      <div class="toolbox-section">
-        <div class="toolbox-title" id="titleSections">🏷️ Sections & Song 2</div>
-        <button class="tool-btn custom-btn" style="width:100%; font-weight:700; margin-bottom:4px;" id="btnSubSong2" onclick="addSong2Subtitle()">➕ Song 2 / Subtitle</button>
-        <div class="btn-grid">
-          <button class="tool-btn custom-btn" id="btnSecEdit" onclick="addEditableSection()">✏️ EDITABLE</button>
-          <button class="tool-btn" id="btnSecIntro" onclick="addSection(i18n[currentLang].secIntro)">+ INTRO</button>
-          <button class="tool-btn" id="btnSecVerse" onclick="addSection(i18n[currentLang].secVerse)">+ VERSE</button>
-          <button class="tool-btn" id="btnSecChorus" onclick="addSection(i18n[currentLang].secChorus)">+ CHORUS</button>
-          <button class="tool-btn" id="btnSecBridge" onclick="addSection(i18n[currentLang].secBridge)">+ BRIDGE</button>
-          <button class="tool-btn" id="btnSecSolo" onclick="addSection(i18n[currentLang].secSolo)">+ SOLO</button>
+        <div class="collapsible-header" onclick="toggleModule(this)">⏱️ Time Signature</div>
+        <div class="collapsible-body">
+          <select class="select-input" id="timeSignatureSelect">
+            <option value="4/4" selected id="opt44">4/4 (Four-Four)</option>
+            <option value="3/4" id="opt34">3/4 (Three-Four)</option>
+            <option value="2/4" id="opt24">2/4 (Two-Four)</option>
+            <option value="6/8" id="opt68">6/8 (Six-Eighths)</option>
+            <option value="9/8" id="opt98">9/8 (Nine-Eighths)</option>
+            <option value="12/8" id="opt128">12/8 (Twelve-Eighths)</option>
+            <option value="2/2" id="opt22">2/2 (Cut Time)</option>
+          </select>
+          <button class="tool-btn" style="margin-top:2px; border-color:var(--accent-purple); color:#d8b4fe;" id="btnApplyTimeSig" onclick="applyTimeSignatureToSelected()">⏱️ Apply Time Sig from Selection</button>
         </div>
       </div>
 
       <div class="toolbox-section">
-        <div class="toolbox-title" id="titleMeasures">🎼 Measures & Structure</div>
-        
-        <button class="tool-btn primary" style="margin-bottom:6px; background:linear-gradient(135deg, #10b981, #06b6d4);" id="btnGroupSelected" onclick="groupSelectedInSystem()">🔗 Group Selected in 1 System</button>
-
-        <div class="btn-grid">
-          <button class="tool-btn" id="btnAdd4" onclick="addMultipleMeasures(4)">+ 4 Measures</button>
-          <button class="tool-btn" id="btnAdd8" onclick="addMultipleMeasures(8)">+ 8 Measures</button>
+        <div class="collapsible-header" onclick="toggleModule(this)">🏷️ Sections & Song 2</div>
+        <div class="collapsible-body">
+          <button class="tool-btn custom-btn" style="width:100%; font-weight:700; margin-bottom:4px;" id="btnSubSong2" onclick="addSong2Subtitle()">➕ Song 2 / Subtitle</button>
+          <div class="btn-grid">
+            <button class="tool-btn custom-btn" id="btnSecEdit" onclick="addEditableSection()">✏️ EDITABLE</button>
+            <button class="tool-btn" id="btnSecIntro" onclick="addSection(i18n[currentLang].secIntro)">+ INTRO</button>
+            <button class="tool-btn" id="btnSecVerse" onclick="addSection(i18n[currentLang].secVerse)">+ VERSE</button>
+            <button class="tool-btn" id="btnSecChorus" onclick="addSection(i18n[currentLang].secChorus)">+ CHORUS</button>
+            <button class="tool-btn" id="btnSecBridge" onclick="addSection(i18n[currentLang].secBridge)">+ BRIDGE</button>
+            <button class="tool-btn" id="btnSecSolo" onclick="addSection(i18n[currentLang].secSolo)">+ SOLO</button>
+          </div>
         </div>
-        <div style="display:flex; gap:6px; margin-top:4px;">
-          <input type="number" id="customMeasureQty" value="12" min="1" max="100" class="select-input" style="width:70px; text-align:center;">
-          <button class="tool-btn" style="flex:1;" id="btnAddN" onclick="addMultipleMeasures()">+ Custom N</button>
-        </div>
-        <div style="font-size:0.75em; color:var(--text-muted); margin-top:6px; margin-bottom:2px;" id="lblLocation">Position relative to selection:</div>
-        <div class="btn-grid">
-          <button class="tool-btn" id="btnInsertBefore" onclick="insertMeasure('before')">⬅️ Before</button>
-          <button class="tool-btn" id="btnInsertAfter" onclick="insertMeasure('after')">➡️ After</button>
-        </div>
-        <button class="tool-btn" style="margin-top:6px; background:rgba(234,179,8,0.15); border-color:rgba(234,179,8,0.4); color:#fef08a;" id="btnLineBreak" onclick="toggleSystemBreak()">↵ Line Break (Group)</button>
-        <button class="tool-btn" style="margin-top:4px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" id="btnDelete" onclick="removeSelectedMeasure()">🗑️ Delete Selected (Shift+Click)</button>
       </div>
 
       <div class="toolbox-section">
-        <div class="toolbox-title" id="titleAnnotations">📌 Band Cues</div>
-        <button class="tool-btn custom-btn" id="btnCustomNote" onclick="addAnnotation(i18n[currentLang].noteDefault, true)">✏️ Custom Note</button>
-        <div class="btn-grid" style="margin-top:6px;">
-          <button class="tool-btn" id="btnBandIn" onclick="addAnnotation(i18n[currentLang].bandIn)">Band IN</button>
-          <button class="tool-btn" id="btnTutti" onclick="addAnnotation('Tutti')">Tutti</button>
+        <div class="collapsible-header" onclick="toggleModule(this)">🎼 Measures & Structure</div>
+        <div class="collapsible-body">
+          <button class="tool-btn primary" style="margin-bottom:6px; background:linear-gradient(135deg, #10b981, #06b6d4);" id="btnGroupSelected" onclick="groupSelectedInSystem()">🔗 Group Selected in 1 System</button>
 
-          <button class="tool-btn" id="btnCorte" onclick="addAnnotation(i18n[currentLang].corte)">Break / Cut</button>
-          <button class="tool-btn" id="btnPadOnly" onclick="addAnnotation('Pad Only')">Pad Only</button>
+          <div class="btn-grid">
+            <button class="tool-btn" id="btnAdd4" onclick="addMultipleMeasures(4)">+ 4 Measures</button>
+            <button class="tool-btn" id="btnAdd8" onclick="addMultipleMeasures(8)">+ 8 Measures</button>
+          </div>
+          <div style="display:flex; gap:6px; margin-top:4px;">
+            <input type="number" id="customMeasureQty" value="12" min="1" max="100" class="select-input" style="width:70px; text-align:center;">
+            <button class="tool-btn" style="flex:1;" id="btnAddN" onclick="addMultipleMeasures()">+ Custom N</button>
+          </div>
+          <div style="font-size:0.75em; color:var(--text-muted); margin-top:6px; margin-bottom:2px;" id="lblLocation">Position relative to selection:</div>
+          <div class="btn-grid">
+            <button class="tool-btn" id="btnInsertBefore" onclick="insertMeasure('before')">⬅️ Before</button>
+            <button class="tool-btn" id="btnInsertAfter" onclick="insertMeasure('after')">➡️ After</button>
+          </div>
+          <button class="tool-btn" style="margin-top:6px; background:rgba(234,179,8,0.15); border-color:rgba(234,179,8,0.4); color:#fef08a;" id="btnLineBreak" onclick="toggleSystemBreak()">↵ Line Break (Group)</button>
+          <button class="tool-btn" style="margin-top:4px; color:#fca5a5; border-color:rgba(239,68,68,0.3);" id="btnDelete" onclick="removeSelectedMeasure()">🗑️ Delete Selected (Shift+Click)</button>
+        </div>
+      </div>
+
+      <div class="toolbox-section">
+        <div class="collapsible-header" onclick="toggleModule(this)">📌 Band Cues</div>
+        <div class="collapsible-body">
+          <button class="tool-btn custom-btn" id="btnCustomNote" onclick="addAnnotation(i18n[currentLang].noteDefault, true)">✏️ Custom Note</button>
+          <div class="btn-grid" style="margin-top:6px;">
+            <button class="tool-btn" id="btnBandIn" onclick="addAnnotation(i18n[currentLang].bandIn)">Band IN</button>
+            <button class="tool-btn" id="btnTutti" onclick="addAnnotation('Tutti')">Tutti</button>
+
+            <button class="tool-btn" id="btnCorte" onclick="addAnnotation(i18n[currentLang].corte)">Break / Cut</button>
+            <button class="tool-btn" id="btnPadOnly" onclick="addAnnotation('Pad Only')">Pad Only</button>
+          </div>
         </div>
       </div>
 
@@ -777,7 +877,7 @@
     <!-- COLUMNA PRINCIPAL DERECHA -->
     <div class="right-main-column">
 
-      <!-- BARRA DE ESCRITURA RÍTMICA BEAT-BY-BEAT CON SUBDIVISIONES EDITABLES -->
+      <!-- BARRA DE ESCRITURA RÍTMICA BEAT-BY-BEAT -->
       <div class="rhythm-toolbar">
         <div class="rhythm-title">
           <span>🥁 Rhythms & Notation Studio</span>
@@ -888,123 +988,35 @@
     const i18n = {
       en: {
         btnBack: "← HOME",
-        titleActions: "⚡ Main Actions",
-        btnExportMain: "📥 Download Chart ▾",
-        optDownloadPNG: "🖼️ Export as PNG Images",
-        optDownloadPDF: "📄 Export as Single PDF File",
-        btnAddPage: "📄 Add New Page",
-        btnTranspDown: "♭ -1 Semitone",
-        btnTranspUp: "♯ +1 Semitone",
-        titleTimeSig: "⏱️ Time Signature",
-        opt44: "4/4 (Four-Four)",
-        opt34: "3/4 (Three-Four)",
-        opt24: "2/4 (Two-Four)",
-        opt68: "6/8 (Six-Eighths)",
-        opt98: "9/8 (Nine-Eighths)",
-        opt128: "12/8 (Twelve-Eighths)",
-        opt22: "2/2 (Cut Time)",
-        btnApplyTimeSig: "⏱️ Apply Time Sig from Selection",
-        titleSections: "🏷️ Sections & Song 2",
-        btnSubSong2: "➕ Song 2 / Subtitle",
-        btnSecEdit: "✏️ EDITABLE",
-        btnSecIntro: "+ INTRO",
-        btnSecVerse: "+ VERSE",
-        btnSecChorus: "+ CHORUS",
-        btnSecBridge: "+ BRIDGE",
-        btnSecSolo: "+ SOLO",
-        secIntro: "INTRO",
-        secVerse: "VERSE",
-        secChorus: "CHORUS",
-        secBridge: "BRIDGE",
-        secSolo: "SOLO",
-        secNew: "NEW SECTION",
-        titleMeasures: "🎼 Measures & Structure",
-        btnGroupSelected: "🔗 Group Selected in 1 System",
-        btnAdd4: "+ 4 Measures",
-        btnAdd8: "+ 8 Measures",
-        btnAddN: "+ Custom N",
-        lblLocation: "Position relative to selection:",
-        btnInsertBefore: "⬅️ Before",
-        btnInsertAfter: "➡️ After",
-        btnLineBreak: "↵ Line Break (Group)",
-        btnDelete: "🗑️ Delete Selected",
-        titleAnnotations: "📌 Band Cues",
-        btnCustomNote: "✏️ Custom Note",
-        noteDefault: "✏️ Your Note",
-        bandIn: "Band IN",
-        corte: "Break / Cut",
         titlePlaceholder: "SONG TITLE",
         artistPlaceholder: "Artist / Band",
         stylePlaceholder: "Style: Worship / Pop",
         lblTimeSigHeader: "Time Sig",
         untitledChart: "UNTITLED CHART",
         pageLabel: "PAGE",
-        continuation: "Continuation",
-        alertSelectMeasure: "Please click on a measure first to select the starting spot for the time signature change.",
-        alertSelectBreak: "Select a measure to group or create a line break.",
-        alertSelectNote: "Click on the measure where you want to add the cue.",
-        alertGroupSelect: "Please select measures using Shift + Click to group them into a single line.",
+        secIntro: "INTRO",
+        secVerse: "VERSE",
+        secChorus: "CHORUS",
+        secBridge: "BRIDGE",
+        secSolo: "SOLO",
+        secNew: "NEW SECTION",
         chordPlaceholder: "Chord",
         song2Placeholder: "SONG 2: NEW TITLE / SUBTITLE"
       },
       es: {
         btnBack: "← INICIO",
-        titleActions: "⚡ Acciones Principales",
-        btnExportMain: "📥 Descargar Partitura ▾",
-        optDownloadPNG: "🖼️ Exportar Imagen (PNG)",
-        optDownloadPDF: "📄 Exportar Archivo PDF Único",
-        btnAddPage: "📄 Crear Nueva Página",
-        btnTranspDown: "♭ -1 Semitono",
-        btnTranspUp: "♯ +1 Semitono",
-        titleTimeSig: "⏱️ Métrica de Tiempo",
-        opt44: "4/4 (Cuatro por Cuatro)",
-        opt34: "3/4 (Tres por Cuatro)",
-        opt24: "2/4 (Dos por Cuatro)",
-        opt68: "6/8 (Seis por Ocho)",
-        opt98: "Nueve por Ocho",
-        opt128: "12/8 (Doce por Ocho)",
-        opt22: "2/2 (Dos por Dos)",
-        btnApplyTimeSig: "⏱️ Aplicar Métrica desde Selección",
-        titleSections: "🏷️ Secciones y Canción 2",
-        btnSubSong2: "➕ Canción 2 / Subtítulo",
-        btnSecEdit: "✏️ EDITABLE",
-        btnSecIntro: "+ INTRO",
-        btnSecVerse: "+ VERSO",
-        btnSecChorus: "+ CORO",
-        btnSecBridge: "+ PUENTE",
-        btnSecSolo: "+ SOLO",
-        secIntro: "INTRO",
-        secVerse: "VERSO",
-        secChorus: "CORO",
-        secBridge: "PUENTE",
-        secSolo: "SOLO",
-        secNew: "NUEVA SECCIÓN",
-        titleMeasures: "🎼 Compases & Estructura",
-        btnGroupSelected: "🔗 Agrupar Seleccionados en 1 Sistema",
-        btnAdd4: "+ 4 Compases",
-        btnAdd8: "+ 8 Compases",
-        btnAddN: "+ Cantidad N",
-        lblLocation: "Ubicación según selección:",
-        btnInsertBefore: "⬅️ Antes",
-        btnInsertAfter: "➡️ Después",
-        btnLineBreak: "↵ Salto de Línea (Agrupar)",
-        btnDelete: "🗑️ Eliminar Seleccionados",
-        titleAnnotations: "📌 Indicaciones Banda",
-        btnCustomNote: "✏️ Nota Personalizada",
-        noteDefault: "✏️ Tu Nota",
-        bandIn: "Banda IN",
-        corte: "Corte",
         titlePlaceholder: "TÍTULO DE LA CANCIÓN",
         artistPlaceholder: "Artista / Banda",
         stylePlaceholder: "Estilo: Worship / Pop",
         lblTimeSigHeader: "Métrica",
         untitledChart: "CANCIÓN SIN TÍTULO",
         pageLabel: "PÁG.",
-        continuation: "Continuación",
-        alertSelectMeasure: "Por favor haz clic en un compás para elegir desde dónde cambia la métrica.",
-        alertSelectBreak: "Selecciona un compás para agrupar o hacer un salto de línea.",
-        alertSelectNote: "Haz clic en el compás donde quieres poner la indicación.",
-        alertGroupSelect: "Por favor selecciona los compases con Shift + Clic que deseas agrupar en una misma fila.",
+        secIntro: "INTRO",
+        secVerse: "VERSO",
+        secChorus: "CORO",
+        secBridge: "PUENTE",
+        secSolo: "SOLO",
+        secNew: "NUEVA SECCIÓN",
         chordPlaceholder: "Acorde",
         song2Placeholder: "CANCIÓN 2: NUEVO TÍTULO / SUBTÍTULO"
       }
@@ -1013,21 +1025,17 @@
     let currentLang = 'en';
     let selectedMeasures = [];
     let lastSelectedMeasure = null;
-    let activeBeatSlot = null; // Slot de beat activo
-    let activeSubIndex = 0;   // Índice del elemento seleccionado dentro de la subdivisión del beat
+    let activeBeatSlot = null;
+    let activeSubIndex = 0;
+
+    function toggleModule(headerEl) {
+      headerEl.classList.toggle('collapsed');
+      const body = headerEl.nextElementSibling;
+      if (body) body.classList.toggle('hidden');
+    }
 
     function initLanguage() {
-      let savedLang = localStorage.getItem('preferred_lang');
-      if (!savedLang) {
-        const urlParams = new URLSearchParams(window.location.search);
-        savedLang = urlParams.get('lang');
-      }
-      if (!savedLang) {
-        const userNavLang = (navigator.language || navigator.userLanguage || '').split('-')[0];
-        savedLang = userNavLang;
-      }
-      if (!i18n[savedLang]) savedLang = 'en';
-
+      let savedLang = localStorage.getItem('preferred_lang') || 'en';
       currentLang = savedLang;
       document.getElementById('langSelector').value = currentLang;
       applyLanguage(currentLang);
@@ -1036,60 +1044,10 @@
     function applyLanguage(lang) {
       currentLang = lang;
       const dict = i18n[lang] || i18n['en'];
-
       document.getElementById('btnBack').innerText = dict.btnBack;
-      document.getElementById('titleActions').innerText = dict.titleActions;
-      document.getElementById('btnExportMain').innerText = dict.btnExportMain;
-      document.getElementById('optDownloadPNG').innerText = dict.optDownloadPNG;
-      document.getElementById('optDownloadPDF').innerText = dict.optDownloadPDF;
-      document.getElementById('btnAddPage').innerText = dict.btnAddPage;
-      document.getElementById('btnTranspDown').innerText = dict.btnTranspDown;
-      document.getElementById('btnTranspUp').innerText = dict.btnTranspUp;
-
-      document.getElementById('titleTimeSig').innerText = dict.titleTimeSig;
-      document.getElementById('opt44').innerText = dict.opt44;
-      document.getElementById('opt34').innerText = dict.opt34;
-      document.getElementById('opt24').innerText = dict.opt24;
-      document.getElementById('opt68').innerText = dict.opt68;
-      document.getElementById('opt98').innerText = dict.opt98;
-      document.getElementById('opt128').innerText = dict.opt128;
-      document.getElementById('opt22').innerText = dict.opt22;
-      document.getElementById('btnApplyTimeSig').innerText = dict.btnApplyTimeSig;
-
-      document.getElementById('titleSections').innerText = dict.titleSections;
-      document.getElementById('btnSubSong2').innerText = dict.btnSubSong2;
-      document.getElementById('btnSecEdit').innerText = dict.btnSecEdit;
-      document.getElementById('btnSecIntro').innerText = dict.btnSecIntro;
-      document.getElementById('btnSecVerse').innerText = dict.btnSecVerse;
-      document.getElementById('btnSecChorus').innerText = dict.btnSecChorus;
-      document.getElementById('btnSecBridge').innerText = dict.btnSecBridge;
-      document.getElementById('btnSecSolo').innerText = dict.btnSecSolo;
-
-      document.getElementById('titleMeasures').innerText = dict.titleMeasures;
-      document.getElementById('btnGroupSelected').innerText = dict.btnGroupSelected;
-      document.getElementById('btnAdd4').innerText = dict.btnAdd4;
-      document.getElementById('btnAdd8').innerText = dict.btnAdd8;
-      document.getElementById('btnAddN').innerText = dict.btnAddN;
-      document.getElementById('lblLocation').innerText = dict.lblLocation;
-      document.getElementById('btnInsertBefore').innerText = dict.btnInsertBefore;
-      document.getElementById('btnInsertAfter').innerText = dict.btnInsertAfter;
-      document.getElementById('btnLineBreak').innerText = dict.btnLineBreak;
-      document.getElementById('btnDelete').innerText = dict.btnDelete;
-
-      document.getElementById('titleAnnotations').innerText = dict.titleAnnotations;
-      document.getElementById('btnCustomNote').innerText = dict.btnCustomNote;
-      document.getElementById('btnBandIn').innerText = dict.bandIn;
-      document.getElementById('btnCorte').innerText = dict.corte;
-
       document.getElementById('songTitleInput').placeholder = dict.titlePlaceholder;
       document.getElementById('artistInput').placeholder = dict.artistPlaceholder;
       document.getElementById('styleInput').placeholder = dict.stylePlaceholder;
-      
-      const badgeIntro = document.getElementById('firstSectionBadge');
-      if (badgeIntro && badgeIntro.innerText === 'INTRO') {
-        badgeIntro.innerText = dict.secIntro;
-      }
-
       updateFooterTitle(document.getElementById('songTitleInput').value);
       updateTotalPagesCounter();
     }
@@ -1099,43 +1057,15 @@
       applyLanguage(lang);
     }
 
-    function toggleDownloadMenu(e) {
-      e.stopPropagation();
-      const dropdown = document.getElementById('downloadDropdown');
-      dropdown.classList.toggle('active');
-    }
-
-    document.addEventListener('click', () => {
-      const dropdown = document.getElementById('downloadDropdown');
-      if (dropdown) dropdown.classList.remove('active');
-    });
-
     function handleMeasureClick(el, event) {
       if (el.classList.contains('break-system')) return;
+      clearSelections();
+      el.classList.add('selected');
+      selectedMeasures = [el];
+      lastSelectedMeasure = el;
 
-      const allMeasures = Array.from(document.querySelectorAll('.measure-box:not(.break-system)'));
-
-      if (event && event.shiftKey && lastSelectedMeasure) {
-        const startIdx = allMeasures.indexOf(lastSelectedMeasure);
-        const endIdx = allMeasures.indexOf(el);
-
-        const min = Math.min(startIdx, endIdx);
-        const max = Math.max(startIdx, endIdx);
-
-        clearSelections();
-        for (let i = min; i <= max; i++) {
-          allMeasures[i].classList.add('selected');
-          selectedMeasures.push(allMeasures[i]);
-        }
-      } else {
-        clearSelections();
-        el.classList.add('selected');
-        selectedMeasures = [el];
-        lastSelectedMeasure = el;
-
-        const firstBeat = el.querySelector('.beat-slot');
-        if (firstBeat) selectBeatSlot(firstBeat, null, 0);
-      }
+      const firstBeat = el.querySelector('.beat-slot');
+      if (firstBeat) selectBeatSlot(firstBeat, null, 0);
     }
 
     function clearSelections() {
@@ -1162,18 +1092,15 @@
       }
     }
 
-    // INTERRUPTOR DE CLIC EN SUB-ELEMENTO INDIVIDUAL DENTRO DEL SVG
     function handleSubItemClick(slotEl, subIdx, e) {
       if (e) e.stopPropagation();
       selectBeatSlot(slotEl, null, subIdx);
       renderBeatSlot(slotEl);
     }
 
-    // ESTRUCTURA DE DATOS PARA UN BEAT: Array de figuras/silencios por pulso
-    // por defecto 1 tiempo = ['q']
     function getBeatData(slotEl) {
       if (!slotEl.dataset.items) {
-        slotEl.dataset.items = JSON.stringify([{ type: 'q', dot: false, tie: false }]);
+        slotEl.dataset.items = JSON.stringify([{ type: 'q', dot: false, tie: false, articulation: '' }]);
       }
       return JSON.parse(slotEl.dataset.items);
     }
@@ -1183,7 +1110,6 @@
       renderBeatSlot(slotEl);
     }
 
-    // DIBUJO RÍTMICO SVG DE SUBDIVISIONES COMBINADAS
     function renderBeatSlot(slotEl) {
       const items = getBeatData(slotEl);
       const totalItems = items.length;
@@ -1205,7 +1131,6 @@
         if (pureType === '16' && !isRest) hasSixteenthBeams = true;
         if ((pureType === '8' || pureType === '16') && !isRest) hasEighthBeams = true;
 
-        // Zona interactiva del sub-elemento
         svgHTML += `<g class="sub-item-target" onclick="handleSubItemClick(this.closest('.beat-slot'), ${i}, event)">`;
 
         if (isSelected) {
@@ -1231,9 +1156,28 @@
           // Slash inclinado a la derecha
           svgHTML += `<line x1="${x - 3.5}" y1="26" x2="${x + 3.5}" y2="10" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" />`;
 
-          // Plica desde el extremo izquierdo superior del slash (x-3.5, y=26)
+          // Plica
           if (pureType === '8' || pureType === '16') {
             svgHTML += `<line x1="${x - 3.5}" y1="26" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
+          }
+        }
+
+        // DIBUJO DE ARTICULACIONES
+        if (item.articulation) {
+          const artY = 5;
+          if (item.articulation === 'staccato') {
+            svgHTML += `<circle cx="${x + 3.5}" cy="${artY}" r="1.5" fill="#1e293b" />`;
+          } else if (item.articulation === 'staccatissimo') {
+            svgHTML += `<polygon points="${x+2},${artY-2} ${x+5},${artY-2} ${x+3.5},${artY+3}" fill="#1e293b" />`;
+          } else if (item.articulation === 'accent') {
+            svgHTML += `<path d="M ${x+1} ${artY-2} L ${x+6} ${artY} L ${x+1} ${artY+2}" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" />`;
+          } else if (item.articulation === 'tenuto') {
+            svgHTML += `<line x1="${x+1}" y1="${artY}" x2="${x+6}" y2="${artY}" stroke="#1e293b" stroke-width="1.8" />`;
+          } else if (item.articulation === 'marcato') {
+            svgHTML += `<path d="M ${x+1} ${artY+2} L ${x+3.5} ${artY-2} L ${x+6} ${artY+2}" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" />`;
+          } else if (item.articulation === 'fermata') {
+            svgHTML += `<path d="M ${x+1} ${artY+1} A 3 3 0 0 1 ${x+6} ${artY+1}" fill="none" stroke="#1e293b" stroke-width="1.2" />`;
+            svgHTML += `<circle cx="${x+3.5}" cy="${artY}" r="1" fill="#1e293b" />`;
           }
         }
 
@@ -1248,7 +1192,7 @@
         svgHTML += `</g>`;
       });
 
-      // Dibujo de Barras superiores / de unión (Beams)
+      // Beams
       if (totalItems >= 2 && hasEighthBeams) {
         const xFirst = step * 1 - 3.5;
         const xLast = step * totalItems - 3.5;
@@ -1263,34 +1207,29 @@
       slotEl.innerHTML = svgHTML;
     }
 
-    // APLICAR RITMO O SUBDIVISIÓN AL ELEMENTO ACTIVO
     function applySubdivisionRhythm(type) {
       if (!activeBeatSlot) return;
-
       let items = getBeatData(activeBeatSlot);
 
       if (type === '16' || type === 'r16') {
-        // Subdivisión de Semicorcheas (4 elementos)
         items = [
-          { type: type, dot: false, tie: false },
-          { type: type, dot: false, tie: false },
-          { type: type, dot: false, tie: false },
-          { type: type, dot: false, tie: false }
+          { type: type, dot: false, tie: false, articulation: '' },
+          { type: type, dot: false, tie: false, articulation: '' },
+          { type: type, dot: false, tie: false, articulation: '' },
+          { type: type, dot: false, tie: false, articulation: '' }
         ];
         activeSubIndex = 0;
       } else if (type === '8' || type === 'r8') {
-        // Subdivisión de Corcheas (2 elementos)
         items = [
-          { type: type, dot: false, tie: false },
-          { type: type, dot: false, tie: false }
+          { type: type, dot: false, tie: false, articulation: '' },
+          { type: type, dot: false, tie: false, articulation: '' }
         ];
         activeSubIndex = 0;
       } else {
-        // Reemplazar o cambiar solo el sub-elemento seleccionado
         if (items[activeSubIndex]) {
           items[activeSubIndex].type = type;
         } else {
-          items = [{ type: type, dot: false, tie: false }];
+          items = [{ type: type, dot: false, tie: false, articulation: '' }];
           activeSubIndex = 0;
         }
       }
@@ -1316,19 +1255,79 @@
       }
     }
 
+    // APLICAR Y QUITAR ARTICULACIONES
+    function applyArticulation(artType) {
+      if (!activeBeatSlot) return;
+      let items = getBeatData(activeBeatSlot);
+      if (items[activeSubIndex]) {
+        items[activeSubIndex].articulation = artType;
+        setBeatData(activeBeatSlot, items);
+      }
+    }
+
+    function removeArticulation() {
+      if (!activeBeatSlot) return;
+      let items = getBeatData(activeBeatSlot);
+      if (items[activeSubIndex]) {
+        items[activeSubIndex].articulation = '';
+        setBeatData(activeBeatSlot, items);
+      }
+    }
+
+    // APLICAR TEXTO DE DINÁMICA (MATIZ) O CRESCENDO/DECRESCENDO REGULADOR
+    function applyDynamicText(text) {
+      if (selectedMeasures.length === 0) return;
+      const target = selectedMeasures[0];
+      let dynBox = target.querySelector('.measure-dynamics-container');
+      if (!dynBox) {
+        dynBox = document.createElement('div');
+        dynBox.className = 'measure-dynamics-container';
+        target.appendChild(dynBox);
+      }
+      dynBox.innerHTML = `<span>${text}</span>`;
+    }
+
+    function applyHairpin(type) {
+      if (selectedMeasures.length === 0) return;
+      const target = selectedMeasures[0];
+      const bars = parseInt(document.getElementById('hairpinLength').value) || 1;
+      
+      let dynBox = target.querySelector('.measure-dynamics-container');
+      if (!dynBox) {
+        dynBox = document.createElement('div');
+        dynBox.className = 'measure-dynamics-container';
+        target.appendChild(dynBox);
+      }
+
+      const svgHairpin = type === 'crescendo' 
+        ? `<svg width="${100 * bars}%" height="12" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M 0 6 L 100 0 M 0 6 L 100 12" stroke="#0f172a" stroke-width="1.5" fill="none"/></svg>`
+        : `<svg width="${100 * bars}%" height="12" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M 0 0 L 100 6 M 0 12 L 100 6" stroke="#0f172a" stroke-width="1.5" fill="none"/></svg>`;
+
+      dynBox.innerHTML = svgHairpin;
+    }
+
+    function updateHairpinLength(lengthVal) {
+      if (selectedMeasures.length > 0) {
+        const dynBox = selectedMeasures[0].querySelector('.measure-dynamics-container svg');
+        if (dynBox) {
+          dynBox.setAttribute('width', `${100 * lengthVal}%`);
+        }
+      }
+    }
+
     function resetMeasureRhythm() {
       if (selectedMeasures.length > 0) {
         selectedMeasures.forEach(m => {
           const slots = m.querySelectorAll('.beat-slot');
           slots.forEach(b => {
-            setBeatData(b, [{ type: 'q', dot: false, tie: false }]);
+            setBeatData(b, [{ type: 'q', dot: false, tie: false, articulation: '' }]);
           });
           if (slots[0]) selectBeatSlot(slots[0], null, 0);
         });
       }
     }
 
-    // --- ESCUCHADOR DE TECLADO NUMÉRICO ---
+    // TECLADO NUMÉRICO Y ATAJOS
     window.addEventListener('keydown', (e) => {
       const isEditingInput = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable);
       if (isEditingInput) return;
@@ -1384,11 +1383,7 @@
 
     function applyTimeSignatureToSelected() {
       const val = document.getElementById('timeSignatureSelect').value;
-      if (selectedMeasures.length === 0) {
-        const dict = i18n[currentLang] || i18n['en'];
-        alert(dict.alertSelectMeasure);
-        return;
-      }
+      if (selectedMeasures.length === 0) return;
 
       const startMeasure = selectedMeasures[0];
       const allMeasures = Array.from(document.querySelectorAll('.measure-box:not(.break-system)'));
@@ -1409,10 +1404,6 @@
         } else {
           stackEl.outerHTML = createStackedTimeSigHTML(val);
         }
-      }
-
-      if (typeof gtag === 'function') {
-        gtag('event', 'change_time_signature_forward', { 'time_sig': val });
       }
     }
 
@@ -1578,12 +1569,7 @@
     }
 
     function insertMeasure(position) {
-      const dict = i18n[currentLang] || i18n['en'];
-      if (selectedMeasures.length === 0) {
-        alert(dict.alertSelectMeasure);
-        return;
-      }
-
+      if (selectedMeasures.length === 0) return;
       const target = selectedMeasures[0];
       const newBox = createMeasureElement();
       if (position === 'before') {
@@ -1597,11 +1583,7 @@
     }
 
     function toggleSystemBreak() {
-      const dict = i18n[currentLang] || i18n['en'];
-      if (selectedMeasures.length === 0) {
-        alert(dict.alertSelectBreak);
-        return;
-      }
+      if (selectedMeasures.length === 0) return;
       const target = selectedMeasures[selectedMeasures.length - 1];
       const grid = target.parentNode;
       const breakEl = document.createElement('div');
@@ -1623,11 +1605,7 @@
     }
 
     function addAnnotation(text, isEditable = false) {
-      const dict = i18n[currentLang] || i18n['en'];
-      if (selectedMeasures.length === 0) {
-        alert(dict.alertSelectNote);
-        return;
-      }
+      if (selectedMeasures.length === 0) return;
       const target = selectedMeasures[0];
       let badge = target.querySelector('.band-annotation');
       if (!badge) {
@@ -1658,10 +1636,6 @@
           input.value = transposeChord(input.value, semitones);
         }
       });
-
-      if (typeof gtag === 'function') {
-        gtag('event', 'transpose_chart', { 'semitones': semitones });
-      }
     }
 
     const RENDER_OPTIONS = {
@@ -1744,15 +1718,7 @@
     }
 
     function exportAllPagesToPNG() {
-      if (typeof gtag === 'function') {
-        gtag('event', 'export_chart_png', {
-          'song_title': document.getElementById('songTitleInput').value || 'Sin Titulo',
-          'total_pages': document.querySelectorAll('.chart-paper').length
-        });
-      }
-
       prepareForRender();
-
       document.fonts.ready.then(() => {
         const papers = document.querySelectorAll('.chart-paper');
         papers.forEach((paper, idx) => {
@@ -1769,15 +1735,7 @@
     }
 
     function exportAllPagesToPDF() {
-      if (typeof gtag === 'function') {
-        gtag('event', 'export_chart_pdf', {
-          'song_title': document.getElementById('songTitleInput').value || 'Sin Titulo',
-          'total_pages': document.querySelectorAll('.chart-paper').length
-        });
-      }
-
       prepareForRender();
-
       document.fonts.ready.then(async () => {
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('p', 'mm', 'a4');
@@ -1805,7 +1763,7 @@
             const slot = document.createElement('div');
             slot.className = 'beat-slot';
             slot.onclick = function(e) { selectBeatSlot(this, e, 0); };
-            setBeatData(slot, [{ type: 'q', dot: false, tie: false }]);
+            setBeatData(slot, [{ type: 'q', dot: false, tie: false, articulation: '' }]);
             c.appendChild(slot);
           }
         }
