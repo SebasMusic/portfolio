@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chord Chart Studio - Advanced Subdivisions & Dynamics</title>
+  <title>Chord Chart Studio - Rigorous Engraving Notation Engine</title>
   
   <!-- Google Analytics GA4 Base -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3DTLYSJMH"></script>
@@ -211,7 +211,6 @@
       gap: 10px;
     }
 
-    /* ACORDEÓN / SECCIONES DESPLEGABLES */
     .collapsible-header {
       font-size: 0.8em;
       font-weight: 800;
@@ -295,7 +294,6 @@
       color: var(--accent-cyan);
     }
 
-    /* MENÚ FLOTANTE DE DESCARGA */
     .download-dropdown {
       position: relative;
       width: 100%;
@@ -398,7 +396,6 @@
       overflow: visible;
     }
 
-    /* ENCABEZADO HOJA 1 */
     .chart-header {
       display: flex;
       flex-direction: column;
@@ -410,7 +407,6 @@
       width: 100%;
     }
 
-    /* ENCABEZADO HOJAS SIGUIENTES */
     .chart-header-subsequent {
       display: flex;
       justify-content: space-between;
@@ -642,7 +638,6 @@
       height: 100%;
     }
 
-    /* MATICES Y DINÁMICAS INFERIORES */
     .measure-dynamics-container {
       position: absolute;
       bottom: -22px;
@@ -735,7 +730,7 @@
 
   <div class="studio-layout">
     
-    <!-- PANEL LATERAL DE CONTROL CON MÓDULOS DESPLEGABLES -->
+    <!-- PANEL LATERAL DE CONTROL -->
     <div class="toolbox-panel">
       
       <div class="toolbox-section">
@@ -1130,6 +1125,7 @@
       renderBeatSlot(slotEl);
     }
 
+    // MOTOR RIGUROSO DE NOTACIÓN ENGRAVING Y DIBUJO VECTORIAL
     function renderBeatSlot(slotEl) {
       const items = getBeatData(slotEl);
       const totalItems = items.length;
@@ -1138,18 +1134,21 @@
       const step = 40 / (totalItems + 1);
       const stemYBottom = 38;
 
-      let hasSixteenthBeams = false;
-      let hasEighthBeams = false;
+      let hasSixteenths = false;
+      let hasEighths = false;
+
+      // Cálculo de posiciones X de cada elemento
+      const xPositions = items.map((_, i) => step * (i + 1));
 
       items.forEach((item, i) => {
-        const x = step * (i + 1);
+        const x = xPositions[i];
         const isSelected = (i === activeSubIndex && slotEl.classList.contains('active-beat'));
         const type = item.type;
         const isRest = type.startsWith('r');
         const pureType = isRest ? type.substring(1) : type;
 
-        if (pureType === '16' && !isRest) hasSixteenthBeams = true;
-        if ((pureType === '8' || pureType === '16') && !isRest) hasEighthBeams = true;
+        if (pureType === '16' && !isRest) hasSixteenths = true;
+        if ((pureType === '8' || pureType === '16') && !isRest) hasEighths = true;
 
         svgHTML += `<g class="sub-item-target" onclick="handleSubItemClick(this.closest('.beat-slot'), ${i}, event)">`;
 
@@ -1173,16 +1172,16 @@
             svgHTML += `<rect x="${x - 5}" y="18" width="10" height="5" fill="#1e293b" />`;
           }
         } else {
-          // Slash inclinado a la derecha
+          // Slash inclinado hacia la derecha
           svgHTML += `<line x1="${x - 3.5}" y1="26" x2="${x + 3.5}" y2="10" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" />`;
 
-          // Plica
+          // Plica vertical saliendo desde el extremo superior izquierdo
           if (pureType === '8' || pureType === '16') {
             svgHTML += `<line x1="${x - 3.5}" y1="26" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
           }
         }
 
-        // DIBUJO DE ARTICULACIONES MÁS GRANDES
+        // DIBUJO DE ARTICULACIONES
         if (item.articulation) {
           const artY = 5;
           const s = item.scale || currentArticulationScale || 1.4;
@@ -1214,14 +1213,33 @@
         svgHTML += `</g>`;
       });
 
-      // Beams
-      if (totalItems >= 2 && hasEighthBeams) {
-        const xFirst = step * 1 - 3.5;
-        const xLast = step * totalItems - 3.5;
-        svgHTML += `<line x1="${xFirst}" y1="${stemYBottom}" x2="${xLast}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="3" />`;
+      // LÓGICA RIGUROSA DE ENGRAVING PARA BARRAS (BEAMS):
+      // Primary Beam: Unifica todas las notas no-silencios del pulso
+      const nonRestIndices = items.map((it, idx) => (!it.type.startsWith('r') && (it.type.endsWith('8') || it.type.endsWith('16'))) ? idx : -1).filter(i => i !== -1);
 
-        if (hasSixteenthBeams) {
-          svgHTML += `<line x1="${xFirst}" y1="${stemYBottom - 4}" x2="${xLast}" y2="${stemYBottom - 4}" stroke="#1e293b" stroke-width="2.5" />`;
+      if (nonRestIndices.length >= 2) {
+        const firstX = xPositions[nonRestIndices[0]] - 3.5;
+        const lastX = xPositions[nonRestIndices[nonRestIndices.length - 1]] - 3.5;
+
+        // Barra Exterior / Principal de Corcheas
+        svgHTML += `<line x1="${firstX}" y1="${stemYBottom}" x2="${lastX}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="3" />`;
+
+        // Barras Secundarias / Fraccionadas de Semicorcheas
+        for (let idx = 0; idx < items.length; idx++) {
+          const pureType = items[idx].type.replace('r', '');
+          if (pureType === '16' && !items[idx].type.startsWith('r')) {
+            const currentX = xPositions[idx] - 3.5;
+
+            // Si hay otra semicorchea a la derecha, unir continua
+            if (items[idx + 1] && items[idx + 1].type.replace('r', '') === '16' && !items[idx + 1].type.startsWith('r')) {
+              const nextX = xPositions[idx + 1] - 3.5;
+              svgHTML += `<line x1="${currentX}" y1="${stemYBottom - 4}" x2="${nextX}" y2="${stemYBottom - 4}" stroke="#1e293b" stroke-width="2.5" />`;
+              idx++; // Saltar la pareja ya unida
+            } else {
+              // Barra fraccionada individual (Partial/Cut-off secondary beam hacia la izquierda)
+              svgHTML += `<line x1="${currentX - 4}" y1="${stemYBottom - 4}" x2="${currentX}" y2="${stemYBottom - 4}" stroke="#1e293b" stroke-width="2.5" />`;
+            }
+          }
         }
       }
 
@@ -1229,13 +1247,13 @@
       slotEl.innerHTML = svgHTML;
     }
 
-    // SUBDIVISIÓN PROGRESIVA HACIA ADELANTE (Mantiene intactas las figuras anteriores)
+    // SUBDIVISIÓN ADAPTATIVA Y RIGUROSA
     function applySubdivisionRhythm(type) {
       if (!activeBeatSlot) return;
       let items = getBeatData(activeBeatSlot);
 
       if (type === '16' || type === 'r16') {
-        // Subdividir SOLO la posición seleccionada en 2 semicorcheas hacia adelante
+        // Subdividir la posición actual en 2 semicorcheas hacia adelante
         const currentItem = items[activeSubIndex] || { type: '8', dot: false, tie: false, articulation: '', scale: 1.4 };
         
         const newSubItems = [
@@ -1255,6 +1273,10 @@
         } else if (items[activeSubIndex]) {
           items[activeSubIndex].type = type;
         }
+      } else if (type === 'q' || type === 'rq') {
+        // Restablecer el tiempo completo a una Negra o silencio de Negra
+        items = [{ type: type, dot: false, tie: false, articulation: '', scale: 1.4 }];
+        activeSubIndex = 0;
       } else {
         if (items[activeSubIndex]) {
           items[activeSubIndex].type = type;
@@ -1267,11 +1289,22 @@
       setBeatData(activeBeatSlot, items);
     }
 
+    // PUNTO MATEMÁTICO STRICTO
     function toggleSubdivisionDot() {
       if (!activeBeatSlot) return;
       let items = getBeatData(activeBeatSlot);
       if (items[activeSubIndex]) {
-        items[activeSubIndex].dot = !items[activeSubIndex].dot;
+        const newState = !items[activeSubIndex].dot;
+        items[activeSubIndex].dot = newState;
+
+        // Si es corchea con puntillo (𝅘𝅥𝅮.), obligatoriamente el complemento hacia adelante es 1 semicorchea
+        if (newState && items[activeSubIndex].type.endsWith('8')) {
+          items = [
+            { type: items[activeSubIndex].type, dot: true, tie: false, articulation: items[activeSubIndex].articulation, scale: 1.4 },
+            { type: '16', dot: false, tie: false, articulation: '', scale: 1.4 }
+          ];
+        }
+
         setBeatData(activeBeatSlot, items);
       }
     }
@@ -1285,7 +1318,7 @@
       }
     }
 
-    // ARTICULACIONES
+    // ARTICULACIONES Y MATICES
     function applyArticulation(artType) {
       if (!activeBeatSlot) return;
       let items = getBeatData(activeBeatSlot);
@@ -1316,7 +1349,6 @@
       }
     }
 
-    // DINÁMICAS Y MATICES
     function applyDynamicText(text) {
       if (selectedMeasures.length === 0) return;
       const target = selectedMeasures[0];
@@ -1378,7 +1410,7 @@
       }
     }
 
-    // TECLADO NUMÉRICO Y ATAJOS
+    // ATAJOS DE TECLADO NUMÉRICO
     window.addEventListener('keydown', (e) => {
       const isEditingInput = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable);
       if (isEditingInput) return;
