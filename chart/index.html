@@ -20,9 +20,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
   
-  <!-- VexFlow 4.2.5 CDN para Renderizado Vectorial (SVG) de Rhythms y Slashes Exactos -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vexflow/4.2.5/vexflow-min.js"></script>
-
   <!-- html2canvas y jsPDF para Exportación -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -436,6 +433,7 @@
       gap: 4px;
     }
 
+    /* ESTILO UNIFICADO Y SUAVE DE GRIS SIN NEGRITA PESADA */
     .editable-sub {
       border: none;
       outline: none;
@@ -504,7 +502,7 @@
     }
 
     .measure-box {
-      height: 90px;
+      height: 80px;
       border-right: 2px solid #0f172a;
       border-top: 2px solid #0f172a;
       border-bottom: 2px solid #0f172a;
@@ -549,17 +547,16 @@
       background: transparent;
     }
 
-    /* CONTENEDOR VECTORIAL DE RITMO Y SLASHES SOBRE PENTAGRAMA */
-    .vex-container {
+    /* CONTENEDOR VECTORIAL SVG ULTRA RÁPIDO Y SIEMPRE VISIBLE */
+    .rhythm-svg-container {
       width: 100%;
-      height: 52px;
+      height: 42px;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
     }
 
-    .vex-container svg {
+    .rhythm-svg-container svg {
       width: 100%;
       height: 100%;
     }
@@ -763,9 +760,9 @@
                 <span class="sub-print-text" id="printStyle"></span>
               </div>
               
+              <!-- MÉTRICA TOTALMENTE UNIFICADA EN GRIS SUAVE Y MISMO ESTILO -->
               <div class="sub-item-wrapper" id="wrapTimeSig">
-                <span id="lblTimeSigHeader">Time Sig</span>: 
-                <input type="text" class="editable-sub displayTimeSig" id="headerTimeSigInput" value="4/4" style="width:40px; text-align:center; font-weight:600; color:#475569;">
+                <input type="text" class="editable-sub displayTimeSig" id="headerTimeSigInput" placeholder="4/4" value="4/4" style="width:50px; text-align:center;">
                 <span class="sub-print-text" id="printTimeSig"></span>
               </div>
               
@@ -783,25 +780,25 @@
                 <div class="measure-box" onclick="handleMeasureClick(this, event)">
                   <div class="measure-main">
                     <input type="text" class="chord-input" placeholder="C">
-                    <div class="vex-container"></div>
+                    <div class="rhythm-svg-container"></div>
                   </div>
                 </div>
                 <div class="measure-box" onclick="handleMeasureClick(this, event)">
                   <div class="measure-main">
                     <input type="text" class="chord-input" placeholder="G/B">
-                    <div class="vex-container"></div>
+                    <div class="rhythm-svg-container"></div>
                   </div>
                 </div>
                 <div class="measure-box" onclick="handleMeasureClick(this, event)">
                   <div class="measure-main">
                     <input type="text" class="chord-input" placeholder="Am7">
-                    <div class="vex-container"></div>
+                    <div class="rhythm-svg-container"></div>
                   </div>
                 </div>
                 <div class="measure-box" onclick="handleMeasureClick(this, event)">
                   <div class="measure-main">
                     <input type="text" class="chord-input" placeholder="F2">
-                    <div class="vex-container"></div>
+                    <div class="rhythm-svg-container"></div>
                   </div>
                 </div>
               </div>
@@ -896,8 +893,8 @@
         opt34: "3/4 (Tres por Cuatro)",
         opt24: "2/4 (Dos por Cuatro)",
         opt68: "6/8 (Seis por Ocho)",
-        opt98: "9/8 (Nueve por Ocho)",
-        opt128: "12/8 (Doce por Ocho)",
+        opt98: "Nueve por Ocho",
+        opt128: "Doce por Ocho",
         opt22: "2/2 (Dos por Dos)",
         btnApplyTimeSig: "⏱️ Aplicar Métrica desde Selección",
         titleSections: "🏷️ Secciones y Canción 2",
@@ -949,7 +946,6 @@
     let selectedMeasures = [];
     let lastSelectedMeasure = null;
 
-    // ESTADO RÍTMICO DEL COMPÁS ACTIVO
     let currentDotState = false;
     let currentTieState = false;
 
@@ -1021,7 +1017,6 @@
       document.getElementById('songTitleInput').placeholder = dict.titlePlaceholder;
       document.getElementById('artistInput').placeholder = dict.artistPlaceholder;
       document.getElementById('styleInput').placeholder = dict.stylePlaceholder;
-      document.getElementById('lblTimeSigHeader').innerText = dict.lblTimeSigHeader;
       
       const badgeIntro = document.getElementById('firstSectionBadge');
       if (badgeIntro && badgeIntro.innerText === 'INTRO') {
@@ -1080,78 +1075,81 @@
       selectedMeasures = [];
     }
 
-    // --- MOTOR VEXFLOW PARA RENDERIZAR RHYTHM SLASHES VECTORIALES SOBRE 5 LÍNEAS ---
-    function renderVexRhythm(container, durationType = 'q', hasDot = false, hasTie = false) {
+    // --- GENERADOR RÁPIDO DE SVG RÍTMICO INLINE (100% GARANTIZADO Y FIABLE) ---
+    function renderSlashesSVG(container, durationType = 'q', hasDot = false, hasTie = false) {
       if (!container) return;
-      container.innerHTML = '';
+      
+      let count = 4;
+      let strokeWidth = 3.5;
+      let showStems = false;
+      let beamEighths = false;
+      let beamSixteenths = false;
 
-      try {
-        const { Factory, StaveNote, Beam, Dot, StaveTie } = Vex.Flow;
-        const vf = new Factory({
-          renderer: { element: container, width: container.clientWidth || 150, height: 50 }
-        });
+      if (durationType === 'w') count = 1;
+      else if (durationType === 'h') count = 2;
+      else if (durationType === 'q') { count = 4; strokeWidth = 3.5; }
+      else if (durationType === '8') { count = 8; showStems = true; beamEighths = true; }
+      else if (durationType === '16') { count = 16; showStems = true; beamSixteenths = true; }
 
-        const score = vf.EasyScore();
-        const system = vf.System({ width: container.clientWidth || 150, x: 0, y: -20 });
+      let svgHTML = `<svg viewBox="0 0 160 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">`;
+      
+      const step = 160 / (count + 1);
+      const stemYTop = 26;
+      const stemYBottom = 38;
 
-        let notesCount = 4;
-        let noteDur = 'q';
+      for (let i = 1; i <= count; i++) {
+        const x = step * i;
+        // Dibujo del Slash inclinado
+        svgHTML += `<line x1="${x - 4}" y1="26" x2="${x + 4}" y2="10" stroke="#1e293b" stroke-width="${strokeWidth}" stroke-linecap="round" />`;
 
-        if (durationType === 'w') { notesCount = 1; noteDur = 'w'; }
-        else if (durationType === 'h') { notesCount = 2; noteDur = 'h'; }
-        else if (durationType === 'q') { notesCount = 4; noteDur = 'q'; }
-        else if (durationType === '8') { notesCount = 8; noteDur = '8'; }
-        else if (durationType === '16') { notesCount = 16; noteDur = '16'; }
-
-        let notes = [];
-        for (let i = 0; i < notesCount; i++) {
-          let sn = new StaveNote({
-            keys: ['b/4'],
-            duration: noteDur,
-            type: 'slash'
-          });
-          if (hasDot && i === 0) {
-            Dot.buildAndAppendInSpace([sn], 1);
-          }
-          notes.push(sn);
+        // Plica (Stem)
+        if (showStems) {
+          svgHTML += `<line x1="${x + 3}" y1="12" x2="${x + 3}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="2" />`;
         }
 
-        let stave = system.addStave({
-          voices: [vf.Voice().addTickables(notes)]
-        });
-
-        stave.setBegBarType(Vex.Flow.Barline.type.NONE);
-        stave.setEndBarType(Vex.Flow.Barline.type.NONE);
-
-        // Agrupación automática de plicas (Beaming)
-        if (noteDur === '8' || noteDur === '16') {
-          const beams = Beam.generateBeams(notes);
-          beams.forEach(b => vf.getContext().add(b));
+        // Puntillo
+        if (hasDot && i === 1) {
+          svgHTML += `<circle cx="${x + 9}" cy="16" r="2" fill="#1e293b" />`;
         }
-
-        // Ligadura
-        if (hasTie && notes.length >= 2) {
-          const tie = new StaveTie({
-            first_note: notes[0],
-            last_note: notes[1]
-          });
-          vf.getContext().add(tie);
-        }
-
-        vf.draw();
-      } catch (err) {
-        console.warn("VexFlow render warning:", err);
       }
+
+      // Barras de agrupación (Beams)
+      if (beamEighths) {
+        for (let b = 0; b < count; b += 2) {
+          const x1 = step * (b + 1) + 3;
+          const x2 = step * (b + 2) + 3;
+          svgHTML += `<line x1="${x1}" y1="${stemYBottom}" x2="${x2}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="3.5" />`;
+        }
+      }
+
+      if (beamSixteenths) {
+        for (let b = 0; b < count; b += 4) {
+          const x1 = step * (b + 1) + 3;
+          const x4 = step * (b + 4) + 3;
+          svgHTML += `<line x1="${x1}" y1="${stemYBottom}" x2="${x4}" y2="${stemYBottom}" stroke="#1e293b" stroke-width="3.5" />`;
+          svgHTML += `<line x1="${x1}" y1="${stemYBottom - 4}" x2="${x4}" y2="${stemYBottom - 4}" stroke="#1e293b" stroke-width="2.5" />`;
+        }
+      }
+
+      // Ligadura de prolongación (Tie)
+      if (hasTie && count >= 2) {
+        const x1 = step * 1;
+        const x2 = step * 2;
+        svgHTML += `<path d="M ${x1} 28 Q ${(x1 + x2) / 2} 36 ${x2} 28" fill="none" stroke="#1e293b" stroke-width="2" />`;
+      }
+
+      svgHTML += `</svg>`;
+      container.innerHTML = svgHTML;
     }
 
     // APLICACIÓN RÍTMICA DESDE TECLADO O BOTONES
     function applyRhythmType(type) {
       if (selectedMeasures.length === 0) return;
       selectedMeasures.forEach(m => {
-        const vexCont = m.querySelector('.vex-container');
-        if (vexCont) {
-          vexCont.dataset.rhythm = type;
-          renderVexRhythm(vexCont, type, currentDotState, currentTieState);
+        const svgCont = m.querySelector('.rhythm-svg-container');
+        if (svgCont) {
+          svgCont.dataset.rhythm = type;
+          renderSlashesSVG(svgCont, type, currentDotState, currentTieState);
         }
       });
     }
@@ -1160,10 +1158,10 @@
       currentDotState = !currentDotState;
       if (selectedMeasures.length > 0) {
         selectedMeasures.forEach(m => {
-          const vexCont = m.querySelector('.vex-container');
-          if (vexCont) {
-            const type = vexCont.dataset.rhythm || 'q';
-            renderVexRhythm(vexCont, type, currentDotState, currentTieState);
+          const svgCont = m.querySelector('.rhythm-svg-container');
+          if (svgCont) {
+            const type = svgCont.dataset.rhythm || 'q';
+            renderSlashesSVG(svgCont, type, currentDotState, currentTieState);
           }
         });
       }
@@ -1173,10 +1171,10 @@
       currentTieState = !currentTieState;
       if (selectedMeasures.length > 0) {
         selectedMeasures.forEach(m => {
-          const vexCont = m.querySelector('.vex-container');
-          if (vexCont) {
-            const type = vexCont.dataset.rhythm || 'q';
-            renderVexRhythm(vexCont, type, currentDotState, currentTieState);
+          const svgCont = m.querySelector('.rhythm-svg-container');
+          if (svgCont) {
+            const type = svgCont.dataset.rhythm || 'q';
+            renderSlashesSVG(svgCont, type, currentDotState, currentTieState);
           }
         });
       }
@@ -1187,16 +1185,16 @@
       currentTieState = false;
       if (selectedMeasures.length > 0) {
         selectedMeasures.forEach(m => {
-          const vexCont = m.querySelector('.vex-container');
-          if (vexCont) {
-            vexCont.dataset.rhythm = 'q';
-            renderVexRhythm(vexCont, 'q', false, false);
+          const svgCont = m.querySelector('.rhythm-svg-container');
+          if (svgCont) {
+            svgCont.dataset.rhythm = 'q';
+            renderSlashesSVG(svgCont, 'q', false, false);
           }
         });
       }
     }
 
-    // --- ESCUCHADOR TECLADO NUMÉRICO Y AT ACOS RÁPIDOS ---
+    // --- ESCUCHADOR TECLADO NUMÉRICO Y ATAJOS RÁPIDOS ---
     window.addEventListener('keydown', (e) => {
       const isEditingInput = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable);
       if (isEditingInput) return;
@@ -1321,7 +1319,7 @@
       newBlock.appendChild(grid);
       content.appendChild(newBlock);
 
-      initAllVexRhythms();
+      initAllSVGRhythms();
       updateTotalPagesCounter();
     }
 
@@ -1390,7 +1388,7 @@
       box.innerHTML = `
         <div class="measure-main">
           <input type="text" class="chord-input" placeholder="${dict.chordPlaceholder}">
-          <div class="vex-container"></div>
+          <div class="rhythm-svg-container"></div>
         </div>
       `;
       return box;
@@ -1411,7 +1409,7 @@
       newBlock.appendChild(grid);
       content.appendChild(newBlock);
 
-      initAllVexRhythms();
+      initAllSVGRhythms();
     }
 
     function addMultipleMeasures(qty) {
@@ -1433,7 +1431,7 @@
         targetGrid.appendChild(createMeasureElement());
       }
 
-      initAllVexRhythms();
+      initAllSVGRhythms();
     }
 
     function insertMeasure(position) {
@@ -1451,7 +1449,7 @@
         target.parentNode.insertBefore(newBox, target.nextSibling);
       }
 
-      initAllVexRhythms();
+      initAllSVGRhythms();
       handleMeasureClick(newBox, null);
     }
 
@@ -1498,7 +1496,7 @@
       badge.innerText = text;
     }
 
-    const notesChromatic = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const notesChromatic = ['C', 'C#', 'D', 'D#', 'E', 'F', 'G', 'G#', 'A', 'A#', 'B'];
     const notesFlats = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
     function transposeChord(chord, semitones) {
@@ -1572,7 +1570,7 @@
 
       prepareSubItem('artistInput', 'printArtist', 'wrapArtist');
       prepareSubItem('styleInput', 'printStyle', 'wrapStyle');
-      prepareSubItem('headerTimeSigInput', 'printTimeSig', 'wrapTimeSig', (i18n[currentLang]?.lblTimeSigHeader || 'Métrica') + ': ');
+      prepareSubItem('headerTimeSigInput', 'printTimeSig', 'wrapTimeSig');
       prepareSubItem('bpmInput', 'printBPM', 'wrapBPM');
     }
 
@@ -1656,14 +1654,10 @@
       });
     }
 
-    function initAllVexRhythms() {
-      setTimeout(() => {
-        document.querySelectorAll('.vex-container').forEach(c => {
-          if (!c.firstChild) {
-            renderVexRhythm(c, 'q', false, false);
-          }
-        });
-      }, 50);
+    function initAllSVGRhythms() {
+      document.querySelectorAll('.rhythm-svg-container').forEach(c => {
+        renderSlashesSVG(c, 'q', false, false);
+      });
     }
 
     window.addEventListener('keydown', (e) => {
@@ -1678,7 +1672,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       initLanguage();
-      initAllVexRhythms();
+      initAllSVGRhythms();
     });
   </script>
 </body>
