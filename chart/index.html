@@ -492,18 +492,20 @@
       position: relative;
     }
 
+    /* TIRADOR VERTICAL DEL BLOQUE: REPOSICIONADO A LA IZQUIERDA DENTRO DE LA HOJA */
     .block-v-handle {
       position: absolute;
-      right: -12px;
+      left: -14px;
       top: 50%;
-      width: 6px;
-      height: 24px;
+      width: 8px;
+      height: 28px;
       background: #94a3b8;
-      border-radius: 2px;
+      border-radius: 3px;
       cursor: ns-resize;
       transform: translateY(-50%);
       display: none;
       z-index: 15;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
     .section-block:hover .block-v-handle {
       display: block;
@@ -598,7 +600,6 @@
       border: none !important;
     }
 
-    /* BARRAS DE REPETICIÓN ESTÉTICAS Y DEFINIDAS */
     .measure-box.repeat-start {
       border-left: 5px solid #0f172a !important;
       box-shadow: inset 3px 0 0 0 #fff, inset 5px 0 0 0 #0f172a;
@@ -636,7 +637,7 @@
       z-index: 5;
     }
 
-    /* VOLTA / CASILLA CON TIRADORES */
+    /* VOLTA / CASILLA CON TIRADORES AMPLIADOS PARA FÁCIL AGARRE */
     .volta-bracket {
       position: absolute;
       top: -24px;
@@ -670,25 +671,25 @@
 
     .volta-resize-left, .volta-resize-right {
       position: absolute;
-      top: -2px;
-      width: 8px;
-      height: 10px;
+      top: -3px;
+      width: 10px;
+      height: 14px;
       background: #0f172a;
       cursor: ew-resize;
-      border-radius: 1px;
+      border-radius: 2px;
       z-index: 15;
     }
-    .volta-resize-left { left: -4px; }
-    .volta-resize-right { right: -4px; }
+    .volta-resize-left { left: -5px; }
+    .volta-resize-right { right: -5px; }
 
     .volta-v-handle {
       position: absolute;
       left: 50%;
-      top: -10px;
-      width: 12px;
-      height: 6px;
+      top: -12px;
+      width: 20px;
+      height: 10px;
       background: #94a3b8;
-      border-radius: 2px;
+      border-radius: 3px;
       cursor: ns-resize;
       transform: translateX(-50%);
       display: none;
@@ -757,7 +758,6 @@
       height: 100%;
     }
 
-    /* LIGADURAS (TIES) CON TIRADORES DE MOVIMIENTO VERTICAL Y DOBLE REDISEÑO HORIZONTAL */
     .custom-tie-overlay {
       position: absolute;
       top: 4px;
@@ -774,8 +774,8 @@
       position: absolute;
       left: 50%;
       top: -6px;
-      width: 10px;
-      height: 5px;
+      width: 14px;
+      height: 6px;
       background: #94a3b8;
       border-radius: 2px;
       transform: translateX(-50%);
@@ -789,17 +789,17 @@
     .tie-resize-handle {
       position: absolute;
       top: 50%;
-      width: 6px;
-      height: 8px;
+      width: 8px;
+      height: 12px;
       background: #0f172a;
       cursor: ew-resize;
-      border-radius: 1px;
+      border-radius: 2px;
       transform: translateY(-50%);
       z-index: 28;
       display: none;
     }
-    .tie-resize-left { left: -3px; }
-    .tie-resize-right { right: -3px; }
+    .tie-resize-left { left: -4px; }
+    .tie-resize-right { right: -4px; }
 
     .custom-tie-overlay:hover .tie-resize-handle {
       display: block;
@@ -826,8 +826,8 @@
       position: absolute;
       right: 2px;
       top: 50%;
-      width: 6px;
-      height: 10px;
+      width: 14px;
+      height: 12px;
       background: #94a3b8;
       border-radius: 2px;
       transform: translateY(-50%);
@@ -840,17 +840,17 @@
     .dyn-resize-handle {
       position: absolute;
       top: 50%;
-      width: 8px;
-      height: 10px;
+      width: 10px;
+      height: 14px;
       background: #0f172a;
       cursor: ew-resize;
-      border-radius: 1px;
+      border-radius: 2px;
       transform: translateY(-50%);
       z-index: 15;
       display: none;
     }
-    .dyn-resize-left { left: -4px; }
-    .dyn-resize-right { right: -4px; }
+    .dyn-resize-left { left: -5px; }
+    .dyn-resize-right { right: -5px; }
 
     .measure-dynamics-container:hover .dyn-resize-handle {
       display: block;
@@ -998,7 +998,7 @@
         </div>
       </div>
 
-      <!-- MÓDULO NUEVO: TRANSPOSITION -->
+      <!-- MÓDULO TRANSPOSICIÓN -->
       <div class="toolbox-section">
         <div class="collapsible-header collapsed" id="modTranspose" onclick="toggleModule(this)">Transposición</div>
         <div class="collapsible-body hidden">
@@ -2067,7 +2067,6 @@
       setBeatData(activeBeatSlot, items);
     }
 
-    // CREACIÓN Y GESTIÓN DE LIGADURAS (TIES) LIBRES ENTRE COMPASES
     function toggleSubdivisionTie() {
       if (!activeBeatSlot) return;
       saveStateForUndo();
