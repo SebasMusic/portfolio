@@ -492,6 +492,7 @@
       position: relative;
     }
 
+    /* CONTENEDOR DE SECCIÓN CON MANIJA DE ARRASTRE VERTICAL */
     .section-badge-container {
       position: absolute;
       top: -24px;
@@ -502,6 +503,9 @@
       z-index: 12;
       cursor: ns-resize;
       user-select: none;
+      background: #cbd5e1;
+      padding: 2px 6px;
+      border-radius: 4px;
     }
 
     .section-badge {
@@ -517,7 +521,6 @@
       text-transform: uppercase;
       min-width: 18px;
       min-height: 14px;
-      cursor: grab;
     }
     
     .section-badge:empty {
@@ -529,12 +532,15 @@
       font-weight: 700;
       color: #0f172a;
       border-bottom: 1.5px solid #0f172a;
-      padding-bottom: 2px;
+      padding: 4px 6px;
       margin: 16px 0 6px 0;
       outline: none;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       cursor: ns-resize;
+      background: #f1f5f9;
+      display: inline-block;
+      border-radius: 4px;
     }
 
     .measures-grid {
@@ -608,12 +614,12 @@
       z-index: 5;
     }
 
-    /* VOLTA / CASILLA CON ARRASTRE DIRECTO */
+    /* VOLTA / CASILLA CON ARRASTRE LIBRE */
     .volta-bracket {
       position: absolute;
-      top: -24px;
+      top: -26px;
       left: 0;
-      height: 16px;
+      height: 18px;
       border-top: 1.5px solid #0f172a;
       border-left: 1.5px solid #0f172a;
       border-right: 1.5px solid #0f172a;
@@ -623,10 +629,11 @@
       line-height: 1.2;
       color: #0f172a;
       z-index: 10;
-      background: #ffffff;
+      background: #f8fafc;
       display: flex;
       align-items: center;
-      cursor: grab;
+      cursor: ns-resize;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
 
     .volta-input {
@@ -639,6 +646,7 @@
       color: inherit;
       width: 45px;
       padding: 0;
+      cursor: text;
     }
 
     .measure-main {
@@ -700,17 +708,19 @@
       height: 100%;
     }
 
-    /* LIGADURAS CON ARRASTRE DIRECTO */
+    /* LIGADURAS CON ARRASTRE */
     .custom-tie-overlay {
       position: absolute;
       top: 4px;
       left: 0px;
       width: 60px;
-      height: 16px;
-      cursor: grab;
+      height: 18px;
+      cursor: ns-resize;
       z-index: 25;
       display: flex;
       align-items: center;
+      background: rgba(241, 245, 249, 0.7);
+      border-radius: 3px;
     }
 
     .measure-dynamics-container {
@@ -718,7 +728,7 @@
       bottom: -22px;
       left: 0;
       right: 0;
-      height: 18px;
+      height: 20px;
       display: flex;
       align-items: center;
       justify-content: flex-start;
@@ -727,23 +737,26 @@
       font-style: italic;
       font-weight: bold;
       color: #0f172a;
-      cursor: grab;
+      cursor: ns-resize;
+      background: #f8fafc;
+      border-radius: 3px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
 
     .band-annotation {
       position: absolute;
-      top: -16px;
+      top: -18px;
       right: 4px;
       font-size: 0.68em;
       font-weight: 600;
       color: #334155;
-      background: #f1f5f9;
-      padding: 1px 5px;
+      background: #e2e8f0;
+      padding: 2px 6px;
       border-radius: 3px;
       border: 1px solid #cbd5e1;
       outline: none;
       z-index: 5;
-      cursor: grab;
+      cursor: ns-resize;
     }
 
     .time-sig-stack {
@@ -1097,8 +1110,8 @@
 
             <div class="chart-content">
               <div class="section-block" style="margin-top: 24px;">
-                <div class="section-badge-container" style="top: -24px;">
-                  <span class="section-badge" contenteditable="true" id="firstSectionBadge" onmousedown="initDirectDrag(this, event, 'badge')">INTRO</span>
+                <div class="section-badge-container" style="top: -24px;" onmousedown="initDirectDrag(this, event, 'badge')">
+                  <span class="section-badge" contenteditable="true" id="firstSectionBadge">INTRO</span>
                 </div>
                 <div class="measures-grid">
                   <div class="measure-box" onclick="handleMeasureClick(this, event)">
@@ -1305,14 +1318,14 @@
       document.querySelectorAll('.beat-slot').forEach(b => {
         b.onclick = function(e) { selectBeatSlot(this, e, 0); };
       });
-      document.querySelectorAll('.section-badge').forEach(b => {
-        b.onmousedown = function(e) { initDirectDrag(this, e, 'badge'); };
+      document.querySelectorAll('.section-badge-container').forEach(c => {
+        c.onmousedown = function(e) { initDirectDrag(this, e, 'badge'); };
       });
       document.querySelectorAll('.song2-subtitle').forEach(s => {
         s.onmousedown = function(e) { initDirectDrag(this, e, 'subtitle'); };
       });
       document.querySelectorAll('.volta-bracket').forEach(v => {
-        v.onmousedown = function(e) { initDirectDrag(v.querySelector('.volta-input') || v, e, 'volta'); };
+        v.onmousedown = function(e) { initDirectDrag(v, e, 'volta'); };
       });
       document.querySelectorAll('.custom-tie-overlay').forEach(t => {
         t.onmousedown = function(e) { initDirectDrag(t, e, 'tie'); };
@@ -1327,30 +1340,28 @@
       updateTotalPagesCounter();
     }
 
+    // MOTOR ROBUSTO DE ARRASTRE DIRECTO (CLIC SOSTENIDO)
     function initDirectDrag(el, e, type) {
-      if (e.target.tagName === 'INPUT' && type === 'volta') return;
-      if (e.target.isContentEditable && (type === 'badge' || type === 'subtitle' || type === 'annotation')) return;
+      if (e.target.tagName === 'INPUT' || e.target.isContentEditable) return;
       e.preventDefault();
       e.stopPropagation();
 
       const startX = e.clientX;
       const startY = e.clientY;
+      const targetEl = el;
 
-      let targetEl = el;
-      if (type === 'badge') targetEl = el.closest('.section-badge-container');
-      else if (type === 'volta') targetEl = el.closest('.volta-bracket');
-
-      const startTop = parseInt(window.getComputedStyle(targetEl).top) || (type === 'badge' ? -24 : (type === 'volta' ? -24 : (type === 'tie' ? 4 : (type === 'annotation' ? -16 : 0))));
-      const startLeft = parseFloat(targetEl.style.left) || 0;
+      const startTop = parseInt(window.getComputedStyle(targetEl).top) || (type === 'badge' ? -24 : (type === 'volta' ? -26 : (type === 'tie' ? 4 : (type === 'annotation' ? -18 : 0))));
       const startWidth = targetEl.offsetWidth;
 
       function onMouseMove(moveEvent) {
         const diffX = moveEvent.clientX - startX;
         const diffY = moveEvent.clientY - startY;
 
+        // Movimiento Vertical (Arriba / Abajo)
         const newTop = startTop + diffY;
         targetEl.style.top = `${newTop}px`;
 
+        // Movimiento Horizontal / Redimensionamiento (Izquierda / Derecha)
         if (type === 'volta' || type === 'tie' || type === 'dynamics') {
           const newWidth = Math.max(30, startWidth + diffX);
           targetEl.style.width = `${newWidth}px`;
@@ -1548,12 +1559,12 @@
       
       let v = document.createElement('div');
       v.className = 'volta-bracket';
-      v.style.top = '-24px';
+      v.style.top = '-26px';
       v.style.left = '0px';
       v.innerHTML = `
         <input type="text" class="volta-input" value="${labelNum}" onclick="event.stopPropagation()">
       `;
-      v.onmousedown = function(e) { initDirectDrag(v, e, 'volta'); };
+      v.onmousedown = function(e) { initDirectDrag(this, e, 'volta'); };
       first.appendChild(v);
 
       if (selectedMeasures.length > 1) {
@@ -1592,7 +1603,6 @@
       }
     }
 
-    // RENDERIZADOR MEJORADO: SOPORTE DE BANDERILLAS INDIVIDUALES (FLAGS)
     function renderBeatSlot(slotEl) {
       const items = getBeatData(slotEl);
       const totalItems = items.length;
@@ -1602,7 +1612,6 @@
       const stemYBottom = 31;
       const xPositions = items.map((_, i) => step * (i + 1));
 
-      // Verificamos si hay notas agrupadas por barra (beam)
       const nonRestIndices = items.map((it, idx) => (!it.type.startsWith('r') && (it.type.endsWith('8') || it.type.endsWith('16'))) ? idx : -1).filter(i => i !== -1);
       const hasBeam = nonRestIndices.length >= 2;
 
@@ -1641,14 +1650,12 @@
             svgHTML += `<path d="M ${x - 2.5} 19 L ${x + 2.5} 13" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />`;
             svgHTML += `<line x1="${x - 3.5}" y1="20" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#0f172a" stroke-width="1.8" />`;
           } else if (pureType === '8') {
-            // Corchea con plica y banderilla individual si no está en un grupo de barra
             svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x + 3.5}" y2="8" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />`;
             svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#0f172a" stroke-width="1.8" />`;
             if (!hasBeam || !nonRestIndices.includes(i)) {
               svgHTML += `<path d="M ${x - 3.5} ${stemYBottom} Q ${x + 5} ${stemYBottom - 4} ${x + 3} ${stemYBottom - 9}" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />`;
             }
           } else if (pureType === '16') {
-            // Semicorchea con plica y doble banderilla individual si no está agrupada
             svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x + 3.5}" y2="8" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />`;
             svgHTML += `<line x1="${x - 3.5}" y1="22" x2="${x - 3.5}" y2="${stemYBottom}" stroke="#0f172a" stroke-width="1.8" />`;
             if (!hasBeam || !nonRestIndices.includes(i)) {
@@ -1803,7 +1810,6 @@
       if (tie) tie.remove();
     }
 
-    // ESCUCHA GLOBAL DE TECLADO (ATAJOS NUMÉRICOS 7, 6, 5, 4, 3 Y COPIAR/PEGAR/DESHACER)
     window.addEventListener('keydown', (e) => {
       const isEditingInput = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.isContentEditable);
       const isCtrl = e.ctrlKey || e.metaKey;
@@ -1821,7 +1827,6 @@
 
       if (isEditingInput) return;
 
-      // Atajos de figuras rítmicas por número de teclado
       if (!isCtrl) {
         if (e.key === '7') { applySubdivisionRhythm('w'); return; }
         if (e.key === '6') { applySubdivisionRhythm('h'); return; }
@@ -1933,8 +1938,8 @@
       grid.className = 'measures-grid';
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `
-        <div class="section-badge-container" style="top: -24px;">
-          <span class="section-badge" contenteditable="true" onmousedown="initDirectDrag(this, event, 'badge')">${dict.secNew}</span>
+        <div class="section-badge-container" style="top: -24px;" onmousedown="initDirectDrag(this, event, 'badge')">
+          <span class="section-badge" contenteditable="true">${dict.secNew}</span>
         </div>
       `;
       newBlock.appendChild(grid);
@@ -2024,8 +2029,8 @@
       grid.className = 'measures-grid';
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `
-        <div class="section-badge-container" style="top: -24px;">
-          <span class="section-badge" contenteditable="true" onmousedown="initDirectDrag(this, event, 'badge')">${title}</span>
+        <div class="section-badge-container" style="top: -24px;" onmousedown="initDirectDrag(this, event, 'badge')">
+          <span class="section-badge" contenteditable="true">${title}</span>
         </div>
       `;
       newBlock.appendChild(grid);
@@ -2070,7 +2075,7 @@
         badge = document.createElement('span');
         badge.className = 'band-annotation';
         badge.contentEditable = 'true';
-        badge.style.top = '-16px';
+        badge.style.top = '-18px';
         badge.onmousedown = function(e) { initDirectDrag(this, e, 'annotation'); };
         target.appendChild(badge);
       }
