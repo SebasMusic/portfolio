@@ -437,20 +437,20 @@
       outline: none;
     }
 
-    /* ESTILO PARA INDICADOR VISUAL DE NUEVA MÉTRICA */
+    /* BADGE DE MÉTRICA VISIBLE EN COMPÁS DE CAMBIO */
     .time-sig-badge {
       position: absolute;
-      top: 2px;
-      left: 4px;
-      font-size: 0.65em;
+      bottom: 6px;
+      left: 6px;
+      font-size: 0.75em;
       font-weight: 800;
       color: #0f172a;
-      background: #f1f5f9;
-      border: 1px solid #94a3b8;
-      padding: 0px 4px;
-      border-radius: 3px;
+      background: #e2e8f0;
+      border: 1px solid #64748b;
+      padding: 1px 5px;
+      border-radius: 4px;
       user-select: none;
-      pointer-events: none;
+      outline: none;
     }
 
     .chart-footer {
@@ -591,7 +591,10 @@
             <div class="header-sub-row">
               <div><input type="text" class="editable-sub" id="artistInput" placeholder="Artist / Band" style="width:160px;"></div>
               <div><input type="text" class="editable-sub" id="styleInput" placeholder="Style: Worship / Pop" style="width:150px; text-align:center;"></div>
-              <div><span id="lblTimeSigHeader">Time Sig</span>: <span class="displayTimeSig">4/4</span></div>
+              
+              <!-- MÉTRICA DEL ENCABEZADO AHORA EDITABLE -->
+              <div><span id="lblTimeSigHeader">Time Sig</span>: <input type="text" class="editable-sub displayTimeSig" id="headerTimeSigInput" value="4/4" style="width:50px; text-align:center; font-weight:800;"></div>
+              
               <div><input type="text" class="editable-sub" placeholder="BPM: 120" style="width:80px; text-align:right;"></div>
             </div>
           </div>
@@ -916,7 +919,7 @@
       }
     }
 
-    // APLICA LA MÉTRICA DESDE EL COMPÁS SELECCIONADO EN ADELANTE Y AGREGA EL INDICADOR VISUAL
+    // APLICA LA MÉTRICA DESDE EL COMPÁS SELECCIONADO EN ADELANTE E INSERTA BADGE VISUAL
     function applyTimeSignatureToSelected() {
       const val = document.getElementById('timeSignatureSelect').value;
       if (selectedMeasures.length === 0) {
@@ -932,16 +935,23 @@
       if (startIdx !== -1) {
         const slashHtml = getSlashHTML(val);
         
-        // 1. Agregar o actualizar el distintivo visual con la nueva métrica en el primer compás del cambio
+        // 1. Si es el primer compás de la obra, actualiza el encabezado general
+        if (startIdx === 0) {
+          const headerInput = document.getElementById('headerTimeSigInput');
+          if (headerInput) headerInput.value = val;
+        }
+
+        // 2. Inserta o actualiza el badge con la nueva métrica en el compás inicial del cambio
         let badge = startMeasure.querySelector('.time-sig-badge');
         if (!badge) {
           badge = document.createElement('span');
           badge.className = 'time-sig-badge';
+          badge.contentEditable = 'true';
           startMeasure.appendChild(badge);
         }
         badge.innerText = val;
 
-        // 2. Actualizar los slashes rítmicos desde el compás seleccionado en adelante
+        // 3. Modifica los slashes rítmicos desde la selección hacia adelante
         for (let i = startIdx; i < allMeasures.length; i++) {
           const slashes = allMeasures[i].querySelector('.rhythm-slashes');
           if (slashes) {
