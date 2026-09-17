@@ -492,7 +492,6 @@
       position: relative;
     }
 
-    /* MANIJA DE ARRASTRE DEDICADA CON ICONO ⠿ */
     .section-badge-container {
       position: absolute;
       top: -24px;
@@ -664,7 +663,7 @@
       padding-right: 10px;
     }
 
-    /* VOLTA / CASILLA */
+    /* VOLTA / CASILLA CON SOLAPAS GRÁFICAS Y LIBERTAD ABSOLUTA (X e Y) */
     .volta-bracket {
       position: absolute;
       top: -26px;
@@ -683,6 +682,26 @@
       display: flex;
       align-items: center;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      width: 120px; /* Ancho inicial ajustable */
+    }
+
+    .volta-bracket::before {
+      content: '';
+      position: absolute;
+      left: -2px;
+      bottom: -4px;
+      width: 4px;
+      height: 4px;
+      background: #0f172a;
+    }
+    .volta-bracket::after {
+      content: '';
+      position: absolute;
+      right: -2px;
+      bottom: -4px;
+      width: 4px;
+      height: 4px;
+      background: #0f172a;
     }
 
     .volta-drag {
@@ -766,33 +785,35 @@
       height: 100%;
     }
 
+    /* LIGADURA FLOTANTE LIBRE (MOVIMIENTO X, Y Y ANCHO) */
     .custom-tie-overlay {
       position: absolute;
-      top: 4px;
-      left: 0px;
-      width: 60px;
-      height: 18px;
+      top: -10px;
+      left: 10px;
+      width: 80px;
+      height: 22px;
       z-index: 25;
       display: flex;
       align-items: center;
-      background: rgba(241, 245, 249, 0.85);
+      background: rgba(241, 245, 249, 0.9);
       border-radius: 3px;
       border: 1px solid #cbd5e1;
     }
     .tie-drag {
       cursor: grab;
       font-size: 0.9em;
-      padding: 0 3px;
+      padding: 0 4px;
       color: #475569;
       touch-action: none;
     }
     .tie-drag:active { cursor: grabbing; }
 
+    /* DINÁMICAS FLOTANTES LIBRES (MOVIMIENTO X, Y Y ANCHO) */
     .measure-dynamics-container {
       position: absolute;
-      bottom: -22px;
-      left: 0;
-      right: 0;
+      bottom: -28px;
+      left: 0px;
+      width: 90px;
       height: 20px;
       display: flex;
       align-items: center;
@@ -1187,9 +1208,9 @@
             </div>
 
             <div class="chart-content">
-              <div class="section-block" style="margin-top: 24px;">
-                <div class="section-badge-container" style="top: -24px;">
-                  <span class="drag-handle" onpointerdown="initPointerDrag(this.closest('.section-block'), event, 'badge')">⠿</span>
+              <div class="section-block" style="margin-top: 24px; position: relative;">
+                <div class="section-badge-container" style="top: -24px; left: 0px;">
+                  <span class="drag-handle" onpointerdown="initPointerDrag(this.closest('.section-block'), event, 'sectionBlock')">⠿</span>
                   <span class="section-badge" contenteditable="true" id="firstSectionBadge">INTRO</span>
                 </div>
                 <div class="measures-grid">
@@ -1401,25 +1422,45 @@
       updateTotalPagesCounter();
     }
 
-    // MOTOR PROFESIONAL DE ARRASTRE CON POINTER EVENTS (SIN CONFLICTOS DE TEXTO)
+    // MOTOR DE ARRASTRE FLUIDO (LIBERTAD TOTAL EN EJES X e Y + ANCHO)
     function initPointerDrag(handleEl, e, type) {
       e.preventDefault();
       e.stopPropagation();
 
-      const targetEl = type === 'badge' ? handleEl.closest('.section-block').querySelector('.section-badge-container') : handleEl.closest('.song2-subtitle-wrapper, .volta-bracket, .custom-tie-overlay, .measure-dynamics-container');
+      let targetEl;
+      if (type === 'sectionBlock') {
+        targetEl = handleEl.closest('.section-block');
+      } else if (type === 'badge') {
+        targetEl = handleEl.closest('.section-block').querySelector('.section-badge-container');
+      } else {
+        targetEl = handleEl.closest('.song2-subtitle-wrapper, .volta-bracket, .custom-tie-overlay, .measure-dynamics-container');
+      }
       if (!targetEl) return;
 
       const startY = e.clientY;
       const startX = e.clientX;
-      const startTop = parseInt(window.getComputedStyle(targetEl).top) || (type === 'badge' ? -24 : (type === 'volta' ? -26 : (type === 'tie' ? 4 : (type === 'dynamics' ? 0 : 0))));
+      
+      const computed = window.getComputedStyle(targetEl);
+      const startTop = type === 'sectionBlock' ? (parseInt(computed.marginTop) || 24) : (parseInt(computed.top) || (type === 'badge' ? -24 : (type === 'volta' ? -26 : -10)));
+      const startLeft = (type === 'badge' || type === 'volta' || type === 'tie' || type === 'dynamics') ? (parseInt(computed.left) || 0) : 0;
       const startWidth = targetEl.offsetWidth;
 
       function onPointerMove(moveEvent) {
         const diffY = moveEvent.clientY - startY;
         const diffX = moveEvent.clientX - startX;
 
-        const newTop = startTop + diffY;
-        targetEl.style.top = `${newTop}px`;
+        if (type === 'sectionBlock') {
+          const newMargin = Math.max(0, startTop + diffY);
+          targetEl.style.marginTop = `${newMargin}px`;
+        } else {
+          const newTop = startTop + diffY;
+          targetEl.style.top = `${newTop}px`;
+
+          if (type === 'badge' || type === 'volta' || type === 'tie' || type === 'dynamics') {
+            const newLeft = startLeft + diffX;
+            targetEl.style.left = `${newLeft}px`;
+          }
+        }
 
         if (type === 'volta' || type === 'tie' || type === 'dynamics') {
           const newWidth = Math.max(30, startWidth + diffX);
@@ -1647,7 +1688,7 @@
         const totalFlex = selectedMeasures.reduce((acc, m) => acc + (parseFloat(m.style.flexBasis) || 25), 0);
         v.style.width = `calc(${totalFlex}% + ${(selectedMeasures.length - 1) * 1.5}px)`;
       } else {
-        v.style.width = '100%';
+        v.style.width = '120px';
       }
     }
 
@@ -1783,9 +1824,10 @@
     }
 
     function toggleSubdivisionTie() {
-      if (!activeBeatSlot) return;
+      if (selectedMeasures.length === 0) return;
       saveStateForUndo();
-      const measureMain = activeBeatSlot.closest('.measure-main');
+      const target = selectedMeasures[0];
+      const measureMain = target.querySelector('.measure-main');
       if (!measureMain) return;
 
       let tieOverlay = measureMain.querySelector('.custom-tie-overlay');
@@ -1794,11 +1836,14 @@
       } else {
         tieOverlay = document.createElement('div');
         tieOverlay.className = 'custom-tie-overlay';
-        tieOverlay.style.top = '4px';
+        tieOverlay.style.top = '-10px';
         tieOverlay.style.left = '10px';
+        tieOverlay.style.width = '80px';
         tieOverlay.innerHTML = `
           <span class="tie-drag" onpointerdown="initPointerDrag(this, event, 'tie')">⠿</span>
-          <svg width="45" height="16" viewBox="0 0 100 16" preserveAspectRatio="none"><path d="M 0 12 Q 50 2 100 12" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/></svg>
+          <div style="flex:1; height:100%; display:flex; align-items:center;">
+            <svg width="100%" height="16" viewBox="0 0 100 16" preserveAspectRatio="none"><path d="M 0 12 Q 50 2 100 12" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
         `;
         measureMain.appendChild(tieOverlay);
       }
@@ -1833,7 +1878,7 @@
         dynBox = document.createElement('div');
         dynBox.className = 'measure-dynamics-container';
         dynBox.style.left = '0px';
-        dynBox.style.width = '100%';
+        dynBox.style.width = '90px';
         target.appendChild(dynBox);
       }
       dynBox.innerHTML = `
@@ -1852,7 +1897,7 @@
         dynBox = document.createElement('div');
         dynBox.className = 'measure-dynamics-container';
         dynBox.style.left = '0px';
-        dynBox.style.width = '100%';
+        dynBox.style.width = '90px';
         target.appendChild(dynBox);
       }
       const svgContent = type === 'crescendo' 
@@ -1996,6 +2041,7 @@
       const wrapper = document.createElement('div');
       wrapper.className = 'song2-subtitle-wrapper';
       wrapper.style.top = '0px';
+      wrapper.style.left = '0px';
       wrapper.innerHTML = `
         <span class="drag-handle" onpointerdown="initPointerDrag(this, event, 'badge')">⠿</span>
         <div class="song2-subtitle" contenteditable="true">${dict.song2Placeholder}</div>
@@ -2019,12 +2065,13 @@
       const content = newPage.querySelector('.chart-content');
       const newBlock = document.createElement('div');
       newBlock.className = 'section-block';
+      newBlock.style.marginTop = '24px';
       const grid = document.createElement('div');
       grid.className = 'measures-grid';
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `
-        <div class="section-badge-container" style="top: -24px;">
-          <span class="drag-handle" onpointerdown="initPointerDrag(this, event, 'badge')">⠿</span>
+        <div class="section-badge-container" style="top: -24px; left: 0px;">
+          <span class="drag-handle" onpointerdown="initPointerDrag(this.closest('.section-block'), event, 'sectionBlock')">⠿</span>
           <span class="section-badge" contenteditable="true">${dict.secNew}</span>
         </div>
       `;
@@ -2111,12 +2158,13 @@
       const content = getCurrentPageContent();
       const newBlock = document.createElement('div');
       newBlock.className = 'section-block';
+      newBlock.style.marginTop = '24px';
       const grid = document.createElement('div');
       grid.className = 'measures-grid';
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `
-        <div class="section-badge-container" style="top: -24px;">
-          <span class="drag-handle" onpointerdown="initPointerDrag(this, event, 'badge')">⠿</span>
+        <div class="section-badge-container" style="top: -24px; left: 0px;">
+          <span class="drag-handle" onpointerdown="initPointerDrag(this.closest('.section-block'), event, 'sectionBlock')">⠿</span>
           <span class="section-badge" contenteditable="true">${title}</span>
         </div>
       `;
