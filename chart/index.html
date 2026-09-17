@@ -492,7 +492,7 @@
       position: relative;
     }
 
-    /* CONTENEDOR DE SECCIÓN CON MANIJA DE ARRASTRE VERTICAL */
+    /* MANIJA DE ARRASTRE DEDICADA CON ICONO ⠿ */
     .section-badge-container {
       position: absolute;
       top: -24px;
@@ -501,11 +501,21 @@
       align-items: center;
       gap: 4px;
       z-index: 12;
-      cursor: ns-resize;
       user-select: none;
       background: #cbd5e1;
       padding: 2px 6px;
       border-radius: 4px;
+    }
+
+    .drag-handle {
+      cursor: grab;
+      font-size: 0.9em;
+      color: #0f172a;
+      padding: 0 3px;
+      touch-action: none;
+    }
+    .drag-handle:active {
+      cursor: grabbing;
     }
 
     .section-badge {
@@ -527,20 +537,28 @@
       display: none !important;
     }
 
+    .song2-subtitle-wrapper {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 16px 0 6px 0;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      width: fit-content;
+    }
+
     .song2-subtitle {
       font-size: 1.05em;
       font-weight: 700;
       color: #0f172a;
-      border-bottom: 1.5px solid #0f172a;
-      padding: 4px 6px;
-      margin: 16px 0 6px 0;
       outline: none;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      cursor: ns-resize;
-      background: #f1f5f9;
-      display: inline-block;
-      border-radius: 4px;
+      background: transparent;
+      border: none;
     }
 
     .measures-grid {
@@ -583,16 +601,27 @@
     }
 
     .measure-box.repeat-start::before {
-      content: '• •';
+      content: '';
       position: absolute;
-      left: 8px;
-      top: 35px;
-      font-size: 0.9em;
-      font-weight: 900;
-      color: #0f172a;
-      line-height: 1.2;
-      letter-spacing: 2px;
+      left: 10px;
+      top: 36px;
+      width: 3.5px;
+      height: 3.5px;
+      background-color: #0f172a;
+      border-radius: 50%;
+      box-shadow: 0 14px 0 0 #0f172a;
       z-index: 5;
+    }
+
+    .measure-box.repeat-start::after {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: -1.5px;
+      width: 5px;
+      height: 3px;
+      background: #0f172a;
+      z-index: 6;
     }
 
     .measure-box.repeat-end {
@@ -601,20 +630,41 @@
       box-shadow: inset -3px 0 0 0 #fff, inset -5px 0 0 0 #0f172a;
     }
 
-    .measure-box.repeat-end::after {
-      content: '• •';
+    .measure-box.repeat-end::before {
+      content: '';
       position: absolute;
-      right: 8px;
-      top: 35px;
-      font-size: 0.9em;
-      font-weight: 900;
-      color: #0f172a;
-      line-height: 1.2;
-      letter-spacing: 2px;
+      right: 10px;
+      top: 36px;
+      width: 3.5px;
+      height: 3.5px;
+      background-color: #0f172a;
+      border-radius: 50%;
+      box-shadow: 0 14px 0 0 #0f172a;
       z-index: 5;
     }
 
-    /* VOLTA / CASILLA CON ARRASTRE LIBRE */
+    .measure-box.double-bar-final {
+      border-right: 5px solid #0f172a !important;
+      box-shadow: inset -3px 0 0 0 #fff, inset -5px 0 0 0 #0f172a, inset -8px 0 0 0 #0f172a;
+    }
+
+    .measure-box.double-bar-final::after {
+      content: '';
+      position: absolute;
+      right: -5px;
+      bottom: -1.5px;
+      width: 5px;
+      height: 3px;
+      background: #0f172a;
+      z-index: 6;
+    }
+
+    .measure-box.double-bar-thin {
+      border-right: 3.5px double #0f172a !important;
+      padding-right: 10px;
+    }
+
+    /* VOLTA / CASILLA */
     .volta-bracket {
       position: absolute;
       top: -26px;
@@ -632,9 +682,17 @@
       background: #f8fafc;
       display: flex;
       align-items: center;
-      cursor: ns-resize;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
+
+    .volta-drag {
+      cursor: grab;
+      font-size: 1.1em;
+      padding: 0 4px;
+      color: #64748b;
+      touch-action: none;
+    }
+    .volta-drag:active { cursor: grabbing; }
 
     .volta-input {
       border: none;
@@ -644,7 +702,7 @@
       font-size: inherit;
       font-weight: inherit;
       color: inherit;
-      width: 45px;
+      width: 35px;
       padding: 0;
       cursor: text;
     }
@@ -708,20 +766,27 @@
       height: 100%;
     }
 
-    /* LIGADURAS CON ARRASTRE */
     .custom-tie-overlay {
       position: absolute;
       top: 4px;
       left: 0px;
       width: 60px;
       height: 18px;
-      cursor: ns-resize;
       z-index: 25;
       display: flex;
       align-items: center;
-      background: rgba(241, 245, 249, 0.7);
+      background: rgba(241, 245, 249, 0.85);
       border-radius: 3px;
+      border: 1px solid #cbd5e1;
     }
+    .tie-drag {
+      cursor: grab;
+      font-size: 0.9em;
+      padding: 0 3px;
+      color: #475569;
+      touch-action: none;
+    }
+    .tie-drag:active { cursor: grabbing; }
 
     .measure-dynamics-container {
       position: absolute;
@@ -731,17 +796,25 @@
       height: 20px;
       display: flex;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: space-between;
       padding: 0 4px;
       font-family: 'Times New Roman', serif;
       font-style: italic;
       font-weight: bold;
       color: #0f172a;
-      cursor: ns-resize;
       background: #f8fafc;
       border-radius: 3px;
+      border: 1px solid #cbd5e1;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      z-index: 10;
     }
+    .dyn-drag {
+      cursor: grab;
+      font-size: 0.8em;
+      color: #64748b;
+      touch-action: none;
+    }
+    .dyn-drag:active { cursor: grabbing; }
 
     .band-annotation {
       position: absolute;
@@ -756,7 +829,6 @@
       border: 1px solid #cbd5e1;
       outline: none;
       z-index: 5;
-      cursor: ns-resize;
     }
 
     .time-sig-stack {
@@ -960,6 +1032,12 @@
             <button class="tool-btn" onclick="applyVolta('2.')">Casilla [2.]</button>
           </div>
 
+          <div style="font-size:0.75em; color:var(--text-muted); margin-top:4px;">Tipos de Barras:</div>
+          <div class="btn-grid">
+            <button class="tool-btn custom-btn" onclick="toggleBarType('double-bar-final')">║ Final Partitura</button>
+            <button class="tool-btn custom-btn" onclick="toggleBarType('double-bar-thin')">‖ Doble Barra Fina</button>
+          </div>
+
           <div style="font-size:0.75em; color:var(--text-muted); margin-top:4px;">Navegación:</div>
           <div class="btn-grid">
             <button class="tool-btn" onclick="addAnnotation('𝄌 Segno')">𝄌 Segno</button>
@@ -1110,7 +1188,8 @@
 
             <div class="chart-content">
               <div class="section-block" style="margin-top: 24px;">
-                <div class="section-badge-container" style="top: -24px;" onmousedown="initDirectDrag(this, event, 'badge')">
+                <div class="section-badge-container" style="top: -24px;">
+                  <span class="drag-handle" onpointerdown="initPointerDrag(this.closest('.section-block'), event, 'badge')">⠿</span>
                   <span class="section-badge" contenteditable="true" id="firstSectionBadge">INTRO</span>
                 </div>
                 <div class="measures-grid">
@@ -1318,63 +1397,45 @@
       document.querySelectorAll('.beat-slot').forEach(b => {
         b.onclick = function(e) { selectBeatSlot(this, e, 0); };
       });
-      document.querySelectorAll('.section-badge-container').forEach(c => {
-        c.onmousedown = function(e) { initDirectDrag(this, e, 'badge'); };
-      });
-      document.querySelectorAll('.song2-subtitle').forEach(s => {
-        s.onmousedown = function(e) { initDirectDrag(this, e, 'subtitle'); };
-      });
-      document.querySelectorAll('.volta-bracket').forEach(v => {
-        v.onmousedown = function(e) { initDirectDrag(v, e, 'volta'); };
-      });
-      document.querySelectorAll('.custom-tie-overlay').forEach(t => {
-        t.onmousedown = function(e) { initDirectDrag(t, e, 'tie'); };
-      });
-      document.querySelectorAll('.measure-dynamics-container').forEach(d => {
-        d.onmousedown = function(e) { initDirectDrag(d, e, 'dynamics'); };
-      });
-      document.querySelectorAll('.band-annotation').forEach(a => {
-        a.onmousedown = function(e) { initDirectDrag(a, e, 'annotation'); };
-      });
       initAllBeatMeasures();
       updateTotalPagesCounter();
     }
 
-    // MOTOR ROBUSTO DE ARRASTRE DIRECTO (CLIC SOSTENIDO)
-    function initDirectDrag(el, e, type) {
-      if (e.target.tagName === 'INPUT' || e.target.isContentEditable) return;
+    // MOTOR PROFESIONAL DE ARRASTRE CON POINTER EVENTS (SIN CONFLICTOS DE TEXTO)
+    function initPointerDrag(handleEl, e, type) {
       e.preventDefault();
       e.stopPropagation();
 
-      const startX = e.clientX;
-      const startY = e.clientY;
-      const targetEl = el;
+      const targetEl = type === 'badge' ? handleEl.closest('.section-block').querySelector('.section-badge-container') : handleEl.closest('.song2-subtitle-wrapper, .volta-bracket, .custom-tie-overlay, .measure-dynamics-container');
+      if (!targetEl) return;
 
-      const startTop = parseInt(window.getComputedStyle(targetEl).top) || (type === 'badge' ? -24 : (type === 'volta' ? -26 : (type === 'tie' ? 4 : (type === 'annotation' ? -18 : 0))));
+      const startY = e.clientY;
+      const startX = e.clientX;
+      const startTop = parseInt(window.getComputedStyle(targetEl).top) || (type === 'badge' ? -24 : (type === 'volta' ? -26 : (type === 'tie' ? 4 : (type === 'dynamics' ? 0 : 0))));
       const startWidth = targetEl.offsetWidth;
 
-      function onMouseMove(moveEvent) {
-        const diffX = moveEvent.clientX - startX;
+      function onPointerMove(moveEvent) {
         const diffY = moveEvent.clientY - startY;
+        const diffX = moveEvent.clientX - startX;
 
-        // Movimiento Vertical (Arriba / Abajo)
         const newTop = startTop + diffY;
         targetEl.style.top = `${newTop}px`;
 
-        // Movimiento Horizontal / Redimensionamiento (Izquierda / Derecha)
         if (type === 'volta' || type === 'tie' || type === 'dynamics') {
           const newWidth = Math.max(30, startWidth + diffX);
           targetEl.style.width = `${newWidth}px`;
         }
       }
 
-      function onMouseUp() {
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
+      function onPointerUp(upEvent) {
+        handleEl.releasePointerCapture(upEvent.pointerId);
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
       }
 
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
+      handleEl.setPointerCapture(e.pointerId);
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerUp);
     }
 
     function toggleModule(headerEl) {
@@ -1541,8 +1602,23 @@
       if (selectedMeasures.length === 0) return;
       saveStateForUndo();
       selectedMeasures.forEach(m => {
-        if (type === 'start') m.classList.toggle('repeat-start');
-        else if (type === 'end') m.classList.toggle('repeat-end');
+        if (type === 'start') {
+          m.classList.toggle('repeat-start');
+          m.classList.remove('double-bar-final', 'double-bar-thin');
+        } else if (type === 'end') {
+          m.classList.toggle('repeat-end');
+          m.classList.remove('double-bar-final', 'double-bar-thin');
+        }
+      });
+    }
+
+    function toggleBarType(barClass) {
+      if (selectedMeasures.length === 0) return;
+      saveStateForUndo();
+      selectedMeasures.forEach(m => {
+        const hasIt = m.classList.contains(barClass);
+        m.classList.remove('double-bar-final', 'double-bar-thin', 'repeat-end');
+        if (!hasIt) m.classList.add(barClass);
       });
     }
 
@@ -1562,9 +1638,9 @@
       v.style.top = '-26px';
       v.style.left = '0px';
       v.innerHTML = `
+        <span class="volta-drag" onpointerdown="initPointerDrag(this, event, 'volta')">⠿</span>
         <input type="text" class="volta-input" value="${labelNum}" onclick="event.stopPropagation()">
       `;
-      v.onmousedown = function(e) { initDirectDrag(this, e, 'volta'); };
       first.appendChild(v);
 
       if (selectedMeasures.length > 1) {
@@ -1721,9 +1797,9 @@
         tieOverlay.style.top = '4px';
         tieOverlay.style.left = '10px';
         tieOverlay.innerHTML = `
-          <svg width="100%" height="16" viewBox="0 0 100 16" preserveAspectRatio="none"><path d="M 0 12 Q 50 2 100 12" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/></svg>
+          <span class="tie-drag" onpointerdown="initPointerDrag(this, event, 'tie')">⠿</span>
+          <svg width="45" height="16" viewBox="0 0 100 16" preserveAspectRatio="none"><path d="M 0 12 Q 50 2 100 12" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/></svg>
         `;
-        tieOverlay.onmousedown = function(e) { initDirectDrag(this, e, 'tie'); };
         measureMain.appendChild(tieOverlay);
       }
     }
@@ -1758,10 +1834,13 @@
         dynBox.className = 'measure-dynamics-container';
         dynBox.style.left = '0px';
         dynBox.style.width = '100%';
-        dynBox.onmousedown = function(e) { initDirectDrag(this, e, 'dynamics'); };
         target.appendChild(dynBox);
       }
-      dynBox.innerHTML = `<span style="font-size:1.1em; margin: 0 auto;">${text}</span>`;
+      dynBox.innerHTML = `
+        <span class="dyn-drag" onpointerdown="initPointerDrag(this, event, 'dynamics')">⠿</span>
+        <span style="font-size:1.1em; margin: 0 auto;">${text}</span>
+        <span style="width:12px;"></span>
+      `;
     }
 
     function applyHairpin(type) {
@@ -1774,13 +1853,15 @@
         dynBox.className = 'measure-dynamics-container';
         dynBox.style.left = '0px';
         dynBox.style.width = '100%';
-        dynBox.onmousedown = function(e) { initDirectDrag(this, e, 'dynamics'); };
         target.appendChild(dynBox);
       }
       const svgContent = type === 'crescendo' 
         ? `<svg width="100%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 7 L 100 0 M 0 7 L 100 14" stroke="#0f172a" stroke-width="1.5" fill="none"/></svg>`
         : `<svg width="100%" height="14" viewBox="0 0 100 14" preserveAspectRatio="none"><path d="M 0 0 L 100 7 M 0 14 L 100 7" stroke="#0f172a" stroke-width="1.5" fill="none"/></svg>`;
-      dynBox.innerHTML = `<div style="flex:1; height:100%; display:flex; align-items:center;">${svgContent}</div>`;
+      dynBox.innerHTML = `
+        <span class="dyn-drag" onpointerdown="initPointerDrag(this, event, 'dynamics')">⠿</span>
+        <div style="flex:1; height:100%; display:flex; align-items:center;">${svgContent}</div>
+      `;
     }
 
     function resetMeasureRhythm() {
@@ -1808,6 +1889,7 @@
       if (volta) volta.remove();
       const tie = measureEl.querySelector('.custom-tie-overlay');
       if (tie) tie.remove();
+      measureEl.classList.remove('repeat-start', 'repeat-end', 'double-bar-final', 'double-bar-thin');
     }
 
     window.addEventListener('keydown', (e) => {
@@ -1910,17 +1992,20 @@
       const dict = i18n[currentLang] || i18n['en'];
       saveStateForUndo();
       const targetMeasure = selectedMeasures.length > 0 ? selectedMeasures[0] : null;
-      const sub = document.createElement('div');
-      sub.className = 'song2-subtitle';
-      sub.contentEditable = 'true';
-      sub.innerText = dict.song2Placeholder;
-      sub.onmousedown = function(e) { initDirectDrag(this, e, 'subtitle'); };
+      
+      const wrapper = document.createElement('div');
+      wrapper.className = 'song2-subtitle-wrapper';
+      wrapper.style.top = '0px';
+      wrapper.innerHTML = `
+        <span class="drag-handle" onpointerdown="initPointerDrag(this, event, 'badge')">⠿</span>
+        <div class="song2-subtitle" contenteditable="true">${dict.song2Placeholder}</div>
+      `;
 
       if (targetMeasure && targetMeasure.parentNode) {
         const block = targetMeasure.closest('.section-block');
-        if (block) block.parentNode.insertBefore(sub, block);
+        if (block) block.parentNode.insertBefore(wrapper, block);
       } else {
-        getCurrentPageContent().appendChild(sub);
+        getCurrentPageContent().appendChild(wrapper);
       }
     }
 
@@ -1938,7 +2023,8 @@
       grid.className = 'measures-grid';
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `
-        <div class="section-badge-container" style="top: -24px;" onmousedown="initDirectDrag(this, event, 'badge')">
+        <div class="section-badge-container" style="top: -24px;">
+          <span class="drag-handle" onpointerdown="initPointerDrag(this, event, 'badge')">⠿</span>
           <span class="section-badge" contenteditable="true">${dict.secNew}</span>
         </div>
       `;
@@ -2029,7 +2115,8 @@
       grid.className = 'measures-grid';
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `
-        <div class="section-badge-container" style="top: -24px;" onmousedown="initDirectDrag(this, event, 'badge')">
+        <div class="section-badge-container" style="top: -24px;">
+          <span class="drag-handle" onpointerdown="initPointerDrag(this, event, 'badge')">⠿</span>
           <span class="section-badge" contenteditable="true">${title}</span>
         </div>
       `;
@@ -2076,7 +2163,6 @@
         badge.className = 'band-annotation';
         badge.contentEditable = 'true';
         badge.style.top = '-18px';
-        badge.onmousedown = function(e) { initDirectDrag(this, e, 'annotation'); };
         target.appendChild(badge);
       }
       badge.innerText = text;
