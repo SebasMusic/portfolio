@@ -492,10 +492,11 @@
       position: relative;
     }
 
+    /* CONTENEDOR DE LA INSIGNIA CON POSICIONAMIENTO ABSOLUTO INDEPENDIENTE */
     .section-badge-container {
       position: absolute;
       top: -24px;
-      left: 0;
+      left: 0px;
       display: inline-flex;
       align-items: center;
       gap: 4px;
@@ -1211,7 +1212,7 @@
             <div class="chart-content">
               <div class="section-block" style="margin-top: 24px; position: relative;">
                 <div class="section-badge-container" style="top: -24px; left: 0px;">
-                  <span class="drag-handle" onpointerdown="initPointerDrag(this.closest('.section-block'), event, 'sectionBlock')">⠿</span>
+                  <span class="drag-handle" onpointerdown="initPointerDrag(this.querySelector('.section-badge-container'), event, 'badge')">⠿</span>
                   <span class="section-badge" contenteditable="true" id="firstSectionBadge">INTRO</span>
                 </div>
                 <div class="measures-grid">
@@ -1426,16 +1427,13 @@
       updateTotalPagesCounter();
     }
 
-    // FORMATEADOR INTELIGENTE DE CIFRADO AMERICANO
     function formatChordInput(inputEl) {
       if (!inputEl.value) return;
       let val = inputEl.value.trim();
-      // Reemplazo tipográfico estándar profesional para partituras
       val = val.replace(/#/g, '♯').replace(/b(?![\w])/g, '♭').replace(/dim/gi, '°');
       inputEl.value = val;
     }
 
-    // FORMATEO ESTRICTO DE 4 COMPASES POR LÍNEA (LEAD SHEET LAYOUT)
     function formatStrict4BarsPerSystem() {
       saveStateForUndo();
       document.querySelectorAll('.measures-grid').forEach(grid => {
@@ -1443,30 +1441,26 @@
         measures.forEach((m, idx) => {
           m.style.flex = '0 0 25%';
           m.classList.remove('break-system');
-          // Agregar salto cada 4 compases si hay más
           if ((idx + 1) % 4 === 0 && idx < measures.length - 1) {
-            // Asegurar que exista un break system después de este compás
             let next = m.nextElementSibling;
             if (!next || !next.classList.contains('break-system')) {
               const breakEl = document.createElement('div');
               breakEl.className = 'measure-box break-system';
-              grid.insertBefore(breakEl, m.nextSibling);
+              grid.insertBefore(breakEl, m.nextElementSibling);
             }
           }
         });
       });
     }
 
-    // MOTOR DE ARRASTRE FLUIDO (LIBERTAD TOTAL EN EJES X e Y + ANCHO)
+    // MOTOR DE ARRASTRE FLUIDO INDEPENDIENTE (ETIQUETA DE SECCIÓN, VOLTAS, LIGADURAS, DINÁMICAS)
     function initPointerDrag(handleEl, e, type) {
       e.preventDefault();
       e.stopPropagation();
 
       let targetEl;
-      if (type === 'sectionBlock') {
-        targetEl = handleEl.closest('.section-block');
-      } else if (type === 'badge') {
-        targetEl = handleEl.closest('.section-block').querySelector('.section-badge-container');
+      if (type === 'badge') {
+        targetEl = handleEl.closest('.section-badge-container');
       } else {
         targetEl = handleEl.closest('.song2-subtitle-wrapper, .volta-bracket, .custom-tie-overlay, .measure-dynamics-container');
       }
@@ -1476,26 +1470,18 @@
       const startX = e.clientX;
       
       const computed = window.getComputedStyle(targetEl);
-      const startTop = type === 'sectionBlock' ? (parseInt(computed.marginTop) || 24) : (parseInt(computed.top) || (type === 'badge' ? -24 : (type === 'volta' ? -26 : -10)));
-      const startLeft = (type === 'badge' || type === 'volta' || type === 'tie' || type === 'dynamics') ? (parseInt(computed.left) || 0) : 0;
+      const startTop = parseInt(computed.top) || (type === 'badge' ? -24 : (type === 'volta' ? -26 : -10));
+      const startLeft = parseInt(computed.left) || 0;
       const startWidth = targetEl.offsetWidth;
 
       function onPointerMove(moveEvent) {
         const diffY = moveEvent.clientY - startY;
         const diffX = moveEvent.clientX - startX;
 
-        if (type === 'sectionBlock') {
-          const newMargin = Math.max(0, startTop + diffY);
-          targetEl.style.marginTop = `${newMargin}px`;
-        } else {
-          const newTop = startTop + diffY;
-          targetEl.style.top = `${newTop}px`;
-
-          if (type === 'badge' || type === 'volta' || type === 'tie' || type === 'dynamics') {
-            const newLeft = startLeft + diffX;
-            targetEl.style.left = `${newLeft}px`;
-          }
-        }
+        const newTop = startTop + diffY;
+        const newLeft = startLeft + diffX;
+        targetEl.style.top = `${newTop}px`;
+        targetEl.style.left = `${newLeft}px`;
 
         if (type === 'volta' || type === 'tie' || type === 'dynamics') {
           const newWidth = Math.max(30, startWidth + diffX);
@@ -1781,7 +1767,10 @@
         }
 
         if (isRest) {
-          if (pureType === 'q') {
+          if (pureType === 'w') {
+            // Silencio de redonda (cuadrito debajo de la cuarta línea o centrado)
+            svgHTML += `<rect x="12" y="16" width="16" height="6" fill="#0f172a" />`;
+          } else if (pureType === 'q') {
             svgHTML += `<path d="M ${x-2} 8 L ${x+3} 14 L ${x-3} 20 L ${x+2} 26 C ${x-4} 28 ${x-4} 31 ${x+1} 31" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />`;
           } else if (pureType === '8') {
             svgHTML += `<circle cx="${x-2}" cy="14" r="1.6" fill="#0f172a" />`;
@@ -1792,7 +1781,10 @@
             svgHTML += `<path d="M ${x-2} 12 Q ${x+2} 10 ${x+1} 16 L ${x-3} 28" fill="none" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round" />`;
           }
         } else {
-          if (pureType === 'slash') {
+          if (pureType === 'w') {
+            // Figura redonda centrada que ocupa todo el compás
+            svgHTML += `<ellipse cx="20" cy="20" rx="7" ry="5" fill="none" stroke="#0f172a" stroke-width="3.5" transform="rotate(-15 20 20)" />`;
+          } else if (pureType === 'slash') {
             svgHTML += `<line x1="${x - 3.5}" y1="24" x2="${x + 3.5}" y2="8" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />`;
           } else if (pureType === 'q') {
             svgHTML += `<line x1="${x - 3.5}" y1="20" x2="${x + 3.5}" y2="12" stroke="#0f172a" stroke-width="4" stroke-linecap="round" />`;
@@ -1817,7 +1809,7 @@
           }
         }
 
-        if (item.dot) {
+        if (item.dot && pureType !== 'w') {
           svgHTML += `<circle cx="${x + 6}" cy="16" r="1.6" fill="#0f172a" />`;
         }
 
@@ -1843,6 +1835,22 @@
     function applySubdivisionRhythm(type) {
       if (!activeBeatSlot) return;
       saveStateForUndo();
+      const measureBox = activeBeatSlot.closest('.measure-box');
+
+      if (type === 'w' || type === 'rw') {
+        const container = measureBox.querySelector('.rhythm-beats-container');
+        container.innerHTML = '';
+        const slot = document.createElement('div');
+        slot.className = 'beat-slot active-beat';
+        slot.style.flex = '1';
+        slot.onclick = function(e) { selectBeatSlot(this, e, 0); };
+        setBeatData(slot, [{ type: type, dot: false, tie: false, articulation: '', scale: 1.4 }]);
+        container.appendChild(slot);
+        activeBeatSlot = slot;
+        activeSubIndex = 0;
+        return;
+      }
+
       let items = getBeatData(activeBeatSlot);
 
       if (type === '16' || type === 'r16') {
@@ -1948,9 +1956,15 @@
       if (selectedMeasures.length > 0) {
         saveStateForUndo();
         selectedMeasures.forEach(m => {
-          m.querySelectorAll('.beat-slot').forEach(b => {
-            setBeatData(b, [{ type: 'slash', dot: false, tie: false, articulation: '', scale: 1.4 }]);
-          });
+          const container = m.querySelector('.rhythm-beats-container');
+          container.innerHTML = '';
+          for (let i = 0; i < 4; i++) {
+            const slot = document.createElement('div');
+            slot.className = 'beat-slot';
+            slot.onclick = function(e) { selectBeatSlot(this, e, 0); };
+            setBeatData(slot, [{ type: 'slash', dot: false, tie: false, articulation: '', scale: 1.4 }]);
+            container.appendChild(slot);
+          }
         });
       }
     }
@@ -1958,9 +1972,15 @@
     function clearMeasureContent(measureEl) {
       const chordInput = measureEl.querySelector('.chord-input');
       if (chordInput) chordInput.value = '';
-      measureEl.querySelectorAll('.beat-slot').forEach(b => {
-        setBeatData(b, [{ type: 'slash', dot: false, tie: false, articulation: '', scale: 1.4 }]);
-      });
+      const container = measureEl.querySelector('.rhythm-beats-container');
+      container.innerHTML = '';
+      for (let i = 0; i < 4; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'beat-slot';
+        slot.onclick = function(e) { selectBeatSlot(this, e, 0); };
+        setBeatData(slot, [{ type: 'slash', dot: false, tie: false, articulation: '', scale: 1.4 }]);
+        container.appendChild(slot);
+      }
       const dyn = measureEl.querySelector('.measure-dynamics-container');
       if (dyn) dyn.remove();
       const annot = measureEl.querySelector('.band-annotation');
@@ -2106,7 +2126,7 @@
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `
         <div class="section-badge-container" style="top: -24px; left: 0px;">
-          <span class="drag-handle" onpointerdown="initPointerDrag(this.closest('.section-block'), event, 'sectionBlock')">⠿</span>
+          <span class="drag-handle" onpointerdown="initPointerDrag(this.querySelector('.section-badge-container'), event, 'badge')">⠿</span>
           <span class="section-badge" contenteditable="true">${dict.secNew}</span>
         </div>
       `;
@@ -2199,7 +2219,7 @@
       for (let i = 0; i < 4; i++) grid.appendChild(createMeasureElement());
       newBlock.innerHTML = `
         <div class="section-badge-container" style="top: -24px; left: 0px;">
-          <span class="drag-handle" onpointerdown="initPointerDrag(this.closest('.section-block'), event, 'sectionBlock')">⠿</span>
+          <span class="drag-handle" onpointerdown="initPointerDrag(this.querySelector('.section-badge-container'), event, 'badge')">⠿</span>
           <span class="section-badge" contenteditable="true">${title}</span>
         </div>
       `;
