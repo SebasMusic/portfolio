@@ -682,7 +682,7 @@
       display: flex;
       align-items: center;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      width: 120px; /* Ancho inicial ajustable */
+      width: 120px;
     }
 
     .volta-bracket::before {
@@ -737,7 +737,7 @@
     }
 
     .chord-input {
-      font-size: 1.1em;
+      font-size: 1.15em;
       font-weight: 700;
       border: none;
       outline: none;
@@ -1107,6 +1107,7 @@
         <div class="collapsible-header collapsed" id="modMeasures" onclick="toggleModule(this)">Compases y Estructura</div>
         <div class="collapsible-body hidden">
           <button class="tool-btn primary" style="margin-bottom:6px;" id="btnGroupSelected" onclick="groupSelectedInSystem()">Agrupar Selección en 1 Sistema</button>
+          <button class="tool-btn custom-btn" style="margin-bottom:6px;" onclick="formatStrict4BarsPerSystem()">Forzar 4 Compases por Línea</button>
 
           <div class="btn-grid">
             <button class="tool-btn" id="btnAdd4" onclick="addMultipleMeasures(4)">+ 4 Compases</button>
@@ -1216,25 +1217,25 @@
                 <div class="measures-grid">
                   <div class="measure-box" onclick="handleMeasureClick(this, event)">
                     <div class="measure-main">
-                      <input type="text" class="chord-input" placeholder="C">
+                      <input type="text" class="chord-input" placeholder="C" onblur="formatChordInput(this)">
                       <div class="rhythm-beats-container"></div>
                     </div>
                   </div>
                   <div class="measure-box" onclick="handleMeasureClick(this, event)">
                     <div class="measure-main">
-                      <input type="text" class="chord-input" placeholder="G/B">
+                      <input type="text" class="chord-input" placeholder="G/B" onblur="formatChordInput(this)">
                       <div class="rhythm-beats-container"></div>
                     </div>
                   </div>
                   <div class="measure-box" onclick="handleMeasureClick(this, event)">
                     <div class="measure-main">
-                      <input type="text" class="chord-input" placeholder="Am7">
+                      <input type="text" class="chord-input" placeholder="Am7" onblur="formatChordInput(this)">
                       <div class="rhythm-beats-container"></div>
                     </div>
                   </div>
                   <div class="measure-box" onclick="handleMeasureClick(this, event)">
                     <div class="measure-main">
-                      <input type="text" class="chord-input" placeholder="F2">
+                      <input type="text" class="chord-input" placeholder="F2" onblur="formatChordInput(this)">
                       <div class="rhythm-beats-container"></div>
                     </div>
                   </div>
@@ -1296,7 +1297,7 @@
         btnBandIn: "Band IN",
         btnCorte: "Break / Cut",
         lblRhythmStudioTitle: "Rhythms & Notation Studio",
-        lblRhythmShortcuts: "Keys 7,6,5,4,3 | Shift+Click: Range | Ctrl+Z: Undo",
+        lblRhythmShortcuts: "Keys 7,6,5,4,3 | Shift+Click: Range | Ctrl+Z: Deshacer",
         btnResetSlashes: "Reset Slashes",
         titlePlaceholder: "SONG TITLE",
         artistPlaceholder: "Artist / Band",
@@ -1415,11 +1416,45 @@
         m.onclick = function(e) { handleMeasureClick(this, e); };
         m.oncontextmenu = function(e) { openContextMenu(this, e); };
       });
+      document.querySelectorAll('.chord-input').forEach(input => {
+        input.onblur = function() { formatChordInput(this); };
+      });
       document.querySelectorAll('.beat-slot').forEach(b => {
         b.onclick = function(e) { selectBeatSlot(this, e, 0); };
       });
       initAllBeatMeasures();
       updateTotalPagesCounter();
+    }
+
+    // FORMATEADOR INTELIGENTE DE CIFRADO AMERICANO
+    function formatChordInput(inputEl) {
+      if (!inputEl.value) return;
+      let val = inputEl.value.trim();
+      // Reemplazo tipográfico estándar profesional para partituras
+      val = val.replace(/#/g, '♯').replace(/b(?![\w])/g, '♭').replace(/dim/gi, '°');
+      inputEl.value = val;
+    }
+
+    // FORMATEO ESTRICTO DE 4 COMPASES POR LÍNEA (LEAD SHEET LAYOUT)
+    function formatStrict4BarsPerSystem() {
+      saveStateForUndo();
+      document.querySelectorAll('.measures-grid').forEach(grid => {
+        const measures = Array.from(grid.querySelectorAll('.measure-box'));
+        measures.forEach((m, idx) => {
+          m.style.flex = '0 0 25%';
+          m.classList.remove('break-system');
+          // Agregar salto cada 4 compases si hay más
+          if ((idx + 1) % 4 === 0 && idx < measures.length - 1) {
+            // Asegurar que exista un break system después de este compás
+            let next = m.nextElementSibling;
+            if (!next || !next.classList.contains('break-system')) {
+              const breakEl = document.createElement('div');
+              breakEl.className = 'measure-box break-system';
+              grid.insertBefore(breakEl, m.nextSibling);
+            }
+          }
+        });
+      });
     }
 
     // MOTOR DE ARRASTRE FLUIDO (LIBERTAD TOTAL EN EJES X e Y + ANCHO)
@@ -2138,7 +2173,7 @@
       box.oncontextmenu = function(e) { openContextMenu(this, e); };
       box.innerHTML = `
         <div class="measure-main">
-          <input type="text" class="chord-input" placeholder="${dict.chordPlaceholder}">
+          <input type="text" class="chord-input" placeholder="${dict.chordPlaceholder}" onblur="formatChordInput(this)">
           <div class="rhythm-beats-container"></div>
         </div>
       `;
@@ -2220,11 +2255,13 @@
     const notesFlats = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
     function transposeChord(chord, semitones) {
-      return chord.replace(/[A-G][#b]?/g, (match) => {
-        let index = notesChromatic.indexOf(match);
-        if (index === -1) index = notesFlats.indexOf(match);
+      return chord.replace(/[A-G][#b♯♭]?/g, (match) => {
+        let clean = match.replace('♯', '#').replace('♭', 'b');
+        let index = notesChromatic.indexOf(clean);
+        if (index === -1) index = notesFlats.indexOf(clean);
         if (index === -1) return match;
-        return notesChromatic[(index + semitones + 12) % 12];
+        let trans = notesChromatic[(index + semitones + 12) % 12];
+        return trans.replace('#', '♯').replace('b', '♭');
       });
     }
 
