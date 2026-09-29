@@ -287,6 +287,15 @@
         <a href="./chart/index.html" class="btn-launch" id="txt-app2-btn" onclick="trackLaunch('Chord Chart Studio')">Launch Application →</a>
       </div>
 
+      <!-- App 3: SynthBase Studio -->
+      <div class="app-card featured">
+        <div>
+          <h2 id="txt-app3-title">SynthBase Studio</h2>
+          <p id="txt-app3-desc">Historic preset search engine, sound design synthesis recipes, and audio references for modern producers.</p>
+        </div>
+        <a href="./base_de_sintesis/index.html" class="btn-launch" id="txt-app3-btn" onclick="trackLaunch('SynthBase Studio')">Launch Application →</a>
+      </div>
+
     </div>
   </main>
 
@@ -309,6 +318,9 @@
         app2Title: "Chord Chart Studio",
         app2Desc: "Create, edit, transpose, and export clean professional song chord charts with custom time signatures and metrics.",
         app2Btn: "Launch Application →",
+        app3Title: "SynthBase Studio",
+        app3Desc: "Historic preset search engine, sound design synthesis recipes, and audio references for modern producers.",
+        app3Btn: "Launch Application →",
         footer: "© 2026 · Built with Web Audio API & Modern Web Standards"
       },
       es: {
@@ -324,6 +336,9 @@
         app2Title: "Chord Chart Studio",
         app2Desc: "Crea, edita, transpón y exporta cifrados de canciones profesionales con métricas y compases personalizados.",
         app2Btn: "Abrir Aplicación →",
+        app3Title: "SynthBase Studio",
+        app3Desc: "Buscador de presets históricos, recetas de síntesis y referencias de audio para productores modernos.",
+        app3Btn: "Abrir Aplicación →",
         footer: "© 2026 · Creado con Web Audio API y Estándares Web Modernos"
       },
       pt: {
@@ -339,6 +354,9 @@
         app2Title: "Chord Chart Studio",
         app2Desc: "Crie, edite, transponha e exporte cifrás de músicas profissionais com métricas e compassos personalizados.",
         app2Btn: "Abrir Aplicação →",
+        app3Title: "SynthBase Studio",
+        app3Desc: "Mecanismo de busca de presets históricos, receitas de síntese e referências de áudio para produtores modernos.",
+        app3Btn: "Abrir Aplicação →",
         footer: "© 2026 · Criado com Web Audio API e Padrões Web Modernos"
       },
       fr: {
@@ -354,6 +372,9 @@
         app2Title: "Editeur de Grilles d'Accords",
         app2Desc: "Créez, éditez, transposez et exportez des grilles d'accords professionnelles avec métriques et mesures personnalisées.",
         app2Btn: "Lancer l'application →",
+        app3Title: "SynthBase Studio",
+        app3Desc: "Moteur de recherche de presets historiques, recettes de synthèse et références audio pour producteurs modernes.",
+        app3Btn: "Lancer l'application →",
         footer: "© 2026 · Créé avec Web Audio API & Normes Web Modernes"
       },
       de: {
@@ -369,6 +390,9 @@
         app2Title: "Chord Chart Studio",
         app2Desc: "Erstellen, bearbeiten, transponieren und exportieren Sie professionelle Akkord-Charts mit benutzerdefinierten Taktarten.",
         app2Btn: "Anwendung Starten →",
+        app3Title: "SynthBase Studio",
+        app3Desc: "Historische Preset-Suchmaschine, Synthese-Rezepte und Audio-Referenzen für moderne Produzenten.",
+        app3Btn: "Anwendung Starten →",
         footer: "© 2026 · Erstellt mit Web Audio API & Modernen Webstandards"
       },
       zh: {
@@ -384,6 +408,9 @@
         app2Title: "和弦谱工作室",
         app2Desc: "创建、编辑、调高/调低音调并导出具有自定义拍号的专业歌曲和弦谱。",
         app2Btn: "启动应用程序 →",
+        app3Title: "SynthBase Studio",
+        app3Desc: "历史预设搜索引擎、声音设计合成配方和现代制作人音频参考。",
+        app3Btn: "启动应用程序 →",
         footer: "© 2026 · 基于 Web Audio API 和现代 Web 标准构建"
       },
       ru: {
@@ -399,6 +426,9 @@
         app2Title: "Студия аккордовых схем",
         app2Desc: "Создавайте, редактируйте, транспонируйте и экспортируйте профессиональные аккордовые схемы песен с настраиваемыми размерами.",
         app2Btn: "Запустить приложение →",
+        app3Title: "SynthBase Studio",
+        app3Desc: "Поисковая система исторических пресетов, рецепты синтеза и аудиореференсы для современных продюсеров.",
+        app3Btn: "Запустить приложение →",
         footer: "© 2026 · Создано с использованием Web Audio API и современных веб-стандартов"
       },
       ja: {
@@ -414,6 +444,9 @@
         app2Title: "コードチャート・スタジオ",
         app2Desc: "カスタム拍子でプロフェッショナルな楽曲コードチャートを作成、編集、移調、エクスポート。",
         app2Btn: "アプリを起動 →",
+        app3Title: "SynthBase Studio",
+        app3Desc: "歴史的なプリセット検索エンジン、音作りシンセシスレシピ、モダンプロデューサー向けリファレンス。",
+        app3Btn: "アプリを起動 →",
         footer: "© 2026 · Web Audio API と最新の Web 標準で構築"
       }
     };
@@ -449,6 +482,10 @@
       document.getElementById('txt-app2-title').textContent = data.app2Title;
       document.getElementById('txt-app2-desc').textContent = data.app2Desc;
       document.getElementById('txt-app2-btn').textContent = data.app2Btn;
+
+      document.getElementById('txt-app3-title').textContent = data.app3Title;
+      document.getElementById('txt-app3-desc').textContent = data.app3Desc;
+      document.getElementById('txt-app3-btn').textContent = data.app3Btn;
       
       document.getElementById('txt-footer').textContent = data.footer;
 
