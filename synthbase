@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SynthBase Studio | PresetVault</title>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --card-bg: #1a1a1e;
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #27272a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        header {
+            max-width: 1200px;
+            margin: 0 auto 2rem auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+        }
+
+        .logo-area h1 {
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            color: #fff;
+        }
+
+        .logo-area p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .badge {
+            background-color: rgba(99, 102, 241, 0.1);
+            color: #818cf8;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-weight: 500;
+        }
+
+        .synth-source {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .recipe-box {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 0.875rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 1rem 0;
+            line-height: 1.4;
+        }
+
+        .recipe-box strong {
+            color: var(--text-main);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.6rem;
+            border-radius: 6px;
+            border: none;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <h1>SynthBase Studio</h1>
+            <p>Buscador e Historial de Sonidos para Producción</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Filtros dinámicos -->
+        <div class="filters" id="filter-container">
+            <button class="filter-btn active" data-category="Todos">Todos</button>
+            <button class="filter-btn" data-category="Basses">Basses</button>
+            <button class="filter-btn" data-category="Pads">Pads</button>
+            <button class="filter-btn" data-category="Brasses">Brasses</button>
+            <button class="filter-btn" data-category="Leads">Leads</button>
+            <button class="filter-btn" data-category="Keys & Electric Pianos">Keys</button>
+            <button class="filter-btn" data-category="Plucks & Stabs">Plucks & Stabs</button>
+            <button class="filter-btn" data-category="FX & Sweeps">FX & Sweeps</button>
+        </div>
+
+        <!-- Cuadrícula donde se inyectarán las tarjetas desde el JSON -->
+        <div class="grid" id="preset-grid">
+            <!-- Las tarjetas se cargan aquí mediante JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Datos maestros integrados directamente para facilitar el montaje local
+        const database = {
+            "presets": [
+                {
+                    "id": "preset_001",
+                    "nombre_preset": "Fat Moog Sub Bass",
+                    "categoria": "Basses",
+                    "sinte_emulado": "Minimoog Model D",
+                    "receta_sound_design": {
+                        "resumen": "2 Saw (Osc 2 a -12 semitonos). Filtro escalera 24dB con Cutoff al 35% y resonancia moderada."
+                    }
+                },
+                {
+                    "id": "preset_002",
+                    "nombre_preset": "Juno Warm Chorus Pad",
+                    "categoria": "Pads",
+                    "sinte_emulado": "Roland Juno-60",
+                    "receta_sound_design": {
+                        "resumen": "1 DCO Sierra + Sub. PWM por LFO lento. Ataque 800ms, Release largo. Chorus Estéreo Modo II encendido."
+                    }
+                },
+                {
+                    "id": "preset_003",
+                    "nombre_preset": "Jump Arena Brass",
+                    "categoria": "Brasses",
+                    "sinte_emulado": "Oberheim OB-Xa",
+                    "receta_sound_design": {
+                        "resumen": "2 Saw desalineadas (+10 cents). Cutoff abierto al 70% con fuerte modulación de envolvente para mordiente."
+                    }
+                },
+                {
+                    "id": "preset_004",
+                    "nombre_preset": "Prophet Woodsy Poly Lead",
+                    "categoria": "Leads",
+                    "sinte_emulado": "Sequential Prophet-5",
+                    "receta_sound_design": {
+                        "resumen": "Pulso y Sierra con Sync activado. Filtro Curtis 24dB con Poly Mod aplicada."
+                    }
+                },
+                {
+                    "id": "preset_005",
+                    "nombre_preset": "DX7 Electric Tines",
+                    "categoria": "Keys & Electric Pianos",
+                    "sinte_emulado": "Yamaha DX7",
+                    "receta_sound_design": {
+                        "resumen": "Algoritmo FM de 6 operadores en cascada moduladora simulando impacto metálico."
+                    }
+                },
+                {
+                    "id": "preset_006",
+                    "nombre_preset": "Squelchy Acid 303 Bass",
+                    "categoria": "Basses",
+                    "sinte_emulado": "Roland TB-303",
+                    "receta_sound_design": {
+                        "resumen": "Saw pura con filtro de 18dB, altísima resonancia y decay rápido vinculado al acento."
+                    }
+                },
+                {
+                    "id": "preset_007",
+                    "nombre_preset": "M1 House Piano Stabs",
+                    "categoria": "Plucks & Stabs",
+                    "sinte_emulado": "Korg M1",
+                    "receta_sound_design": {
+                        "resumen": "Muestra PCM de piano acústico con EQ de fábrica y realce en agudos para club."
+                    }
+                },
+                {
+                    "id": "preset_008",
+                    "nombre_preset": "Cyberpunk Rise Sweep",
+                    "categoria": "FX & Sweeps",
+                    "sinte_emulado": "Minimoog Model D",
+                    "receta_sound_design": {
+                        "resumen": "Ruido blanco combinado con onda senoidal grave y barrido de filtro automatizado."
+                    }
+                }
+            ]
+        };
+
+        const grid = document.getElementById('preset-grid');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+
+        // Función para renderizar las tarjetas en pantalla
+        function renderPresets(categoryFilter = 'Todos') {
+            grid.innerHTML = '';
+            
+            const filtered = categoryFilter === 'Todos' 
+                ? database.presets 
+                : database.presets.filter(p => p.categoria === categoryFilter);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<p style="color: var(--text-muted); grid-column: 1/-1;">No hay sonidos en esta categoría todavía.</p>`;
+                return;
+            }
+
+            filtered.forEach(preset => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div>
+                        <div class="card-header">
+                            <span class="synth-source">${preset.sinte_emulado}</span>
+                            <span class="badge">${preset.categoria}</span>
+                        </div>
+                        <h3>${preset.nombre_preset}</h3>
+                        <div class="recipe-box">
+                            <strong>Receta:</strong> ${preset.receta_sound_design.resumen}
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn btn-secondary" onclick="alert('Reproduciendo audio preview de: ${preset.nombre_preset}')">▶ Preview</button>
+                        <button class="btn btn-primary" onclick="alert('Descargando preset para: ${preset.nombre_preset}')">⬇ Descargar</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Lógica de los botones de filtro
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                filterButtons.forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                const cat = e.target.getAttribute('data-category');
+                renderPresets(cat);
+            });
+        });
+
+        // Carga inicial al abrir la página
+        renderPresets();
+    </script>
+</body>
+</html>
