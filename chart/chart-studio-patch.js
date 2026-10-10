@@ -29,7 +29,7 @@
   .exporting .fx-ui,.exporting .drag-handle,.exporting .volta-drag,.exporting .tie-drag,.exporting .dyn-drag{display:none!important}
   .exporting .custom-tie-overlay,.exporting .measure-dynamics-container,.exporting .band-annotation,.exporting .section-badge-container,.exporting .song2-subtitle-wrapper{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
   .chord-row{display:flex;height:26px;position:absolute;left:0;right:0;top:-30px}
-  .chord-cell{position:relative;flex:1 1 0;min-width:0}
+  .chord-cell{position:relative;flex:1 1 0;min-width:0;transform:translate(calc(var(--dx,0px) + var(--push,0px)),var(--dy,0px))}
   .chord-cell .chord-input{position:absolute;left:0;top:0;width:100%}
   .chord-cell .chord-display{top:0}
   .chord-cell:focus-within{z-index:5}
@@ -49,6 +49,9 @@
   .rhythm-beats-container{height:100%!important}
   .section-block{margin-top:44px!important}
   .measure-box.repeat-start::before,.measure-box.repeat-end::before{top:14px;box-shadow:0 14px 0 0 #0f172a}
+  .chord-nudge{position:absolute;top:-9px;left:0;font:700 9px Inter,sans-serif;color:#64748b;cursor:grab;opacity:0;user-select:none;touch-action:none;z-index:6}
+  .chord-cell.has:hover>.chord-nudge,.chord-nudge:hover{opacity:1}
+  .exporting .chord-nudge{display:none}
   .tie-layer{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:20;overflow:visible}
   .measure-num{position:absolute;left:-17px;top:-11px;width:14px;text-align:right;font:italic 700 9px Inter,sans-serif;color:#0f172a;pointer-events:none}
   `;
@@ -81,6 +84,7 @@
       if (!d || !d.classList.contains('chord-display')) { d = document.createElement('div'); d.className = 'chord-display'; inp.after(d); }
       d.innerHTML = chordHTML(inp.value);
     });
+    spaceChords();
   }
   W.formatChordInput = inp => {
     inp.value = inp.value.trim().replace(/#/g, '♯').replace(/([A-G])b/g, '$1♭').replace(/dim/gi, '°');
@@ -183,7 +187,7 @@
   };
   const retype = it => {
     if (/^r?[hw]$/.test(it.type)) return it;
-    const d = it.dur, r = it.rest; it.dot = d === 3;
+    const d = it.dur, r = it.rest; it.dot = d === 3 || !!it.dotq;
     it.type = d === 4 ? (r ? 'rq' : it.type === 'slash' ? 'slash' : 'q') : d === 1 ? (r ? 'r16' : '16') : (r ? 'r8' : '8');
     return it;
   };
@@ -242,7 +246,7 @@
     const K = '#0f172a', on = slot.classList.contains('active-beat');
     let t = 0; const xs = items.map(it => { const x = items.length === 1 ? 20 : 7 + t * 8.5; t += it.dur; return x; });
     const groups = []; let cur = [];
-    items.forEach((it, i) => { if (!it.rest && it.dur < 4 && !/[hw]$/.test(it.type)) cur.push(i); else { if (cur.length) groups.push(cur); cur = []; } });
+    items.forEach((it, i) => { if (!it.rest && !it.cont && it.dur < 4 && !/[hw]$/.test(it.type)) cur.push(i); else { if (cur.length) groups.push(cur); cur = []; } });
     if (cur.length) groups.push(cur);
     const beamed = new Set(groups.filter(g => g.length > 1).flat());
     let s = '<svg viewBox="0 0 40 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">';
@@ -250,6 +254,7 @@
       const x = xs[i], ty = it.type.replace(/^r/, '');
       s += `<g class="sub-item-target" onclick="handleSubItemClick(this.closest('.beat-slot'),${i},event)"><rect x="${x - 6}" y="0" width="12" height="40" fill="transparent"/>`;
       if (on && i === activeSubIndex) s += `<rect x="${x - 6}" y="2" width="12" height="36" fill="none" stroke="#64748b" stroke-width="1" stroke-dasharray="2,2" rx="2"/>`;
+      if (it.cont) { s += '</g>'; return; }
       if (it.rest) {
         if (ty === 'w') s += `<line x1="10" y1="14" x2="30" y2="14" stroke="${K}" stroke-width="1"/><rect x="14" y="14" width="12" height="5" fill="${K}"/>`;
         else if (ty === 'h') s += `<line x1="10" y1="24" x2="30" y2="24" stroke="${K}" stroke-width="1"/><rect x="14" y="19" width="12" height="5" fill="${K}"/>`;
@@ -397,6 +402,10 @@
           c.appendChild(i); row.appendChild(c);
         }
       }
+      $$('.chord-cell', m).forEach(c => {
+        if ($(':scope>.chord-nudge', c)) return;
+        const h = document.createElement('span'); h.className = 'chord-nudge'; h.textContent = '⠿'; h.title = 'Mover acorde · doble clic: volver'; c.appendChild(h);
+      });
       if (!$('.measure-grip', m)) { const g = document.createElement('span'); g.className = 'measure-grip'; g.title = 'Arrastrar: ancho del compás · doble clic: igualar'; m.appendChild(g); }
     });
   }
@@ -487,7 +496,8 @@
   function drawTies() {
     const ev = tieEvents(), out = new Map(), add = (p, s) => out.set(p, (out.get(p) || '') + s);
     ev.forEach((e, i) => {
-      const n = ev[i + 1]; if (!e.it.tie || e.it.rest || !n || n.it.rest) return;
+      let n = ev[i + 1]; if (n && n.it.cont) n = ev[i + 2];
+      if (!e.it.tie || e.it.rest || e.it.cont || !n || n.it.rest) return;
       const A = tiePt(e, 3), B = tiePt(n, -3); if (!A || !B) return;
       if (A.paper === B.paper && Math.abs(A.y - B.y) < 20 && B.x > A.x) add(A.paper, tieArc(A.paper, A.x, A.y, B.x, B.y));
       else {
@@ -502,6 +512,82 @@
       if (L.dataset.s !== html) { L.innerHTML = html; L.dataset.s = html; }
     });
   }
+
+  /* ---------- Separación de acordes (automática + manual) ---------- */
+  function spaceChords() {
+    $$('.measures-grid', wrap).forEach(g => {
+      let prevRight = -1e9, prevTop = null;
+      [...g.children].forEach(m => {
+        if (!m.classList.contains('measure-box') || m.classList.contains('break-system')) return;
+        if (prevTop !== null && m.offsetTop !== prevTop) prevRight = -1e9;
+        prevTop = m.offsetTop;
+        $$('.chord-cell', m).forEach(c => {
+          const d = $(':scope>.chord-display', c), inp = $(':scope>.chord-input', c), has = !!(inp && inp.value.trim() && d);
+          c.classList.toggle('has', has);
+          if (!has) { c.style.setProperty('--push', '0px'); return; }
+          const dx = parseFloat(c.style.getPropertyValue('--dx')) || 0, cur = (parseFloat(c.style.getPropertyValue('--push')) || 0) + dx;
+          const left = c.getBoundingClientRect().left - cur + dx;
+          const push = dx ? 0 : Math.round(Math.max(0, prevRight + 6 - left) * 2) / 2;
+          c.style.setProperty('--push', push + 'px');
+          prevRight = left + push + d.offsetWidth;
+        });
+      });
+    });
+  }
+  document.addEventListener('pointerdown', e => {
+    const h = e.target.closest && e.target.closest('.chord-nudge'); if (!h) return;
+    e.preventDefault(); e.stopPropagation();
+    const c = h.parentNode, sx = e.clientX, sy = e.clientY, x0 = parseFloat(c.style.getPropertyValue('--dx')) || 0, y0 = parseFloat(c.style.getPropertyValue('--dy')) || 0;
+    let saved = false;
+    const mv = ev => {
+      const dx = ev.clientX - sx, dy = ev.clientY - sy;
+      if (!saved && Math.hypot(dx, dy) > 3) { saveStateForUndo(); saved = true; }
+      if (!saved) return;
+      c.style.setProperty('--dx', (x0 + dx) + 'px'); c.style.setProperty('--dy', (y0 + dy) + 'px'); spaceChords();
+    };
+    const up = () => { removeEventListener('pointermove', mv); removeEventListener('pointerup', up); if (saved) tick(); };
+    addEventListener('pointermove', mv); addEventListener('pointerup', up);
+  }, true);
+  document.addEventListener('dblclick', e => {
+    const h = e.target.closest && e.target.closest('.chord-nudge'); if (!h) return;
+    saveStateForUndo(); h.parentNode.style.removeProperty('--dx'); h.parentNode.style.removeProperty('--dy'); spaceChords(); tick();
+  }, true);
+
+  /* ---------- Negra con puntillo (ocupa el pulso y la mitad del siguiente) ---------- */
+  function releaseDotq(slot) {
+    const items = getBeatData(slot);
+    if (items[0] && items[0].dotq) {
+      items[0].dotq = false; items[0].dot = false; setBeatData(slot, items);
+      const nx = slot.nextElementSibling;
+      if (nx) { const n = getBeatData(nx); if (n[0] && n[0].cont) { n[0].cont = false; setBeatData(nx, n); } }
+    } else if (items[0] && items[0].cont) {
+      items[0].cont = false; setBeatData(slot, items);
+      const pv = slot.previousElementSibling;
+      if (pv) { const p = getBeatData(pv); if (p[0] && p[0].dotq) { p[0].dotq = false; p[0].dot = false; setBeatData(pv, p); } }
+    }
+  }
+  const _dot = W.toggleSubdivisionDot, _asr = W.applySubdivisionRhythm, _tgr = W.toggleRest;
+  W.toggleSubdivisionDot = () => {
+    if (!activeBeatSlot) return;
+    const slot = activeBeatSlot, items = getBeatData(slot).map(norm), i = Math.min(activeSubIndex, items.length - 1), it = items[i];
+    if (it.dotq || it.cont) { saveStateForUndo(); releaseDotq(slot); focusSlot(slot, 0); return; }
+    if (it.dur === 4 && items.length === 1 && !/^r?[hw]$/.test(it.type)) {
+      const nx = slot.nextElementSibling; if (!nx || nx.style.flex === '2') return;
+      const n = getBeatData(nx).map(norm); if (n[0].dur < 2 || /^r?[hw]$/.test(n[0].type)) return;
+      saveStateForUndo();
+      resize(n, 0, 2); n[0].cont = true; n[0].rest = false; n[0].tie = false; n.forEach(retype); setBeatData(nx, n);
+      it.dotq = true; it.dot = true; setBeatData(slot, items); focusSlot(slot, 0); return;
+    }
+    _dot();
+  };
+  W.applySubdivisionRhythm = t => {
+    if (activeBeatSlot && getBeatData(activeBeatSlot).some(x => x.dotq || x.cont)) { saveStateForUndo(); releaseDotq(activeBeatSlot); }
+    _asr(t);
+  };
+  W.toggleRest = () => {
+    if (activeBeatSlot && getBeatData(activeBeatSlot).some(x => x.cont)) { saveStateForUndo(); releaseDotq(activeBeatSlot); }
+    _tgr();
+  };
 
   /* ---------- Arranque ---------- */
   let timer = 0;
