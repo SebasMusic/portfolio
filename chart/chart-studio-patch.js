@@ -589,6 +589,56 @@
     _tgr();
   };
 
+  /* ---------- Guardar y abrir charts como archivo (.chart.json) ---------- */
+  function saveFile() {
+    sync();
+    const c = wrap.cloneNode(true);
+    $$('.selected,.active-beat', c).forEach(n => n.classList.remove('selected', 'active-beat'));
+    const data = { app: 'chord-chart-studio', v: 1, saved: new Date().toISOString(), orient: document.body.classList.contains('landscape') ? 'l' : 'p', title: ($('#songTitleInput') || {}).value || '', html: c.innerHTML };
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    a.download = (slug() || 'chart') + '.chart.json'; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  // Un archivo ajeno no debe poder ejecutar código: se quitan scripts, manejadores on* y URLs peligrosas.
+  function sanitize(html) {
+    const doc = new DOMParser().parseFromString('<div id="r">' + html + '</div>', 'text/html'), root = doc.getElementById('r');
+    root.querySelectorAll('script,iframe,object,embed,link,meta,style,base,form,foreignObject,animate,set,animateTransform,animateMotion').forEach(n => n.remove());
+    root.querySelectorAll('*').forEach(el => [...el.attributes].forEach(a => {
+      const n = a.name.toLowerCase();
+      if (n.startsWith('on') || (/^(href|src|xlink:href|action|formaction)$/.test(n) && /^\s*(javascript|data|vbscript):/i.test(a.value))) el.removeAttribute(a.name);
+    }));
+    return root.innerHTML;
+  }
+  function openFile(f) {
+    const r = new FileReader();
+    r.onload = () => {
+      let d;
+      try { d = JSON.parse(r.result); if (d.app !== 'chord-chart-studio' || typeof d.html !== 'string' || d.html.length > 5e6) throw 0; }
+      catch (e) { alert('No se pudo abrir: el archivo no es un chart válido de esta app.'); return; }
+      if (!confirm('Esto reemplaza el chart actual (podés deshacer con Ctrl+Z). ¿Abrir "' + f.name + '"?')) return;
+      try {
+        saveStateForUndo();
+        wrap.innerHTML = sanitize(d.html);
+        $$('.beat-slot', wrap).forEach(sl => renderBeatSlot(sl));
+        rebindAllEvents();
+        const ti = $('#songTitleInput'); if (ti) ti.oninput = function () { updateFooterTitle(this.value); };
+        $$('.volta-input', wrap).forEach(i => i.onclick = ev => ev.stopPropagation());
+        clearSelections();
+        const land = d.orient === 'l'; if ($('#orientSel')) $('#orientSel').value = land ? 'l' : 'p';
+        setOrientation(land); updateFooterTitle(ti ? ti.value : ''); tick();
+      } catch (e) { alert('Hubo un problema al cargar el chart: ' + e.message); }
+    };
+    r.readAsText(f);
+  }
+  function addFileButtons(box) {
+    const mk = (t, fn) => { const b = document.createElement('button'); b.className = 'tool-btn'; b.style.cssText = 'margin-top:6px;width:100%'; b.textContent = t; b.onclick = fn; return b; };
+    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json'; inp.style.display = 'none';
+    inp.onchange = () => { if (inp.files[0]) openFile(inp.files[0]); inp.value = ''; };
+    box.before(mk('Guardar chart (archivo) · Ctrl+S', saveFile), mk('Abrir chart (archivo)', () => inp.click()), inp);
+  }
+  addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveFile(); } });
+
   /* ---------- Arranque ---------- */
   let timer = 0;
   const tick = () => { clearTimeout(timer); timer = setTimeout(() => { ensureRows(); layout(false); markRows(); drawTies(); refreshChords(); $$(FX).forEach(deco); save(); }, 150); };
@@ -600,6 +650,7 @@
       const box = document.createElement('div');
       box.innerHTML = '<select class="select-input" id="orientSel"><option value="p">Hoja A4 vertical</option><option value="l">Hoja A4 horizontal</option></select><button class="tool-btn" id="btnNewChart" style="margin-top:6px;width:100%">Nuevo chart (borrar guardado)</button>';
       body.appendChild(box);
+      addFileButtons(box);
       $('#orientSel').onchange = e => setOrientation(e.target.value === 'l');
       $('#btnNewChart').onclick = () => { if (confirm('¿Borrar el chart guardado y empezar de cero?')) { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); } };
       $('#btnAddPage').style.display = 'none';
