@@ -15,7 +15,7 @@
   .chart-paper{background:#fffef9;background-image:radial-gradient(rgba(120,100,60,.05) 1px,transparent 1px);background-size:4px 4px;border:1px solid #e4dcc8;box-shadow:0 1px 1px rgba(0,0,0,.2),0 20px 45px rgba(0,0,0,.55)}
   body.landscape .chart-paper{width:1123px;height:794px;max-height:794px}
   .paper-inner{height:auto!important;flex:1;min-height:0}
-  .chord-input,.chord-display{font-family:'Montserrat','Inter',sans-serif;font-weight:800;font-size:1.3em;letter-spacing:.2px}
+  .chord-input,.chord-display{font-family:var(--chord-font,'Montserrat'),'Inter',sans-serif;font-weight:800;font-size:var(--chord-size,1.3em);letter-spacing:.2px}
   .chord-input:not(:focus){color:transparent}
   .chord-display{position:absolute;left:0;top:14px;white-space:nowrap;pointer-events:none;color:#0f172a;line-height:1.25}
   .chord-input:focus+.chord-display{display:none}
@@ -27,7 +27,7 @@
   .fx-resize{position:absolute;right:-3px;top:0;bottom:0;width:7px;cursor:ew-resize;background:rgba(100,116,139,.45);border-radius:3px;padding:0;touch-action:none}
   .band-annotation{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
   .exporting .fx-ui,.exporting .drag-handle,.exporting .volta-drag,.exporting .tie-drag,.exporting .dyn-drag{display:none!important}
-  .exporting .custom-tie-overlay,.exporting .measure-dynamics-container,.exporting .band-annotation,.exporting .section-badge-container,.exporting .song2-subtitle-wrapper{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+  .exporting .custom-tie-overlay,.exporting .measure-dynamics-container,.exporting .band-annotation,.exporting .song2-subtitle-wrapper{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
   .chord-row{display:flex;height:26px;position:absolute;left:0;right:0;top:-30px}
   .chord-cell{position:relative;flex:1 1 0;min-width:0;transform:translate(calc(var(--dx,0px) + var(--push,0px)),var(--dy,0px))}
   .chord-cell .chord-input{position:absolute;left:0;top:0;width:100%}
@@ -52,6 +52,15 @@
   .chord-nudge{position:absolute;top:-9px;left:0;font:700 9px Inter,sans-serif;color:#64748b;cursor:grab;opacity:0;user-select:none;touch-action:none;z-index:6}
   .chord-cell.has:hover>.chord-nudge,.chord-nudge:hover{opacity:1}
   .exporting .chord-nudge{display:none}
+  .exporting input::placeholder{color:transparent!important}
+  .section-badge-container{background:#fff;border:1.5px solid #0f172a;border-radius:0;padding:0 4px;gap:2px}
+  .section-badge{background:transparent;color:#0f172a;font-weight:800;font-size:.8em;letter-spacing:.6px;padding:1px 4px}
+  .drag-handle{color:#94a3b8}
+  .band-annotation{background:transparent;border:1px dashed #cbd5e1;font-style:italic;font-weight:700;font-size:.78em;color:#0f172a}
+  .chart-header{border-bottom:1px solid #cbd5e1;gap:6px}
+  .song-title-editable,.song-title-print{font-family:var(--title-font,'Montserrat'),'Montserrat',sans-serif;font-size:2.1em;letter-spacing:2px}
+  .subtitle-input{width:100%;text-align:center;border:0;outline:0;background:transparent;font:600 .85em 'Inter',sans-serif;text-transform:uppercase;letter-spacing:.6px;color:#334155}
+  .subtitle-input::placeholder{color:#cbd5e1}
   .tie-layer{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:20;overflow:visible}
   .measure-num{position:absolute;left:-17px;top:-11px;width:14px;text-align:right;font:italic 700 9px Inter,sans-serif;color:#0f172a;pointer-events:none}
   `;
@@ -639,18 +648,73 @@
   }
   addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveFile(); } });
 
+  /* ---------- Estilo: tipografías, subtítulo y escritura rápida de acordes ---------- */
+  const FONT_Q = { Montserrat: 'Montserrat:wght@700;800', 'Patrick Hand': 'Patrick+Hand', Kalam: 'Kalam:wght@400;700', 'Space Grotesk': 'Space+Grotesk:wght@500;700', Bungee: 'Bungee', Bangers: 'Bangers', 'Archivo Black': 'Archivo+Black' };
+  const CHORD_FONTS = ['Montserrat', 'Patrick Hand', 'Kalam', 'Space Grotesk'], TITLE_FONTS = ['Montserrat', 'Bungee', 'Bangers', 'Archivo Black'];
+  const DEF_STYLE = { chord: 'Montserrat', title: 'Montserrat', size: 1.3 };
+  function readStyle() { try { return Object.assign({}, DEF_STYLE, JSON.parse(localStorage.getItem('ccs_style') || '{}')); } catch (e) { return Object.assign({}, DEF_STYLE); } }
+  function loadFont(n) {
+    const id = 'gf-' + n.replace(/\W/g, ''); if (!FONT_Q[n] || document.getElementById(id)) return;
+    const l = document.createElement('link'); l.id = id; l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=' + FONT_Q[n] + '&display=swap'; document.head.appendChild(l);
+  }
+  function applyStyle(st) {
+    if (!CHORD_FONTS.includes(st.chord)) st.chord = DEF_STYLE.chord;
+    if (!TITLE_FONTS.includes(st.title)) st.title = DEF_STYLE.title;
+    st.size = Math.min(1.6, Math.max(1.0, +st.size || DEF_STYLE.size));
+    const r = document.documentElement.style;
+    loadFont(st.chord); loadFont(st.title);
+    r.setProperty('--chord-font', "'" + st.chord + "'"); r.setProperty('--title-font', "'" + st.title + "'"); r.setProperty('--chord-size', st.size + 'em');
+    try { localStorage.setItem('ccs_style', JSON.stringify(st)); } catch (e) {}
+    try { Promise.all([document.fonts.load('800 1em "' + st.chord + '"'), document.fonts.load('800 1em "' + st.title + '"')]).then(() => { refreshChords(); drawTies(); }); } catch (e) {}
+  }
+  function addStylePanel() {
+    const panel = $('.toolbox-panel'); if (!panel || $('#fontChord')) return;
+    const st = readStyle(), opt = (list, cur) => list.map(f => `<option value="${f}"${f === cur ? ' selected' : ''}>${f}</option>`).join('');
+    const lb = t => `<div style="font-size:0.75em;color:var(--text-muted);margin-top:4px">${t}</div>`;
+    const sec = document.createElement('div'); sec.className = 'toolbox-section';
+    sec.innerHTML = `<div class="collapsible-header collapsed" onclick="toggleModule(this)">Estilo</div><div class="collapsible-body hidden">${lb('Tipografía de acordes')}<select class="select-input" id="fontChord">${opt(CHORD_FONTS, st.chord)}</select>${lb('Tipografía del título')}<select class="select-input" id="fontTitle">${opt(TITLE_FONTS, st.title)}</select>${lb('Tamaño de acordes')}<input type="range" id="sizeChord" min="1" max="1.6" step="0.05" value="${st.size}" style="width:100%"></div>`;
+    panel.children[0].after(sec);
+    const upd = () => applyStyle({ chord: $('#fontChord').value, title: $('#fontTitle').value, size: $('#sizeChord').value });
+    ['fontChord', 'fontTitle'].forEach(id => $('#' + id).onchange = upd); $('#sizeChord').oninput = upd;
+  }
+  function ensureHeader() {
+    const tc = $('.title-container'); if (!tc || $('#subtitleInput')) return;
+    const i = document.createElement('input'); i.type = 'text'; i.id = 'subtitleInput'; i.className = 'subtitle-input'; i.placeholder = 'Subtítulo · álbum · grabación'; tc.after(i);
+  }
+  // Escritura rápida: Espacio/Enter = siguiente compás, flechas = moverse entre casillas, Retroceso en vacío = compás anterior, Esc = salir.
+  document.addEventListener('keydown', e => {
+    const t = e.target; if (!t || !t.classList || !t.classList.contains('chord-input') || e.ctrlKey || e.metaKey || e.altKey) return;
+    const cells = () => $$('.chord-input', wrap), go = el => { if (el) { el.focus(); el.select(); } };
+    const measures = () => $$('.measure-box:not(.break-system)', wrap), m = t.closest('.measure-box');
+    if (e.key === 'Escape') { t.blur(); return; }
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault(); formatChordInput(t);
+      let ms = measures(), k = ms.indexOf(m);
+      if (k < 0) return;
+      if (!ms[k + 1]) { addMultipleMeasures(1); ms = measures(); }
+      const nm = ms[k + 1]; if (nm) { handleMeasureClick(nm, null); go($('.chord-input', nm)); }
+    } else if (e.key === 'Backspace' && !t.value) {
+      const ms = measures(), k = ms.indexOf(m);
+      if (k > 0) { e.preventDefault(); handleMeasureClick(ms[k - 1], null); go($('.chord-input', ms[k - 1])); }
+    } else if ((e.key === 'ArrowRight' && t.selectionStart === t.value.length) || (e.key === 'ArrowLeft' && t.selectionStart === 0 && t.selectionEnd === 0)) {
+      const c = cells(), k = c.indexOf(t), n = c[k + (e.key === 'ArrowRight' ? 1 : -1)];
+      if (n) { e.preventDefault(); go(n); }
+    }
+  });
+
   /* ---------- Arranque ---------- */
   let timer = 0;
-  const tick = () => { clearTimeout(timer); timer = setTimeout(() => { ensureRows(); layout(false); markRows(); drawTies(); refreshChords(); $$(FX).forEach(deco); save(); }, 150); };
+  const tick = () => { clearTimeout(timer); timer = setTimeout(() => { ensureHeader(); ensureRows(); layout(false); markRows(); drawTies(); refreshChords(); $$(FX).forEach(deco); save(); }, 150); };
   function init() {
     try { const h = localStorage.getItem(KEY); if (h) { wrap.innerHTML = h; clearSelections(); rebindAllEvents(); } } catch (e) {}
+    applyStyle(readStyle());
     const body = $('#modMainActions + .collapsible-body');
     if (body) {
       $('#modMainActions').classList.remove('collapsed'); body.classList.remove('hidden');
       const box = document.createElement('div');
       box.innerHTML = '<select class="select-input" id="orientSel"><option value="p">Hoja A4 vertical</option><option value="l">Hoja A4 horizontal</option></select><button class="tool-btn" id="btnNewChart" style="margin-top:6px;width:100%">Nuevo chart (borrar guardado)</button>';
       body.appendChild(box);
-      addFileButtons(box);
+      addFileButtons(box); addStylePanel();
       $('#orientSel').onchange = e => setOrientation(e.target.value === 'l');
       $('#btnNewChart').onclick = () => { if (confirm('¿Borrar el chart guardado y empezar de cero?')) { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); } };
       $('#btnAddPage').style.display = 'none';
@@ -663,7 +727,7 @@
     applyLanguage(currentLang);
     let land = false; try { land = localStorage.getItem('ccs_orient') === 'l'; } catch (e) {}
     if (land && $('#orientSel')) $('#orientSel').value = 'l';
-    document.fonts.ready.then(() => { ensureRows(); setOrientation(land); markRows(); drawTies(); refreshChords(); $$(FX).forEach(deco); });
+    document.fonts.ready.then(() => { ensureHeader(); ensureRows(); setOrientation(land); markRows(); drawTies(); refreshChords(); $$(FX).forEach(deco); });
     new MutationObserver(tick).observe(wrap, { childList: true, subtree: true });
     wrap.addEventListener('input', tick);
   }
