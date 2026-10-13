@@ -42,9 +42,9 @@
   .exporting .measure-grip{display:none}
   :root{--staff:linear-gradient(#0f172a,#0f172a) 0 25%/100% 1.2px no-repeat,linear-gradient(#0f172a,#0f172a) 0 50%/100% 1.2px no-repeat,linear-gradient(#0f172a,#0f172a) 0 75%/100% 1.2px no-repeat}
   .measures-grid{border-left:0!important}
-  .chart-paper .measure-box{height:46px;margin-top:50px;padding:0 6px;background:var(--staff);border-left:0}
+  .chart-paper .measure-box{height:46px;margin-top:50px;padding:0 6px;background:var(--staff),var(--hl,transparent);border-left:0}
   .chart-paper .measure-box.rf{border-left:1.5px solid #0f172a}
-  body .measure-box.selected{background:var(--staff),#e8eef6!important}
+  body .measure-box.selected{background:var(--staff),linear-gradient(rgba(76,194,255,.2),rgba(76,194,255,.2)),var(--hl,transparent)!important}
   .measure-main{padding:0!important}
   .rhythm-beats-container{height:100%!important}
   .section-block{margin-top:44px!important}
@@ -64,6 +64,13 @@
   .chord-input::placeholder{color:transparent}
   .measure-box:hover .chord-input::placeholder{color:#cbd5e1}
   .sel{display:none}
+  .measure-box{-webkit-user-select:none;user-select:none}
+  .measure-box input{-webkit-user-select:text;user-select:text}
+  .chart-paper .measure-box.rf{padding-left:calc(6px + var(--sysw,0px))}
+  .sys-head{position:absolute;left:3px;top:-1.5px;pointer-events:none}
+  .sys-head svg{display:block;overflow:visible}
+  .hl-sw{width:26px;height:26px;border-radius:50%;border:1px solid rgba(255,255,255,.35);cursor:pointer;background:var(--c);transition:box-shadow .2s,transform .2s;padding:0}
+  .hl-sw:hover{box-shadow:0 0 12px 2px var(--c);transform:scale(1.12)}
   .beat-slot.active-beat[data-sub="0"] .sel0,.beat-slot.active-beat[data-sub="1"] .sel1,.beat-slot.active-beat[data-sub="2"] .sel2,.beat-slot.active-beat[data-sub="3"] .sel3{display:inline}
   .exporting .sel{display:none!important}
   .volta-bracket{background:transparent;box-shadow:none;border-right:none;height:16px}
@@ -279,7 +286,7 @@
     items.forEach((it, i) => { if (!it.rest && !it.cont && it.dur < 4 && !/[hw]$/.test(it.type)) cur.push(i); else { if (cur.length) groups.push(cur); cur = []; } });
     if (cur.length) groups.push(cur);
     const beamed = new Set(groups.filter(g => g.length > 1).flat());
-    let s = '<svg viewBox="0 0 40 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">';
+    let s = '<svg viewBox="0 0 40 40" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">';
     items.forEach((it, i) => {
       const x = xs[i], ty = it.type.replace(/^r/, '');
       s += `<g class="sub-item-target" onclick="handleSubItemClick(this.closest('.beat-slot'),${i},event)"><rect x="${x - 6}" y="0" width="12" height="40" fill="transparent"/>`;
@@ -292,7 +299,7 @@
         else if (ty === '8') s += `<circle cx="${x - 2}" cy="14" r="1.7" fill="${K}"/><path d="M ${x - 2} 14 Q ${x + 2} 12 ${x + 1} 18 L ${x - 3} 28" fill="none" stroke="${K}" stroke-width="1.6" stroke-linecap="round"/>`;
         else s += `<circle cx="${x - 2}" cy="12" r="1.5" fill="${K}"/><circle cx="${x - 3}" cy="18" r="1.5" fill="${K}"/><path d="M ${x - 2} 12 Q ${x + 2} 10 ${x + 1} 16 L ${x - 3} 28" fill="none" stroke="${K}" stroke-width="1.4" stroke-linecap="round"/>`;
       } else {
-        if (ty === 'w') s += `<ellipse cx="20" cy="20" rx="8" ry="5.5" fill="none" stroke="${K}" stroke-width="3" transform="rotate(-15 20 20)"/>`;
+        if (ty === 'w') s += `<path fill-rule="evenodd" fill="${K}" d="${wholeD(20, 20)}"/>`;
         else {
           const hollow = ty === 'h', p = `${x - 4.5},29 ${x - 1.5},29 ${x + 4.5},17 ${x + 1.5},17`;
           s += hollow ? `<polygon points="${p}" fill="#fffef9" stroke="${K}" stroke-width="1.3"/>` : `<polygon points="${p}" fill="${K}"/>`;
@@ -468,7 +475,7 @@
   const _av = W.applyVolta;
   W.applyVolta = n => { _av(n); if (selectedMeasures[0]) $$('.volta-bracket', selectedMeasures[0]).forEach(v => v.style.top = '-48px'); };
   function markRows() {
-    let idx = 0;
+    let idx = 0; const head = sysHead();
     $$('.measures-grid', wrap).forEach(g => {
       let prev = null;
       [...g.children].forEach(m => {
@@ -476,6 +483,13 @@
         idx++;
         const rf = !prev || m.offsetTop !== prev.offsetTop; prev = m;
         m.classList.toggle('rf', rf);
+        let h = $(':scope>.sys-head', m);
+        if (!rf || !head) { if (h) h.remove(); m.style.removeProperty('--sysw'); }
+        else {
+          if (!h) { h = document.createElement('div'); h.className = 'sys-head'; m.appendChild(h); }
+          if (h.dataset.s !== head.sig) { h.innerHTML = head.html; h.dataset.s = head.sig; }
+          m.style.setProperty('--sysw', head.w + 'px');
+        }
         let n = $(':scope>.measure-num', m);
         if (!rf) { if (n) n.remove(); }
         else if (!n) { n = document.createElement('span'); n.className = 'measure-num'; n.textContent = idx; m.appendChild(n); }
@@ -516,7 +530,8 @@
   const tiePt = (e, dx) => {
     const sv = $('svg', e.slot); if (!sv) return null;
     const b = sv.getBoundingClientRect();
-    return { x: b.left + (e.x + dx) / 40 * b.width, y: b.top + b.height * 0.74, paper: e.slot.closest('.chart-paper') };
+    const k = Math.min(b.width, b.height) / 40;
+    return { x: b.left + b.width / 2 + (e.x + dx - 20) * k, y: b.top + b.height / 2 + 9.6 * k, paper: e.slot.closest('.chart-paper') };
   };
   function tieArc(paper, x1, y1, x2, y2) {
     const pr = paper.getBoundingClientRect(), r = v => Math.round(v * 2) / 2;
@@ -636,7 +651,7 @@
     root.querySelectorAll('script,iframe,object,embed,link,meta,style,base,form,foreignObject,animate,set,animateTransform,animateMotion').forEach(n => n.remove());
     root.querySelectorAll('*').forEach(el => [...el.attributes].forEach(a => {
       const n = a.name.toLowerCase();
-      if (n.startsWith('on') || (/^(href|src|xlink:href|action|formaction)$/.test(n) && /^\s*(javascript|data|vbscript):/i.test(a.value))) el.removeAttribute(a.name);
+      if (n.startsWith('on') || (n === 'style' && /url\s*\(|expression|@import/i.test(a.value)) || (/^(href|src|xlink:href|action|formaction)$/.test(n) && /^\s*(javascript|data|vbscript):/i.test(a.value))) el.removeAttribute(a.name);
     }));
     return root.innerHTML;
   }
@@ -670,7 +685,7 @@
   addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveFile(); } });
 
   /* ---------- Estilo: tipografías, subtítulo y escritura rápida de acordes ---------- */
-  const FONT_Q = { Montserrat: 'Montserrat:wght@700;800', 'Patrick Hand': 'Patrick+Hand', Kalam: 'Kalam:wght@400;700', 'Space Grotesk': 'Space+Grotesk:wght@500;700', Bungee: 'Bungee', Bangers: 'Bangers', 'Archivo Black': 'Archivo+Black', 'Caveat Brush': 'Caveat+Brush', 'Gochi Hand': 'Gochi+Hand', 'Permanent Marker': 'Permanent+Marker', 'Architects Daughter': 'Architects+Daughter', 'Covered By Your Grace': 'Covered+By+Your+Grace' };
+  const FONT_Q = { Montserrat: 'Montserrat:wght@700;800', 'Patrick Hand': 'Patrick+Hand', Kalam: 'Kalam:wght@400;700', 'Space Grotesk': 'Space+Grotesk:wght@500;700', Bungee: 'Bungee', Bangers: 'Bangers', 'Archivo Black': 'Archivo+Black', 'Caveat Brush': 'Caveat+Brush', 'Gochi Hand': 'Gochi+Hand', 'Permanent Marker': 'Permanent+Marker', 'Architects Daughter': 'Architects+Daughter', 'Covered By Your Grace': 'Covered+By+Your+Grace', 'Noto Music': 'Noto+Music' };
   const BOLD = { Montserrat: 800, 'Space Grotesk': 700, Kalam: 700 };
   const CHORD_FONTS = ['Montserrat', 'Patrick Hand', 'Kalam', 'Space Grotesk', 'Caveat Brush', 'Gochi Hand', 'Architects Daughter', 'Covered By Your Grace', 'Permanent Marker'], TITLE_FONTS = ['Montserrat', 'Bungee', 'Bangers', 'Archivo Black', 'Permanent Marker', 'Caveat Brush', 'Gochi Hand', 'Covered By Your Grace'];
   const DEF_STYLE = { chord: 'Montserrat', title: 'Montserrat', size: 1.3 };
@@ -765,12 +780,85 @@
     panel.children[0].after(sec); tb.remove();
   }
 
+  /* ---------- Redonda, resaltado de compases, clave y tonalidad ---------- */
+  function wholeD(cx, cy) {
+    const N = 36, pts = (rx, ry, rot) => Array.from({ length: N }, (_, k) => {
+      const t = k / N * 2 * Math.PI, ex = rx * Math.cos(t), ey = ry * Math.sin(t);
+      return (cx + ex * Math.cos(rot) - ey * Math.sin(rot)).toFixed(2) + ' ' + (cy + ex * Math.sin(rot) + ey * Math.cos(rot)).toFixed(2);
+    });
+    return 'M ' + pts(7.2, 4.9, 0).join(' L ') + ' Z M ' + pts(2.9, 4.4, 0.6).join(' L ') + ' Z';
+  }
+  const hexA = (h, a) => { const n = parseInt(h.slice(1), 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; };
+  W.paintMeasures = c => {
+    if (!selectedMeasures.length) return;
+    saveStateForUndo();
+    selectedMeasures.forEach(m => c ? m.style.setProperty('--hl', hexA(c, 0.5)) : m.style.removeProperty('--hl'));
+    tick();
+  };
+  const KEYS = [['', 'No mostrar'], ['0', 'C · Am (sin alteraciones)'], ['1', 'G · Em (1♯)'], ['2', 'D · Bm (2♯)'], ['3', 'A · F♯m (3♯)'], ['4', 'E · C♯m (4♯)'], ['5', 'B · G♯m (5♯)'], ['6', 'F♯ · D♯m (6♯)'], ['7', 'C♯ · A♯m (7♯)'], ['-1', 'F · Dm (1♭)'], ['-2', 'B♭ · Gm (2♭)'], ['-3', 'E♭ · Cm (3♭)'], ['-4', 'A♭ · Fm (4♭)'], ['-5', 'D♭ · B♭m (5♭)'], ['-6', 'G♭ · E♭m (6♭)'], ['-7', 'C♭ · A♭m (7♭)']];
+  const SH_STEPS = [0, 3, -1, 2, 5, 1, 4], FL_STEPS = [4, 1, 5, 2, 6, 3, 7];
+  const P1 = () => $('.chart-paper', wrap);
+  const sigState = () => { const p = P1(); return { clef: (p && p.dataset.clef) || '', key: (p && p.dataset.key) || '' }; };
+  const clefPrefs = () => { try { return Object.assign({ size: 44, dy: 0 }, JSON.parse(localStorage.getItem('ccs_clef') || '{}')); } catch (e) { return { size: 44, dy: 0 }; } };
+  function sysHead() {
+    const st = sigState(), pf = clefPrefs(), n = st.key === '' ? 0 : parseInt(st.key, 10) || 0;
+    const hasClef = st.clef === 'g' || st.clef === 'f';
+    if (!hasClef && !n) return null;
+    const K = '#0f172a', yOf = k => 0.75 + k * 5.5625, bass = st.clef === 'f';
+    let x = hasClef ? 26 : 2, g = '';
+    if (hasClef) g += `<text x="2" y="${(bass ? yOf(2) : yOf(6)) + pf.dy}" font-size="${pf.size}" font-family="'Noto Music','Segoe UI Symbol','Apple Symbols','Noto Sans Symbols 2',serif" fill="${K}">${bass ? '𝄢' : '𝄞'}</text>`;
+    (n > 0 ? SH_STEPS : FL_STEPS).slice(0, Math.abs(n)).forEach((stp, i) => {
+      const cx = x + i * 8 + 4, y = yOf(stp + (bass ? 2 : 0));
+      g += n > 0
+        ? `<path d="M ${cx - 1.7} ${y - 7.5} L ${cx - 1.7} ${y + 8.5} M ${cx + 1.7} ${y - 8.5} L ${cx + 1.7} ${y + 7.5}" stroke="${K}" stroke-width="1.1" fill="none"/><path d="M ${cx - 4.5} ${y - 2.2} L ${cx + 4.5} ${y - 4.7} M ${cx - 4.5} ${y + 3.6} L ${cx + 4.5} ${y + 1.1}" stroke="${K}" stroke-width="2.2" fill="none"/>`
+        : `<path d="M ${cx - 2} ${y - 9} L ${cx - 2} ${y + 3.5} C ${cx + 1} ${y + 2.5} ${cx + 5.5} ${y - 0.5} ${cx + 5} ${y - 3} C ${cx + 4.5} ${y - 5} ${cx + 1} ${y - 4.5} ${cx - 2} ${y - 1.5}" stroke="${K}" stroke-width="1.3" fill="none"/>`;
+    });
+    const w = Math.round(x + Math.abs(n) * 8 + 4);
+    return { w, sig: [st.clef, n, pf.size, pf.dy].join('|'), html: `<svg width="${w}" height="46" viewBox="0 0 ${w} 46" xmlns="http://www.w3.org/2000/svg">${g}</svg>` };
+  }
+  function syncKeyPanel() {
+    const c = $('#selClef'), k = $('#selKey'); if (!c || !k) return;
+    const st = sigState(); if (c.value !== st.clef) c.value = st.clef; if (k.value !== st.key) k.value = st.key;
+  }
+  function addKeyPanel() {
+    const panel = $('.toolbox-panel'); if (!panel || $('#selClef')) return;
+    const pf = clefPrefs(), lb = t => `<div style="font-size:0.75em;color:var(--text-muted);margin-top:4px">${t}</div>`;
+    const sec = document.createElement('div'); sec.className = 'toolbox-section'; sec.id = 'secKey';
+    sec.innerHTML = `<div class="collapsible-header collapsed" onclick="toggleModule(this)">Clave y Tonalidad</div><div class="collapsible-body hidden">${lb('Clave')}<select class="select-input" id="selClef"><option value="">Sin clave</option><option value="g">Clave de Sol</option><option value="f">Clave de Fa</option></select>${lb('Tonalidad')}<select class="select-input" id="selKey">${KEYS.map(k => `<option value="${k[0]}">${k[1]}</option>`).join('')}</select>${lb('Tamaño de la clave')}<input type="range" id="clefSize" min="30" max="70" step="1" value="${pf.size}" style="width:100%">${lb('Altura de la clave')}<input type="range" id="clefDy" min="-20" max="20" step="1" value="${pf.dy}" style="width:100%">${lb('Se muestra al inicio de cada sistema. Si la clave se ve chica o corrida, ajustá los dos controles.')}</div>`;
+    ($('#modRhythm') ? $('#modRhythm').parentNode : panel.children[0]).after(sec);
+    const setSt = () => { const p = P1(); if (!p) return; saveStateForUndo(); p.dataset.clef = $('#selClef').value; p.dataset.key = $('#selKey').value; tick(); };
+    $('#selClef').onchange = setSt; $('#selKey').onchange = setSt;
+    const setPf = () => { try { localStorage.setItem('ccs_clef', JSON.stringify({ size: +$('#clefSize').value, dy: +$('#clefDy').value })); } catch (e) {} tick(); };
+    $('#clefSize').oninput = setPf; $('#clefDy').oninput = setPf;
+    syncKeyPanel();
+  }
+  function addHighlightPanel() {
+    const panel = $('.toolbox-panel'); if (!panel || $('#secHl')) return;
+    const cols = ['#ffb3c7', '#fff08a', '#9be8a8', '#a9c4ff', '#ffc999', '#d8b4fe'];
+    const sec = document.createElement('div'); sec.className = 'toolbox-section'; sec.id = 'secHl';
+    sec.innerHTML = `<div class="collapsible-header collapsed" onclick="toggleModule(this)">Resaltar compases</div><div class="collapsible-body hidden"><div style="font-size:0.75em;color:var(--text-muted)">Seleccioná compases (Shift + clic para un rango) y elegí un color de fondo.</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">${cols.map(c => `<button class="hl-sw" style="--c:${c}" data-c="${c}" title="Pintar"></button>`).join('')}<input type="color" id="hlCustom" value="#ffd166" title="Otro color" style="width:30px;height:28px;border:0;background:none;padding:0;cursor:pointer"></div><button class="tool-btn" id="hlClear" style="margin-top:6px">Quitar color</button></div>`;
+    ($('#secKey') || $('#modRhythm') && $('#modRhythm').parentNode || panel.children[0]).after(sec);
+    $$('.hl-sw', sec).forEach(b => b.onclick = () => paintMeasures(b.dataset.c));
+    $('#hlCustom').onchange = e => paintMeasures(e.target.value); $('#hlClear').onclick = () => paintMeasures(null);
+  }
+  // Transponer también mueve la tonalidad marcada
+  const _ta2 = W.transposeAll;
+  W.transposeAll = sm => {
+    _ta2(sm);
+    const p = P1(), n = p && p.dataset.key !== undefined && p.dataset.key !== '' ? parseInt(p.dataset.key, 10) : NaN;
+    if (isNaN(n)) return;
+    let k = (7 * ((((7 * n) % 12 + 12) % 12 + sm + 120) % 12)) % 12; if (k > 6) k -= 12;
+    p.dataset.key = String(k); tick();
+  };
+  // Shift + clic no debe seleccionar texto del navegador (se veían los "+" azules)
+  document.addEventListener('mousedown', e => { if (e.shiftKey && e.target.closest && e.target.closest('.measure-box')) e.preventDefault(); }, true);
+
   /* ---------- Arranque ---------- */
   let timer = 0;
-  const tick = () => { clearTimeout(timer); timer = setTimeout(() => { ensureHeader(); ensureRows(); layout(false); markRows(); drawTies(); refreshChords(); $$(FX).forEach(deco); save(); }, 150); };
+  const tick = () => { clearTimeout(timer); timer = setTimeout(() => { syncKeyPanel(); ensureHeader(); ensureRows(); layout(false); markRows(); drawTies(); refreshChords(); $$(FX).forEach(deco); save(); }, 150); };
   function init() {
     try { const h = localStorage.getItem(KEY); if (h) { wrap.innerHTML = h; clearSelections(); rebindAllEvents(); } } catch (e) {}
-    applyStyle(readStyle());
+    applyStyle(readStyle()); loadFont('Noto Music');
     const body = $('#modMainActions + .collapsible-body');
     if (body) {
       $('#modMainActions').classList.remove('collapsed'); body.classList.remove('hidden');
@@ -784,7 +872,7 @@
     }
     const rb = $('.rhythm-buttons');
     if (rb) { const b = document.createElement('button'); b.className = 'rhythm-btn'; b.title = 'Slash simple'; b.textContent = '/'; b.onclick = () => applySubdivisionRhythm('slash'); rb.appendChild(b); }
-    addRhythmPanel();
+    addRhythmPanel(); addKeyPanel(); addHighlightPanel();
     $$('.rest-btn .key-badge').forEach(b => b.style.display = 'none');
     const hint = 'Teclas 7,6,5,4,3 | R: silencio | L: ligadura | .: puntillo | Shift+Clic: rango | Ctrl+Z';
     i18n.es.lblRhythmShortcuts = hint; i18n.en.lblRhythmShortcuts = hint.replace('Teclas', 'Keys').replace('silencio', 'rest').replace('ligadura', 'tie').replace('puntillo', 'dot').replace('rango', 'range');
