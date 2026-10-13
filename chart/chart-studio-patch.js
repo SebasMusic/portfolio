@@ -3,7 +3,7 @@
    <script src="chart-studio-patch.js"></script>                                  */
 (function () {
   'use strict';
-  const PATCH_VERSION = 'v13 · 13/10';
+  const PATCH_VERSION = 'v14 · 13/10';
   function showPatchError(e) {
     console.error('[chart-studio-patch]', e);
     let b = document.getElementById('patchErr');
@@ -105,6 +105,18 @@
   .download-option{font-size:.72em;font-weight:500}
   @keyframes dp{0%,100%{box-shadow:0 0 6px rgba(255,90,90,.3)}50%{box-shadow:0 0 18px rgba(255,90,90,.65)}}
   .dict-on{border-color:#ff6b6b!important;color:#ffe0e0!important;background:rgba(255,90,90,.14)!important;animation:dp 1.6s ease-in-out infinite}
+  .studio-layout{grid-template-columns:232px 1fr!important}
+  .toolbox-panel{font-size:12.5px;padding:8px 6px!important}
+  .toolbox-section{padding:0 6px}
+  .collapsible-header{font-size:.7em;letter-spacing:.15em;padding:8px 2px 7px}
+  .collapsible-body{gap:5px;padding-top:6px}
+  .tool-btn{font-size:.76em;padding:5px 7px;border-radius:7px}
+  .select-input{font-size:.78em;padding:5px 7px;border-radius:7px}
+  .rhythm-btn{padding:3px 6px;border-radius:7px;font-size:.95em}
+  .rhythm-buttons{gap:4px}
+  .btn-grid,.btn-grid-3{gap:4px}
+  .key-badge{font-size:.6em}
+  .download-option{font-size:.76em}
   @media print{
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     html,body{background:#fff!important;padding:0!important;margin:0!important;min-height:0!important}
@@ -827,7 +839,7 @@
   function addRhythmPanel() {
     const tb = $('.rhythm-toolbar'), panel = $('.toolbox-panel'); if (!tb || !panel || $('#modRhythm')) return;
     const sec = document.createElement('div'); sec.className = 'toolbox-section';
-    sec.innerHTML = '<div class="collapsible-header" id="modRhythm" onclick="toggleModule(this)">Ritmo y Notación</div><div class="collapsible-body"></div>';
+    sec.innerHTML = '<div class="collapsible-header collapsed" id="modRhythm" onclick="toggleModule(this)">Ritmo y Notación</div><div class="collapsible-body hidden"></div>';
     const body = $('.collapsible-body', sec), hint = $('#lblRhythmShortcuts');
     if (hint) { hint.style.cssText = 'font-size:.68em;opacity:.75;line-height:1.5;text-transform:none;letter-spacing:0'; body.appendChild(hint); }
     $$('.rhythm-buttons', tb).forEach(r => body.appendChild(r));
@@ -852,8 +864,8 @@
   const KEYS = [['', 'No mostrar'], ['0', 'C · Am (sin alteraciones)'], ['1', 'G · Em (1♯)'], ['2', 'D · Bm (2♯)'], ['3', 'A · F♯m (3♯)'], ['4', 'E · C♯m (4♯)'], ['5', 'B · G♯m (5♯)'], ['6', 'F♯ · D♯m (6♯)'], ['7', 'C♯ · A♯m (7♯)'], ['-1', 'F · Dm (1♭)'], ['-2', 'B♭ · Gm (2♭)'], ['-3', 'E♭ · Cm (3♭)'], ['-4', 'A♭ · Fm (4♭)'], ['-5', 'D♭ · B♭m (5♭)'], ['-6', 'G♭ · E♭m (6♭)'], ['-7', 'C♭ · A♭m (7♭)']];
   const SH_STEPS = [0, 3, -1, 2, 5, 1, 4], FL_STEPS = [4, 1, 5, 2, 6, 3, 7];
   const P1 = () => $('.chart-paper', wrap);
-  const sigState = () => { const p = P1(); return { clef: (p && p.dataset.clef) || '', key: (p && p.dataset.key) || '' }; };
-  const clefPrefs = () => { try { return Object.assign({ size: 44, dy: 0, acc: 0.62 }, JSON.parse(localStorage.getItem('ccs_clef') || '{}')); } catch (e) { return { size: 44, dy: 0, acc: 0.62 }; } };
+  const sigState = () => { const p = P1(); return { clef: p && p.dataset.clef !== undefined ? p.dataset.clef : 'g', key: p && p.dataset.key !== undefined ? p.dataset.key : '2' }; };
+  const clefPrefs = () => { try { return Object.assign({ size: 36, dy: 8, acc: 1.1 }, JSON.parse(localStorage.getItem('ccs_clef') || '{}')); } catch (e) { return { size: 36, dy: 8, acc: 1.1 }; } };
   function sysHead(st0) {
     const st = st0 || sigState(), pf = clefPrefs(), n = st.key === '' ? 0 : parseInt(st.key, 10) || 0;
     const hasClef = st.clef === 'g' || st.clef === 'f';
@@ -879,7 +891,7 @@
     const panel = $('.toolbox-panel'); if (!panel || $('#selClef')) return;
     const pf = clefPrefs(), lb = t => `<div style="font-size:0.75em;color:var(--text-muted);margin-top:4px">${t}</div>`;
     const sec = document.createElement('div'); sec.className = 'toolbox-section'; sec.id = 'secKey';
-    sec.innerHTML = `<div class="collapsible-header collapsed" onclick="toggleModule(this)">Clave y Tonalidad</div><div class="collapsible-body hidden">${lb('Clave')}<select class="select-input" id="selClef"><option value="">Sin clave</option><option value="g">Clave de Sol</option><option value="f">Clave de Fa</option></select>${lb('Tonalidad')}<select class="select-input" id="selKey">${KEYS.map(k => `<option value="${k[0]}">${k[1]}</option>`).join('')}</select>${lb('Tamaño de la clave')}<input type="range" id="clefSize" min="30" max="70" step="1" value="${pf.size}" style="width:100%">${lb('Altura de la clave')}<input type="range" id="clefDy" min="-20" max="20" step="1" value="${pf.dy}" style="width:100%">${lb('Tamaño de alteraciones')}<input type="range" id="accSize" min="0.35" max="1.1" step="0.01" value="${pf.acc}" style="width:100%">${lb('Cambio desde el compás seleccionado')}<select class="select-input" id="chgClef"><option value="~">Clave: sin cambio</option><option value="">Sin clave</option><option value="g">Clave de Sol</option><option value="f">Clave de Fa</option></select><select class="select-input" id="chgKey"><option value="~">Tonalidad: sin cambio</option>${KEYS.map(k => `<option value="${k[0]}">${k[1]}</option>`).join('')}</select><div style="display:flex;gap:6px;margin-top:4px"><button class="tool-btn" id="chgApply" style="flex:1">Aplicar</button><button class="tool-btn" id="chgClear" style="flex:1">Quitar</button></div>${lb('El cambio vale desde ese compás hacia adelante y no modifica lo anterior. Si la clave se ve chica o corrida, ajustá los controles.')}</div>`;
+    sec.innerHTML = `<div class="collapsible-header collapsed" onclick="toggleModule(this)">Clave y Tonalidad</div><div class="collapsible-body hidden">${lb('Clave')}<select class="select-input" id="selClef"><option value="">Sin clave</option><option value="g">Clave de Sol</option><option value="f">Clave de Fa</option></select>${lb('Tonalidad')}<select class="select-input" id="selKey">${KEYS.map(k => `<option value="${k[0]}">${k[1]}</option>`).join('')}</select>${lb('Tamaño de la clave')}<input type="range" id="clefSize" min="30" max="70" step="1" value="${pf.size}" style="width:100%">${lb('Altura de la clave')}<input type="range" id="clefDy" min="-20" max="20" step="1" value="${pf.dy}" style="width:100%">${lb('Tamaño de alteraciones')}<input type="range" id="accSize" min="0.35" max="2" step="0.01" value="${pf.acc}" style="width:100%">${lb('Cambio desde el compás seleccionado')}<select class="select-input" id="chgClef"><option value="~">Clave: sin cambio</option><option value="">Sin clave</option><option value="g">Clave de Sol</option><option value="f">Clave de Fa</option></select><select class="select-input" id="chgKey"><option value="~">Tonalidad: sin cambio</option>${KEYS.map(k => `<option value="${k[0]}">${k[1]}</option>`).join('')}</select><div style="display:flex;gap:6px;margin-top:4px"><button class="tool-btn" id="chgApply" style="flex:1">Aplicar</button><button class="tool-btn" id="chgClear" style="flex:1">Quitar</button></div>${lb('El cambio vale desde ese compás hacia adelante y no modifica lo anterior. Si la clave se ve chica o corrida, ajustá los controles.')}</div>`;
     ($('#modRhythm') ? $('#modRhythm').parentNode : panel.children[0]).after(sec);
     const setSt = () => { const p = P1(); if (!p) return; saveStateForUndo(); p.dataset.clef = $('#selClef').value; p.dataset.key = $('#selKey').value; tick(); };
     $('#selClef').onchange = setSt; $('#selKey').onchange = setSt;
@@ -910,7 +922,7 @@
   W.transposeAll = sm => {
     _ta2(sm);
     const mapK = n => { let k = (7 * ((((7 * n) % 12 + 12) % 12 + sm + 120) % 12)) % 12; return k > 6 ? k - 12 : k; };
-    const p = P1(); if (p && p.dataset.key !== undefined && p.dataset.key !== '' && !isNaN(parseInt(p.dataset.key, 10))) p.dataset.key = String(mapK(parseInt(p.dataset.key, 10)));
+    const p = P1(), pk = p ? (p.dataset.key !== undefined ? p.dataset.key : '2') : ''; if (p && pk !== '' && !isNaN(parseInt(pk, 10))) p.dataset.key = String(mapK(parseInt(pk, 10)));
     $$('.measure-box[data-key]', wrap).forEach(m => { const n = parseInt(m.dataset.key, 10); if (m.dataset.key !== '' && !isNaN(n)) m.dataset.key = String(mapK(n)); });
     tick();
   };
@@ -1128,7 +1140,6 @@
     applyStyle(readStyle()); loadFont('Noto Music');
     const body = $('#modMainActions + .collapsible-body');
     if (body) {
-      $('#modMainActions').classList.remove('collapsed'); body.classList.remove('hidden');
       const box = document.createElement('div');
       box.innerHTML = '<select class="select-input" id="orientSel"><option value="p">Hoja A4 vertical</option><option value="l">Hoja A4 horizontal</option></select><button class="tool-btn" id="btnNewChart" style="margin-top:6px;width:100%">Nuevo chart (borrar guardado)</button>';
       body.appendChild(box);
