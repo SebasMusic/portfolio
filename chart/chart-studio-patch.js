@@ -67,11 +67,44 @@
   .beat-slot svg{overflow:visible}
   .measure-box{-webkit-user-select:none;user-select:none}
   .measure-box input{-webkit-user-select:text;user-select:text}
-  .chart-paper .measure-box.rf{padding-left:calc(6px + var(--sysw,0px))}
+  .chart-paper .measure-box.hh{padding-left:calc(6px + var(--sysw,0px))}
   .sys-head{position:absolute;left:3px;top:-1.5px;pointer-events:none}
   .sys-head svg{display:block;overflow:visible}
   .hl-sw{width:26px;height:26px;border-radius:50%;border:1px solid rgba(255,255,255,.35);cursor:pointer;background:var(--c);transition:box-shadow .2s,transform .2s;padding:0}
   .hl-sw:hover{box-shadow:0 0 12px 2px var(--c);transform:scale(1.12)}
+  .studio-layout{grid-template-columns:268px 1fr!important}
+  .toolbox-panel{padding:10px 8px!important;gap:2px!important;border-radius:14px}
+  .toolbox-section{padding:0 8px}
+  .toolbox-section:hover{border-color:rgba(76,194,255,.14);box-shadow:0 0 12px rgba(76,194,255,.07);background:rgba(76,194,255,.02)}
+  .toolbox-section:has(>.collapsible-header:not(.collapsed)){border-color:rgba(76,194,255,.22);box-shadow:0 0 16px rgba(76,194,255,.10),inset 0 0 12px rgba(76,194,255,.03);padding-bottom:10px;margin:2px 0}
+  .collapsible-header{font-size:.66em;font-weight:600;letter-spacing:.16em;color:#8ea3b6;border-bottom:1px solid rgba(255,255,255,.045);padding:11px 2px 9px}
+  .collapsible-header::after,.collapsible-header.collapsed::after{content:'›';font-size:1.5em;font-weight:300;line-height:.6;opacity:.55;transform:rotate(90deg);transition:transform .2s}
+  .collapsible-header.collapsed::after{transform:rotate(0)}
+  .collapsible-header:not(.collapsed){color:#9fdcff;text-shadow:0 0 8px rgba(76,194,255,.3);border-bottom-color:rgba(76,194,255,.12)}
+  .collapsible-body{gap:6px;padding-top:8px}
+  .tool-btn{font-size:.72em;font-weight:500;padding:6px 9px;border-radius:8px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);color:#cdd6df}
+  .tool-btn:hover{background:rgba(76,194,255,.07);border-color:rgba(76,194,255,.45);box-shadow:0 0 10px rgba(76,194,255,.2);color:#fff}
+  .tool-btn.primary{background:rgba(76,194,255,.14);border-color:rgba(76,194,255,.45);color:#e4f5ff;box-shadow:0 0 10px rgba(76,194,255,.18)}
+  .tool-btn.primary:hover{background:rgba(76,194,255,.22);box-shadow:0 0 16px rgba(76,194,255,.4)}
+  .tool-btn.custom-btn{border-style:solid}
+  .rhythm-btn{padding:4px 8px;border-radius:8px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08)}
+  .select-input{font-size:.74em;padding:6px 9px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.09);color:#d5dde5}
+  input[type=range]{accent-color:#4cc2ff}
+  .download-option{font-size:.72em;font-weight:500}
+  @keyframes dp{0%,100%{box-shadow:0 0 6px rgba(255,90,90,.3)}50%{box-shadow:0 0 18px rgba(255,90,90,.65)}}
+  .dict-on{border-color:#ff6b6b!important;color:#ffe0e0!important;background:rgba(255,90,90,.14)!important;animation:dp 1.6s ease-in-out infinite}
+  @media print{
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    html,body{background:#fff!important;padding:0!important;margin:0!important;min-height:0!important}
+    body>*:not(.studio-layout){display:none!important}
+    .studio-layout{display:block!important;max-width:none!important}
+    .toolbox-panel,.rhythm-toolbar{display:none!important}
+    .right-main-column{gap:0!important}
+    .sheets-container{background:#fff!important;padding:0!important;border:0!important;gap:0!important;display:block!important}
+    .chart-paper{width:210mm!important;height:296.6mm!important;max-height:296.6mm!important;box-shadow:none!important;border:0!important;border-radius:0!important;margin:0!important;break-after:page;page-break-after:always;overflow:hidden}
+    body.landscape .chart-paper{width:297mm!important;height:209.6mm!important;max-height:209.6mm!important}
+    .chart-paper:last-child{break-after:auto;page-break-after:auto}
+  }
   .beat-slot.active-beat[data-sub="0"] .sel0,.beat-slot.active-beat[data-sub="1"] .sel1,.beat-slot.active-beat[data-sub="2"] .sel2,.beat-slot.active-beat[data-sub="3"] .sel3{display:inline}
   .exporting .sel{display:none!important}
   .volta-bracket{background:transparent;box-shadow:none;border-right:none;height:16px}
@@ -386,7 +419,7 @@
     try { const s = sig(); if (force || s !== lastSig) flatten(); paginate(); lastSig = sig(); } finally { busy = false; }
   }
   function setOrientation(land) {
-    document.body.classList.toggle('landscape', land);
+    document.body.classList.toggle('landscape', land); setPageStyle(land);
     RENDER_OPTIONS.width = land ? 1123 : 794; RENDER_OPTIONS.height = land ? 794 : 1123;
     try { localStorage.setItem('ccs_orient', land ? 'l' : 'p'); } catch (e) {}
     layout(true);
@@ -479,7 +512,7 @@
   const _av = W.applyVolta;
   W.applyVolta = n => { _av(n); if (selectedMeasures[0]) $$('.volta-bracket', selectedMeasures[0]).forEach(v => v.style.top = '-48px'); };
   function markRows() {
-    let idx = 0; const head = sysHead();
+    let idx = 0; const base = sigState(), cur = { clef: base.clef, key: base.key }, hc = {}, headFor = st => { const k = st.clef + '|' + st.key; if (!(k in hc)) hc[k] = sysHead(st); return hc[k]; };
     $$('.measures-grid', wrap).forEach(g => {
       let prev = null;
       [...g.children].forEach(m => {
@@ -487,8 +520,13 @@
         idx++;
         const rf = !prev || m.offsetTop !== prev.offsetTop; prev = m;
         m.classList.toggle('rf', rf);
+        if (m.dataset.clef !== undefined && m.dataset.clef !== '~') cur.clef = m.dataset.clef;
+        if (m.dataset.key !== undefined && m.dataset.key !== '~') cur.key = m.dataset.key;
+        const chg = (m.dataset.clef !== undefined && m.dataset.clef !== '~') || (m.dataset.key !== undefined && m.dataset.key !== '~');
+        const head = (rf || chg) ? headFor(cur) : null;
+        m.classList.toggle('hh', !!head);
         let h = $(':scope>.sys-head', m);
-        if (!rf || !head) { if (h) h.remove(); m.style.removeProperty('--sysw'); }
+        if (!head) { if (h) h.remove(); m.style.removeProperty('--sysw'); }
         else {
           if (!h) { h = document.createElement('div'); h.className = 'sys-head'; m.appendChild(h); }
           if (h.dataset.s !== head.sig) { h.innerHTML = head.html; h.dataset.s = head.sig; }
@@ -803,22 +841,23 @@
   const SH_STEPS = [0, 3, -1, 2, 5, 1, 4], FL_STEPS = [4, 1, 5, 2, 6, 3, 7];
   const P1 = () => $('.chart-paper', wrap);
   const sigState = () => { const p = P1(); return { clef: (p && p.dataset.clef) || '', key: (p && p.dataset.key) || '' }; };
-  const clefPrefs = () => { try { return Object.assign({ size: 44, dy: 0 }, JSON.parse(localStorage.getItem('ccs_clef') || '{}')); } catch (e) { return { size: 44, dy: 0 }; } };
-  function sysHead() {
-    const st = sigState(), pf = clefPrefs(), n = st.key === '' ? 0 : parseInt(st.key, 10) || 0;
+  const clefPrefs = () => { try { return Object.assign({ size: 44, dy: 0, acc: 0.62 }, JSON.parse(localStorage.getItem('ccs_clef') || '{}')); } catch (e) { return { size: 44, dy: 0, acc: 0.62 }; } };
+  function sysHead(st0) {
+    const st = st0 || sigState(), pf = clefPrefs(), n = st.key === '' ? 0 : parseInt(st.key, 10) || 0;
     const hasClef = st.clef === 'g' || st.clef === 'f';
     if (!hasClef && !n) return null;
     const K = '#0f172a', yOf = k => 0.75 + k * 5.5625, bass = st.clef === 'f';
     let x = hasClef ? 26 : 2, g = '';
     if (hasClef) g += `<text x="2" y="${(bass ? yOf(2) : yOf(6)) + pf.dy}" font-size="${pf.size}" font-family="'Noto Music','Segoe UI Symbol','Apple Symbols','Noto Sans Symbols 2',serif" fill="${K}">${bass ? '𝄢' : '𝄞'}</text>`;
+    const ks = (pf.size / 44) * (pf.acc || 0.62), adv = 11 * ks;
     (n > 0 ? SH_STEPS : FL_STEPS).slice(0, Math.abs(n)).forEach((stp, i) => {
-      const cx = x + i * 8 + 4, y = yOf(stp + (bass ? 2 : 0));
+      const cx = x + i * adv + 5 * ks, y = yOf(stp + (bass ? 2 : 0));
       g += n > 0
-        ? `<path d="M ${cx - 1.7} ${y - 7.5} L ${cx - 1.7} ${y + 8.5} M ${cx + 1.7} ${y - 8.5} L ${cx + 1.7} ${y + 7.5}" stroke="${K}" stroke-width="1.1" fill="none"/><path d="M ${cx - 4.5} ${y - 2.2} L ${cx + 4.5} ${y - 4.7} M ${cx - 4.5} ${y + 3.6} L ${cx + 4.5} ${y + 1.1}" stroke="${K}" stroke-width="2.2" fill="none"/>`
-        : `<path d="M ${cx - 2} ${y - 9} L ${cx - 2} ${y + 3.5} C ${cx + 1} ${y + 2.5} ${cx + 5.5} ${y - 0.5} ${cx + 5} ${y - 3} C ${cx + 4.5} ${y - 5} ${cx + 1} ${y - 4.5} ${cx - 2} ${y - 1.5}" stroke="${K}" stroke-width="1.3" fill="none"/>`;
+        ? `<g transform="translate(${cx.toFixed(2)} ${y.toFixed(2)}) scale(${ks.toFixed(3)})"><path d="M -1.7 -7.5 L -1.7 8.5 M 1.7 -8.5 L 1.7 7.5" stroke="${K}" stroke-width="1.7" fill="none"/><path d="M -4.5 -2.2 L 4.5 -4.7 M -4.5 3.6 L 4.5 1.1" stroke="${K}" stroke-width="3.2" fill="none"/></g>`
+        : `<g transform="translate(${cx.toFixed(2)} ${y.toFixed(2)}) scale(${(ks * 1.1).toFixed(3)})"><path d="M -2 -9 L -2 3.5 C 1 2.5 5.5 -0.5 5 -3 C 4.5 -5 1 -4.5 -2 -1.5" stroke="${K}" stroke-width="1.9" fill="none"/></g>`;
     });
-    const w = Math.round(x + Math.abs(n) * 8 + 4);
-    return { w, sig: [st.clef, n, pf.size, pf.dy].join('|'), html: `<svg width="${w}" height="46" viewBox="0 0 ${w} 46" xmlns="http://www.w3.org/2000/svg">${g}</svg>` };
+    const w = Math.round(x + Math.abs(n) * adv + 6 * ks);
+    return { w, sig: [st.clef, n, pf.size, pf.dy, pf.acc].join('|'), html: `<svg width="${w}" height="46" viewBox="0 0 ${w} 46" xmlns="http://www.w3.org/2000/svg">${g}</svg>` };
   }
   function syncKeyPanel() {
     const c = $('#selClef'), k = $('#selKey'); if (!c || !k) return;
@@ -828,12 +867,21 @@
     const panel = $('.toolbox-panel'); if (!panel || $('#selClef')) return;
     const pf = clefPrefs(), lb = t => `<div style="font-size:0.75em;color:var(--text-muted);margin-top:4px">${t}</div>`;
     const sec = document.createElement('div'); sec.className = 'toolbox-section'; sec.id = 'secKey';
-    sec.innerHTML = `<div class="collapsible-header collapsed" onclick="toggleModule(this)">Clave y Tonalidad</div><div class="collapsible-body hidden">${lb('Clave')}<select class="select-input" id="selClef"><option value="">Sin clave</option><option value="g">Clave de Sol</option><option value="f">Clave de Fa</option></select>${lb('Tonalidad')}<select class="select-input" id="selKey">${KEYS.map(k => `<option value="${k[0]}">${k[1]}</option>`).join('')}</select>${lb('Tamaño de la clave')}<input type="range" id="clefSize" min="30" max="70" step="1" value="${pf.size}" style="width:100%">${lb('Altura de la clave')}<input type="range" id="clefDy" min="-20" max="20" step="1" value="${pf.dy}" style="width:100%">${lb('Se muestra al inicio de cada sistema. Si la clave se ve chica o corrida, ajustá los dos controles.')}</div>`;
+    sec.innerHTML = `<div class="collapsible-header collapsed" onclick="toggleModule(this)">Clave y Tonalidad</div><div class="collapsible-body hidden">${lb('Clave')}<select class="select-input" id="selClef"><option value="">Sin clave</option><option value="g">Clave de Sol</option><option value="f">Clave de Fa</option></select>${lb('Tonalidad')}<select class="select-input" id="selKey">${KEYS.map(k => `<option value="${k[0]}">${k[1]}</option>`).join('')}</select>${lb('Tamaño de la clave')}<input type="range" id="clefSize" min="30" max="70" step="1" value="${pf.size}" style="width:100%">${lb('Altura de la clave')}<input type="range" id="clefDy" min="-20" max="20" step="1" value="${pf.dy}" style="width:100%">${lb('Tamaño de alteraciones')}<input type="range" id="accSize" min="0.35" max="1.1" step="0.01" value="${pf.acc}" style="width:100%">${lb('Cambio desde el compás seleccionado')}<select class="select-input" id="chgClef"><option value="~">Clave: sin cambio</option><option value="">Sin clave</option><option value="g">Clave de Sol</option><option value="f">Clave de Fa</option></select><select class="select-input" id="chgKey"><option value="~">Tonalidad: sin cambio</option>${KEYS.map(k => `<option value="${k[0]}">${k[1]}</option>`).join('')}</select><div style="display:flex;gap:6px;margin-top:4px"><button class="tool-btn" id="chgApply" style="flex:1">Aplicar</button><button class="tool-btn" id="chgClear" style="flex:1">Quitar</button></div>${lb('El cambio vale desde ese compás hacia adelante y no modifica lo anterior. Si la clave se ve chica o corrida, ajustá los controles.')}</div>`;
     ($('#modRhythm') ? $('#modRhythm').parentNode : panel.children[0]).after(sec);
     const setSt = () => { const p = P1(); if (!p) return; saveStateForUndo(); p.dataset.clef = $('#selClef').value; p.dataset.key = $('#selKey').value; tick(); };
     $('#selClef').onchange = setSt; $('#selKey').onchange = setSt;
-    const setPf = () => { try { localStorage.setItem('ccs_clef', JSON.stringify({ size: +$('#clefSize').value, dy: +$('#clefDy').value })); } catch (e) {} tick(); };
-    $('#clefSize').oninput = setPf; $('#clefDy').oninput = setPf;
+    const setPf = () => { try { localStorage.setItem('ccs_clef', JSON.stringify({ size: +$('#clefSize').value, dy: +$('#clefDy').value, acc: +$('#accSize').value })); } catch (e) {} tick(); };
+    $('#clefSize').oninput = setPf; $('#clefDy').oninput = setPf; $('#accSize').oninput = setPf;
+    $('#chgApply').onclick = () => {
+      const m = selectedMeasures[0]; if (!m) { alert('Primero seleccioná el compás donde empieza el cambio.'); return; }
+      saveStateForUndo();
+      const c = $('#chgClef').value, k = $('#chgKey').value;
+      if (c === '~') delete m.dataset.clef; else m.dataset.clef = c;
+      if (k === '~') delete m.dataset.key; else m.dataset.key = k;
+      tick();
+    };
+    $('#chgClear').onclick = () => { const m = selectedMeasures[0]; if (!m) return; saveStateForUndo(); delete m.dataset.clef; delete m.dataset.key; tick(); };
     syncKeyPanel();
   }
   function addHighlightPanel() {
@@ -849,10 +897,10 @@
   const _ta2 = W.transposeAll;
   W.transposeAll = sm => {
     _ta2(sm);
-    const p = P1(), n = p && p.dataset.key !== undefined && p.dataset.key !== '' ? parseInt(p.dataset.key, 10) : NaN;
-    if (isNaN(n)) return;
-    let k = (7 * ((((7 * n) % 12 + 12) % 12 + sm + 120) % 12)) % 12; if (k > 6) k -= 12;
-    p.dataset.key = String(k); tick();
+    const mapK = n => { let k = (7 * ((((7 * n) % 12 + 12) % 12 + sm + 120) % 12)) % 12; return k > 6 ? k - 12 : k; };
+    const p = P1(); if (p && p.dataset.key !== undefined && p.dataset.key !== '' && !isNaN(parseInt(p.dataset.key, 10))) p.dataset.key = String(mapK(parseInt(p.dataset.key, 10)));
+    $$('.measure-box[data-key]', wrap).forEach(m => { const n = parseInt(m.dataset.key, 10); if (m.dataset.key !== '' && !isNaN(n)) m.dataset.key = String(mapK(n)); });
+    tick();
   };
   // Shift + clic no debe seleccionar texto del navegador (se veían los "+" azules)
   document.addEventListener('mousedown', e => { if (e.shiftKey && e.target.closest && e.target.closest('.measure-box')) e.preventDefault(); }, true);
@@ -881,6 +929,185 @@
     e.preventDefault(); toggleStemDir();
   });
 
+  /* ---------- Exportación robusta + imprimir a PDF ---------- */
+  function setPageStyle(land) {
+    let ps = $('#pageStyle'); if (!ps) { ps = document.createElement('style'); ps.id = 'pageStyle'; document.head.appendChild(ps); }
+    ps.textContent = '@page{size:A4 ' + (land ? 'landscape' : 'portrait') + ';margin:0}';
+  }
+  function printPDF() {
+    prepareForRender();
+    const done = () => { restoreAfterRender(); removeEventListener('afterprint', done); };
+    addEventListener('afterprint', done); setTimeout(() => window.print(), 80);
+  }
+  W.printPDF = printPDF;
+  async function exportPages(kind) {
+    prepareForRender(); let fallback = false;
+    try {
+      await document.fonts.ready;
+      if (!W.html2canvas || (kind === 'pdf' && !(W.jspdf && W.jspdf.jsPDF))) throw new Error('no cargaron las librerías de exportación (conexión o bloqueador de anuncios)');
+      const ps = $$('.chart-paper', wrap), L = document.body.classList.contains('landscape');
+      const pdf = kind === 'pdf' ? new W.jspdf.jsPDF(L ? 'l' : 'p', 'mm', 'a4') : null;
+      for (let i = 0; i < ps.length; i++) {
+        const c = await html2canvas(ps[i], RENDER_OPTIONS);
+        if (pdf) { if (i) pdf.addPage(); pdf.addImage(c.toDataURL('image/jpeg', 0.98), 'JPEG', 0, 0, L ? 297 : 210, L ? 210 : 297); }
+        else { const a = document.createElement('a'); a.download = slug() + '-page-' + (i + 1) + '.png'; a.href = c.toDataURL('image/png'); a.click(); }
+      }
+      if (pdf) pdf.save(slug() + '.pdf');
+    } catch (e) {
+      console.error(e);
+      const msg = e && e.message ? e.message : String(e);
+      if (kind === 'pdf') fallback = confirm('No se pudo generar el PDF directo:\n' + msg + '\n\n¿Abrir el diálogo de impresión para guardarlo como PDF?');
+      else alert('No se pudo exportar: ' + msg);
+    } finally { restoreAfterRender(); }
+    if (fallback) printPDF();
+  }
+  W.exportAllPagesToPDF = () => exportPages('pdf');
+  W.exportAllPagesToPNG = () => exportPages('png');
+  function addPdfPrint() {
+    const dm = $('.download-menu'); if (!dm || $('#optPrintPDF')) return;
+    const b = document.createElement('button'); b.className = 'download-option'; b.id = 'optPrintPDF'; b.textContent = 'Imprimir / Guardar como PDF (vectorial)'; b.onclick = printPDF; dm.appendChild(b);
+  }
+
+  /* ---------- Dictado de acordes y signos ---------- */
+  const NUMW = { cero: 0, uno: 1, una: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10, once: 11, doce: 12, trece: 13, catorce: 14, quince: 15, dieciseis: 16, diecisiete: 17, dieciocho: 18, diecinueve: 19, veinte: 20, veintiuno: 21, veintidos: 22, veintitres: 23, veinticuatro: 24, veinticinco: 25, veintiseis: 26, veintisiete: 27, veintiocho: 28, veintinueve: 29, treinta: 30, cuarenta: 40, cincuenta: 50, sesenta: 60, setenta: 70, ochenta: 80, noventa: 90 };
+  const ROOTS = { do: 'C', re: 'D', mi: 'E', fa: 'F', sol: 'G', la: 'A', si: 'B', ce: 'C', efe: 'F', ge: 'G', be: 'B', a: 'A', b: 'B', c: 'C', d: 'D', e: 'E', f: 'F', g: 'G' };
+  const ACCW = { sostenido: '♯', bemol: '♭' };
+  const SECW = { intro: 'secIntro', verso: 'secVerse', coro: 'secChorus', puente: 'secBridge', solo: 'secSolo' };
+  const normTxt = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[♯#]/g, ' sostenido ').replace(/♭/g, ' bemol ').replace(/\//g, ' sobre ').replace(/[^a-z0-9\s]/g, ' ').trim();
+  const numAt = (T, i) => {
+    const w = T[i]; if (w === undefined) return null;
+    if (/^\d+$/.test(w)) return { n: +w, len: 1 };
+    if (!(w in NUMW)) return null;
+    const n = NUMW[w];
+    if (n >= 30 && T[i + 1] === 'y' && T[i + 2] in NUMW && NUMW[T[i + 2]] < 10) return { n: n + NUMW[T[i + 2]], len: 3 };
+    return { n, len: 1 };
+  };
+  function parseChord(T, i) {
+    const d = /^([a-g])(m|min|maj|dim|aug|sus)?(\d{1,2})?$/.exec(T[i]);
+    if (T[i].length > 1 && d) return { str: d[1].toUpperCase() + (d[2] === 'min' ? 'm' : d[2] || '') + (d[3] || ''), len: 1 };
+    const r = ROOTS[T[i]]; if (!r) return null;
+    let j = i + 1, acc = '', q = '', maj = false, sus = false, pend = '', bass = ''; const nums = [], alts = [];
+    if (T[j] in ACCW) { acc = ACCW[T[j]]; j++; }
+    for (; j < T.length; j++) {
+      const w = T[j];
+      if (w === 'menor' || w === 'min' || w === 'm') q = 'm';
+      else if (w === 'mayor' || w === 'maj' || w === 'major') maj = true;
+      else if (w === 'disminuido' || w === 'dim') q = 'dim';
+      else if (w === 'semidisminuido') q = 'ø';
+      else if (w === 'aumentado' || w === 'aug') q = 'aug';
+      else if (w === 'suspendido' || w === 'sus') sus = true;
+      else if (w === 'septima') nums.push(7); else if (w === 'sexta') nums.push(6); else if (w === 'novena') nums.push(9); else if (w === 'oncena') nums.push(11);
+      else if (w in ACCW && numAt(T, j + 1)) pend = ACCW[w];
+      else if (numAt(T, j)) { const nn = numAt(T, j); if (pend) { alts.push(pend + nn.n); pend = ''; } else nums.push(nn.n); j += nn.len - 1; }
+      else if (w === 'con' && T[j + 1] === 'bajo') continue;
+      else if (w === 'sobre' || w === 'bajo') {
+        let k = j + 1; if (T[k] === 'en') k++;
+        const br = ROOTS[T[k]]; if (!br) break;
+        bass = br; k++; if (T[k] in ACCW) { bass += ACCW[T[k]]; k++; }
+        j = k - 1;
+      } else break;
+    }
+    let str = r + acc + ({ m: 'm', dim: 'dim', aug: 'aug', 'ø': 'ø' }[q] || '');
+    if (sus) str += 'sus' + (nums.length ? nums.shift() : 4);
+    if (nums.length) { const e = nums.shift(); str += (maj && e >= 7 ? 'maj' : '') + e; nums.forEach(x => { str += 'add' + x; }); }
+    if (alts.length) str += '(' + alts.join(',') + ')';
+    if (bass) str += '/' + bass;
+    return { str, len: j - i };
+  }
+  const measuresAll = () => $$('.measure-box:not(.break-system)', wrap);
+  const selectMeasure = m => { handleMeasureClick(m, null); try { m.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {} };
+  const pickMeasure = n => { const m = measuresAll()[n - 1]; if (m) selectMeasure(m); return m; };
+  const act = f => n => { const m = pickMeasure(n); if (!m) return false; f(m); return true; };
+  const dyn = t => act(() => applyDynamicText(t)), hairp = t => act(() => applyHairpin(t)), note = t => act(() => addAnnotation(t));
+  const CMDS = [
+    ['da capo al coda', note('D.C. al Coda')], ['dal segno al coda', note('D.S. al Coda')],
+    ['inicio de repeticion', act(() => toggleRepeat('start'))], ['abrir repeticion', act(() => toggleRepeat('start'))],
+    ['fin de repeticion', act(() => toggleRepeat('end'))], ['cerrar repeticion', act(() => toggleRepeat('end'))],
+    ['doble barra final', act(() => toggleBarType('double-bar-final'))], ['barra final', act(() => toggleBarType('double-bar-final'))], ['doble barra', act(() => toggleBarType('double-bar-thin'))],
+    ['mezzo piano', dyn('mp')], ['mezzo forte', dyn('mf')], ['forte piano', dyn('fp')], ['pianissimo', dyn('pp')], ['fortissimo', dyn('ff')], ['sforzando', dyn('sfz')], ['piano', dyn('p')], ['forte', dyn('f')],
+    ['decrescendo', hairp('decrescendo')], ['diminuendo', hairp('decrescendo')], ['crescendo', hairp('crescendo')],
+    ['entra banda', act(() => addAnnotation(i18n[currentLang].bandIn))], ['tutti', note('Tutti')], ['corte', act(() => addAnnotation(i18n[currentLang].corte))],
+    ['segno', note('𝄌 Segno')], ['signo', note('𝄌 Segno')], ['coda', note('𝄍 Coda')],
+    ['casilla uno', act(() => applyVolta('1.'))], ['casilla 1', act(() => applyVolta('1.'))], ['casilla dos', act(() => applyVolta('2.'))], ['casilla 2', act(() => applyVolta('2.'))],
+    ['deshacer', () => { undoAction(); return true; }]
+  ].sort((a, b) => b[0].split(' ').length - a[0].split(' ').length);
+  let pos = { m: 1, b: 1 }, lastM = 0, focusM = 0, justWrote = false;
+  function interpret(raw) {
+    const T = normTxt(raw).split(/\s+/).filter(Boolean), acts = []; if (!T.length) return acts;
+    let saved = false; const sv = () => { if (!saved) { saveStateForUndo(); saved = true; } };
+    const tmNow = () => justWrote ? lastM : (focusM || lastM || pos.m);
+    let i = 0;
+    while (i < T.length) {
+      const w = T[i], nn = numAt(T, i + 1);
+      if (w === 'compas' && nn) { pos = { m: nn.n, b: 1 }; focusM = nn.n; justWrote = false; i += 1 + nn.len; continue; }
+      if ((w === 'pulso' || w === 'tiempo' || w === 'beat') && nn) { const b = Math.min(4, Math.max(1, nn.n)); pos = { m: justWrote ? lastM : pos.m, b }; justWrote = false; i += 1 + nn.len; continue; }
+      if (w === 'siguiente' || w === 'proximo') { pos = { m: pos.m + 1, b: 1 }; justWrote = false; i++; continue; }
+      if (w === 'anterior') { pos = { m: Math.max(1, pos.m - 1), b: 1 }; justWrote = false; i++; continue; }
+      if ((w === 'agregar' || w === 'agrega') && nn) { sv(); addMultipleMeasures(Math.min(nn.n, 200)); acts.push('+' + nn.n + ' compases'); i += 1 + nn.len + (T[i + 1 + nn.len] === 'compases' ? 1 : 0); continue; }
+      if (w === 'borrar' || w === 'borra') {
+        let n = tmNow(), len = 1; const n2 = T[i + 1] === 'compas' ? numAt(T, i + 2) : null;
+        if (n2) { n = n2.n; len = 2 + n2.len; }
+        const m = measuresAll()[n - 1]; if (m) { sv(); $$('.chord-input', m).forEach(x => { x.value = ''; }); acts.push('borré el compás ' + n); }
+        i += len; continue;
+      }
+      if (w === 'seccion' || (w === 'nueva' && T[i + 1] === 'seccion')) {
+        const k = w === 'seccion' ? i + 1 : i + 2;
+        if (SECW[T[k]]) { sv(); addSection(i18n[currentLang][SECW[T[k]]]); acts.push('sección ' + T[k]); i = k + 1; continue; }
+      }
+      let hit = false;
+      for (const [ph, fn] of CMDS) {
+        const p = ph.split(' ');
+        if (p.every((x, k) => T[i + k] === x)) { sv(); const tm = tmNow(); if (fn(tm)) acts.push(ph + ' → compás ' + tm); i += p.length; hit = true; break; }
+      }
+      if (hit) continue;
+      const ch = parseChord(T, i);
+      if (ch) {
+        sv();
+        if (pos.m > measuresAll().length) addMultipleMeasures(Math.min(pos.m - measuresAll().length, 300));
+        const m = measuresAll()[pos.m - 1]; ensureRows();
+        const inp = m && $$('.chord-input', m)[pos.b - 1];
+        if (inp) { inp.value = ch.str; formatChordInput(inp); selectMeasure(m); acts.push(ch.str + ' → compás ' + pos.m + (pos.b > 1 ? ', pulso ' + pos.b : '')); }
+        lastM = pos.m; focusM = pos.m; pos = { m: pos.m + 1, b: 1 }; justWrote = true; i += ch.len; continue;
+      }
+      i++;
+    }
+    return acts;
+  }
+  function dictLog(raw, acts) {
+    const el = $('#dictLog'), st = $('#dictStatus'); if (!el) return;
+    const line = document.createElement('div'); line.textContent = acts.length ? '✓ ' + acts.join(' · ') : '· no entendí: «' + raw + '»';
+    el.prepend(line); while (el.children.length > 6) el.lastChild.remove();
+    if (st) st.textContent = 'Escuché: ' + raw;
+  }
+  function handleDictation(raw) { const acts = interpret(raw); dictLog(raw, acts); if (acts.length) { refreshChords(); tick(); } }
+  let rec = null, listening = false;
+  function setDictUI(on) { const b = $('#dictBtn'); if (!b) return; b.classList.toggle('dict-on', on); b.textContent = on ? '■ Detener dictado' : '● Dictar'; }
+  function stopDictation() { listening = false; try { rec && rec.stop(); } catch (e) {} setDictUI(false); }
+  function startDictation() {
+    const SR = W.SpeechRecognition || W.webkitSpeechRecognition;
+    if (!SR) { alert('Tu navegador no permite dictado por voz. Probá con Chrome o Edge, o escribí los comandos en el cuadro de texto.'); return; }
+    pos = { m: 1, b: 1 }; lastM = 0; focusM = 0; justWrote = false;
+    const sel = selectedMeasures[0]; if (sel) pos.m = measuresAll().indexOf(sel) + 1 || 1;
+    rec = new SR(); rec.lang = ($('#dictLang') || {}).value || 'es-AR'; rec.continuous = true; rec.interimResults = true;
+    rec.onresult = e => {
+      let interim = '';
+      for (let k = e.resultIndex; k < e.results.length; k++) { const r = e.results[k]; if (r.isFinal) handleDictation(r[0].transcript); else interim += r[0].transcript; }
+      const st = $('#dictStatus'); if (interim && st) st.textContent = '… ' + interim;
+    };
+    rec.onerror = e => { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { stopDictation(); alert('Hay que permitir el uso del micrófono para dictar.'); } };
+    rec.onend = () => { if (listening) { try { rec.start(); } catch (e) {} } };
+    listening = true; setDictUI(true);
+    try { rec.start(); } catch (e) {}
+  }
+  function addDictationPanel() {
+    const panel = $('.toolbox-panel'); if (!panel || $('#secDict')) return;
+    const sec = document.createElement('div'); sec.className = 'toolbox-section'; sec.id = 'secDict';
+    sec.innerHTML = `<div class="collapsible-header collapsed" onclick="toggleModule(this)">Dictado</div><div class="collapsible-body hidden"><button class="tool-btn primary" id="dictBtn">● Dictar</button><select class="select-input" id="dictLang"><option value="es-AR">Español (Argentina)</option><option value="es-ES">Español (España)</option><option value="es-MX">Español (México)</option></select><input class="select-input" id="dictText" placeholder="o escribí un comando y Enter"><div id="dictStatus" style="font-size:.7em;color:#8ea3b6;min-height:1.2em"></div><div id="dictLog" style="font-size:.7em;color:#b9c7d3;line-height:1.5"></div><div style="font-size:.66em;color:#6f8396;line-height:1.5">Ejemplos: «compás 32, re menor siete» · «sol sobre si» · «la bemol mayor siete pulso 3 do» · «coda» · «crescendo» · «casilla dos» · «nueva sección coro» · «agregar 8 compases» · «deshacer». Sin decir compás, cada acorde va al siguiente.</div></div>`;
+    ($('#modRhythm') ? $('#modRhythm').parentNode : panel.children[0]).after(sec);
+    $('#dictBtn').onclick = () => listening ? stopDictation() : startDictation();
+    $('#dictText').onkeydown = e => { if (e.key === 'Enter' && e.target.value.trim()) { if (!justWrote && !lastM) { const sel = selectedMeasures[0]; if (sel) pos.m = measuresAll().indexOf(sel) + 1 || 1; } handleDictation(e.target.value); e.target.value = ''; } };
+  }
+
   /* ---------- Arranque ---------- */
   let timer = 0;
   const tick = () => { clearTimeout(timer); timer = setTimeout(() => { syncKeyPanel(); ensureHeader(); ensureRows(); layout(false); markRows(); drawTies(); refreshChords(); $$(FX).forEach(deco); save(); }, 150); };
@@ -900,7 +1127,7 @@
     }
     const rb = $('.rhythm-buttons');
     if (rb) { const b = document.createElement('button'); b.className = 'rhythm-btn'; b.title = 'Slash simple'; b.textContent = '/'; b.onclick = () => applySubdivisionRhythm('slash'); rb.appendChild(b); }
-    addRhythmPanel(); addKeyPanel(); addHighlightPanel();
+    addRhythmPanel(); addKeyPanel(); addHighlightPanel(); addDictationPanel(); addPdfPrint();
     $$('.rest-btn .key-badge').forEach(b => b.style.display = 'none');
     const hint = 'Teclas 7,6,5,4,3 | R: silencio | L: ligadura | .: puntillo | X: plica arriba/abajo | Shift+Clic: rango | Ctrl+Z';
     i18n.es.lblRhythmShortcuts = hint; i18n.en.lblRhythmShortcuts = hint.replace('Teclas', 'Keys').replace('silencio', 'rest').replace('ligadura', 'tie').replace('puntillo', 'dot').replace('rango', 'range').replace('plica arriba/abajo', 'stem up/down');
