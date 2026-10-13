@@ -3,6 +3,18 @@
    <script src="chart-studio-patch.js"></script>                                  */
 (function () {
   'use strict';
+  const PATCH_VERSION = 'v13 · 13/10';
+  function showPatchError(e) {
+    console.error('[chart-studio-patch]', e);
+    let b = document.getElementById('patchErr');
+    if (!b) {
+      b = document.createElement('div'); b.id = 'patchErr'; b.title = 'Clic para cerrar';
+      b.style.cssText = 'position:fixed;left:12px;bottom:12px;max-width:560px;z-index:99999;background:#3b0d12;color:#ffd7da;border:1px solid #ff6b6b;border-radius:10px;padding:10px 14px;font:12px Inter,sans-serif;box-shadow:0 0 18px rgba(255,90,90,.35);cursor:pointer';
+      b.onclick = () => b.remove(); document.body.appendChild(b);
+    }
+    b.textContent = 'El parche tuvo un error: ' + (e && e.message ? e.message : e) + '  (clic para cerrar)';
+  }
+  addEventListener('error', ev => { if (/chart-studio-patch/.test(ev.filename || '')) showPatchError(ev.error || ev.message); });
   const W = window, $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const wrap = $('#sheetsContainer');
   const FX = '.section-badge-container,.song2-subtitle-wrapper,.volta-bracket,.custom-tie-overlay,.measure-dynamics-container,.band-annotation';
@@ -1127,7 +1139,9 @@
     }
     const rb = $('.rhythm-buttons');
     if (rb) { const b = document.createElement('button'); b.className = 'rhythm-btn'; b.title = 'Slash simple'; b.textContent = '/'; b.onclick = () => applySubdivisionRhythm('slash'); rb.appendChild(b); }
-    addRhythmPanel(); addKeyPanel(); addHighlightPanel(); addDictationPanel(); addPdfPrint();
+    [addRhythmPanel, addKeyPanel, addHighlightPanel, addDictationPanel, addPdfPrint].forEach(f => { try { f(); } catch (e) { showPatchError(e); } });
+    const pnl = $('.toolbox-panel');
+    if (pnl && !$('#patchVer')) { const v = document.createElement('div'); v.id = 'patchVer'; v.style.cssText = 'font-size:.62em;color:#5b6b7a;text-align:center;padding:8px 0 2px;letter-spacing:.08em'; v.textContent = 'PARCHE ' + PATCH_VERSION; pnl.appendChild(v); }
     $$('.rest-btn .key-badge').forEach(b => b.style.display = 'none');
     const hint = 'Teclas 7,6,5,4,3 | R: silencio | L: ligadura | .: puntillo | X: plica arriba/abajo | Shift+Clic: rango | Ctrl+Z';
     i18n.es.lblRhythmShortcuts = hint; i18n.en.lblRhythmShortcuts = hint.replace('Teclas', 'Keys').replace('silencio', 'rest').replace('ligadura', 'tie').replace('puntillo', 'dot').replace('rango', 'range').replace('plica arriba/abajo', 'stem up/down');
@@ -1138,5 +1152,6 @@
     new MutationObserver(tick).observe(wrap, { childList: true, subtree: true });
     wrap.addEventListener('input', tick);
   }
-  if (document.readyState === 'loading') addEventListener('DOMContentLoaded', init); else init();
+  const safeInit = () => { try { init(); } catch (e) { showPatchError(e); } };
+  if (document.readyState === 'loading') addEventListener('DOMContentLoaded', safeInit); else safeInit();
 })();
