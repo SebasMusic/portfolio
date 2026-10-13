@@ -64,6 +64,7 @@
   .chord-input::placeholder{color:transparent}
   .measure-box:hover .chord-input::placeholder{color:#cbd5e1}
   .sel{display:none}
+  .beat-slot svg{overflow:visible}
   .measure-box{-webkit-user-select:none;user-select:none}
   .measure-box input{-webkit-user-select:text;user-select:text}
   .chart-paper .measure-box.rf{padding-left:calc(6px + var(--sysw,0px))}
@@ -286,9 +287,11 @@
     items.forEach((it, i) => { if (!it.rest && !it.cont && it.dur < 4 && !/[hw]$/.test(it.type)) cur.push(i); else { if (cur.length) groups.push(cur); cur = []; } });
     if (cur.length) groups.push(cur);
     const beamed = new Set(groups.filter(g => g.length > 1).flat());
+    const ups = items.map(it => !!it.up);
+    groups.filter(g => g.length > 1).forEach(g => g.forEach(i => { ups[i] = !!items[g[0]].up; }));
     let s = '<svg viewBox="0 0 40 40" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">';
     items.forEach((it, i) => {
-      const x = xs[i], ty = it.type.replace(/^r/, '');
+      const x = xs[i], ty = it.type.replace(/^r/, ''), up = ups[i];
       s += `<g class="sub-item-target" onclick="handleSubItemClick(this.closest('.beat-slot'),${i},event)"><rect x="${x - 6}" y="0" width="12" height="40" fill="transparent"/>`;
       s += `<rect class="sel sel${i}" x="${x - 6}" y="2" width="12" height="36" fill="none" stroke="#64748b" stroke-width="1" stroke-dasharray="2,2" rx="2"/>`;
       if (it.cont) { s += '</g>'; return; }
@@ -301,12 +304,12 @@
       } else {
         if (ty === 'w') s += `<path fill-rule="evenodd" fill="${K}" d="${wholeD(20, 20)}"/>`;
         else {
-          const hollow = ty === 'h', p = `${x - 4.5},29 ${x - 1.5},29 ${x + 4.5},17 ${x + 1.5},17`;
+          const hollow = ty === 'h', p = up ? `${x - 4.5},29 ${x - 1.5},29 ${x + 4.5},17 ${x + 1.5},17` : `${x - 4.5},24 ${x - 1.5},24 ${x + 4.5},11 ${x + 1.5},11`;
           s += hollow ? `<polygon points="${p}" fill="#fffef9" stroke="${K}" stroke-width="1.3"/>` : `<polygon points="${p}" fill="${K}"/>`;
-          if (ty !== 'slash') s += `<line x1="${x + 3.2}" y1="17" x2="${x + 3.2}" y2="3" stroke="${K}" stroke-width="1.6"/>`;
-          if ((ty === '8' || ty === '16') && !beamed.has(i)) for (let f = 0; f < (ty === '16' ? 2 : 1); f++) s += `<path d="M ${x + 3.2} ${3 + f * 4.5} Q ${x + 9} ${6 + f * 4.5} ${x + 7.5} ${13 + f * 4.5}" fill="none" stroke="${K}" stroke-width="1.8" stroke-linecap="round"/>`;
+          if (ty !== 'slash') s += up ? `<line x1="${x + 3.2}" y1="17" x2="${x + 3.2}" y2="-2" stroke="${K}" stroke-width="1.6"/>` : `<line x1="${x - 3}" y1="24" x2="${x - 3}" y2="42" stroke="${K}" stroke-width="1.6"/>`;
+          if ((ty === '8' || ty === '16') && !beamed.has(i)) for (let f = 0; f < (ty === '16' ? 2 : 1); f++) s += up ? `<path d="M ${x + 3.2} ${-2 + f * 4.5} Q ${x + 9} ${1 + f * 4.5} ${x + 7.5} ${8 + f * 4.5}" fill="none" stroke="${K}" stroke-width="1.8" stroke-linecap="round"/>` : `<path d="M ${x - 3} ${42 - f * 4.5} Q ${x + 4} ${39 - f * 4.5} ${x + 3.5} ${32 - f * 4.5}" fill="none" stroke="${K}" stroke-width="1.8" stroke-linecap="round"/>`;
         }
-        const a = it.articulation, ay = a === 'fermata' ? 6 : 36;
+        const a = it.articulation, ay = a === 'fermata' ? 6 : (up ? 36 : 5);
         if (a === 'staccato') s += `<circle cx="${x}" cy="${ay}" r="1.3" fill="${K}"/>`;
         else if (a === 'staccatissimo') s += `<polygon points="${x - 1.4},${ay - 2} ${x + 1.4},${ay - 2} ${x},${ay + 3}" fill="${K}"/>`;
         else if (a === 'accent') s += `<path d="M ${x - 3.5} ${ay - 2} L ${x + 3.5} ${ay + 0.5} L ${x - 3.5} ${ay + 3}" fill="none" stroke="${K}" stroke-width="1.3"/>`;
@@ -314,17 +317,18 @@
         else if (a === 'marcato') s += `<path d="M ${x - 3} ${ay + 3} L ${x} ${ay - 2} L ${x + 3} ${ay + 3}" fill="none" stroke="${K}" stroke-width="1.3"/>`;
         else if (a === 'fermata') s += `<path d="M ${x - 4.5} ${ay + 3} Q ${x} ${ay - 5} ${x + 4.5} ${ay + 3}" fill="none" stroke="${K}" stroke-width="1.3"/><circle cx="${x}" cy="${ay + 1}" r="1" fill="${K}"/>`;
       }
-      if (it.dot) s += `<circle cx="${x + (it.rest ? 6.5 : 7.5)}" cy="${it.rest ? 19 : 25}" r="1.5" fill="${K}"/>`;
+      if (it.dot) s += `<circle cx="${x + (it.rest ? 6.5 : up ? 7.5 : 7)}" cy="${it.rest ? 19 : up ? 25 : 16.5}" r="1.5" fill="${K}"/>`;
       s += '</g>';
     });
     groups.filter(g => g.length > 1).forEach(g => {
       const ln = (a, b, y) => `<line x1="${a}" y1="${y}" x2="${b}" y2="${y}" stroke="${K}" stroke-width="2.6"/>`;
-      s += ln(xs[g[0]] + 3.2, xs[g[g.length - 1]] + 3.2, 3);
+      const U = !!items[g[0]].up, ox = U ? 3.2 : -3, y1 = U ? -2 : 42, y2 = U ? 2.5 : 37.5;
+      s += ln(xs[g[0]] + ox, xs[g[g.length - 1]] + ox, y1);
       g.forEach((idx, k) => {
         if (items[idx].dur !== 1) return;
-        const x = xs[idx] + 3.2, n = items[g[k + 1]], p = items[g[k - 1]];
-        if (n && n.dur === 1) s += ln(x, xs[g[k + 1]] + 3.2, 7.5);
-        else if (!(p && p.dur === 1)) s += ln(x, x + (n ? 4.5 : -4.5), 7.5);
+        const x = xs[idx] + ox, n = items[g[k + 1]], p = items[g[k - 1]];
+        if (n && n.dur === 1) s += ln(x, xs[g[k + 1]] + ox, y2);
+        else if (!(p && p.dur === 1)) s += ln(x, x + (n ? 4.5 : -4.5), y2);
       });
     });
     slot.innerHTML = s + '</svg>';
@@ -531,11 +535,11 @@
     const sv = $('svg', e.slot); if (!sv) return null;
     const b = sv.getBoundingClientRect();
     const k = Math.min(b.width, b.height) / 40;
-    return { x: b.left + b.width / 2 + (e.x + dx - 20) * k, y: b.top + b.height / 2 + 9.6 * k, paper: e.slot.closest('.chart-paper') };
+    return { x: b.left + b.width / 2 + (e.x + dx - 20) * k, y: b.top + b.height / 2 + (e.it.up ? 9.6 : -10) * k, paper: e.slot.closest('.chart-paper') };
   };
-  function tieArc(paper, x1, y1, x2, y2) {
+  function tieArc(paper, x1, y1, x2, y2, dir) {
     const pr = paper.getBoundingClientRect(), r = v => Math.round(v * 2) / 2;
-    const a = r(x1 - pr.left), b = r(y1 - pr.top), c = r(x2 - pr.left), d = r(y2 - pr.top), h = Math.min(16, Math.abs(c - a) * 0.3 + 5) * 1.3;
+    const a = r(x1 - pr.left), b = r(y1 - pr.top), c = r(x2 - pr.left), d = r(y2 - pr.top), h = Math.min(16, Math.abs(c - a) * 0.3 + 5) * 1.3 * (dir || 1);
     return `<path d="M ${a} ${b} C ${r(a + (c - a) * .2)} ${r(b + h)} ${r(c - (c - a) * .2)} ${r(d + h)} ${c} ${d}" fill="none" stroke="#0f172a" stroke-width="1.7" stroke-linecap="round"/>`;
   }
   function drawTies() {
@@ -544,10 +548,10 @@
       let n = ev[i + 1]; if (n && n.it.cont) n = ev[i + 2];
       if (!e.it.tie || e.it.rest || e.it.cont || !n || n.it.rest) return;
       const A = tiePt(e, 3), B = tiePt(n, -3); if (!A || !B) return;
-      if (A.paper === B.paper && Math.abs(A.y - B.y) < 20 && B.x > A.x) add(A.paper, tieArc(A.paper, A.x, A.y, B.x, B.y));
+      if (A.paper === B.paper && Math.abs(A.y - B.y) < 20 && B.x > A.x) add(A.paper, tieArc(A.paper, A.x, A.y, B.x, B.y, e.it.up ? 1 : -1));
       else {
-        add(A.paper, tieArc(A.paper, A.x, A.y, e.m.getBoundingClientRect().right, A.y));
-        add(B.paper, tieArc(B.paper, n.m.getBoundingClientRect().left, B.y, B.x, B.y));
+        add(A.paper, tieArc(A.paper, A.x, A.y, e.m.getBoundingClientRect().right, A.y, e.it.up ? 1 : -1));
+        add(B.paper, tieArc(B.paper, n.m.getBoundingClientRect().left, B.y, B.x, B.y, n.it.up ? 1 : -1));
       }
     });
     $$('.chart-paper', wrap).forEach(p => {
@@ -853,6 +857,30 @@
   // Shift + clic no debe seleccionar texto del navegador (se veían los "+" azules)
   document.addEventListener('mousedown', e => { if (e.shiftKey && e.target.closest && e.target.closest('.measure-box')) e.preventDefault(); }, true);
 
+  /* ---------- Dirección de plicas (X) ---------- */
+  const beamable = it => !it.rest && !it.cont && it.dur < 4 && !/[hw]$/.test(it.type);
+  W.toggleStemDir = () => {
+    if (activeBeatSlot) {
+      const items = getBeatData(activeBeatSlot).map(norm), i = Math.min(activeSubIndex, items.length - 1);
+      saveStateForUndo();
+      let a = i, b = i;
+      if (beamable(items[i])) { while (a > 0 && beamable(items[a - 1])) a--; while (b < items.length - 1 && beamable(items[b + 1])) b++; }
+      const nu = !items[i].up; for (let k = a; k <= b; k++) items[k].up = nu;
+      setBeatData(activeBeatSlot, items); focusSlot(activeBeatSlot, i);
+    } else if (selectedMeasures.length) {
+      saveStateForUndo();
+      const slots = selectedMeasures.flatMap(m => $$('.beat-slot', m));
+      const first = slots.map(sl => getBeatData(sl)).flat().find(it => !it.rest);
+      const nu = !(first && first.up);
+      slots.forEach(sl => { const its = getBeatData(sl).map(norm); its.forEach(it => { it.up = nu; }); setBeatData(sl, its); });
+    }
+  };
+  addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.key.toLowerCase() !== 'x') return;
+    const a = document.activeElement; if (a && (a.tagName === 'INPUT' || a.isContentEditable)) return;
+    e.preventDefault(); toggleStemDir();
+  });
+
   /* ---------- Arranque ---------- */
   let timer = 0;
   const tick = () => { clearTimeout(timer); timer = setTimeout(() => { syncKeyPanel(); ensureHeader(); ensureRows(); layout(false); markRows(); drawTies(); refreshChords(); $$(FX).forEach(deco); save(); }, 150); };
@@ -874,8 +902,8 @@
     if (rb) { const b = document.createElement('button'); b.className = 'rhythm-btn'; b.title = 'Slash simple'; b.textContent = '/'; b.onclick = () => applySubdivisionRhythm('slash'); rb.appendChild(b); }
     addRhythmPanel(); addKeyPanel(); addHighlightPanel();
     $$('.rest-btn .key-badge').forEach(b => b.style.display = 'none');
-    const hint = 'Teclas 7,6,5,4,3 | R: silencio | L: ligadura | .: puntillo | Shift+Clic: rango | Ctrl+Z';
-    i18n.es.lblRhythmShortcuts = hint; i18n.en.lblRhythmShortcuts = hint.replace('Teclas', 'Keys').replace('silencio', 'rest').replace('ligadura', 'tie').replace('puntillo', 'dot').replace('rango', 'range');
+    const hint = 'Teclas 7,6,5,4,3 | R: silencio | L: ligadura | .: puntillo | X: plica arriba/abajo | Shift+Clic: rango | Ctrl+Z';
+    i18n.es.lblRhythmShortcuts = hint; i18n.en.lblRhythmShortcuts = hint.replace('Teclas', 'Keys').replace('silencio', 'rest').replace('ligadura', 'tie').replace('puntillo', 'dot').replace('rango', 'range').replace('plica arriba/abajo', 'stem up/down');
     applyLanguage(currentLang);
     let land = false; try { land = localStorage.getItem('ccs_orient') === 'l'; } catch (e) {}
     if (land && $('#orientSel')) $('#orientSel').value = 'l';
