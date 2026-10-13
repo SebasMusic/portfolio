@@ -15,11 +15,11 @@
   .chart-paper{background:#fffef9;background-image:radial-gradient(rgba(120,100,60,.05) 1px,transparent 1px);background-size:4px 4px;border:1px solid #e4dcc8;box-shadow:0 1px 1px rgba(0,0,0,.2),0 20px 45px rgba(0,0,0,.55)}
   body.landscape .chart-paper{width:1123px;height:794px;max-height:794px}
   .paper-inner{height:auto!important;flex:1;min-height:0}
-  .chord-input,.chord-display{font-family:var(--chord-font,'Montserrat'),'Inter',sans-serif;font-weight:800;font-size:var(--chord-size,1.3em);letter-spacing:.2px}
+  .chord-input,.chord-display{font-family:var(--chord-font,'Montserrat'),'Inter',sans-serif;font-weight:var(--chord-weight,800);font-size:var(--chord-size,1.3em);letter-spacing:.2px}
   .chord-input:not(:focus){color:transparent}
   .chord-display{position:absolute;left:0;top:14px;white-space:nowrap;pointer-events:none;color:#0f172a;line-height:1.25}
   .chord-input:focus+.chord-display{display:none}
-  .chord-display sup{font-size:.58em;position:relative;top:-.5em;vertical-align:baseline;font-weight:800}
+  .chord-display sup{font-size:.58em;position:relative;top:-.5em;vertical-align:baseline;font-weight:inherit}
   .fx-ui{font:700 11px Inter,sans-serif;color:#64748b;padding:0 3px;user-select:none;cursor:pointer}
   .fx-move{cursor:grab;touch-action:none}
   .fx-del{opacity:0}
@@ -42,7 +42,7 @@
   .exporting .measure-grip{display:none}
   :root{--staff:linear-gradient(#0f172a,#0f172a) 0 25%/100% 1.2px no-repeat,linear-gradient(#0f172a,#0f172a) 0 50%/100% 1.2px no-repeat,linear-gradient(#0f172a,#0f172a) 0 75%/100% 1.2px no-repeat}
   .measures-grid{border-left:0!important}
-  .chart-paper .measure-box{height:46px;margin-top:36px;padding:0 6px;background:var(--staff);border-left:0}
+  .chart-paper .measure-box{height:46px;margin-top:50px;padding:0 6px;background:var(--staff);border-left:0}
   .chart-paper .measure-box.rf{border-left:1.5px solid #0f172a}
   body .measure-box.selected{background:var(--staff),#e8eef6!important}
   .measure-main{padding:0!important}
@@ -58,9 +58,29 @@
   .drag-handle{color:#94a3b8}
   .band-annotation{background:transparent;border:1px dashed #cbd5e1;font-style:italic;font-weight:700;font-size:.78em;color:#0f172a}
   .chart-header{border-bottom:1px solid #cbd5e1;gap:6px}
-  .song-title-editable,.song-title-print{font-family:var(--title-font,'Montserrat'),'Montserrat',sans-serif;font-size:2.1em;letter-spacing:2px}
+  .song-title-editable,.song-title-print{font-family:var(--title-font,'Montserrat'),'Montserrat',sans-serif;font-size:2.1em;letter-spacing:2px;font-weight:var(--title-weight,800)}
   .subtitle-input{width:100%;text-align:center;border:0;outline:0;background:transparent;font:600 .85em 'Inter',sans-serif;text-transform:uppercase;letter-spacing:.6px;color:#334155}
   .subtitle-input::placeholder{color:#cbd5e1}
+  .chord-input::placeholder{color:transparent}
+  .measure-box:hover .chord-input::placeholder{color:#cbd5e1}
+  .sel{display:none}
+  .beat-slot.active-beat[data-sub="0"] .sel0,.beat-slot.active-beat[data-sub="1"] .sel1,.beat-slot.active-beat[data-sub="2"] .sel2,.beat-slot.active-beat[data-sub="3"] .sel3{display:inline}
+  .exporting .sel{display:none!important}
+  .volta-bracket{background:transparent;box-shadow:none;border-right:none;height:16px}
+  .volta-bracket::before,.volta-bracket::after{display:none}
+  :root{--accent:#4cc2ff}
+  body{background:radial-gradient(1200px 600px at 20% -10%,#12202e 0%,#0b0f14 55%,#07090c 100%) fixed}
+  .toolbox-panel{background:linear-gradient(180deg,#14181d,#101317);border:1px solid #1f2a35;max-height:calc(100vh - 48px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2a3b4b transparent}
+  .toolbox-section{border:1px solid transparent;border-radius:10px;padding:8px 10px;transition:border-color .25s,box-shadow .25s,background .25s}
+  .toolbox-section:hover{border-color:rgba(76,194,255,.4);box-shadow:0 0 16px rgba(76,194,255,.22),inset 0 0 14px rgba(76,194,255,.05);background:rgba(76,194,255,.025)}
+  .toolbox-section:has(>.collapsible-header:not(.collapsed)){border-color:rgba(76,194,255,.55);box-shadow:0 0 20px rgba(76,194,255,.28),inset 0 0 16px rgba(76,194,255,.07)}
+  .collapsible-header{color:#8fb7d6;border-bottom-color:#22303c;transition:color .25s,text-shadow .25s}
+  .collapsible-header:not(.collapsed){color:var(--accent);text-shadow:0 0 10px rgba(76,194,255,.6)}
+  .tool-btn,.rhythm-btn,.select-input{transition:border-color .2s,box-shadow .2s,background .2s,color .2s}
+  .tool-btn:hover,.rhythm-btn:hover{border-color:var(--accent);box-shadow:0 0 10px rgba(76,194,255,.4);color:#fff}
+  .tool-btn.primary{background:linear-gradient(180deg,#1f5f8f,#164a72);border-color:var(--accent);color:#e8f6ff;box-shadow:0 0 12px rgba(76,194,255,.35)}
+  .tool-btn.primary:hover{background:linear-gradient(180deg,#2670a6,#1b5a8a);box-shadow:0 0 22px rgba(76,194,255,.65)}
+  .select-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(76,194,255,.25)}
   .tie-layer{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:20;overflow:visible}
   .measure-num{position:absolute;left:-17px;top:-11px;width:14px;text-align:right;font:italic 700 9px Inter,sans-serif;color:#0f172a;pointer-events:none}
   `;
@@ -92,6 +112,7 @@
       let d = inp.nextElementSibling;
       if (!d || !d.classList.contains('chord-display')) { d = document.createElement('div'); d.className = 'chord-display'; inp.after(d); }
       d.innerHTML = chordHTML(inp.value);
+      inp.placeholder = '+';
     });
     spaceChords();
   }
@@ -213,7 +234,7 @@
     const s = document.createElement('div'); s.className = 'beat-slot'; s.style.flex = flex || '1';
     s.onclick = function (e) { selectBeatSlot(this, e, 0); }; setBeatData(s, items); return s;
   };
-  const focusSlot = (s, i) => { $$('.beat-slot.active-beat').forEach(b => b.classList.remove('active-beat')); s.classList.add('active-beat'); activeBeatSlot = s; activeSubIndex = i || 0; renderBeatSlot(s); };
+  const focusSlot = (s, i) => { $$('.beat-slot.active-beat').forEach(b => b.classList.remove('active-beat')); s.classList.add('active-beat'); activeBeatSlot = s; activeSubIndex = i || 0; s.dataset.sub = activeSubIndex; renderBeatSlot(s); };
 
   W.applySubdivisionRhythm = type => {
     if (!activeBeatSlot) return;
@@ -262,7 +283,7 @@
     items.forEach((it, i) => {
       const x = xs[i], ty = it.type.replace(/^r/, '');
       s += `<g class="sub-item-target" onclick="handleSubItemClick(this.closest('.beat-slot'),${i},event)"><rect x="${x - 6}" y="0" width="12" height="40" fill="transparent"/>`;
-      if (on && i === activeSubIndex) s += `<rect x="${x - 6}" y="2" width="12" height="36" fill="none" stroke="#64748b" stroke-width="1" stroke-dasharray="2,2" rx="2"/>`;
+      s += `<rect class="sel sel${i}" x="${x - 6}" y="2" width="12" height="36" fill="none" stroke="#64748b" stroke-width="1" stroke-dasharray="2,2" rx="2"/>`;
       if (it.cont) { s += '</g>'; return; }
       if (it.rest) {
         if (ty === 'w') s += `<line x1="10" y1="14" x2="30" y2="14" stroke="${K}" stroke-width="1"/><rect x="14" y="14" width="12" height="5" fill="${K}"/>`;
@@ -273,12 +294,12 @@
       } else {
         if (ty === 'w') s += `<ellipse cx="20" cy="20" rx="8" ry="5.5" fill="none" stroke="${K}" stroke-width="3" transform="rotate(-15 20 20)"/>`;
         else {
-          const hollow = ty === 'h', p = `${x - 4.5},24 ${x - 1.5},24 ${x + 4.5},11 ${x + 1.5},11`;
+          const hollow = ty === 'h', p = `${x - 4.5},29 ${x - 1.5},29 ${x + 4.5},17 ${x + 1.5},17`;
           s += hollow ? `<polygon points="${p}" fill="#fffef9" stroke="${K}" stroke-width="1.3"/>` : `<polygon points="${p}" fill="${K}"/>`;
-          if (ty !== 'slash') s += `<line x1="${x - 3}" y1="24" x2="${x - 3}" y2="34" stroke="${K}" stroke-width="1.6"/>`;
-          if ((ty === '8' || ty === '16') && !beamed.has(i)) for (let f = 0; f < (ty === '16' ? 2 : 1); f++) s += `<path d="M ${x - 3} ${34 - f * 4.5} Q ${x + 4} ${31 - f * 4.5} ${x + 3.5} ${24 - f * 4.5}" fill="none" stroke="${K}" stroke-width="1.8" stroke-linecap="round"/>`;
+          if (ty !== 'slash') s += `<line x1="${x + 3.2}" y1="17" x2="${x + 3.2}" y2="3" stroke="${K}" stroke-width="1.6"/>`;
+          if ((ty === '8' || ty === '16') && !beamed.has(i)) for (let f = 0; f < (ty === '16' ? 2 : 1); f++) s += `<path d="M ${x + 3.2} ${3 + f * 4.5} Q ${x + 9} ${6 + f * 4.5} ${x + 7.5} ${13 + f * 4.5}" fill="none" stroke="${K}" stroke-width="1.8" stroke-linecap="round"/>`;
         }
-        const a = it.articulation, ay = 5;
+        const a = it.articulation, ay = a === 'fermata' ? 6 : 36;
         if (a === 'staccato') s += `<circle cx="${x}" cy="${ay}" r="1.3" fill="${K}"/>`;
         else if (a === 'staccatissimo') s += `<polygon points="${x - 1.4},${ay - 2} ${x + 1.4},${ay - 2} ${x},${ay + 3}" fill="${K}"/>`;
         else if (a === 'accent') s += `<path d="M ${x - 3.5} ${ay - 2} L ${x + 3.5} ${ay + 0.5} L ${x - 3.5} ${ay + 3}" fill="none" stroke="${K}" stroke-width="1.3"/>`;
@@ -286,17 +307,17 @@
         else if (a === 'marcato') s += `<path d="M ${x - 3} ${ay + 3} L ${x} ${ay - 2} L ${x + 3} ${ay + 3}" fill="none" stroke="${K}" stroke-width="1.3"/>`;
         else if (a === 'fermata') s += `<path d="M ${x - 4.5} ${ay + 3} Q ${x} ${ay - 5} ${x + 4.5} ${ay + 3}" fill="none" stroke="${K}" stroke-width="1.3"/><circle cx="${x}" cy="${ay + 1}" r="1" fill="${K}"/>`;
       }
-      if (it.dot) s += `<circle cx="${x + 6.5}" cy="${it.rest ? 19 : 16.5}" r="1.5" fill="${K}"/>`;
+      if (it.dot) s += `<circle cx="${x + (it.rest ? 6.5 : 7.5)}" cy="${it.rest ? 19 : 25}" r="1.5" fill="${K}"/>`;
       s += '</g>';
     });
     groups.filter(g => g.length > 1).forEach(g => {
       const ln = (a, b, y) => `<line x1="${a}" y1="${y}" x2="${b}" y2="${y}" stroke="${K}" stroke-width="2.6"/>`;
-      s += ln(xs[g[0]] - 3, xs[g[g.length - 1]] - 3, 34);
+      s += ln(xs[g[0]] + 3.2, xs[g[g.length - 1]] + 3.2, 3);
       g.forEach((idx, k) => {
         if (items[idx].dur !== 1) return;
-        const x = xs[idx] - 3, n = items[g[k + 1]], p = items[g[k - 1]];
-        if (n && n.dur === 1) s += ln(x, xs[g[k + 1]] - 3, 29.5);
-        else if (!(p && p.dur === 1)) s += ln(x, x + (n ? 4.5 : -4.5), 29.5);
+        const x = xs[idx] + 3.2, n = items[g[k + 1]], p = items[g[k - 1]];
+        if (n && n.dur === 1) s += ln(x, xs[g[k + 1]] + 3.2, 7.5);
+        else if (!(p && p.dur === 1)) s += ln(x, x + (n ? 4.5 : -4.5), 7.5);
       });
     });
     slot.innerHTML = s + '</svg>';
@@ -445,7 +466,7 @@
 
   /* ---------- Pentagrama de slashes: barras por sistema y numeración ---------- */
   const _av = W.applyVolta;
-  W.applyVolta = n => { _av(n); if (selectedMeasures[0]) $$('.volta-bracket', selectedMeasures[0]).forEach(v => v.style.top = '-58px'); };
+  W.applyVolta = n => { _av(n); if (selectedMeasures[0]) $$('.volta-bracket', selectedMeasures[0]).forEach(v => v.style.top = '-48px'); };
   function markRows() {
     let idx = 0;
     $$('.measures-grid', wrap).forEach(g => {
@@ -495,12 +516,12 @@
   const tiePt = (e, dx) => {
     const sv = $('svg', e.slot); if (!sv) return null;
     const b = sv.getBoundingClientRect();
-    return { x: b.left + (e.x + dx) / 40 * b.width, y: b.top + b.height * 0.22, paper: e.slot.closest('.chart-paper') };
+    return { x: b.left + (e.x + dx) / 40 * b.width, y: b.top + b.height * 0.74, paper: e.slot.closest('.chart-paper') };
   };
   function tieArc(paper, x1, y1, x2, y2) {
     const pr = paper.getBoundingClientRect(), r = v => Math.round(v * 2) / 2;
     const a = r(x1 - pr.left), b = r(y1 - pr.top), c = r(x2 - pr.left), d = r(y2 - pr.top), h = Math.min(16, Math.abs(c - a) * 0.3 + 5) * 1.3;
-    return `<path d="M ${a} ${b} C ${r(a + (c - a) * .2)} ${r(b - h)} ${r(c - (c - a) * .2)} ${r(d - h)} ${c} ${d}" fill="none" stroke="#0f172a" stroke-width="1.7" stroke-linecap="round"/>`;
+    return `<path d="M ${a} ${b} C ${r(a + (c - a) * .2)} ${r(b + h)} ${r(c - (c - a) * .2)} ${r(d + h)} ${c} ${d}" fill="none" stroke="#0f172a" stroke-width="1.7" stroke-linecap="round"/>`;
   }
   function drawTies() {
     const ev = tieEvents(), out = new Map(), add = (p, s) => out.set(p, (out.get(p) || '') + s);
@@ -649,8 +670,9 @@
   addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveFile(); } });
 
   /* ---------- Estilo: tipografías, subtítulo y escritura rápida de acordes ---------- */
-  const FONT_Q = { Montserrat: 'Montserrat:wght@700;800', 'Patrick Hand': 'Patrick+Hand', Kalam: 'Kalam:wght@400;700', 'Space Grotesk': 'Space+Grotesk:wght@500;700', Bungee: 'Bungee', Bangers: 'Bangers', 'Archivo Black': 'Archivo+Black' };
-  const CHORD_FONTS = ['Montserrat', 'Patrick Hand', 'Kalam', 'Space Grotesk'], TITLE_FONTS = ['Montserrat', 'Bungee', 'Bangers', 'Archivo Black'];
+  const FONT_Q = { Montserrat: 'Montserrat:wght@700;800', 'Patrick Hand': 'Patrick+Hand', Kalam: 'Kalam:wght@400;700', 'Space Grotesk': 'Space+Grotesk:wght@500;700', Bungee: 'Bungee', Bangers: 'Bangers', 'Archivo Black': 'Archivo+Black', 'Caveat Brush': 'Caveat+Brush', 'Gochi Hand': 'Gochi+Hand', 'Permanent Marker': 'Permanent+Marker', 'Architects Daughter': 'Architects+Daughter', 'Covered By Your Grace': 'Covered+By+Your+Grace' };
+  const BOLD = { Montserrat: 800, 'Space Grotesk': 700, Kalam: 700 };
+  const CHORD_FONTS = ['Montserrat', 'Patrick Hand', 'Kalam', 'Space Grotesk', 'Caveat Brush', 'Gochi Hand', 'Architects Daughter', 'Covered By Your Grace', 'Permanent Marker'], TITLE_FONTS = ['Montserrat', 'Bungee', 'Bangers', 'Archivo Black', 'Permanent Marker', 'Caveat Brush', 'Gochi Hand', 'Covered By Your Grace'];
   const DEF_STYLE = { chord: 'Montserrat', title: 'Montserrat', size: 1.3 };
   function readStyle() { try { return Object.assign({}, DEF_STYLE, JSON.parse(localStorage.getItem('ccs_style') || '{}')); } catch (e) { return Object.assign({}, DEF_STYLE); } }
   function loadFont(n) {
@@ -663,19 +685,20 @@
     st.size = Math.min(1.6, Math.max(1.0, +st.size || DEF_STYLE.size));
     const r = document.documentElement.style;
     loadFont(st.chord); loadFont(st.title);
-    r.setProperty('--chord-font', "'" + st.chord + "'"); r.setProperty('--title-font', "'" + st.title + "'"); r.setProperty('--chord-size', st.size + 'em');
+    r.setProperty('--chord-font', "'" + st.chord + "'"); r.setProperty('--title-font', "'" + st.title + "'"); r.setProperty('--chord-size', st.size + 'em'); r.setProperty('--chord-weight', BOLD[st.chord] || 400); r.setProperty('--title-weight', BOLD[st.title] || 400);
     try { localStorage.setItem('ccs_style', JSON.stringify(st)); } catch (e) {}
-    try { Promise.all([document.fonts.load('800 1em "' + st.chord + '"'), document.fonts.load('800 1em "' + st.title + '"')]).then(() => { refreshChords(); drawTies(); }); } catch (e) {}
+    try { Promise.all([document.fonts.load((BOLD[st.chord] || 400) + ' 1em "' + st.chord + '"'), document.fonts.load((BOLD[st.title] || 400) + ' 1em "' + st.title + '"')]).then(() => { refreshChords(); drawTies(); }); } catch (e) {}
   }
   function addStylePanel() {
     const panel = $('.toolbox-panel'); if (!panel || $('#fontChord')) return;
     const st = readStyle(), opt = (list, cur) => list.map(f => `<option value="${f}"${f === cur ? ' selected' : ''}>${f}</option>`).join('');
     const lb = t => `<div style="font-size:0.75em;color:var(--text-muted);margin-top:4px">${t}</div>`;
     const sec = document.createElement('div'); sec.className = 'toolbox-section';
-    sec.innerHTML = `<div class="collapsible-header collapsed" onclick="toggleModule(this)">Estilo</div><div class="collapsible-body hidden">${lb('Tipografía de acordes')}<select class="select-input" id="fontChord">${opt(CHORD_FONTS, st.chord)}</select>${lb('Tipografía del título')}<select class="select-input" id="fontTitle">${opt(TITLE_FONTS, st.title)}</select>${lb('Tamaño de acordes')}<input type="range" id="sizeChord" min="1" max="1.6" step="0.05" value="${st.size}" style="width:100%"></div>`;
+    sec.innerHTML = `<div class="collapsible-header collapsed" onclick="toggleModule(this)">Estilo</div><div class="collapsible-body hidden">${lb('Tipografía de acordes')}<select class="select-input" id="fontChord">${opt(CHORD_FONTS, st.chord)}</select>${lb('Tipografía del título')}<select class="select-input" id="fontTitle">${opt(TITLE_FONTS, st.title)}</select>${lb('Tamaño de acordes')}<input type="range" id="sizeChord" min="1" max="1.6" step="0.05" value="${st.size}" style="width:100%"><button class="tool-btn custom-btn" id="btnHand" style="margin-top:8px">✎ Look manuscrito</button></div>`;
     panel.children[0].after(sec);
     const upd = () => applyStyle({ chord: $('#fontChord').value, title: $('#fontTitle').value, size: $('#sizeChord').value });
     ['fontChord', 'fontTitle'].forEach(id => $('#' + id).onchange = upd); $('#sizeChord').oninput = upd;
+    $('#btnHand').onclick = () => { $('#fontChord').value = 'Caveat Brush'; $('#fontTitle').value = 'Permanent Marker'; $('#sizeChord').value = 1.5; upd(); };
   }
   function ensureHeader() {
     const tc = $('.title-container'); if (!tc || $('#subtitleInput')) return;
@@ -702,6 +725,46 @@
     }
   });
 
+  /* ---------- Selección de varios compases y módulo de ritmo ---------- */
+  const _sbs = W.selectBeatSlot, _hsi = W.handleSubItemClick, _ocm = W.openContextMenu;
+  function shiftRange(slot, e) {
+    if (!(e && e.shiftKey && lastSelectedMeasure)) return false;
+    const m = slot.closest('.measure-box'); if (!m) return false;
+    handleMeasureClick(m, e); return true;
+  }
+  W.selectBeatSlot = (slot, e, i) => { if (shiftRange(slot, e)) return; _sbs(slot, e, i || 0); slot.dataset.sub = i || 0; };
+  W.handleSubItemClick = (slot, i, e) => { if (shiftRange(slot, e)) return; _hsi(slot, i, e); slot.dataset.sub = i; };
+  const multi = () => selectedMeasures.length > 1 && selectedMeasures.includes(contextTargetMeasure);
+  W.contextAction = action => {
+    const t = contextTargetMeasure; if (!t) return;
+    const sel = multi() ? selectedMeasures.slice() : [t]; saveStateForUndo();
+    if (action === 'clear') sel.forEach(m => clearMeasureContent(m));
+    else if (action === 'delete') { sel.forEach(m => m.remove()); clearSelections(); cleanupEmptyPages(); }
+    else if (action === 'repeatStart') sel[0].classList.toggle('repeat-start');
+    else if (action === 'repeatEnd') sel[sel.length - 1].classList.toggle('repeat-end');
+    else if (action === 'insertBefore') { sel[0].parentNode.insertBefore(createMeasureElement(), sel[0]); rebindAllEvents(); }
+    else if (action === 'insertAfter') { const l = sel[sel.length - 1]; l.parentNode.insertBefore(createMeasureElement(), l.nextSibling); rebindAllEvents(); }
+    $('#measureContextMenu').style.display = 'none';
+  };
+  W.openContextMenu = (el, e) => {
+    _ocm(el, e);
+    const n = multi() ? selectedMeasures.length : 1;
+    $$('#measureContextMenu .context-menu-item').forEach(b => {
+      const k = ((b.getAttribute('onclick') || '').match(/'(\w+)'/) || [])[1];
+      if (k === 'clear') b.textContent = n > 1 ? 'Limpiar ' + n + ' compases (Supr)' : 'Limpiar contenido (Supr)';
+      if (k === 'delete') b.textContent = n > 1 ? 'Eliminar ' + n + ' compases' : 'Eliminar compás';
+    });
+  };
+  function addRhythmPanel() {
+    const tb = $('.rhythm-toolbar'), panel = $('.toolbox-panel'); if (!tb || !panel || $('#modRhythm')) return;
+    const sec = document.createElement('div'); sec.className = 'toolbox-section';
+    sec.innerHTML = '<div class="collapsible-header" id="modRhythm" onclick="toggleModule(this)">Ritmo y Notación</div><div class="collapsible-body"></div>';
+    const body = $('.collapsible-body', sec), hint = $('#lblRhythmShortcuts');
+    if (hint) { hint.style.cssText = 'font-size:.68em;opacity:.75;line-height:1.5;text-transform:none;letter-spacing:0'; body.appendChild(hint); }
+    $$('.rhythm-buttons', tb).forEach(r => body.appendChild(r));
+    panel.children[0].after(sec); tb.remove();
+  }
+
   /* ---------- Arranque ---------- */
   let timer = 0;
   const tick = () => { clearTimeout(timer); timer = setTimeout(() => { ensureHeader(); ensureRows(); layout(false); markRows(); drawTies(); refreshChords(); $$(FX).forEach(deco); save(); }, 150); };
@@ -721,13 +784,14 @@
     }
     const rb = $('.rhythm-buttons');
     if (rb) { const b = document.createElement('button'); b.className = 'rhythm-btn'; b.title = 'Slash simple'; b.textContent = '/'; b.onclick = () => applySubdivisionRhythm('slash'); rb.appendChild(b); }
+    addRhythmPanel();
     $$('.rest-btn .key-badge').forEach(b => b.style.display = 'none');
     const hint = 'Teclas 7,6,5,4,3 | R: silencio | L: ligadura | .: puntillo | Shift+Clic: rango | Ctrl+Z';
     i18n.es.lblRhythmShortcuts = hint; i18n.en.lblRhythmShortcuts = hint.replace('Teclas', 'Keys').replace('silencio', 'rest').replace('ligadura', 'tie').replace('puntillo', 'dot').replace('rango', 'range');
     applyLanguage(currentLang);
     let land = false; try { land = localStorage.getItem('ccs_orient') === 'l'; } catch (e) {}
     if (land && $('#orientSel')) $('#orientSel').value = 'l';
-    document.fonts.ready.then(() => { ensureHeader(); ensureRows(); setOrientation(land); markRows(); drawTies(); refreshChords(); $$(FX).forEach(deco); });
+    document.fonts.ready.then(() => { ensureHeader(); ensureRows(); $$('.beat-slot', wrap).forEach(sl => renderBeatSlot(sl)); setOrientation(land); markRows(); drawTies(); refreshChords(); $$(FX).forEach(deco); });
     new MutationObserver(tick).observe(wrap, { childList: true, subtree: true });
     wrap.addEventListener('input', tick);
   }
