@@ -3,7 +3,7 @@
    <script src="chart-studio-patch.js"></script>                                  */
 (function () {
   'use strict';
-  const PATCH_VERSION = 'v14 · 13/10';
+  const PATCH_VERSION = 'v15 · 13/10';
   function showPatchError(e) {
     console.error('[chart-studio-patch]', e);
     let b = document.getElementById('patchErr');
@@ -117,6 +117,11 @@
   .btn-grid,.btn-grid-3{gap:4px}
   .key-badge{font-size:.6em}
   .download-option{font-size:.76em}
+  #micBar{display:flex;align-items:center;gap:12px;min-width:0;flex:1;justify-content:center;padding:0 12px}
+  .mic-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;border:1px solid rgba(76,194,255,.5);background:rgba(76,194,255,.12);color:#dff3ff;font:600 .8em Inter,sans-serif;letter-spacing:.04em;cursor:pointer;box-shadow:0 0 16px rgba(76,194,255,.3);transition:box-shadow .2s,background .2s}
+  .mic-btn:hover{background:rgba(76,194,255,.2);box-shadow:0 0 24px rgba(76,194,255,.6)}
+  .mic-btn svg{width:16px;height:16px;fill:currentColor;flex:none}
+  #micStatus{font:.74em Inter,sans-serif;color:#9fb3c6;max-width:440px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   @media print{
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     html,body{background:#fff!important;padding:0!important;margin:0!important;min-height:0!important}
@@ -1098,14 +1103,28 @@
     return acts;
   }
   function dictLog(raw, acts) {
-    const el = $('#dictLog'), st = $('#dictStatus'); if (!el) return;
+    const el = $('#dictLog'), st = $('#dictStatus'); micStatus(acts.length ? '✓ ' + acts.join(' · ') : 'No entendí: «' + raw + '»'); if (!el) return;
     const line = document.createElement('div'); line.textContent = acts.length ? '✓ ' + acts.join(' · ') : '· no entendí: «' + raw + '»';
     el.prepend(line); while (el.children.length > 6) el.lastChild.remove();
     if (st) st.textContent = 'Escuché: ' + raw;
   }
   function handleDictation(raw) { const acts = interpret(raw); dictLog(raw, acts); if (acts.length) { refreshChords(); tick(); } }
   let rec = null, listening = false;
-  function setDictUI(on) { const b = $('#dictBtn'); if (!b) return; b.classList.toggle('dict-on', on); b.textContent = on ? '■ Detener dictado' : '● Dictar'; }
+  function setDictUI(on) {
+    const b = $('#dictBtn'); if (b) { b.classList.toggle('dict-on', on); b.textContent = on ? '■ Detener dictado' : '● Dictar'; }
+    const m = $('#micBtn'); if (m) { m.classList.toggle('dict-on', on); m.setAttribute('aria-pressed', on ? 'true' : 'false'); const t = $('span', m); if (t) t.textContent = on ? 'Escuchando…' : 'Dictar'; }
+    if (!on) micStatus('');
+  }
+  function micStatus(t) { const el = $('#micStatus'); if (el) el.textContent = t; }
+  function addMicBar() {
+    const nav = $('.top-nav'); if (!nav || $('#micBar')) return;
+    const bar = document.createElement('div'); bar.id = 'micBar';
+    bar.innerHTML = '<button class="mic-btn" id="micBtn" aria-pressed="false" title="Dictar acordes y signos con la voz (Alt+M)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14.5a3.5 3.5 0 0 0 3.5-3.5V6a3.5 3.5 0 0 0-7 0v5a3.5 3.5 0 0 0 3.5 3.5zm6-3.5a1 1 0 1 0-2 0 4 4 0 0 1-8 0 1 1 0 1 0-2 0 6 6 0 0 0 5 5.92V19H9.5a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2H13v-2.08A6 6 0 0 0 18 11z"/></svg><span>Dictar</span></button><div id="micStatus"></div>';
+    nav.insertBefore(bar, nav.lastElementChild);
+    $('#micBtn').onclick = () => listening ? stopDictation() : startDictation();
+    if (!(W.SpeechRecognition || W.webkitSpeechRecognition)) $('#micBtn').title = 'Tu navegador no admite dictado por voz (probá Chrome o Edge)';
+  }
+  addEventListener('keydown', e => { if (e.altKey && !e.ctrlKey && !e.metaKey && e.code === 'KeyM') { e.preventDefault(); listening ? stopDictation() : startDictation(); } });
   function stopDictation() { listening = false; try { rec && rec.stop(); } catch (e) {} setDictUI(false); }
   function startDictation() {
     const SR = W.SpeechRecognition || W.webkitSpeechRecognition;
@@ -1116,7 +1135,7 @@
     rec.onresult = e => {
       let interim = '';
       for (let k = e.resultIndex; k < e.results.length; k++) { const r = e.results[k]; if (r.isFinal) handleDictation(r[0].transcript); else interim += r[0].transcript; }
-      const st = $('#dictStatus'); if (interim && st) st.textContent = '… ' + interim;
+      const st = $('#dictStatus'); if (interim) { micStatus('… ' + interim); if (st) st.textContent = '… ' + interim; }
     };
     rec.onerror = e => { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { stopDictation(); alert('Hay que permitir el uso del micrófono para dictar.'); } };
     rec.onend = () => { if (listening) { try { rec.start(); } catch (e) {} } };
@@ -1150,7 +1169,7 @@
     }
     const rb = $('.rhythm-buttons');
     if (rb) { const b = document.createElement('button'); b.className = 'rhythm-btn'; b.title = 'Slash simple'; b.textContent = '/'; b.onclick = () => applySubdivisionRhythm('slash'); rb.appendChild(b); }
-    [addRhythmPanel, addKeyPanel, addHighlightPanel, addDictationPanel, addPdfPrint].forEach(f => { try { f(); } catch (e) { showPatchError(e); } });
+    [addRhythmPanel, addKeyPanel, addHighlightPanel, addDictationPanel, addPdfPrint, addMicBar].forEach(f => { try { f(); } catch (e) { showPatchError(e); } });
     const pnl = $('.toolbox-panel');
     if (pnl && !$('#patchVer')) { const v = document.createElement('div'); v.id = 'patchVer'; v.style.cssText = 'font-size:.62em;color:#5b6b7a;text-align:center;padding:8px 0 2px;letter-spacing:.08em'; v.textContent = 'PARCHE ' + PATCH_VERSION; pnl.appendChild(v); }
     $$('.rest-btn .key-badge').forEach(b => b.style.display = 'none');
