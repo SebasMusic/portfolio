@@ -16,7 +16,6 @@
             display: flex;
             justify-content: center;
         }
-        /* Estilo Realista vs Moderno */
         .piano-realista .key-white {
             background: linear-gradient(to bottom, #ffffff 0%, #f0f0f0 80%, #dedede 100%);
             border: 1px solid #b5b5b5;
@@ -37,7 +36,6 @@
             transform: translateY(2px);
             box-shadow: 0 1px 2px rgba(0,0,0,0.4) !important;
         }
-
         .piano-moderno .key-white {
             background: #ffffff;
             border: 1px solid #e2e8f0;
@@ -58,7 +56,6 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-4 md:p-8">
 
-    <!-- ENCABEZADO -->
     <header class="w-full max-w-6xl text-center mb-6">
         <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
             Generador Didáctico de Piano & Acordes
@@ -66,12 +63,9 @@
         <p class="text-slate-400 text-sm mt-1">Herramienta profesional para profesores y músicos</p>
     </header>
 
-    <!-- PANEL DE CONTROL PRINCIPAL -->
     <main class="w-full max-w-6xl bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col gap-6">
         
-        <!-- Controles de Modo y Entrada -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <!-- Tipo -->
             <div>
                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Modo</label>
                 <select id="modeSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
@@ -80,32 +74,28 @@
                 </select>
             </div>
 
-            <!-- Selector Acorde / Escala -->
             <div id="inputContainer" class="md:col-span-2">
                 <label id="inputLabel" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Acorde (Ej: Cmaj7, Am, F#7)</label>
                 <div class="flex gap-2">
-                    <input type="text" id="chordInput" value="Cmaj7" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm font-mono uppercase focus:ring-2 focus:ring-blue-500 outline-none">
-                    <button id="generateBtn" class="bg-blue-600 hover:bg-blue-500 font-medium px-5 py-2 rounded-lg text-sm transition shadow-lg shadow-blue-600/30">Generar</button>
+                    <input type="text" id="chordInput" value="CMAJ7" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm font-mono uppercase focus:ring-2 focus:ring-blue-500 outline-none">
+                    <button id="generateBtn" onclick="generatePiano()" class="bg-blue-600 hover:bg-blue-500 font-medium px-5 py-2 rounded-lg text-sm transition shadow-lg shadow-blue-600/30">Generar</button>
                 </div>
             </div>
 
-            <!-- Estilo Visual -->
             <div>
                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Estilo Teclado</label>
-                <select id="styleSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <select id="styleSelect" onchange="generatePiano()" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                     <option value="moderno">Moderno (Limpio)</option>
                     <option value="realista">Realista (Acústico)</option>
                 </select>
             </div>
         </div>
 
-        <!-- Opciones Pedagógicas Avanzadas -->
         <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-800 text-sm">
             <div class="flex flex-wrap items-center gap-6">
-                <!-- Indicador en teclas -->
                 <div class="flex items-center gap-2">
                     <span class="text-slate-400 text-xs uppercase font-semibold">Mostrar en teclas:</span>
-                    <select id="labelType" class="bg-slate-800 border border-slate-700 rounded-md px-2 py-1 text-xs outline-none">
+                    <select id="labelType" onchange="generatePiano()" class="bg-slate-800 border border-slate-700 rounded-md px-2 py-1 text-xs outline-none">
                         <option value="note">Nombre de Nota</option>
                         <option value="degree">Grado Armónico</option>
                         <option value="finger">Dedos (1 al 5)</option>
@@ -113,9 +103,8 @@
                     </select>
                 </div>
 
-                <!-- Toggle Semitonos -->
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="showSemitones" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-blue-500" checked>
+                    <input type="checkbox" id="showSemitones" onchange="generatePiano()" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-blue-500" checked>
                     <span class="text-xs font-medium text-slate-300">Mostrar Conteo de Semitonos Paso a Paso</span>
                 </label>
             </div>
@@ -130,7 +119,6 @@
             </div>
         </div>
 
-        <!-- ZONA DE RENDERIZADO DEL PIANO -->
         <div id="captureArea" class="bg-slate-950 p-6 rounded-xl border border-slate-800 flex flex-col items-center justify-center relative min-h-[320px]">
             <div id="pianoWrapper" class="piano-container piano-moderno w-full flex justify-center py-6">
                 <!-- El teclado se inyecta por JavaScript -->
@@ -140,15 +128,12 @@
 
     </main>
 
-    <!-- MODAL DE PALETA DE COLORES PERSONALIZADOS -->
     <div id="colorModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-lg shadow-2xl">
             <h3 class="text-lg font-bold mb-1">Paleta de Colores por Nota</h3>
             <p class="text-slate-400 text-xs mb-4">Personalizá el color identificatorio de cada nota musical.</p>
             
-            <div id="colorGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto pr-2 mb-6">
-                <!-- Se inyectan dinámicamente -->
-            </div>
+            <div id="colorGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto pr-2 mb-6"></div>
 
             <div class="flex justify-end gap-3">
                 <button id="resetColorsBtn" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-xs font-medium">Restaurar Originales</button>
@@ -157,12 +142,10 @@
         </div>
     </div>
 
-    <!-- PIE DE PÁGINA -->
     <footer class="mt-8 text-center text-xs text-slate-500">
         Creado para la enseñanza y producción musical profesional.
     </footer>
 
-    <!-- SCRIPT DE LÓGICA MUSICAL Y RENDERIZADO -->
     <script>
         const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
         
@@ -198,324 +181,316 @@
             'blues': [0, 3, 5, 6, 7, 10, 12]
         };
 
-        document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('modeSelect').addEventListener('change', () => {
             const modeSelect = document.getElementById('modeSelect');
             const chordInput = document.getElementById('chordInput');
             const inputLabel = document.getElementById('inputLabel');
-            const generateBtn = document.getElementById('generateBtn');
+            if (modeSelect.value === 'scale') {
+                inputLabel.textContent = "Escala (Ej: C mayor, A menor)";
+                chordInput.value = "C mayor";
+            } else {
+                inputLabel.textContent = "Acorde (Ej: Cmaj7, Am, F#7)";
+                chordInput.value = "Cmaj7";
+            }
+            generatePiano();
+        });
+
+        document.getElementById('chordInput').addEventListener('keypress', (e) => { 
+            if (e.key === 'Enter') generatePiano(); 
+        });
+
+        function parseInput() {
+            const modeSelect = document.getElementById('modeSelect');
+            const chordInput = document.getElementById('chordInput');
+            const val = chordInput.value.trim();
+            if (modeSelect.value === 'scale') {
+                const parts = val.split(' ');
+                const rootNote = parseNoteName(parts[0]);
+                const scaleType = parts[1] ? parts[1].toLowerCase() : 'mayor';
+                const formula = SCALE_FORMULAS[scaleType] || SCALE_FORMULAS['mayor'];
+                if (rootNote === null) return { notes: [0, 4, 7], rootIndex: 0, names: ['C', 'E', 'G'] };
+                
+                let midiNotes = formula.map(interval => rootNote.index + interval + 36);
+                let names = formula.map(interval => NOTES[(rootNote.index + interval) % 12]);
+                return { notes: midiNotes, rootIndex: rootNote.index + 36, names };
+            } else {
+                const match = val.match(/^([A-G][#b]?)(.*)\$/);
+                if (!match) return { notes: [48, 52, 55], rootIndex: 48, names: ['C', 'E', 'G'] };
+                
+                let rootStr = match[1];
+                if(rootStr === 'Db') rootStr = 'C#';
+                if(rootStr === 'Eb') rootStr = 'D#';
+                if(rootStr === 'Gb') rootStr = 'F#';
+                if(rootStr === 'Ab') rootStr = 'G#';
+                if(rootStr === 'Bb') rootStr = 'A#';
+
+                let chordType = match[2].trim().toLowerCase();
+                let formula = CHORD_FORMULAS[chordType] !== undefined ? CHORD_FORMULAS[chordType] : CHORD_FORMULAS[''];
+                
+                let rootObj = parseNoteName(rootStr);
+                let rootMidi = 48 + rootObj.index;
+                
+                let midiNotes = formula.map(interval => rootMidi + interval);
+                let names = formula.map(interval => NOTES[(rootObj.index + interval) % 12]);
+                return { notes: midiNotes, rootIndex: rootMidi, names };
+            }
+        }
+
+        function parseNoteName(name) {
+            let clean = name.charAt(0).toUpperCase() + name.slice(1);
+            let idx = NOTES.indexOf(clean);
+            if(idx === -1) return { index: 0 };
+            return { index: idx };
+        }
+
+        function generatePiano() {
+            const pianoWrapper = document.getElementById('pianoWrapper');
             const styleSelect = document.getElementById('styleSelect');
             const labelType = document.getElementById('labelType');
             const showSemitones = document.getElementById('showSemitones');
-            const pianoWrapper = document.getElementById('pianoWrapper');
             const semitoneInfo = document.getElementById('semitoneInfo');
-            const downloadBtn = document.getElementById('downloadBtn');
-            const openColorsBtn = document.getElementById('openColorsBtn');
-            const colorModal = document.getElementById('colorModal');
-            const closeColorsBtn = document.getElementById('closeColorsBtn');
-            const resetColorsBtn = document.getElementById('resetColorsBtn');
-            const colorGrid = document.getElementById('colorGrid');
 
-            modeSelect.addEventListener('change', () => {
-                if (modeSelect.value === 'scale') {
-                    inputLabel.textContent = "Escala (Ej: C mayor, A menor)";
-                    chordInput.value = "C mayor";
+            pianoWrapper.className = `piano-container piano-${styleSelect.value} w-full flex justify-center py-6`;
+            pianoWrapper.innerHTML = '';
+            
+            const data = parseInput();
+            const activeMidiSet = new Set(data.notes);
+            const labelMode = labelType.value;
+            const withSemitones = showSemitones.checked;
+
+            const startMidi = 48;
+            const endMidi = 84;
+
+            let whiteKeys = [];
+            let blackKeysMap = {};
+
+            for (let m = startMidi; m <= endMidi; m++) {
+                let noteInOctave = m % 12;
+                let noteName = NOTES[noteInOctave];
+                let isBlack = noteName.includes('#');
+
+                if (!isBlack) {
+                    whiteKeys.push({ midi: m, name: noteName });
                 } else {
-                    inputLabel.textContent = "Acorde (Ej: Cmaj7, Am, F#7)";
-                    chordInput.value = "Cmaj7";
-                }
-                generatePiano();
-            });
-
-            generateBtn.addEventListener('click', generatePiano);
-            chordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') generatePiano(); });
-            styleSelect.addEventListener('change', () => {
-                pianoWrapper.className = `piano-container piano-${styleSelect.value} w-full flex justify-center py-6`;
-                generatePiano();
-            });
-            labelType.addEventListener('change', generatePiano);
-            showSemitones.addEventListener('change', generatePiano);
-
-            function parseInput() {
-                const val = chordInput.value.trim();
-                if (modeSelect.value === 'scale') {
-                    const parts = val.split(' ');
-                    const rootNote = parseNoteName(parts[0]);
-                    const scaleType = parts[1] ? parts[1].toLowerCase() : 'mayor';
-                    const formula = SCALE_FORMULAS[scaleType] || SCALE_FORMULAS['mayor'];
-                    if (rootNote === null) return { notes: [0, 4, 7], rootIndex: 0, names: ['C', 'E', 'G'] };
-                    
-                    let midiNotes = formula.map(interval => rootNote.index + interval + 36);
-                    let names = formula.map(interval => NOTES[(rootNote.index + interval) % 12]);
-                    return { notes: midiNotes, rootIndex: rootNote.index + 36, names };
-                } else {
-                    const match = val.match(/^([A-G][#b]?)(.*)\$/);
-                    if (!match) return { notes: [48, 52, 55], rootIndex: 48, names: ['C', 'E', 'G'] };
-                    
-                    let rootStr = match[1];
-                    if(rootStr === 'Db') rootStr = 'C#';
-                    if(rootStr === 'Eb') rootStr = 'D#';
-                    if(rootStr === 'Gb') rootStr = 'F#';
-                    if(rootStr === 'Ab') rootStr = 'G#';
-                    if(rootStr === 'Bb') rootStr = 'A#';
-
-                    let chordType = match[2].trim().toLowerCase();
-                    let formula = CHORD_FORMULAS[chordType] !== undefined ? CHORD_FORMULAS[chordType] : CHORD_FORMULAS[''];
-                    
-                    let rootObj = parseNoteName(rootStr);
-                    let rootMidi = 48 + rootObj.index;
-                    
-                    let midiNotes = formula.map(interval => rootMidi + interval);
-                    let names = formula.map(interval => NOTES[(rootObj.index + interval) % 12]);
-                    return { notes: midiNotes, rootIndex: rootMidi, names };
+                    blackKeysMap[whiteKeys.length - 1] = { midi: m, name: noteName };
                 }
             }
 
-            function parseNoteName(name) {
-                let clean = name.charAt(0).toUpperCase() + name.slice(1);
-                let idx = NOTES.indexOf(clean);
-                if(idx === -1) return { index: 0 };
-                return { index: idx };
-            }
+            const keyboardContainer = document.createElement('div');
+            keyboardContainer.className = 'relative flex';
+            keyboardContainer.style.height = '200px';
 
-            window.generatePiano = function() {
-                pianoWrapper.innerHTML = '';
-                const data = parseInput();
-                const activeMidiSet = new Set(data.notes);
-                const labelMode = labelType.value;
-                const withSemitones = showSemitones.checked;
+            let whiteKeyWidth = 44;
+            let whiteKeyHeight = 190;
+            let blackKeyWidth = 26;
+            let blackKeyHeight = 120;
 
-                const startMidi = 48;
-                const endMidi = 84;
+            whiteKeys.forEach((wk, index) => {
+                const isActive = activeMidiSet.has(wk.midi);
+                const noteName = wk.name;
+                const color = noteColors[noteName] || '#3b82f6';
 
-                let whiteKeys = [];
-                let blackKeysMap = {};
+                const keyEl = document.createElement('div');
+                keyEl.className = `key-white rounded-b-lg relative cursor-pointer transition-all duration-100 flex flex-col justify-end items-center pb-3 ${isActive ? 'active' : ''}`;
+                keyEl.style.width = `${whiteKeyWidth}px`;
+                keyEl.style.height = `${whiteKeyHeight}px`;
+                keyEl.style.zIndex = '1';
 
-                for (let m = startMidi; m <= endMidi; m++) {
-                    let noteInOctave = m % 12;
-                    let noteName = NOTES[noteInOctave];
-                    let isBlack = noteName.includes('#');
-
-                    if (!isBlack) {
-                        whiteKeys.push({ midi: m, name: noteName });
-                    } else {
-                        blackKeysMap[whiteKeys.length - 1] = { midi: m, name: noteName };
-                    }
+                if (isActive) {
+                    keyEl.style.backgroundColor = color;
+                    keyEl.style.borderColor = color;
                 }
 
-                const keyboardContainer = document.createElement('div');
-                keyboardContainer.className = 'relative flex';
-                keyboardContainer.style.height = '200px';
+                if (labelMode !== 'none' && isActive) {
+                    let labelText = getLabelText(wk.midi, data, labelMode);
+                    const badge = document.createElement('div');
+                    badge.className = 'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-md mb-1';
+                    badge.style.backgroundColor = styleSelect.value === 'realista' ? 'rgba(0,0,0,0.7)' : '#0f172a';
+                    badge.textContent = labelText;
+                    keyEl.appendChild(badge);
+                }
 
-                let whiteKeyWidth = 44;
-                let whiteKeyHeight = 190;
-                let blackKeyWidth = 26;
-                let blackKeyHeight = 120;
+                keyboardContainer.appendChild(keyEl);
+            });
 
-                whiteKeys.forEach((wk, index) => {
-                    const isActive = activeMidiSet.has(wk.midi);
-                    const noteName = wk.name;
-                    const color = noteColors[noteName] || '#3b82f6';
+            Object.keys(blackKeysMap).forEach(whiteIdxStr => {
+                let whiteIdx = parseInt(whiteIdxStr);
+                let bk = blackKeysMap[whiteIdx];
+                const isActive = activeMidiSet.has(bk.midi);
+                const noteName = bk.name;
+                const color = noteColors[noteName] || '#8b5cf6';
 
-                    const keyEl = document.createElement('div');
-                    keyEl.className = `key-white rounded-b-lg relative cursor-pointer transition-all duration-100 flex flex-col justify-end items-center pb-3 ${isActive ? 'active' : ''}`;
-                    keyEl.style.width = `${whiteKeyWidth}px`;
-                    keyEl.style.height = `${whiteKeyHeight}px`;
-                    keyEl.style.zIndex = '1';
+                let leftPos = (whiteIdx + 1) * whiteKeyWidth - (blackKeyWidth / 2);
 
-                    if (isActive) {
-                        keyEl.style.backgroundColor = color;
-                        keyEl.style.borderColor = color;
-                    }
+                const keyEl = document.createElement('div');
+                keyEl.className = `key-black rounded-b-md absolute cursor-pointer transition-all duration-100 flex flex-col justify-end items-center pb-2 ${isActive ? 'active' : ''}`;
+                keyEl.style.width = `${blackKeyWidth}px`;
+                keyEl.style.height = `${blackKeyHeight}px`;
+                keyEl.style.left = `${leftPos}px`;
+                keyEl.style.top = '0px';
+                keyEl.style.zIndex = '10';
 
-                    if (labelMode !== 'none' && isActive) {
-                        let labelText = getLabelText(wk.midi, data, labelMode);
-                        const badge = document.createElement('div');
-                        badge.className = 'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-md mb-1';
-                        badge.style.backgroundColor = styleSelect.value === 'realista' ? 'rgba(0,0,0,0.7)' : '#0f172a';
-                        badge.textContent = labelText;
-                        keyEl.appendChild(badge);
-                    }
+                if (isActive) {
+                    keyEl.style.backgroundColor = color;
+                    keyEl.style.borderColor = color;
+                }
 
-                    keyboardContainer.appendChild(keyEl);
-                });
+                if (labelMode !== 'none' && isActive) {
+                    let labelText = getLabelText(bk.midi, data, labelMode);
+                    const badge = document.createElement('div');
+                    badge.className = 'w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-md mb-1';
+                    badge.style.backgroundColor = 'rgba(0,0,0,0.8)';
+                    badge.textContent = labelText;
+                    keyEl.appendChild(badge);
+                }
 
-                Object.keys(blackKeysMap).forEach(whiteIdxStr => {
-                    let whiteIdx = parseInt(whiteIdxStr);
-                    let bk = blackKeysMap[whiteIdx];
-                    const isActive = activeMidiSet.has(bk.midi);
-                    const noteName = bk.name;
-                    const color = noteColors[noteName] || '#8b5cf6';
+                keyboardContainer.appendChild(keyEl);
+            });
 
-                    let leftPos = (whiteIdx + 1) * whiteKeyWidth - (blackKeyWidth / 2);
+            if (withSemitones && data.notes.length > 1) {
+                let sortedNotes = [...data.notes].sort((a, b) => a - b);
+                let semitoneSummaryText = [];
 
-                    const keyEl = document.createElement('div');
-                    keyEl.className = `key-black rounded-b-md absolute cursor-pointer transition-all duration-100 flex flex-col justify-end items-center pb-2 ${isActive ? 'active' : ''}`;
-                    keyEl.style.width = `${blackKeyWidth}px`;
-                    keyEl.style.height = `${blackKeyHeight}px`;
-                    keyEl.style.left = `${leftPos}px`;
-                    keyEl.style.top = '0px';
-                    keyEl.style.zIndex = '10';
+                for (let i = 0; i < sortedNotes.length - 1; i++) {
+                    let n1 = sortedNotes[i];
+                    let n2 = sortedNotes[i+1];
+                    let distance = n2 - n1;
 
-                    if (isActive) {
-                        keyEl.style.backgroundColor = color;
-                        keyEl.style.borderColor = color;
-                    }
+                    semitoneSummaryText.push(`${NOTES[n1%12]}→${NOTES[n2%12]}: +${distance} sem.`);
 
-                    if (labelMode !== 'none' && isActive) {
-                        let labelText = getLabelText(bk.midi, data, labelMode);
-                        const badge = document.createElement('div');
-                        badge.className = 'w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-md mb-1';
-                        badge.style.backgroundColor = 'rgba(0,0,0,0.8)';
-                        badge.textContent = labelText;
-                        keyEl.appendChild(badge);
-                    }
+                    let pos1 = getMidiScreenPosition(n1, whiteKeys, blackKeysMap, whiteKeyWidth, blackKeyWidth);
+                    let pos2 = getMidiScreenPosition(n2, whiteKeys, blackKeysMap, whiteKeyWidth, blackKeyWidth);
 
-                    keyboardContainer.appendChild(keyEl);
-                });
+                    if (pos1 && pos2) {
+                        let midX = (pos1.x + pos2.x) / 2;
+                        const arcBadge = document.createElement('div');
+                        arcBadge.className = 'absolute bg-slate-900 border border-blue-500/50 text-blue-400 font-mono text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg z-30 flex items-center gap-1';
+                        arcBadge.style.left = `${midX}px`;
+                        arcBadge.style.top = `-18px`;
+                        arcBadge.style.transform = 'translateX(-50%)';
+                        arcBadge.textContent = `+${distance} sem.`;
+                        keyboardContainer.appendChild(arcBadge);
 
-                if (withSemitones && data.notes.length > 1) {
-                    let sortedNotes = [...data.notes].sort((a, b) => a - b);
-                    let semitoneSummaryText = [];
-
-                    for (let i = 0; i < sortedNotes.length - 1; i++) {
-                        let n1 = sortedNotes[i];
-                        let n2 = sortedNotes[i+1];
-                        let distance = n2 - n1;
-
-                        semitoneSummaryText.push(`${NOTES[n1%12]}→${NOTES[n2%12]}: +${distance} sem.`);
-
-                        let pos1 = getMidiScreenPosition(n1, whiteKeys, blackKeysMap, whiteKeyWidth, blackKeyWidth);
-                        let pos2 = getMidiScreenPosition(n2, whiteKeys, blackKeysMap, whiteKeyWidth, blackKeyWidth);
-
-                        if (pos1 && pos2) {
-                            let midX = (pos1.x + pos2.x) / 2;
-                            const arcBadge = document.createElement('div');
-                            arcBadge.className = 'absolute bg-slate-900 border border-blue-500/50 text-blue-400 font-mono text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg z-30 flex items-center gap-1';
-                            arcBadge.style.left = `${midX}px`;
-                            arcBadge.style.top = `-18px`;
-                            arcBadge.style.transform = 'translateX(-50%)';
-                            arcBadge.textContent = `+${distance} sem.`;
-                            keyboardContainer.appendChild(arcBadge);
-
-                            for (let step = 1; step < distance; step++) {
-                                let intermediateMidi = n1 + step;
-                                let intPos = getMidiScreenPosition(intermediateMidi, whiteKeys, blackKeysMap, whiteKeyWidth, blackKeyWidth);
-                                if (intPos) {
-                                    const stepNum = document.createElement('div');
-                                    stepNum.className = 'absolute text-slate-300 font-bold text-[10px] z-20 pointer-events-none bg-slate-800/90 w-4 h-4 rounded-full flex items-center justify-center shadow';
-                                    stepNum.style.left = `${intPos.x}px`;
-                                    stepNum.style.top = `60px`;
-                                    stepNum.style.transform = 'translateX(-50%)';
-                                    stepNum.textContent = step;
-                                    keyboardContainer.appendChild(stepNum);
-                                }
+                        for (let step = 1; step < distance; step++) {
+                            let intermediateMidi = n1 + step;
+                            let intPos = getMidiScreenPosition(intermediateMidi, whiteKeys, blackKeysMap, whiteKeyWidth, blackKeyWidth);
+                            if (intPos) {
+                                const stepNum = document.createElement('div');
+                                stepNum.className = 'absolute text-slate-300 font-bold text-[10px] z-20 pointer-events-none bg-slate-800/90 w-4 h-4 rounded-full flex items-center justify-center shadow';
+                                stepNum.style.left = `${intPos.x}px`;
+                                stepNum.style.top = `60px`;
+                                stepNum.style.transform = 'translateX(-50%)';
+                                stepNum.textContent = step;
+                                keyboardContainer.appendChild(stepNum);
                             }
                         }
                     }
-                    semitoneInfo.textContent = `Distancias entre notas: ${semitoneSummaryText.join(' | ')}`;
-                } else {
-                    semitoneInfo.textContent = '';
                 }
-
-                pianoWrapper.appendChild(keyboardContainer);
+                semitoneInfo.textContent = `Distancias entre notas: ${semitoneSummaryText.join(' | ')}`;
+            } else {
+                semitoneInfo.textContent = '';
             }
 
-            function getMidiScreenPosition(midi, whiteKeys, blackKeysMap, whiteKeyWidth, blackKeyWidth) {
-                let whiteIndex = whiteKeys.findIndex(wk => wk.midi === midi);
-                if (whiteIndex !== -1) {
-                    return { x: (whiteIndex * whiteKeyWidth) + (whiteKeyWidth / 2) };
-                }
-                for (let wIdx in blackKeysMap) {
-                    if (blackKeysMap[wIdx].midi === midi) {
-                        let wIdxNum = parseInt(wIdx);
-                        let xPos = (wIdxNum + 1) * whiteKeyWidth;
-                        return { x: xPos };
-                    }
-                }
-                return null;
+            pianoWrapper.appendChild(keyboardContainer);
+        }
+
+        function getMidiScreenPosition(midi, whiteKeys, blackKeysMap, whiteKeyWidth, blackKeyWidth) {
+            let whiteIndex = whiteKeys.findIndex(wk => wk.midi === midi);
+            if (whiteIndex !== -1) {
+                return { x: (whiteIndex * whiteKeyWidth) + (whiteKeyWidth / 2) };
             }
+            for (let wIdx in blackKeysMap) {
+                if (blackKeysMap[wIdx].midi === midi) {
+                    let wIdxNum = parseInt(wIdx);
+                    let xPos = (wIdxNum + 1) * whiteKeyWidth;
+                    return { x: xPos };
+                }
+            }
+            return null;
+        }
 
-            function getLabelText(midi, data, labelMode) {
-                let noteIdx = midi % 12;
-                let noteName = NOTES[noteIdx];
+        function getLabelText(midi, data, labelMode) {
+            let noteIdx = midi % 12;
+            let noteName = NOTES[noteIdx];
 
-                if (labelMode === 'note') {
-                    return noteName;
-                } else if (labelMode === 'degree') {
-                    let indexInChord = data.notes.indexOf(midi);
-                    if (indexInChord !== -1) {
-                        const degrees = ['1ª', '3ª', '5ª', '7ª', '9ª', '11ª', '13ª'];
-                        return degrees[indexInChord] || `${indexInChord+1}º`;
-                    }
-                    return noteName;
-                } else if (labelMode === 'finger') {
-                    let indexInChord = data.notes.indexOf(midi);
-                    const fingers = ['1', '2', '3', '4', '5', '1', '2'];
-                    return fingers[indexInChord % fingers.length];
+            if (labelMode === 'note') {
+                return noteName;
+            } else if (labelMode === 'degree') {
+                let indexInChord = data.notes.indexOf(midi);
+                if (indexInChord !== -1) {
+                    const degrees = ['1ª', '3ª', '5ª', '7ª', '9ª', '11ª', '13ª'];
+                    return degrees[indexInChord] || `${indexInChord+1}º`;
                 }
                 return noteName;
+            } else if (labelMode === 'finger') {
+                let indexInChord = data.notes.indexOf(midi);
+                const fingers = ['1', '2', '3', '4', '5', '1', '2'];
+                return fingers[indexInChord % fingers.length];
             }
+            return noteName;
+        }
 
-            openColorsBtn.addEventListener('click', () => {
-                renderColorGrid();
-                colorModal.classList.remove('hidden');
-                colorModal.classList.add('flex');
-            });
+        document.getElementById('openColorsBtn').addEventListener('click', () => {
+            renderColorGrid();
+            document.getElementById('colorModal').classList.remove('hidden');
+            document.getElementById('colorModal').classList.add('flex');
+        });
 
-            closeColorsBtn.addEventListener('click', () => {
-                colorModal.classList.add('hidden');
-                colorModal.classList.remove('flex');
-                localStorage.setItem('piano_note_colors', JSON.stringify(noteColors));
-                generatePiano();
-            });
-
-            resetColorsBtn.addEventListener('click', () => {
-                noteColors = {...DEFAULT_NOTE_COLORS};
-                renderColorGrid();
-                localStorage.setItem('piano_note_colors', JSON.stringify(noteColors));
-                generatePiano();
-            });
-
-            function renderColorGrid() {
-                colorGrid.innerHTML = '';
-                NOTES.forEach(note => {
-                    const item = document.createElement('div');
-                    item.className = 'flex items-center justify-between bg-slate-800 p-2.5 rounded-xl border border-slate-700';
-                    
-                    const label = document.createElement('span');
-                    label.className = 'font-mono font-bold text-sm';
-                    label.textContent = note;
-
-                    const input = document.createElement('input');
-                    input.type = 'color';
-                    input.value = noteColors[note] || '#3b82f6';
-                    input.className = 'w-8 h-8 rounded border-0 bg-transparent cursor-pointer';
-                    input.addEventListener('input', (e) => {
-                        noteColors[note] = e.target.value;
-                    });
-
-                    item.appendChild(label);
-                    item.appendChild(input);
-                    colorGrid.appendChild(item);
-                });
-            }
-
-            downloadBtn.addEventListener('click', () => {
-                const captureArea = document.getElementById('captureArea');
-                html2canvas(captureArea, {
-                    scale: 3,
-                    backgroundColor: '#020617',
-                    logging: false
-                }).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = `piano-${chordInput.value.replace(/\s+/g, '_')}.png`;
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
-                });
-            });
-
+        document.getElementById('closeColorsBtn').addEventListener('click', () => {
+            document.getElementById('colorModal').classList.add('hidden');
+            document.getElementById('colorModal').classList.remove('flex');
+            localStorage.setItem('piano_note_colors', JSON.stringify(noteColors));
             generatePiano();
         });
+
+        document.getElementById('resetColorsBtn').addEventListener('click', () => {
+            noteColors = {...DEFAULT_NOTE_COLORS};
+            renderColorGrid();
+            localStorage.setItem('piano_note_colors', JSON.stringify(noteColors));
+            generatePiano();
+        });
+
+        function renderColorGrid() {
+            const colorGrid = document.getElementById('colorGrid');
+            colorGrid.innerHTML = '';
+            NOTES.forEach(note => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between bg-slate-800 p-2.5 rounded-xl border border-slate-700';
+                
+                const label = document.createElement('span');
+                label.className = 'font-mono font-bold text-sm';
+                label.textContent = note;
+
+                const input = document.createElement('input');
+                input.type = 'color';
+                input.value = noteColors[note] || '#3b82f6';
+                input.className = 'w-8 h-8 rounded border-0 bg-transparent cursor-pointer';
+                input.addEventListener('input', (e) => {
+                    noteColors[note] = e.target.value;
+                });
+
+                item.appendChild(label);
+                item.appendChild(input);
+                colorGrid.appendChild(item);
+            });
+        }
+
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const captureArea = document.getElementById('captureArea');
+            html2canvas(captureArea, {
+                scale: 3,
+                backgroundColor: '#020617',
+                logging: false
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `piano-${document.getElementById('chordInput').value.replace(/\s+/g, '_')}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        });
+
+        // Ejecutar al cargar la página
+        generatePiano();
     </script>
 </body>
 </html>
