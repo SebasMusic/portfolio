@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Acordes y Escalas de Piano - Pedagógico</title>
+    <!-- Tailwind CSS para diseño moderno -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- html2canvas para exportar la imagen en HD -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        .piano-container {
+            user-select: none;
+            overflow-x: auto;
+        }
+        /* Estilo Realista vs Moderno */
+        .piano-realista .key-white {
+            background: linear-gradient(to bottom, #ffffff 0%, #f0f0f0 80%, #dedede 100%);
+            border: 1px solid #b5b5b5;
+            box-shadow: inset 0 1px 0 #fff, 0 4px 6px rgba(0,0,0,0.15);
+        }
+        .piano-realista .key-white.active {
+            background: linear-gradient(to bottom, #e0e0e0 0%, #d0d0d0 100%) !important;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.3) !important;
+            transform: translateY(3px);
+        }
+        .piano-realista .key-black {
+            background: linear-gradient(to bottom, #444 0%, #222 70%, #111 100%);
+            border: 1px solid #000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        .piano-realista .key-black.active {
+            background: linear-gradient(to bottom, #222 0%, #000 100%) !important;
+            transform: translateY(2px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.4) !important;
+        }
+
+        .piano-moderno .key-white {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .piano-moderno .key-white.active {
+            transform: translateY(2px);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .piano-moderno .key-black {
+            background: #1e293b;
+            border: 1px solid #0f172a;
+        }
+        .piano-moderno .key-black.active {
+            transform: translateY(2px);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-4 md:p-8">
+
+    <!-- ENCABEZADO -->
+    <header class="w-full max-w-6xl text-center mb-6">
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
+            Generador Didáctico de Piano & Acordes
+        </h1>
+        <p class="text-slate-400 text-sm mt-1">Herramienta profesional para profesores y músicos</p>
+    </header>
+
+    <!-- PANEL DE CONTROL PRINCIPAL -->
+    <main class="w-full max-w-6xl bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col gap-6">
+        
+        <!-- Controles de Modo y Entrada -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <!-- Tipo -->
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Modo</label>
+                <select id="modeSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="chord">Acorde Individual</option>
+                    <option value="scale">Escala Musical</option>
+                </select>
+            </div>
+
+            <!-- Selector Acorde / Escala -->
+            <div id="inputContainer" class="md:col-span-2">
+                <label id="inputLabel" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Acorde (Ej: Cmaj7, Am, F#7)</label>
+                <div class="flex gap-2">
+                    <input type="text" id="chordInput" value="Cmaj7" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm font-mono uppercase focus:ring-2 focus:ring-blue-500 outline-none">
+                    <button id="generateBtn" class="bg-blue-600 hover:bg-blue-500 font-medium px-5 py-2 rounded-lg text-sm transition shadow-lg shadow-blue-600/30">Generar</button>
+                </div>
+            </div>
+
+            <!-- Estilo Visual -->
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Estilo Teclado</label>
+                <select id="styleSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="moderno">Moderno (Limpio)</option>
+                    <option value="realista">Realista (Acústico)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Opciones Pedagógicas Avanzadas -->
+        <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-800 text-sm">
+            <div class="flex flex-wrap items-center gap-6">
+                <!-- Indicador en teclas -->
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-400 text-xs uppercase font-semibold">Mostrar en teclas:</span>
+                    <select id="labelType" class="bg-slate-800 border border-slate-700 rounded-md px-2 py-1 text-xs outline-none">
+                        <option value="note">Nombre de Nota</option>
+                        <option value="degree">Grado Armónico</option>
+                        <option value="finger">Dedos (1 al 5)</option>
+                        <option value="none">Ninguno</option>
+                    </select>
+                </div>
+
+                <!-- Toggle Semitonos -->
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="showSemitones" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-blue-500" checked>
+                    <span class="text-xs font-medium text-slate-300">Mostrar Conteo de Semitonos Paso a Paso</span>
+                </label>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button id="openColorsBtn" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+                    🎨 Personalizar Colores
+                </button>
+                <button id="downloadBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-1.5 rounded-lg text-xs transition shadow-lg shadow-emerald-600/20 flex items-center gap-1.5">
+                    📥 Descargar Imagen HD (PDF)
+                </button>
+            </div>
+        </div>
+
+        <!-- ZONA DE RENDERIZADO DEL PIANO -->
+        <div id="captureArea" class="bg-slate-950 p-6 rounded-xl border border-slate-800 flex flex-col items-center justify-center relative min-h-[320px]">
+            <div id="pianoWrapper" class="piano-container piano-moderno w-full flex justify-center py-6">
+                <!-- El teclado se inyecta por JavaScript -->
+            </div>
+            <div id="semitoneInfo" class="text-xs text-slate-400 mt-2 font-mono text-center"></div>
+        </div>
+
+    </main>
+
+    <!-- MODAL DE PALETA DE COLORES PERSONALIZADOS -->
+    <div id="colorModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+            <h3 class="text-lg font-bold mb-1">Paleta de Colores por Nota</h3>
+            <p class="text-slate-400 text-xs mb-4">Personalizá el color identificatorio de cada nota musical.</p>
+            
+            <div id="colorGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto pr-2 mb-6">
+                <!-- Se inyectan dinámicamente -->
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button id="resetColorsBtn" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-xs font-medium">Restaurar Originales</button>
+                <button id="closeColorsBtn" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-xs font-medium">Guardar y Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="mt-8 text-center text-xs text-slate-500">
+        Creado para la enseñanza y producción musical profesional.
+    </footer>
+
+    <!-- SCRIPT DE LÓGICA MUSICAL Y RENDERIZADO -->
+    <script>
+        const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        
+        // Colores por defecto para cada nota
+        const DEFAULT_NOTE_COLORS = {
+            'C': '#06b6d4',  // Cyan
+            'C#': '#8b5cf6', // Purple
+            'D': '#3b82f6',  // Blue
+            'D#': '#ec4899', // Pink
+            'E': '#10b981',  // Emerald
+            'F': '#f59e0b',  // Amber
+            'F#': '#6366f1', // Indigo
+            'G': '#f97316',  // Orange
+            'G#': '#14b8a6', // Teal
+            'A': '#ef4444',  // Red
+            'A#': '#a855f7', // Violet
+            'B': '#84cc16'   // Lime
+        };
+
+        let noteColors = JSON.parse(localStorage.getItem('piano_note_colors')) || {...DEFAULT_NOTE_COLORS};
+
+        // Fórmulas de acordes
+        const CHORD_FORMULAS = {
+            '': [0, 4, 7],
+            'm': [0, 3, 7],
+            'maj7': [0, 4, 7, 11],
+            'm7': [0, 3, 7, 10],
+            '7': [0, 4, 7, 10],
+            'dim': [0, 3, 6],
+            'dim7': [0, 3, 6, 9],
+            'aug': [0, 4, 8],
+            'sus4': [0, 5, 7],
+            'sus2': [0, 2, 7],
+            '6': [0, 4, 7, 9],
+            'm6': [0, 3, 7, 9],
+            'add9': [0, 4, 7, 14]
+        };
+
+        // Fórmulas de escalas
+        const SCALE_FORMULAS = {
+            'mayor': [0, 2, 4, 5, 7, 9, 11, 12],
+            'menor': [0, 2, 3, 5, 7, 8, 10, 12],
+            'pentatonica_mayor': [0, 2, 4, 7, 9, 12],
+            'pentatonica_menor': [0, 3, 5, 7, 10, 12],
+            'blues': [0, 3, 5, 6, 7, 10, 12]
+        };
+
+        // Elementos DOM
+        const modeSelect = document.getElementById('modeSelect');
+        const chordInput = document.getElementById('chordInput');
+        const inputLabel = document.getElementById('inputLabel');
+        const generateBtn = document.getElementById('generateBtn');
+        const styleSelect = document.getElementById('styleSelect');
+        const labelType = document.getElementById('labelType');
+        const showSemitones = document.getElementById('showSemitones');
+        const pianoWrapper = document.getElementById('pianoWrapper');
+        const semitoneInfo = document.getElementById('semitoneInfo');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const openColorsBtn = document.getElementById('openColorsBtn');
+        const colorModal = document.getElementById('colorModal');
+        const closeColorsBtn = document.getElementById('closeColorsBtn');
+        const resetColorsBtn = document.getElementById('resetColorsBtn');
+        const colorGrid = document.getElementById('colorGrid');
+
+        // Cambiar modo acorde/escala
+        modeSelect.addEventListener('change', () => {
+            if (modeSelect.value === 'scale') {
+                inputLabel.textContent = "Escala (Ej: C mayor, A menor)";
+                chordInput.value = "C mayor";
+            } else {
+                inputLabel.textContent = "Acorde (Ej: Cmaj7, Am, F#7)";
+                chordInput.value = "Cmaj7";
+            }
+            generatePiano();
+        });
+
+        generateBtn.addEventListener('click', generatePiano);
+        chordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') generatePiano(); });
+        styleSelect
