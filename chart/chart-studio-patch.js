@@ -3,7 +3,7 @@
    <script src="chart-studio-patch.js"></script>                                  */
 (function () {
   'use strict';
-  const PATCH_VERSION = 'v17 · 13/10';
+  const PATCH_VERSION = 'v18 · 19/10';
   function showPatchError(e) {
     console.error('[chart-studio-patch]', e);
     let b = document.getElementById('patchErr');
@@ -122,6 +122,16 @@
   .mic-btn:hover{background:rgba(76,194,255,.2);box-shadow:0 0 24px rgba(76,194,255,.6)}
   .mic-btn svg{width:16px;height:16px;fill:currentColor;flex:none}
   #micStatus{font:.74em Inter,sans-serif;color:#9fb3c6;max-width:440px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #igModal{position:fixed;inset:0;background:rgba(5,8,12,.78);backdrop-filter:blur(4px);z-index:9998;display:none;align-items:center;justify-content:center}
+  #igModal.on{display:flex}
+  .ig-box{width:min(900px,94vw);max-height:90vh;overflow:auto;background:linear-gradient(180deg,#131a22,#0e1318);border:1px solid rgba(76,194,255,.25);border-radius:16px;padding:16px 20px;box-shadow:0 0 40px rgba(76,194,255,.12);color:#d5dde5;font:13px Inter,sans-serif}
+  .ig-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:12px 0}
+  .ig-row label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#8ea3b6}
+  .ig-box .select-input{width:auto;min-width:130px}
+  .ig-grid{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+  .ig-card{width:150px;display:flex;flex-direction:column;gap:6px;align-items:stretch;font-size:11px}
+  .ig-card img{width:100%;border-radius:8px;border:1px solid rgba(255,255,255,.12)}
+  #igCaption{width:100%;min-height:130px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#d5dde5;padding:10px;font:12px/1.5 Inter,sans-serif;resize:vertical}
   @media print{
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     html,body{background:#fff!important;padding:0!important;margin:0!important;min-height:0!important}
@@ -591,9 +601,9 @@
     const a = document.activeElement; if (a && (a.tagName === 'INPUT' || a.isContentEditable)) return;
     toggleRest();
   });
-  function tieEvents() {
+  function tieEvents(root) {
     const ev = [];
-    $$('.measure-box:not(.break-system)', wrap).forEach(m => $$('.beat-slot', m).forEach(slot => {
+    $$('.measure-box:not(.break-system)', root || wrap).forEach(m => $$('.beat-slot', m).forEach(slot => {
       const items = getBeatData(slot).map(norm); let t = 0;
       items.forEach(it => { ev.push({ slot, it, m, x: items.length === 1 ? 20 : 7 + t * 8.5 }); t += it.dur; });
     }));
@@ -610,8 +620,8 @@
     const a = r(x1 - pr.left), b = r(y1 - pr.top), c = r(x2 - pr.left), d = r(y2 - pr.top), h = Math.min(16, Math.abs(c - a) * 0.3 + 5) * 1.3 * (dir || 1);
     return `<path d="M ${a} ${b} C ${r(a + (c - a) * .2)} ${r(b + h)} ${r(c - (c - a) * .2)} ${r(d + h)} ${c} ${d}" fill="none" stroke="#0f172a" stroke-width="1.7" stroke-linecap="round"/>`;
   }
-  function drawTies() {
-    const ev = tieEvents(), out = new Map(), add = (p, s) => out.set(p, (out.get(p) || '') + s);
+  function drawTies(root) {
+    root = root || wrap; const ev = tieEvents(root), out = new Map(), add = (p, s) => out.set(p, (out.get(p) || '') + s);
     ev.forEach((e, i) => {
       let n = ev[i + 1]; if (n && n.it.cont) n = ev[i + 2];
       if (!e.it.tie || e.it.rest || e.it.cont || !n || n.it.rest) return;
@@ -622,7 +632,7 @@
         add(B.paper, tieArc(B.paper, n.m.getBoundingClientRect().left, B.y, B.x, B.y, n.it.up ? 1 : -1));
       }
     });
-    $$('.chart-paper', wrap).forEach(p => {
+    [root, ...$$('.chart-paper', root)].filter(p => p.classList && p.classList.contains('chart-paper')).forEach(p => {
       const html = out.get(p) || '';
       let L = $(':scope>.tie-layer', p);
       if (!L) { if (!html) return; p.insertAdjacentHTML('beforeend', '<svg class="tie-layer" xmlns="http://www.w3.org/2000/svg"></svg>'); L = $(':scope>.tie-layer', p); }
@@ -1168,6 +1178,116 @@
     $$('.beat-slot', wrap).forEach(sl => { const w = Math.round(sl.getBoundingClientRect().width); if (w > 4 && String(w) !== sl.dataset.w) renderBeatSlot(sl); });
   }
 
+  /* ---------- Exportar para Instagram (carrusel) ---------- */
+  const IG_H = { '45': 1000, '11': 800, '916': 1422 };
+  const keyLabel = () => { const st = sigState(), k = KEYS.find(x => x[0] === st.key); return k && st.key !== '' ? k[1].split(' (')[0].replace(' · ', ' / ') : ''; };
+  const valOf = id => (($('#' + id) || {}).value || '').trim();
+  let igSlides = [];
+  function collectRows() {
+    const rows = [];
+    $$('.section-block', wrap).forEach(block => {
+      const grid = $('.measures-grid', block); if (!grid) return;
+      const badge = $(':scope>.section-badge-container', block);
+      let cur = null, top = null, first = true;
+      [...grid.children].forEach(m => {
+        if (!m.classList.contains('measure-box') || m.classList.contains('break-system')) return;
+        if (cur === null || m.offsetTop !== top) { cur = { measures: [], badge: first ? badge : null }; rows.push(cur); top = m.offsetTop; first = false; }
+        cur.measures.push(m);
+      });
+    });
+    return rows;
+  }
+  function igHeader(first) {
+    const title = valOf('songTitleInput') || 'Sin título', sub = valOf('subtitleInput');
+    const meta = [valOf('styleInput'), valOf('bpmInput'), keyLabel() ? 'Tonalidad ' + keyLabel() : '', valOf('artistInput')].filter(Boolean).join('  ·  ');
+    if (!first) return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #cbd5e1;padding-bottom:6px;margin-bottom:4px;font:700 12px Inter,sans-serif;letter-spacing:.5px;color:#64748b;text-transform:uppercase"><span>${esc(title)}</span><span>(cont.)</span></div>`;
+    return `<div style="padding-bottom:10px;border-bottom:1px solid #cbd5e1;margin-bottom:6px"><div style="font-family:var(--title-font,'Montserrat'),'Montserrat',sans-serif;font-weight:var(--title-weight,800);text-transform:uppercase;text-align:center;color:#0f172a;font-size:34px;letter-spacing:2px;line-height:1.15">${esc(title)}</div>${sub ? `<div style="text-align:center;font:600 13px Inter,sans-serif;letter-spacing:.6px;color:#334155;text-transform:uppercase;margin-top:4px">${esc(sub)}</div>` : ''}${meta ? `<div style="text-align:center;font:500 13px Inter,sans-serif;color:#475569;margin-top:6px">${esc(meta)}</div>` : ''}</div>`;
+  }
+  function igCaption(handle) {
+    const secs = []; $$('.section-badge', wrap).forEach(b => { const x = b.textContent.trim(); if (x && secs[secs.length - 1] !== x) secs.push(x); });
+    const meta = [keyLabel() ? 'Tonalidad ' + keyLabel() : '', valOf('bpmInput'), valOf('styleInput')].filter(Boolean).join(' · ');
+    const head = ['🎼 ' + (valOf('songTitleInput') || 'Chart') + (valOf('artistInput') ? ' — ' + valOf('artistInput') : ''), meta, secs.length ? 'Forma: ' + secs.join(' · ') : '', 'Deslizá para ver el chart completo ➡️', handle ? 'Chart por ' + handle : ''].filter(Boolean).join('\n');
+    return head + '\n\n#chart #acordes #cifradoamericano #musicosdeiglesia #alabanza #adoracion #partituras';
+  }
+  async function loadJSZip() {
+    if (W.JSZip) return W.JSZip;
+    await new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; sc.onload = res; sc.onerror = () => rej(new Error('no se pudo cargar la librería ZIP')); document.head.appendChild(sc); });
+    return W.JSZip;
+  }
+  async function generateIG() {
+    const H = IG_H[$('#igFmt').value], per = parseInt($('#igPer').value, 10) || 0, handle = $('#igHandle').value.trim(), swipe = $('#igSwipe').checked;
+    try { localStorage.setItem('ccs_ig_handle', handle); } catch (e) {}
+    const st = $('#igStatus'), out = $('#igOut'), els = []; out.innerHTML = ''; igSlides = [];
+    st.textContent = 'Generando imágenes…'; $('#igGo').disabled = true;
+    document.body.classList.add('exporting'); clearSelections();
+    try {
+      await document.fonts.ready;
+      if (!W.html2canvas) throw new Error('no cargó la librería de imágenes (conexión o bloqueador de anuncios)');
+      const rows = collectRows(); if (!rows.length) throw new Error('no hay compases para exportar');
+      const newSlide = first => {
+        const el = document.createElement('div'); el.className = 'chart-paper ig-slide';
+        el.style.cssText = `position:absolute;left:-12000px;top:0;width:800px;height:${H}px;max-height:${H}px;box-shadow:none;border:0;border-radius:0;overflow:hidden`;
+        el.innerHTML = `<div class="paper-inner">${igHeader(first)}<div class="chart-content"></div></div><div class="chart-footer ig-foot"><div style="text-transform:none;font-weight:700">${esc(handle)}</div><div style="font-weight:600">${first && swipe ? 'Deslizá ➜' : ''}</div><div class="ig-num"></div></div>`;
+        document.body.appendChild(el); els.push(el); return { el, count: 0, last: null };
+      };
+      const place = (S, row) => {
+        const content = $('.chart-content', S.el); let blk = S.last, made = false;
+        if (row.badge || !blk) { blk = document.createElement('div'); blk.className = 'section-block'; if (row.badge) blk.appendChild(row.badge.cloneNode(true)); content.appendChild(blk); made = true; }
+        const g = document.createElement('div'); g.className = 'measures-grid';
+        row.measures.forEach(m => { const c = m.cloneNode(true); c.classList.remove('selected'); $$('.active-beat', c).forEach(x => x.classList.remove('active-beat')); g.appendChild(c); });
+        blk.appendChild(g); $$('.beat-slot', g).forEach(sl => renderBeatSlot(sl));
+        return { g, blk, made };
+      };
+      const over = (S, g) => { const lim = $('.ig-foot', S.el).getBoundingClientRect().top - 10; return [...g.children].some(m => m.getBoundingClientRect().bottom > lim); };
+      let S = newSlide(true);
+      for (const row of rows) {
+        let p = place(S, row);
+        if (S.count > 0 && (over(S, p.g) || (per && S.count >= per))) { p.g.remove(); if (p.made) p.blk.remove(); S = newSlide(false); p = place(S, row); }
+        S.count++; S.last = p.blk;
+      }
+      els.forEach((el, i) => { $('.ig-num', el).textContent = els.length > 1 ? (i + 1) + '/' + els.length : ''; drawTies(el); });
+      for (let i = 0; i < els.length; i++) {
+        st.textContent = 'Renderizando ' + (i + 1) + ' de ' + els.length + '…';
+        const c = await html2canvas(els[i], { scale: 1.35, backgroundColor: null, useCORS: true, allowTaint: true, width: 800, height: H, windowWidth: 1200 });
+        igSlides.push({ url: c.toDataURL('image/png') });
+      }
+      out.innerHTML = igSlides.map((sl, i) => `<div class="ig-card"><img src="${sl.url}" alt="Imagen ${i + 1}"><a class="tool-btn" style="text-decoration:none;text-align:center" download="${slug()}-${i + 1}.png" href="${sl.url}">Descargar ${i + 1}</a></div>`).join('');
+      st.textContent = igSlides.length + (igSlides.length === 1 ? ' imagen lista.' : ' imágenes listas, en orden para el carrusel.');
+    } catch (e) {
+      console.error(e); st.textContent = 'No se pudo generar: ' + (e && e.message ? e.message : e);
+    } finally {
+      els.forEach(x => x.remove()); document.body.classList.remove('exporting'); $('#igGo').disabled = false;
+    }
+  }
+  function openIG() {
+    if (!$('#igModal')) {
+      const m = document.createElement('div'); m.id = 'igModal';
+      m.innerHTML = `<div class="ig-box"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:700;letter-spacing:.14em;font-size:11px;color:#9fdcff">EXPORTAR PARA INSTAGRAM</div><button class="tool-btn" id="igClose">Cerrar</button></div><div class="ig-row"><label>Formato<select class="select-input" id="igFmt"><option value="45">Publicación 4:5 (1080×1350)</option><option value="11">Cuadrado 1:1 (1080×1080)</option><option value="916">Historia 9:16 (1080×1920)</option></select></label><label>Sistemas por imagen<select class="select-input" id="igPer"><option value="0">Automático</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></label><label>Tu usuario o marca<input class="select-input" id="igHandle" placeholder="@tuusuario"></label><label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="igSwipe" checked> Mostrar “Deslizá ➜”</label><button class="tool-btn primary" id="igGo">Generar</button></div><div id="igStatus" style="font-size:11px;color:#8ea3b6;min-height:1.3em"></div><div class="ig-grid" id="igOut"></div><div style="margin-top:14px;font-size:11px;color:#8ea3b6">Epígrafe (editalo antes de copiar)</div><textarea id="igCaption"></textarea><div class="ig-row"><button class="tool-btn" id="igCopy">Copiar epígrafe</button><button class="tool-btn primary" id="igZip">Descargar todas (ZIP)</button></div><div style="font-size:10px;color:#6f8396">Los tamaños de Instagram cambian con el tiempo: verificá cuál prefiere hoy.</div></div>`;
+      document.body.appendChild(m);
+      const close = () => m.classList.remove('on');
+      $('#igClose').onclick = close; m.onclick = e => { if (e.target === m) close(); };
+      addEventListener('keydown', e => { if (e.key === 'Escape' && m.classList.contains('on')) close(); });
+      $('#igGo').onclick = generateIG;
+      $('#igCopy').onclick = async () => { const t = $('#igCaption'); try { await navigator.clipboard.writeText(t.value); } catch (e) { t.select(); document.execCommand('copy'); } $('#igStatus').textContent = 'Epígrafe copiado.'; };
+      $('#igZip').onclick = async () => {
+        if (!igSlides.length) { $('#igStatus').textContent = 'Primero generá las imágenes.'; return; }
+        try {
+          const Z = await loadJSZip(), z = new Z();
+          igSlides.forEach((sl, i) => z.file(slug() + '-' + (i + 1) + '.png', sl.url.split(',')[1], { base64: true }));
+          const blob = await z.generateAsync({ type: 'blob' }), a = document.createElement('a');
+          a.href = URL.createObjectURL(blob); a.download = slug() + '-instagram.zip'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        } catch (e) { $('#igStatus').textContent = 'No se pudo armar el ZIP (' + (e && e.message ? e.message : e) + '). Descargá las imágenes una por una.'; }
+      };
+    }
+    let h = ''; try { h = localStorage.getItem('ccs_ig_handle') || ''; } catch (e) {}
+    $('#igHandle').value = h; $('#igCaption').value = igCaption(h); $('#igOut').innerHTML = ''; $('#igStatus').textContent = '';
+    $('#igModal').classList.add('on');
+  }
+  function addIgMenu() {
+    const dm = $('.download-menu'); if (!dm || $('#optIG')) return;
+    const b = document.createElement('button'); b.className = 'download-option'; b.id = 'optIG'; b.textContent = 'Exportar para Instagram (carrusel)'; b.onclick = openIG; dm.appendChild(b);
+  }
+
   /* ---------- Arranque ---------- */
   let timer = 0;
   const tick = () => { clearTimeout(timer); timer = setTimeout(() => { syncKeyPanel(); ensureHeader(); ensureRows(); layout(false); markRows(); fitSlots(); drawTies(); refreshChords(); $$(FX).forEach(deco); save(); }, 150); };
@@ -1186,7 +1306,7 @@
     }
     const rb = $('.rhythm-buttons');
     if (rb) { const b = document.createElement('button'); b.className = 'rhythm-btn'; b.title = 'Slash simple'; b.textContent = '/'; b.onclick = () => applySubdivisionRhythm('slash'); rb.appendChild(b); }
-    [addRhythmPanel, addKeyPanel, addHighlightPanel, addDictationPanel, addPdfPrint, addMicBar].forEach(f => { try { f(); } catch (e) { showPatchError(e); } });
+    [addRhythmPanel, addKeyPanel, addHighlightPanel, addDictationPanel, addPdfPrint, addMicBar, addIgMenu].forEach(f => { try { f(); } catch (e) { showPatchError(e); } });
     const pnl = $('.toolbox-panel');
     if (pnl && !$('#patchVer')) { const v = document.createElement('div'); v.id = 'patchVer'; v.style.cssText = 'font-size:.62em;color:#5b6b7a;text-align:center;padding:8px 0 2px;letter-spacing:.08em'; v.textContent = 'PARCHE ' + PATCH_VERSION; pnl.appendChild(v); }
     $$('.rest-btn .key-badge').forEach(b => b.style.display = 'none');
