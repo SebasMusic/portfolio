@@ -232,10 +232,10 @@ const DEF={
   semOn:true,semFrom:'low',semOnChord:true,semColors:SEM_DEF,semGlow:SEM_DEF.map(()=>true),
   style:'moderno',glowOn:true,glowMode:'note',glowColor:'#38bdf8',glowInt:0.5,glowBlur:9,
   chordOn:true,chordCustom:'',chordSlash:true,chordFont:'Georgia, serif',chordAlign:'middle',chordSize:96,
-  chordRootColor:'#ffffff',chordSufColor:'#7dd3fc',chordGlowColor:'#38bdf8',chordGlowInt:0.9,chordGlowBlur:10,
+  chordRootColor:'#ffffff',chordSufColor:'#e0f2fe',chordGlowColor:'#38bdf8',chordGlowInt:0.6,chordGlowBlur:8,
   expContent:'both',expMode:'key',expKey:80,expTotal:2400,bg:'#020617',previewBg:false
 };
-const LS_KEY='pianoStudio.v1';
+const LS_KEY='pianoStudio.v2';
 function load(){
   const c=clone(DEF);
   try{
@@ -579,7 +579,7 @@ function buildSVG(model,opt){
   const fw=totalW,fh=totalH;
   if(glowOn) defs.push('<filter id="kg" filterUnits="userSpaceOnUse" x="-50" y="-50" width="'+(fw+100)+'" height="'+(fh+100)+'"><feGaussianBlur stdDeviation="'+cfg.glowBlur+'"/></filter>');
   if(marks.length) defs.push('<filter id="mg" filterUnits="userSpaceOnUse" x="-50" y="-50" width="'+(fw+100)+'" height="'+(fh+100)+'"><feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>');
-  if(name&&cfg.chordGlowInt>0) defs.push('<filter id="tg" filterUnits="userSpaceOnUse" x="-50" y="-50" width="'+(fw+100)+'" height="'+(fh+100)+'"><feGaussianBlur in="SourceAlpha" stdDeviation="'+cfg.chordGlowBlur+'" result="b"/><feFlood flood-color="'+cfg.chordGlowColor+'" flood-opacity="'+cfg.chordGlowInt+'"/><feComposite in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>');
+  if(name&&cfg.chordGlowInt>0) defs.push('<filter id="tg" filterUnits="userSpaceOnUse" x="-50" y="-50" width="'+(fw+100)+'" height="'+(fh+100)+'"><feGaussianBlur in="SourceAlpha" stdDeviation="'+cfg.chordGlowBlur+'" result="b"/><feFlood flood-color="'+cfg.chordGlowColor+'" flood-opacity="'+cfg.chordGlowInt+'"/><feComposite in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>');
 
   /* cifrado */
   if(name){
