@@ -3,7 +3,7 @@
    <script src="chart-studio-patch.js"></script>                                  */
 (function () {
   'use strict';
-  const PATCH_VERSION = 'v15 · 13/10';
+  const PATCH_VERSION = 'v17 · 13/10';
   function showPatchError(e) {
     console.error('[chart-studio-patch]', e);
     let b = document.getElementById('patchErr');
@@ -315,7 +315,7 @@
     if (t === 'w') { cont.innerHTML = ''; slot = newSlot([{ type, dot: false, tie: false, articulation: '', dur: 4, rest }]); cont.appendChild(slot); focusSlot(slot); return; }
     if (t === 'h') {
       if (slot.style.flex !== '2') {
-        if (cont.children.length < 4) reset4();
+        if (cont.children.length === 1) reset4();
         const nb = slot.nextElementSibling || slot.previousElementSibling;
         if (!nb || nb.style.flex === '2') return;
         nb.remove(); slot.style.flex = '2';
@@ -344,27 +344,28 @@
   W.renderBeatSlot = slot => {
     const items = getBeatData(slot).map(norm); items.forEach(retype);
     const K = '#0f172a', on = slot.classList.contains('active-beat');
-    let t = 0; const xs = items.map(it => { const x = items.length === 1 ? 20 : 7 + t * 8.5; t += it.dur; return x; });
+    const rc = slot.getBoundingClientRect(), VW = rc.width > 4 && rc.height > 4 ? 40 * rc.width / rc.height : 40; slot.dataset.w = Math.round(rc.width);
+    let t = 0; const xs = items.map(it => { const x = items.length === 1 ? VW / 2 : VW * (7 + t * 8.5) / 40; t += it.dur; return x; });
     const groups = []; let cur = [];
     items.forEach((it, i) => { if (!it.rest && !it.cont && it.dur < 4 && !/[hw]$/.test(it.type)) cur.push(i); else { if (cur.length) groups.push(cur); cur = []; } });
     if (cur.length) groups.push(cur);
     const beamed = new Set(groups.filter(g => g.length > 1).flat());
     const ups = items.map(it => !!it.up);
     groups.filter(g => g.length > 1).forEach(g => g.forEach(i => { ups[i] = !!items[g[0]].up; }));
-    let s = '<svg viewBox="0 0 40 40" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">';
+    let s = `<svg viewBox="0 0 ${VW.toFixed(2)} 40" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">`;
     items.forEach((it, i) => {
       const x = xs[i], ty = it.type.replace(/^r/, ''), up = ups[i];
       s += `<g class="sub-item-target" onclick="handleSubItemClick(this.closest('.beat-slot'),${i},event)"><rect x="${x - 6}" y="0" width="12" height="40" fill="transparent"/>`;
       s += `<rect class="sel sel${i}" x="${x - 6}" y="2" width="12" height="36" fill="none" stroke="#64748b" stroke-width="1" stroke-dasharray="2,2" rx="2"/>`;
       if (it.cont) { s += '</g>'; return; }
       if (it.rest) {
-        if (ty === 'w') s += `<line x1="10" y1="14" x2="30" y2="14" stroke="${K}" stroke-width="1"/><rect x="14" y="14" width="12" height="5" fill="${K}"/>`;
-        else if (ty === 'h') s += `<line x1="10" y1="24" x2="30" y2="24" stroke="${K}" stroke-width="1"/><rect x="14" y="19" width="12" height="5" fill="${K}"/>`;
+        if (ty === 'w') s += `<line x1="${x - 10}" y1="14" x2="${x + 10}" y2="14" stroke="${K}" stroke-width="1"/><rect x="${x - 6}" y="14" width="12" height="5" fill="${K}"/>`;
+        else if (ty === 'h') s += `<line x1="${x - 10}" y1="24" x2="${x + 10}" y2="24" stroke="${K}" stroke-width="1"/><rect x="${x - 6}" y="19" width="12" height="5" fill="${K}"/>`;
         else if (ty === 'q') s += `<path d="M ${x - 2} 8 L ${x + 3} 14 L ${x - 3} 20 L ${x + 2} 26 C ${x - 4} 28 ${x - 4} 31 ${x + 1} 31" fill="none" stroke="${K}" stroke-width="2" stroke-linecap="round"/>`;
         else if (ty === '8') s += `<circle cx="${x - 2}" cy="14" r="1.7" fill="${K}"/><path d="M ${x - 2} 14 Q ${x + 2} 12 ${x + 1} 18 L ${x - 3} 28" fill="none" stroke="${K}" stroke-width="1.6" stroke-linecap="round"/>`;
         else s += `<circle cx="${x - 2}" cy="12" r="1.5" fill="${K}"/><circle cx="${x - 3}" cy="18" r="1.5" fill="${K}"/><path d="M ${x - 2} 12 Q ${x + 2} 10 ${x + 1} 16 L ${x - 3} 28" fill="none" stroke="${K}" stroke-width="1.4" stroke-linecap="round"/>`;
       } else {
-        if (ty === 'w') s += `<path fill-rule="evenodd" fill="${K}" d="${wholeD(20, 20)}"/>`;
+        if (ty === 'w') s += `<path fill-rule="evenodd" fill="${K}" d="${wholeD(x, 20)}"/>`;
         else {
           const hollow = ty === 'h', p = up ? `${x - 4.5},29 ${x - 1.5},29 ${x + 4.5},17 ${x + 1.5},17` : `${x - 4.5},24 ${x - 1.5},24 ${x + 4.5},11 ${x + 1.5},11`;
           s += hollow ? `<polygon points="${p}" fill="#fffef9" stroke="${K}" stroke-width="1.3"/>` : `<polygon points="${p}" fill="${K}"/>`;
@@ -601,8 +602,8 @@
   const tiePt = (e, dx) => {
     const sv = $('svg', e.slot); if (!sv) return null;
     const b = sv.getBoundingClientRect();
-    const k = Math.min(b.width, b.height) / 40;
-    return { x: b.left + b.width / 2 + (e.x + dx - 20) * k, y: b.top + b.height / 2 + (e.it.up ? 9.6 : -10) * k, paper: e.slot.closest('.chart-paper') };
+    const k = b.height / 40;
+    return { x: b.left + b.width * e.x / 40 + dx * k, y: b.top + b.height / 2 + (e.it.up ? 9.6 : -10) * k, paper: e.slot.closest('.chart-paper') };
   };
   function tieArc(paper, x1, y1, x2, y2, dir) {
     const pr = paper.getBoundingClientRect(), r = v => Math.round(v * 2) / 2;
@@ -1151,9 +1152,25 @@
     $('#dictText').onkeydown = e => { if (e.key === 'Enter' && e.target.value.trim()) { if (!justWrote && !lastM) { const sel = selectedMeasures[0]; if (sel) pos.m = measuresAll().indexOf(sel) + 1 || 1; } handleDictation(e.target.value); e.target.value = ''; } };
   }
 
+  /* ---------- Teclado numérico y fila de números (por posición física de la tecla) ---------- */
+  const NUMKEYS = { Digit7: 'w', Numpad7: 'w', Digit6: 'h', Numpad6: 'h', Digit5: 'q', Numpad5: 'q', Digit4: '8', Numpad4: '8', Digit3: '16', Numpad3: '16' };
+  addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+    const a = document.activeElement; if (a && (/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName) || a.isContentEditable)) return;
+    const fig = NUMKEYS[e.code], isRest = e.code === 'Digit0' || e.code === 'Numpad0', isDot = e.code === 'NumpadDecimal' || e.key === ',' || e.key === '.';
+    if (!fig && !isRest && !isDot) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (!activeBeatSlot) { micStatus('Seleccioná un compás (clic) para escribir figuras'); return; }
+    if (fig) applySubdivisionRhythm(fig); else if (isRest) toggleRest(); else toggleSubdivisionDot();
+  }, true);
+
+  function fitSlots() {
+    $$('.beat-slot', wrap).forEach(sl => { const w = Math.round(sl.getBoundingClientRect().width); if (w > 4 && String(w) !== sl.dataset.w) renderBeatSlot(sl); });
+  }
+
   /* ---------- Arranque ---------- */
   let timer = 0;
-  const tick = () => { clearTimeout(timer); timer = setTimeout(() => { syncKeyPanel(); ensureHeader(); ensureRows(); layout(false); markRows(); drawTies(); refreshChords(); $$(FX).forEach(deco); save(); }, 150); };
+  const tick = () => { clearTimeout(timer); timer = setTimeout(() => { syncKeyPanel(); ensureHeader(); ensureRows(); layout(false); markRows(); fitSlots(); drawTies(); refreshChords(); $$(FX).forEach(deco); save(); }, 150); };
   function init() {
     try { const h = localStorage.getItem(KEY); if (h) { wrap.innerHTML = h; clearSelections(); rebindAllEvents(); } } catch (e) {}
     applyStyle(readStyle()); loadFont('Noto Music');
@@ -1173,12 +1190,12 @@
     const pnl = $('.toolbox-panel');
     if (pnl && !$('#patchVer')) { const v = document.createElement('div'); v.id = 'patchVer'; v.style.cssText = 'font-size:.62em;color:#5b6b7a;text-align:center;padding:8px 0 2px;letter-spacing:.08em'; v.textContent = 'PARCHE ' + PATCH_VERSION; pnl.appendChild(v); }
     $$('.rest-btn .key-badge').forEach(b => b.style.display = 'none');
-    const hint = 'Teclas 7,6,5,4,3 | R: silencio | L: ligadura | .: puntillo | X: plica arriba/abajo | Shift+Clic: rango | Ctrl+Z';
+    const hint = 'Teclas 7,6,5,4,3 | R o 0: silencio | L: ligadura | .: puntillo | X: plica arriba/abajo | Shift+Clic: rango | Ctrl+Z';
     i18n.es.lblRhythmShortcuts = hint; i18n.en.lblRhythmShortcuts = hint.replace('Teclas', 'Keys').replace('silencio', 'rest').replace('ligadura', 'tie').replace('puntillo', 'dot').replace('rango', 'range').replace('plica arriba/abajo', 'stem up/down');
     applyLanguage(currentLang);
     let land = false; try { land = localStorage.getItem('ccs_orient') === 'l'; } catch (e) {}
     if (land && $('#orientSel')) $('#orientSel').value = 'l';
-    document.fonts.ready.then(() => { ensureHeader(); ensureRows(); $$('.beat-slot', wrap).forEach(sl => renderBeatSlot(sl)); setOrientation(land); markRows(); drawTies(); refreshChords(); $$(FX).forEach(deco); });
+    document.fonts.ready.then(() => { ensureHeader(); ensureRows(); $$('.beat-slot', wrap).forEach(sl => renderBeatSlot(sl)); setOrientation(land); markRows(); fitSlots(); drawTies(); refreshChords(); $$(FX).forEach(deco); });
     new MutationObserver(tick).observe(wrap, { childList: true, subtree: true });
     wrap.addEventListener('input', tick);
   }
