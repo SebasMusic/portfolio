@@ -11,9 +11,11 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-Q3DTLYSJMH');
   </script>
+
+  <!-- Tailwind CSS CDN for enhanced layout control -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     :root {
@@ -44,7 +46,7 @@
     /* BARRA SUPERIOR CON SELECTOR DE IDIOMA */
     .top-bar {
       width: 100%;
-      max-width: 1000px;
+      max-width: 1100px;
       display: flex;
       justify-content: flex-end;
       padding: 20px 20px 0 20px;
@@ -112,7 +114,7 @@
 
     header {
       width: 100%;
-      max-width: 1000px;
+      max-width: 1100px;
       padding: 40px 20px 40px 20px;
       text-align: center;
     }
@@ -142,7 +144,7 @@
 
     p.bio {
       color: var(--text-muted);
-      max-width: 600px;
+      max-width: 650px;
       margin: 0 auto;
       font-size: 1.05em;
       line-height: 1.6;
@@ -150,7 +152,7 @@
 
     main {
       width: 100%;
-      max-width: 1000px;
+      max-width: 1100px;
       padding: 20px;
       flex: 1;
     }
@@ -166,7 +168,7 @@
 
     .apps-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
       gap: 25px;
     }
 
@@ -200,7 +202,7 @@
 
     .app-card h2 {
       margin: 0 0 10px 0;
-      font-size: 1.4em;
+      font-size: 1.35em;
       font-weight: 500;
     }
 
@@ -269,7 +271,7 @@
     
     <div class="apps-grid">
       
-      <!-- App 1: Pad Player -->
+      <!-- App 1: Aura Pad Player -->
       <div class="app-card featured">
         <div>
           <h2 id="txt-app1-title">Aura · Ambient Pad Player</h2>
@@ -296,13 +298,22 @@
         <a href="./synthbase/index.html" class="btn-launch" id="txt-app3-btn" onclick="trackLaunch('SynthBase Studio')">Launch Application →</a>
       </div>
 
-      <!-- App 4: Piano & Chord Visualizer Studio (NUEVO MÓDULO) -->
+      <!-- App 4: Piano & Chord Visualizer Studio -->
       <div class="app-card featured">
         <div>
           <h2 id="txt-app4-title">Piano Chord & Scale Visualizer</h2>
           <p id="txt-app4-desc">Interactive pedagogical piano generator featuring finger numbers, semitone intervals, custom note palettes, and HD PDF export.</p>
         </div>
         <a href="./piano/index.html" class="btn-launch" id="txt-app4-btn" onclick="trackLaunch('Piano Visualizer')">Launch Application →</a>
+      </div>
+
+      <!-- App 5: Cifrador Armónico (NUEVO) -->
+      <div class="app-card featured">
+        <div>
+          <h2 id="txt-app5-title">Cifrador Armónico</h2>
+          <p id="txt-app5-desc">Advanced harmonic progression analyzer and chord voicings generator for professional composition and live arrangement.</p>
+        </div>
+        <a href="./Cifrador armonico/index.html" class="btn-launch" id="txt-app5-btn" onclick="trackLaunch('Cifrador Armonico')">Launch Application →</a>
       </div>
 
     </div>
@@ -333,6 +344,9 @@
         app4Title: "Piano Chord & Scale Visualizer",
         app4Desc: "Interactive pedagogical piano generator featuring finger numbers, semitone intervals, custom note palettes, and HD PDF export.",
         app4Btn: "Launch Application →",
+        app5Title: "Cifrador Armónico",
+        app5Desc: "Advanced harmonic progression analyzer and chord voicings generator for professional composition and live arrangement.",
+        app5Btn: "Launch Application →",
         footer: "© 2026 · Built with Web Audio API & Modern Web Standards"
       },
       es: {
@@ -354,6 +368,9 @@
         app4Title: "Visualizador de Piano y Acordes",
         app4Desc: "Generador de piano pedagógico interactivo con digitación, intervalos de semitonos, paleta de colores personalizada y exportación HD para PDF.",
         app4Btn: "Abrir Aplicación →",
+        app5Title: "Cifrador Armónico",
+        app5Desc: "Analizador avanzado de progresiones armónicas y generador de voicings de acordes para composición y arreglos en vivo.",
+        app5Btn: "Abrir Aplicación →",
         footer: "© 2026 · Creado con Web Audio API y Estándares Web Modernos"
       },
       pt: {
@@ -375,6 +392,9 @@
         app4Title: "Visualizador de Piano e Acordes",
         app4Desc: "Gerador de piano pedagógico interativo com dedilhado, intervalos de semitons, paleta de cores personalizada e exportação HD.",
         app4Btn: "Abrir Aplicação →",
+        app5Title: "Cifrador Armónico",
+        app5Desc: "Analisador avançado de progressões harmônicas e gerador de voicings para composição e arranjos ao vivo.",
+        app5Btn: "Abrir Aplicação →",
         footer: "© 2026 · Criado com Web Audio API e Padrões Web Modernos"
       },
       fr: {
@@ -396,6 +416,9 @@
         app4Title: "Visualiseur de Piano et Accords",
         app4Desc: "Générateur de piano pédagogique interactif avec doigtés, intervalles de demi-tons, palette de couleurs personnalisée et export HD.",
         app4Btn: "Lancer l'application →",
+        app5Title: "Cifrador Armónico",
+        app5Desc: "Analyseur de progressions harmoniques avancé et générateur de voicings pour la composition et les arrangements live.",
+        app5Btn: "Lancer l'application →",
         footer: "© 2026 · Créé avec Web Audio API & Normes Web Modernes"
       },
       de: {
@@ -409,4 +432,153 @@
         app1Desc: "Kontinuierliche High-Definition Ambient-Pads mit 4 individuellen Texturen und 12 Halbtönen. Entwickelt mit sanften Web Audio API Übergängen.",
         app1Btn: "Anwendung Starten →",
         app2Title: "Chord Chart Studio",
-        app2Desc: "Erstellen, bearbeiten, transponieren und exportieren Sie
+        app2Desc: "Erstellen, bearbeiten, transponieren und exportieren Sie professionelle Akkord-Charts mit benutzerdefinierten Taktarten.",
+        app2Btn: "Anwendung Starten →",
+        app3Title: "SynthBase Studio",
+        app3Desc: "Historische Preset-Suchmaschine, Sounddesign-Synthesizer-Rezepte und Audioreferenzen für moderne Produzenten.",
+        app3Btn: "Anwendung Starten →",
+        app4Title: "Klavier- und Akkord-Visualisierer",
+        app4Desc: "Interaktiver pädagogischer Klaviergenerator mit Fingersätzen, Halbtonintervallen, benutzerdefinierten Paletten und HD-PDF-Export.",
+        app4Btn: "Anwendung Starten →",
+        app5Title: "Cifrador Armónico",
+        app5Desc: "Fortgeschrittener Harmonik-Analysator und Voicing-Generator für professionelle Komposition und Live-Arrangements.",
+        app5Btn: "Anwendung Starten →",
+        footer: "© 2026 · Erstellt mit Web Audio API & Modernen Web-Standards"
+      },
+      zh: {
+        flag: "🇨🇳",
+        name: "中文",
+        badge: "交互式音频实验室",
+        title: "面向音乐人的免费网页工具",
+        bio: "专为练习、敬拜、现场演出和音乐教育设计的高质量、无缝且易用的音频应用程序。",
+        secTitle: "精选应用",
+        app1Title: "Aura · 环境音垫播放器",
+        app1Desc: "具有 4 种自定义纹理和 12 个半音的高清持续环境音垫。采用平滑的 Web Audio API 交叉淡入淡出设计。",
+        app1Btn: "启动应用 →",
+        app2Title: "和弦谱工作室",
+        app2Desc: "使用自定义拍号和指标创建、编辑、移调和导出清晰的专业歌曲和弦谱。",
+        app2Btn: "启动应用 →",
+        app3Title: "SynthBase Studio",
+        app3Desc: "为现代制作人打造的历史预设搜索引擎、声音设计合成配方和音频参考。",
+        app3Btn: "启动应用 →",
+        app4Title: "钢琴和弦与音阶可视化工具",
+        app4Desc: "互动式教学钢琴生成器，具有指法、半音音程、自定义音符面板和高清 PDF 导出功能。",
+        app4Btn: "启动应用 →",
+        app5Title: "Cifrador Armónico",
+        app5Desc: "高级和声进行分析器与和弦把位生成器，适用于专业作曲与现场配器。",
+        app5Btn: "启动应用 →",
+        footer: "© 2026 · 基于 Web Audio API 与现代网络标准构建"
+      },
+      ru: {
+        flag: "🇷🇺",
+        name: "Русский",
+        badge: "ИНТЕРАКТИВНАЯ АУДИО ЛАБОРАТОРИЯ",
+        title: "Бесплатные веб-инструменты для музыкантов",
+        bio: "Высококачественные, плавные и доступные аудиоприложения, созданные для практики, богослужений, живых выступлений и музыкального образования.",
+        secTitle: "Рекомендуемые приложения",
+        app1Title: "Aura · Плеер эмбиент-падов",
+        app1Desc: "Непрерывные эмбиент-пады высокого разрешения с 4 пользовательскими текстурами и 12 полутонами. Плавное микширование через Web Audio API.",
+        app1Btn: "Запустить приложение →",
+        app2Title: "Chord Chart Studio",
+        app2Desc: "Создавайте, редактируйте, транспонируйте и экспортируйте профессиональные аккордовые схемы с пользовательскими размерами.",
+        app2Btn: "Запустить приложение →",
+        app3Title: "SynthBase Studio",
+        app3Desc: "Поисковая система исторических пресетов, рецепты синтеза звука и аудиореференсы для современных продюсеров.",
+        app3Btn: "Запустить приложение →",
+        app4Title: "Визуализатор фортепианных аккордов",
+        app4Desc: "Интерактивный обучающий генератор пианино с пальцовкой, полутоновыми интервалами и экспортом в HD PDF.",
+        app4Btn: "Запустить приложение →",
+        app5Title: "Cifrador Armónico",
+        app5Desc: "Продвинутый анализатор гармонических прогрессий и генератор голосоведения для композиции и аранжировок.",
+        app5Btn: "Запустить приложение →",
+        footer: "© 2026 · Создано на Web Audio API и современных веб-стандартах"
+      },
+      ja: {
+        flag: "🇯🇵",
+        name: "日本語",
+        badge: "インタラクティブオーディオラボ",
+        title: "ミュージシャン向け無料Webツール",
+        bio: "練習、礼拝、ライブパフォーマンス、音楽教育向けに設計された、高音質でシームレスなアクセシブルオーディオアプリ。",
+        secTitle: "おすすめアプリ",
+        app1Title: "Aura · アンビエントパッドプレイヤー",
+        app1Desc: "4つのカスタムテクスチャと12の半音を備えた高解像度アンビエントパッド。Web Audio APIによる滑らかなクロスフェード。",
+        app1Btn: "アプリを起動 →",
+        app2Title: "コードチャートスタジオ",
+        app2Desc: "カスタム拍子記号とメトリックを使用して、プロ仕様のクリーンなコードチャートを作成、編集、移調、エクスポート。",
+        app2Btn: "アプリを起動 →",
+        app3Title: "SynthBase Studio",
+        app3Desc: "現代のプロデューサー向けに、歴史的なプリセット検索、音響合成レシピ、オーディオ参照を提供。",
+        app3Btn: "アプリを起動 →",
+        app4Title: "ピアノコード・スケールビジュアライザー",
+        app4Desc: "指番号、半音階、カスタムパレット、HD PDFエクスポート機能を備えたインタラクティブな教育用ピアノジェネレーター。",
+        app4Btn: "アプリを起動 →",
+        app5Title: "Cifrador Armónico",
+        app5Desc: "プロの作曲やライブアレンジに向けた高度なコード進行アナライザーおよびヴォイシングジェネレーター。",
+        app5Btn: "アプリを起動 →",
+        footer: "© 2026 · Web Audio API & モダンWeb標準で構築"
+      }
+    };
+
+    function toggleDropdown() {
+      document.getElementById('lang-dropdown').classList.toggle('show');
+    }
+
+    window.onclick = function(event) {
+      if (!event.target.closest('.lang-selector')) {
+        var dropdowns = document.getElementsByClassName("lang-dropdown");
+        for (let i = 0; i < dropdowns.length; i++) {
+          let openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+
+    function changeLanguage(langKey) {
+      const t = translations[langKey];
+      if (!t) return;
+
+      document.getElementById('current-flag').innerText = t.flag;
+      document.getElementById('current-lang-name').innerText = t.name;
+
+      document.getElementById('txt-badge').innerText = t.badge;
+      document.getElementById('txt-title').innerText = t.title;
+      document.getElementById('txt-bio').innerText = t.bio;
+      document.getElementById('txt-sec-title').innerText = t.secTitle;
+
+      document.getElementById('txt-app1-title').innerText = t.app1Title;
+      document.getElementById('txt-app1-desc').innerText = t.app1Desc;
+      document.getElementById('txt-app1-btn').innerText = t.app1Btn;
+
+      document.getElementById('txt-app2-title').innerText = t.app2Title;
+      document.getElementById('txt-app2-desc').innerText = t.app2Desc;
+      document.getElementById('txt-app2-btn').innerText = t.app2Btn;
+
+      document.getElementById('txt-app3-title').innerText = t.app3Title;
+      document.getElementById('txt-app3-desc').innerText = t.app3Desc;
+      document.getElementById('txt-app3-btn').innerText = t.app3Btn;
+
+      document.getElementById('txt-app4-title').innerText = t.app4Title;
+      document.getElementById('txt-app4-desc').innerText = t.app4Desc;
+      document.getElementById('txt-app4-btn').innerText = t.app4Btn;
+
+      document.getElementById('txt-app5-title').innerText = t.app5Title;
+      document.getElementById('txt-app5-desc').innerText = t.app5Desc;
+      document.getElementById('txt-app5-btn').innerText = t.app5Btn;
+
+      document.getElementById('txt-footer').innerText = t.footer;
+
+      document.getElementById('lang-dropdown').classList.remove('show');
+    }
+
+    function trackLaunch(appName) {
+      if (typeof gtag === 'function') {
+        gtag('event', 'launch_application', {
+          'app_name': appName
+        });
+      }
+    }
+  </script>
+</body>
+</html>
