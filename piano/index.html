@@ -12,9 +12,9 @@ header{padding:18px 20px 4px;max-width:1500px;margin:auto}
 header h1{margin:0;font-size:26px;font-weight:800;background:linear-gradient(90deg,#38bdf8,#818cf8);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
 header p{margin:2px 0 0;color:var(--mut);font-size:13px}
 .app{display:grid;grid-template-columns:minmax(320px,410px) 1fr;gap:16px;padding:12px 20px 30px;max-width:1500px;margin:auto}
-@media(max-width:960px){.app{grid-template-columns:1fr}.main{position:static!important}}
+@media(max-width:960px){.app{grid-template-columns:1fr}.main{position:static!important;max-height:none!important;overflow:visible!important}}
 .side{display:flex;flex-direction:column;gap:10px}
-.main{position:sticky;top:12px;align-self:start;display:flex;flex-direction:column;gap:12px;min-width:0}
+.main{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;align-self:start;display:flex;flex-direction:column;gap:12px;min-width:0}
 details.sec{background:var(--panel);border:1px solid var(--line);border-radius:14px}
 details.sec>summary{cursor:pointer;padding:11px 14px;font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#7dd3fc;list-style:none}
 details.sec>summary::-webkit-details-marker{display:none}
@@ -91,9 +91,19 @@ button.sm{padding:4px 9px;font-size:12px}
 
   <details class="sec" open><summary>2 · Etiquetas en las teclas</summary><div class="body">
     <div class="row">
-      <label class="chk"><input type="checkbox" id="lblNote"> Nota</label>
-      <label class="chk"><input type="checkbox" id="lblDegree"> Grado armónico</label>
-      <label class="chk"><input type="checkbox" id="lblFinger"> Dedos</label>
+      <label class="chk"><input type="checkbox" id="lblNote"> Nota (círculo)</label>
+      <label class="chk"><input type="checkbox" id="lblDegree"> Grado (cuadrado)</label>
+      <label class="chk"><input type="checkbox" id="lblFinger"> Dedos (rombo)</label>
+    </div>
+    <div class="hint">Tocá un rombo de dedo sobre el piano para cambiarlo (Shift+click baja).</div>
+    <div class="row">
+      <label class="chk"><input type="checkbox" id="stepOn"> Corchetes T / semicírculos ST (escalas)</label>
+      <label class="chk"><input type="checkbox" id="fingArcs"> Arcos de digitación</label>
+    </div>
+    <div class="row">
+      <div class="fld" style="flex:0 0 auto"><span>T</span><input type="color" id="stepTColor"></div>
+      <div class="fld" style="flex:0 0 auto"><span>ST</span><input type="color" id="stepSTColor"></div>
+      <div class="fld" style="flex:0 0 auto"><span>Dedos</span><input type="color" id="fingColor"></div>
     </div>
     <div class="row">
       <label class="fld"><span>Nomenclatura</span><select id="notation"><option value="american">Americano (C D E)</option><option value="latin">Latino (Do Re Mi)</option></select></label>
@@ -104,10 +114,10 @@ button.sm{padding:4px 9px;font-size:12px}
   <details class="sec"><summary>3 · Marcas de semitonos</summary><div class="body">
     <label class="chk"><input type="checkbox" id="semOn"> Mostrar números arriba del piano</label>
     <div class="row">
-      <label class="fld"><span>Contar desde</span><select id="semFrom"><option value="low">Nota más grave</option><option value="root">Fundamental</option></select></label>
+      <label class="fld"><span>Contar desde</span><select id="semFrom"><option value="low">Nota más grave</option><option value="root">Fundamental</option><option value="step">Reiniciar en cada nota</option></select></label>
     </div>
     <label class="chk"><input type="checkbox" id="semOnChord"> Marcar también sobre las notas del acorde/escala</label>
-    <div class="hint">Elegí el color de cada número y si lleva glow. Del 13 en adelante se repiten los colores.</div>
+    <div class="hint">Elegí el color de cada número y si lleva glow. Del 13 en adelante se repiten los colores. Con "Reiniciar en cada nota", cada tramo usa un color distinto.</div>
     <div class="cgrid" id="semGrid"></div>
     <button class="sm" id="semReset">Restaurar colores</button>
   </div></details>
@@ -233,6 +243,7 @@ const DEF={
   style:'moderno',glowOn:true,glowMode:'note',glowColor:'#38bdf8',glowInt:0.5,glowBlur:9,
   chordOn:true,chordCustom:'',chordSlash:true,chordFont:'Georgia, serif',chordAlign:'middle',chordSize:96,
   chordRootColor:'#ffffff',chordSufColor:'#e0f2fe',chordGlowColor:'#38bdf8',chordGlowInt:0.6,chordGlowBlur:8,
+  stepOn:true,stepTColor:'#ef4444',stepSTColor:'#3b82f6',fingArcs:true,fingColor:'#f59e0b',
   expContent:'both',expMode:'key',expKey:80,expTotal:2400,bg:'#020617',previewBg:false
 };
 const LS_KEY='pianoStudio.v2';
@@ -558,12 +569,13 @@ function buildSVG(model,opt){
   /* marcas de semitonos */
   const marks=[];
   if(showPiano&&cfg.semOn&&model&&model.notes.length>1){
-    const ref=cfg.semFrom==='root'?model.rootMidi:model.notes[0].midi;
-    const top=model.notes[model.notes.length-1].midi;
-    for(let m=ref+1;m<=top;m++){
-      if(m<lo||m>hi)continue;
-      if(!cfg.semOnChord&&act.has(m))continue;
-      marks.push({m,n:m-ref,white:isWhite(m)});
+    const push=(m,n,seg)=>{if(m<lo||m>hi)return;if(!cfg.semOnChord&&act.has(m))return;marks.push({m,n,seg,white:isWhite(m)});};
+    if(cfg.semFrom==='step'){
+      for(let i=0;i<model.notes.length-1;i++){const a=model.notes[i].midi,b=model.notes[i+1].midi;for(let m=a+1;m<=b;m++)push(m,m-a,i);}
+    }else{
+      const ref=cfg.semFrom==='root'?model.rootMidi:model.notes[0].midi;
+      const top=model.notes[model.notes.length-1].midi;
+      for(let m=ref+1;m<=top;m++)push(m,m-ref);
     }
   }
   const MR=13,ROWGAP=34;
@@ -572,6 +584,11 @@ function buildSVG(model,opt){
   const barH=showPiano&&st.bar?st.bar.h:0;
   const barTop=y;const ky=y+barH;
   if(showPiano) y=ky+H;
+  const pBot=y;
+  const doStep=!!(showPiano&&model&&model.mode==='scale'&&cfg.stepOn&&model.notes.length>1);
+  const doFing=!!(showPiano&&cfg.fingArcs&&model&&model.notes.length>1);
+  const stepH=doStep?62:0,fingH=doFing?58:0;
+  y+=stepH+fingH;
   const totalH=Math.round(y+padB);
 
   const defs=[],P=[];
@@ -645,7 +662,7 @@ function buildSVG(model,opt){
         if(mk.white){const k=whites.find(w=>w.m===mk.m);cx=k.x+W/2;}
         else{cx=blacks.find(b=>b.m===mk.m).cx;}
         const cy=mk.white?markTop+ROWGAP:markTop;
-        const idx=(mk.n-1)%12;
+        const idx=mk.seg!==undefined?mk.seg%12:(mk.n-1)%12;
         const col=cfg.semColors[idx]||'#38bdf8';
         const gl=cfg.semGlow[idx];
         let s='<g'+(gl?' filter="url(#mg)"':'')+'>';
@@ -657,24 +674,63 @@ function buildSVG(model,opt){
     }
     /* etiquetas */
     const light=st.badge==='light';
+    const cxOf=m=>isWhite(m)?whites.find(w=>w.m===m).x+W/2:blacks.find(b=>b.m===m).cx;
+    const txt=(x,y,s,c,fs)=>'<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="system-ui,Arial,sans-serif" font-weight="800" font-size="'+fs+'" fill="'+c+'">'+s+'</text>';
     act.forEach((a,m)=>{
       const items=[];
-      if(cfg.lblNote) items.push(noteName(a.n.pc));
-      if(cfg.lblDegree) items.push(pretty(a.n.label));
-      if(cfg.lblFinger){const f=S.fingers[a.i];if(f)items.push(String(f));}
+      if(cfg.lblNote) items.push({k:'n',t:noteName(a.n.pc)});
+      if(cfg.lblDegree) items.push({k:'d',t:pretty(a.n.label)});
+      if(cfg.lblFinger){const f=S.fingers[a.i];if(f)items.push({k:'f',t:String(f)});}
       if(!items.length)return;
-      const white=isWhite(m);
-      const r=white?16:12,step=white?36:28;
-      let cx,base;
-      if(white){cx=whites.find(w=>w.m===m).x+W/2;base=ky+H-12-r;}
-      else{cx=blacks.find(b=>b.m===m).cx;base=ky+BH-10-r;}
-      items.forEach((txt,j)=>{
+      const white=isWhite(m),r=white?16:12,step=white?36:28;
+      const cx=cxOf(m),base=white?ky+H-12-r:ky+BH-10-r;
+      items.forEach((it,j)=>{
         const cy=base-(items.length-1-j)*step;
-        const fs=r*(txt.length>2?0.74:txt.length>1?0.9:1.05);
-        P.push('<circle cx="'+f1(cx)+'" cy="'+f1(cy)+'" r="'+r+'" fill="'+(light?'#ffffff':'rgba(15,23,42,0.88)')+'" stroke="'+(light?'#111111':'rgba(255,255,255,0.28)')+'" stroke-width="'+(light?2:1)+'"/>');
-        P.push('<text x="'+f1(cx)+'" y="'+f1(cy)+'" dy=".35em" text-anchor="middle" font-family="system-ui,Arial,sans-serif" font-weight="700" font-size="'+f1(fs)+'" fill="'+(light?'#111111':'#ffffff')+'">'+esc(txt)+'</text>');
+        const fs=r*(it.t.length>2?0.74:it.t.length>1?0.9:1.05);
+        let sh,tc=light?'#111111':'#ffffff';
+        if(it.k==='f'){
+          const q=r*1.25;
+          sh='<polygon points="'+f1(cx)+','+f1(cy-q)+' '+f1(cx+q)+','+f1(cy)+' '+f1(cx)+','+f1(cy+q)+' '+f1(cx-q)+','+f1(cy)+'" fill="'+(light?'#ffffff':cfg.fingColor)+'" stroke="'+(light?'#111111':'#ffffff')+'" stroke-width="1.5"/>';
+          if(!light)tc='#1c1100';
+        }else if(it.k==='d'){
+          sh='<rect x="'+f1(cx-r)+'" y="'+f1(cy-r)+'" width="'+(2*r)+'" height="'+(2*r)+'" rx="4" fill="'+(light?'#ffffff':'#312e81')+'" stroke="'+(light?'#111111':'#a5b4fc')+'" stroke-width="'+(light?2:1.5)+'"/>';
+        }else{
+          sh='<circle cx="'+f1(cx)+'" cy="'+f1(cy)+'" r="'+r+'" fill="'+(light?'#ffffff':'rgba(15,23,42,0.88)')+'" stroke="'+(light?'#111111':'rgba(255,255,255,0.28)')+'" stroke-width="'+(light?2:1)+'"/>';
+        }
+        const gsh=sh+'<text x="'+f1(cx)+'" y="'+f1(cy)+'" dy=".35em" text-anchor="middle" font-family="system-ui,Arial,sans-serif" font-weight="700" font-size="'+f1(fs)+'" fill="'+tc+'">'+esc(it.t)+'</text>';
+        P.push(it.k==='f'?'<g data-fi="'+a.i+'" style="cursor:pointer">'+gsh+'</g>':gsh);
       });
     });
+    /* corchetes T y semicírculos ST */
+    if(doStep){
+      const sy=pBot+12,L=model.notes.filter(n=>act.has(n.midi));
+      for(let i=0;i<L.length-1;i++){
+        const d=L[i+1].midi-L[i].midi,x1=cxOf(L[i].midi)+3,x2=cxOf(L[i+1].midi)-3,mid=f1((x1+x2)/2);
+        if(d===1){
+          const rr=Math.max((x2-x1)/2,2),c=cfg.stepSTColor;
+          P.push('<path d="M'+f1(x1)+','+sy+' A'+f1(rr)+','+f1(rr)+' 0 0 0 '+f1(x2)+','+sy+'" fill="none" stroke="'+c+'" stroke-width="3" stroke-linecap="round"/>'+txt(mid,f1(sy+rr+16),'ST',c,15));
+        }else{
+          const c=cfg.stepTColor,lab=d===2?'T':d===3?'T½':d+'ST';
+          P.push('<path d="M'+f1(x1)+','+sy+'V'+(sy+14)+'H'+f1(x2)+'V'+sy+'" fill="none" stroke="'+c+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+txt(mid,sy+38,lab,c,20));
+        }
+      }
+    }
+    /* arcos de digitación */
+    if(doFing){
+      const fy=pBot+stepH+8,L=model.notes.filter(n=>act.has(n.midi)),lh=cfg.hand==='LH';
+      const G=[];let cur=[];
+      L.forEach(n=>{
+        const f=S.fingers[model.notes.indexOf(n)]||0;
+        if(cur.length){const pf=cur[cur.length-1].f;if(lh?f>=pf:f<=pf){G.push(cur);cur=[];}}
+        cur.push({x:cxOf(n.midi),f});
+      });
+      if(cur.length)G.push(cur);
+      G.forEach(g=>{
+        const x1=g[0].x-6,x2=g[g.length-1].x+6;
+        if(g.length>1)P.push('<path d="M'+f1(x1)+','+(fy+14)+' Q'+f1((x1+x2)/2)+','+(fy-10)+' '+f1(x2)+','+(fy+14)+'" fill="none" stroke="'+cfg.fingColor+'" stroke-width="2.5" stroke-linecap="round"/>');
+        g.forEach(p=>{if(p.f)P.push(txt(f1(p.x),fy+42,p.f,cfg.fingColor,22));});
+      });
+    }
     P.push('</g>');
   }
   const bgRect=opt.bg?'<rect width="'+totalW+'" height="'+totalH+'" fill="'+opt.bg+'"/>':'';
@@ -823,6 +879,13 @@ function renderFingers(model){
     S.fingers[+sel.dataset.i]=+sel.value;renderAll(true);
   }));
 }
+/* click sobre el rombo de dedo en el piano: sube (Shift = baja) */
+$('stage').addEventListener('click',e=>{
+  const g=e.target.closest&&e.target.closest('[data-fi]');if(!g)return;
+  const i=+g.getAttribute('data-fi');
+  S.fingers[i]=((S.fingers[i]||0)+(e.shiftKey?5:1))%6;
+  renderAll(true);
+});
 $('fingerAuto').addEventListener('click',()=>{S.fingerSig='';renderAll(true);});
 
 /* ---------- exportar ---------- */
@@ -974,6 +1037,7 @@ function buildGrids(){
   sg.querySelectorAll('input[type=checkbox]').forEach(i=>i.addEventListener('change',()=>{cfg.semGlow[+i.dataset.g]=i.checked;renderAll();}));
 }
 const BINDS=[
+ ['stepOn','stepOn','c'],['fingArcs','fingArcs','c'],['stepTColor','stepTColor','s'],['stepSTColor','stepSTColor','s'],['fingColor','fingColor','s'],
  ['lblNote','lblNote','c'],['lblDegree','lblDegree','c'],['lblFinger','lblFinger','c'],
  ['semOn','semOn','c'],['semFrom','semFrom','s'],['semOnChord','semOnChord','c'],
  ['colorBy','colorBy','s'],['singleColor','singleColor','s'],
