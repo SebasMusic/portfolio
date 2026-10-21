@@ -1,4 +1,8 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Cifrador Armónico</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -100,6 +104,9 @@ details pre{margin:8px 0 0;font-family:var(--font-mono);font-size:12.5px;line-he
 .numtools .chip{font-family:var(--font-ui);font-size:15px;min-width:34px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
+</head>
+<body>
+
 <header class="top">
   <div class="brand">Cifrador <i>Armónico</i></div>
   <div class="sub">Escribí el cifrado, marcá el análisis y exportá una animación con fondo transparente para tus reels.</div>
@@ -160,9 +167,9 @@ details pre{margin:8px 0 0;font-family:var(--font-mono);font-size:12.5px;line-he
         <textarea id="chartText" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>
       </label>
       <div class="row" id="insChips">
-        <button type="button" class="chip" data-ins="Δ7">Δ7</button>
-        <button type="button" class="chip" data-ins="-7">-7</button>
-        <button type="button" class="chip" data-ins="ø7">ø7</button>
+        <button type="button" class="chip" data-ins="maj7">maj7</button>
+        <button type="button" class="chip" data-ins="m7">m7</button>
+        <button type="button" class="chip" data-ins="m7b5">m7b5</button>
         <button type="button" class="chip" data-ins="o7">o7</button>
         <button type="button" class="chip" data-ins="7b9">7b9</button>
         <button type="button" class="chip" data-ins="7#11">7#11</button>
@@ -173,13 +180,14 @@ details pre{margin:8px 0 0;font-family:var(--font-mono);font-size:12.5px;line-he
       <details>
         <summary>Cómo se escribe</summary>
 <pre>Una línea = una fila. Compases separados por |
-Dos acordes en un compás: C-7 F7
-Con duración: C-7:3 F7:1
+Dos acordes en un compás: Cm7 F7
+Con duración: Cm7:3 F7:1
 Repetir compás: %    Sin acorde: N.C.
 Marca de ensayo al inicio: [A] [B] [Intro]
 Ritornelo: |: Am7 | D7 :|
 Cambiar tonalidad desde esa línea: key: C
-Se entienden: maj7, M7, ^7, Δ, m7, min7, -7, ø, m7b5,
+Se escribe: maj7, m7, m7b5, 7, 6, 9, 13, 7b9, 7#9, #11, b13.
+También se entienden: M7, ^7, Δ, -7, ø, min7,
 dim, o7, sus4, 6, 9, 13, 7b9, 7#9, #11, b13, /Bajo</pre>
       </details>
       <div class="row">
@@ -203,13 +211,13 @@ dim, o7, sus4, 6, 9, 13, 7b9, 7#9, #11, b13, /Bajo</pre>
       <div class="card">
         <div class="sel-info" id="selInfo">Ningún acorde elegido.</div>
         <label class="f">Cifra de análisis bajo el acorde A
-          <input type="text" id="lblText" placeholder="II-7, V7/II, ♭II7 …" autocomplete="off">
+          <input type="text" id="lblText" placeholder="IIm7, V7/II, ♭II7 …" autocomplete="off">
         </label>
         <div class="numtools" id="symBtns">
-          <button type="button" class="chip" data-sym="Δ">Δ</button>
-          <button type="button" class="chip" data-sym="ø">ø</button>
+          <button type="button" class="chip" data-sym="maj7">maj7</button>
+          <button type="button" class="chip" data-sym="m7">m7</button>
+          <button type="button" class="chip" data-sym="m7b5">m7b5</button>
           <button type="button" class="chip" data-sym="°">°</button>
-          <button type="button" class="chip" data-sym="-">-</button>
           <button type="button" class="chip" data-sym="+">+</button>
           <button type="button" class="chip" data-sym="♭">♭</button>
           <button type="button" class="chip" data-sym="♯">♯</button>
@@ -343,14 +351,14 @@ El video sale sin audio.</pre>
 'use strict';
 /* ===== Núcleo: estado, cifras, parser del cifrado y análisis ===== */
 const EXAMPLE_TEXT = [
-  '[A] A∆7 | % | C-7 | F7',
-  'A∆7 | % | C#-7 | F#7b9',
-  '[B] B-7 | F#7b9 | B-7 | %',
-  'F7 | % | B-7 | E7',
-  '[A] A∆7 | % | C-7 | F7',
-  'A∆7 | % | C#-7 | F#7b9',
-  '[C] B-7 | F#7b9 | B-7 | D-6',
-  'C#-7 Co7 | B-7 E7 | A∆7 | B-7 E7'
+  '[A] Amaj7 | % | Cm7 | F7',
+  'Amaj7 | % | C#m7 | F#7b9',
+  '[B] Bm7 | F#7b9 | Bm7 | %',
+  'F7 | % | Bm7 | E7',
+  '[A] Amaj7 | % | Cm7 | F7',
+  'Amaj7 | % | C#m7 | F#7b9',
+  '[C] Bm7 | F#7b9 | Bm7 | Dm6',
+  'C#m7 Co7 | Bm7 E7 | Amaj7 | Bm7 E7'
 ].join('\n');
 
 const DEFAULT_STATE = () => ({
@@ -451,7 +459,18 @@ function parseChart(text, meta) {
 }
 
 /* ---- Rótulos ---- */
+function dispQ(q) {
+  if (!q) return '';
+  if (q.startsWith('-Δ')) return 'mMaj' + q.slice(2);
+  if (q[0] === 'Δ') return 'maj' + q.slice(1);
+  if (q === 'ø7') return 'm7b5';
+  if (q[0] === '-') return 'm' + q.slice(1);
+  return q;
+}
 function qSuffix(p) {
+  return dispQ(p.q);
+}
+function qSuffixOld(p) {
   const q = p.q;
   if (q === '') return p.type === 'maj' || p.type === 'sus' ? '' : '';
   return q;
@@ -471,7 +490,7 @@ function autoAnalyze(song) {
     const c = real[i], nx = real[i + 1], p = c.parsed, np = nx.parsed;
     if (isMinorish(p) && np.type === 'dom' && ((np.rootPc - p.rootPc + 12) % 12 === 5)) {
       const tonic = keyOf(c), target = (np.rootPc + 5) % 12, t = (target - tonic + 12) % 12;
-      labels[c.idx] = 'II' + (p.q || '-7'); labels[nx.idx] = 'V' + (np.q || '7');
+      labels[c.idx] = 'II' + dispQ(p.q || '-7'); labels[nx.idx] = 'V' + (np.q || '7');
       locked[c.idx] = locked[nx.idx] = true;
       brackets.push({ from: c.idx, to: nx.idx, text: t === 0 ? '' : '→ ' + DEG[t] });
     }
@@ -560,18 +579,18 @@ function buildLayout(song, ann, V, mctx) {
         else maxSpan = Math.max(maxSpan, Math.abs(song.chords[a.to].bar - song.chords[a.from].bar) + 1);
       }
     }
-    const aS = Math.max(row.section ? 40 : 12, maxSpan ? Math.min(112, 30 + 15 * maxSpan + (a => a)(cross ? 12 : 0)) : 12);
-    const chordTop = y + aS, chordBottom = chordTop + chordH;
+    const aS = Math.max(row.section ? 40 : 12, maxSpan ? Math.min(112, 30 + 15 * maxSpan + (cross ? 12 : 0)) : 12);
     const idxs = [];
     row.bars.forEach(b => b.chords.forEach(c => idxs.push(c.idx)));
     const showL = V.showAnn;
     const hasLabel = showL && idxs.some(i => ann.labels[i]);
     const hasBr = showL && ann.brackets.some(b => rowOfChord[b.from] === ri || rowOfChord[b.to] === ri);
     const hasNote = showL && idxs.some(i => ann.notes[i]);
-    const labelTop = chordBottom + 6, labelH = hasLabel ? labF + 14 : 0;
-    const brTop = labelTop + labelH, brH = hasBr ? 52 : 0;
+    const labelTop = y + aS, labelH = hasLabel ? labF + 12 : 0;
+    const chordTop = labelTop + labelH, chordBottom = chordTop + chordH;
+    const brTop = chordBottom + 4, brH = hasBr ? 46 : 0;
     const noteTop = brTop + brH, noteH = hasNote ? labF + 12 : 0;
-    const rowH = aS + chordH + 6 + labelH + brH + noteH + 22;
+    const rowH = aS + labelH + chordH + 4 + brH + noteH + 22;
     const R = { ri, y, aS, chordTop, chordBottom, labelTop, labelH, brTop, brH, noteTop, noteH, rowH, section: row.section, bars: row.bars, x1: M + G + row.bars.length * barW };
     row.bars.forEach((b, bi) => {
       const x0 = M + G + bi * barW;
@@ -592,34 +611,38 @@ function buildLayout(song, ann, V, mctx) {
 }
 
 /* ---- Cifra ---- */
-function drawChordSym(ctx, p, cx, baseY, size, color, maxW) {
-  const root = p.root, acc = p.acc ? (p.acc === '#' ? '♯' : '♭') : '';
-  const q = (p.q || '').replace(/-/g, '−');
+function chordMetrics(ctx, p, size, maxW) {
+  const acc = p.acc ? (p.acc === '#' ? '♯' : '♭') : '';
+  const q = dispQ(p.q);
   const bass = p.bass ? '/' + p.bass.n + (p.bass.acc ? (p.bass.acc === '#' ? '♯' : '♭') : '') : '';
   const mk = s => `600 ${s}px ${F_UI}`;
   const dims = sz => {
-    ctx.font = mk(sz); const wr = ctx.measureText(root).width;
+    ctx.font = mk(sz); const wr = ctx.measureText(p.root).width;
     ctx.font = mk(sz * 0.55); const wa = acc ? ctx.measureText(acc).width + 1 : 0;
-    ctx.font = mk(sz * 0.64); const wq = q ? ctx.measureText(q).width + 2 : 0;
-    ctx.font = mk(sz * 0.64); const wb = bass ? ctx.measureText(bass).width + 2 : 0;
-    ctx.font = mk(sz * 0.42); let wl = 0; for (const a of p.alts) wl = Math.max(wl, ctx.measureText(a).width); if (wl) wl += 2;
+    ctx.font = mk(sz * 0.72); const wq = q ? ctx.measureText(q).width + 2 : 0;
+    ctx.font = mk(sz * 0.72); const wb = bass ? ctx.measureText(bass).width + 2 : 0;
+    ctx.font = mk(sz * 0.42); let wl = 0; for (const x of p.alts) wl = Math.max(wl, ctx.measureText(x).width); if (wl) wl += 2;
     return { wr, wa, wq, wl, wb, total: wr + wa + wq + wl + wb };
   };
   let d = dims(size);
   if (d.total > maxW) { size = size * maxW / d.total; d = dims(size); }
+  return { size, d, acc, q, bass, mk };
+}
+function drawChordSym(ctx, p, cx, baseY, size, color, maxW) {
+  const m = chordMetrics(ctx, p, size, maxW), d = m.d, mk = m.mk; size = m.size;
   let x = cx - d.total / 2;
   ctx.fillStyle = color; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
-  ctx.font = mk(size); ctx.fillText(root, x, baseY); x += d.wr;
-  if (acc) { ctx.font = mk(size * 0.55); ctx.fillText(acc, x + 1, baseY - size * 0.4); x += d.wa; }
-  if (q) { ctx.font = mk(size * 0.64); ctx.fillText(q, x + 1, baseY - size * 0.26); x += d.wq; }
+  ctx.font = mk(size); ctx.fillText(p.root, x, baseY); x += d.wr;
+  if (m.acc) { ctx.font = mk(size * 0.55); ctx.fillText(m.acc, x + 1, baseY - size * 0.4); x += d.wa; }
+  if (m.q) { ctx.font = mk(size * 0.72); ctx.fillText(m.q, x + 1, baseY - size * 0.1); x += d.wq; }
   if (p.alts.length) {
     ctx.font = mk(size * 0.42);
     const lh = size * 0.4, n = p.alts.length;
-    let by = baseY - size * 0.12 - (n - 1) * lh * 0.5 - (q ? size * 0.02 : 0);
+    let by = baseY - size * 0.12 - (n - 1) * lh * 0.5 - (m.q ? size * 0.12 : 0);
     for (const a of p.alts) { ctx.fillText(a, x + 1, by); by += lh; }
     x += d.wl;
   }
-  if (bass) { ctx.font = mk(size * 0.64); ctx.fillText(bass, x + 1, baseY - size * 0.1); }
+  if (m.bass) { ctx.font = mk(size * 0.72); ctx.fillText(m.bass, x + 1, baseY - size * 0.1); }
   return size;
 }
 
@@ -759,7 +782,7 @@ function drawChart(ctx, L, song, ann, V, st) {
     for (const c of song.chords) {
       const r = L.rects[c.idx]; if (!r) continue;
       const t = ann.labels[c.idx];
-      if (t) drawLabel(ctx, t, r.cx, r.labelTop + sz + 2, sz, (st.active === c.idx && V.lit) ? P.lit : P.num, r.w - 6);
+      if (t) drawLabel(ctx, t, r.cx, r.labelTop + sz + 3, sz, (st.active === c.idx && V.lit) ? P.lit : P.num, r.w - 6);
       const n = ann.notes[c.idx];
       if (n) { ctx.font = `italic 500 ${sz * 0.82}px ${F_UI}`; ctx.fillStyle = P.soft; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
         const R = L.rows[r.row]; ctx.fillText(n, r.cx, R.noteTop + sz); }
@@ -768,16 +791,18 @@ function drawChart(ctx, L, song, ann, V, st) {
     for (const b of ann.brackets) {
       const a = L.rects[b.from], z = L.rects[b.to]; if (!a || !z) continue;
       ctx.strokeStyle = P.arr; ctx.fillStyle = P.arr; ctx.lineWidth = 3.2; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      const span = c => { const r = L.rects[c.idx]; let w = L.cf * 0.9; if (c.parsed && c.parsed.ok) w = chordMetrics(ctx, c.parsed, L.cf, r.w - 10).d.total; return [r.cx - w / 2 - 6, r.cx + w / 2 + 6]; };
+      const sa = span(song.chords[b.from]), sz = span(song.chords[b.to]);
       const segs = [];
-      if (a.row === z.row) segs.push({ row: a.row, x1: a.x + 7, x2: z.x + z.w - 7, openL: false, openR: false });
+      if (a.row === z.row) segs.push({ row: a.row, x1: sa[0], x2: sz[1], openL: false, openR: false });
       else {
         for (let ri = a.row; ri <= z.row; ri++) {
           const R = L.rows[ri];
-          segs.push({ row: ri, x1: ri === a.row ? a.x + 7 : M + G + 6, x2: ri === z.row ? z.x + z.w - 7 : R.x1 - 6, openL: ri !== a.row, openR: ri !== z.row });
+          segs.push({ row: ri, x1: ri === a.row ? sa[0] : M + G + 6, x2: ri === z.row ? sz[1] : R.x1 - 6, openL: ri !== a.row, openR: ri !== z.row });
         }
       }
       segs.forEach((s, si) => {
-        const R = L.rows[s.row], y = R.brTop + 20;
+        const R = L.rows[s.row], y = R.brTop + 14;
         ctx.beginPath();
         ctx.moveTo(s.x1, s.openL ? y : y - 11); ctx.lineTo(s.x1, y); ctx.lineTo(s.x2, y); ctx.lineTo(s.x2, s.openR ? y : y - 11); ctx.stroke();
         if (b.text && si === segs.length - 1) {
@@ -793,13 +818,13 @@ function drawChart(ctx, L, song, ann, V, st) {
       if (s.row === e.row) {
         const span = Math.abs(e.bar - s.bar) + 1, R = L.rows[s.row];
         const h = clamp(14 + span * 15, 20, R.aS - 12);
-        const y = s.top - 4;
+        const y = R.labelTop - 4;
         const x1 = s.cx + (e.cx > s.cx ? 10 : -10), x2 = e.cx + (e.cx > s.cx ? -10 : 10);
         arcArrow(ctx, x1, y, x2, y, h, P.arr, true, lab, L.labF * 0.8);
       } else {
         const R1 = L.rows[s.row], R2 = L.rows[e.row];
-        arcArrow(ctx, s.cx + 10, s.top - 4, R1.x1 + 26, s.top - 14, clamp(26, 14, R1.aS - 12), P.arr, false, '', 0);
-        arcArrow(ctx, M + G - 28, e.top - 14, e.cx - 10, e.top - 4, clamp(26, 14, R2.aS - 12), P.arr, true, lab, L.labF * 0.8);
+        arcArrow(ctx, s.cx + 10, R1.labelTop - 4, R1.x1 + 26, R1.labelTop - 14, clamp(26, 14, R1.aS - 12), P.arr, false, '', 0);
+        arcArrow(ctx, M + G - 28, R2.labelTop - 14, e.cx - 10, R2.labelTop - 4, clamp(26, 14, R2.aS - 12), P.arr, true, lab, L.labF * 0.8);
       }
     }
   }
@@ -809,7 +834,7 @@ function drawChart(ctx, L, song, ann, V, st) {
     for (const [k, col] of [[st.sel.a, '#e59a00'], [st.sel.b, '#3d8bff']]) {
       const r = k != null && L.rects[k]; if (!r) continue;
       ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.setLineDash([9, 6]);
-      ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(r.x + 2, r.top - 2, r.w - 4, r.h + 8 + r.labelH, 12); else ctx.rect(r.x + 2, r.top - 2, r.w - 4, r.h + 8 + r.labelH);
+      ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(r.x + 2, r.labelTop - 2, r.w - 4, r.h + 8 + r.labelH, 12); else ctx.rect(r.x + 2, r.labelTop - 2, r.w - 4, r.h + 8 + r.labelH);
       ctx.stroke(); ctx.setLineDash([]);
     }
   }
@@ -1124,7 +1149,7 @@ cv.addEventListener('click', ev => {
   let hit = null;
   for (const k of Object.keys(layout.rects)) {
     const q = layout.rects[k];
-    if (px >= q.x && px <= q.x + q.w && py >= q.top - 8 && py <= q.top + q.h + q.labelH + 10) { hit = +k; break; }
+    if (px >= q.x && px <= q.x + q.w && py >= q.labelTop - 8 && py <= q.top + q.h + 10) { hit = +k; break; }
   }
   if (hit == null) { sel = { a: null, b: null }; }
   else if (sel.a == null || sel.b != null) { sel = { a: hit, b: null }; }
@@ -1327,4 +1352,5 @@ if (document.fonts && document.fonts.load) {
 }
 </script>
 
-</body></html>
+</body>
+</html>
