@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Cifrador Armónico</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: escenario fijo a la izquierda con transporte debajo, herramientas con pestañas a la derecha; en celular se apilan. */
@@ -110,6 +111,10 @@ details pre{margin:8px 0 0;font-family:var(--font-mono);font-size:12.5px;line-he
 <header class="top">
   <div class="brand">Cifrador <i>Armónico</i></div>
   <div class="sub">Escribí el cifrado, marcá el análisis y exportá una animación con fondo transparente para tus reels.</div>
+  <div class="row" style="margin-left:auto">
+    <button type="button" class="btn" id="btnUndo" disabled title="Ctrl+Z">↶ Deshacer</button>
+    <button type="button" class="btn" id="btnRedo" disabled title="Ctrl+Y">↷ Rehacer</button>
+  </div>
 </header>
 
 <main class="app">
@@ -207,6 +212,11 @@ dim, o7, sus4, 6, 9, 13, 7b9, 7#9, #11, b13, /Bajo</pre>
         <button type="button" class="btn warn" id="btnClearAnn">Borrar análisis</button>
         <label class="check"><input type="checkbox" id="chkAnn" checked>Mostrar</label>
       </div>
+      <div class="row">
+        <button type="button" class="btn" id="btnCopyAnn">Copiar análisis</button>
+        <button type="button" class="btn" id="btnPasteAnn">Pegar análisis</button>
+      </div>
+      <p class="hint" style="margin:0">Atajos: Ctrl+Z deshacer · Ctrl+Y rehacer · Ctrl+C y Ctrl+V copian y pegan el análisis del acorde (o rango A–B) elegido. En Mac usá Cmd.</p>
       <p class="hint" style="margin:0">Tocá un acorde en el escenario para elegirlo (A). Tocá otro para marcar el final (B). El análisis automático usa la tonalidad y detecta II–V, dominantes secundarios y sustitutos. Después editás lo que quieras.</p>
       <div class="card">
         <div class="sel-info" id="selInfo">Ningún acorde elegido.</div>
@@ -265,7 +275,9 @@ dim, o7, sus4, 6, 9, 13, 7b9, 7#9, #11, b13, /Bajo</pre>
       <div class="grid3">
         <label class="f">Retraso inicial (s)<input type="number" id="fDelay" min="0" max="60" step="0.1"></label>
         <label class="f">Volumen<input type="range" id="fVol" min="0" max="100"></label>
-        <span></span>
+        <label class="f">Resaltado
+          <select id="selHl"><option value="color">Cambia de color</option><option value="box">Color y contorno fino</option></select>
+        </label>
       </div>
       <div class="row">
         <label class="check"><input type="checkbox" id="chkClick">Metrónomo</label>
@@ -298,11 +310,18 @@ dim, o7, sus4, 6, 9, 13, 7b9, 7#9, #11, b13, /Bajo</pre>
     <!-- EXPORTAR -->
     <div class="pane" id="pane-export" role="tabpanel" hidden>
       <div class="grid2">
-        <label class="f">Fondo del archivo
+        <label class="f">Archivo
+          <select id="selFile">
+            <option value="mp4">MP4 (DaVinci, CapCut, InShot)</option>
+            <option value="webm">WebM (permite transparencia)</option>
+            <option value="png">Secuencia PNG con transparencia (ZIP) · DaVinci, Premiere</option>
+          </select>
+        </label>
+        <label class="f">Fondo
           <select id="selBg">
-            <option value="alpha">Transparente (WebM con alfa)</option>
             <option value="green">Verde croma</option>
             <option value="black">Negro (modo Pantalla)</option>
+            <option value="alpha">Transparente (solo WebM)</option>
           </select>
         </label>
         <label class="f">Color del trazo
@@ -341,6 +360,10 @@ dim, o7, sus4, 6, 9, 13, 7b9, 7#9, #11, b13, /Bajo</pre>
    · WebM con alfa: si tu editor lo acepta, ya viene transparente.
    · Verde croma: aplicá "Croma" o "Chroma key" y quitá el verde.
    · Negro: ponele modo de mezcla "Pantalla" o "Aclarar".
+   · Secuencia PNG (ZIP): transparencia real. Descomprimí y
+     arrastrá la carpeta a DaVinci. Es un archivo grande: usá
+     1 repetición. Dentro viene un LEEME con el comando para
+     convertirla a ProRes 4444 (.mov con alfa).
 4. Alineá el primer acorde con el primer compás que tocás.
 El video sale sin audio.</pre>
       </details>
@@ -366,7 +389,7 @@ const DEFAULT_STATE = () => ({
   text: EXAMPLE_TEXT,
   ann: { labels: {}, notes: {}, brackets: [], arrows: [], hideAuto: false },
   audio: { tempo: 132, count: 1, reps: 2, delay: 0, click: true, chords: false, vol: 70, midiAudio: true, midiLoop: true, midiBar: 1, midiOff: 0 },
-  view: { fmt: '9:16', pbg: 'video', bg: 'alpha', align: 'center', scale: 100, cols: 0, ink: 'white', panel: false, lit: true, showAnn: true, fps: 30 }
+  view: { fmt: '9:16', pbg: 'video', bg: 'green', file: 'mp4', hl: 'color', align: 'center', scale: 100, cols: 0, ink: 'white', panel: false, lit: true, showAnn: true, fps: 30 }
 });
 
 const FORMATS = { '9:16': [1080, 1920], '4:5': [1080, 1350], '1:1': [1080, 1080], '16:9': [1920, 1080] };
@@ -544,7 +567,7 @@ function inkPalette(V, fx) {
   const t = {
     white: { ink: '#ffffff', num: '#ff8070', arr: '#82caff', lit: '#ffc43d', soft: 'rgba(255,255,255,.72)', panel: 'rgba(8,10,16,.58)', shadow: true },
     black: { ink: '#12151c', num: '#d03626', arr: '#1a5fd0', lit: '#e08a00', soft: 'rgba(18,21,28,.7)', panel: 'rgba(255,255,255,.78)', shadow: false },
-    gold: { ink: '#ffe7a3', num: '#ff9078', arr: '#a8dcff', lit: '#ffffff', soft: 'rgba(255,231,163,.75)', panel: 'rgba(8,10,16,.58)', shadow: true }
+    gold: { ink: '#ffe7a3', num: '#ff9078', arr: '#a8dcff', lit: '#ff8a3d', soft: 'rgba(255,231,163,.75)', panel: 'rgba(8,10,16,.58)', shadow: true }
   }[V.ink] || null;
   return Object.assign({}, t, { shadow: t.shadow && fx });
 }
@@ -747,15 +770,13 @@ function drawChart(ctx, L, song, ann, V, st) {
     const lastB = R.bars[R.bars.length - 1];
     if (!lastB.endRepeat) { ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(R.x1, R.chordTop + 2); ctx.lineTo(R.x1, R.chordBottom - 2); ctx.stroke(); }
   });
-  // iluminación del acorde actual
-  if (st.active != null && V.lit && L.rects[st.active]) {
+  // resaltado del acorde actual: solo contorno fino opcional, sin relleno ni destello
+  if (st.active != null && V.lit && V.hl === 'box' && L.rects[st.active]) {
     const r = L.rects[st.active];
-    shadowOff();
-    if (st.fx) { ctx.shadowColor = P.lit; ctx.shadowBlur = 26; }
-    ctx.fillStyle = hexA(P.lit, 0.3); ctx.strokeStyle = P.lit; ctx.lineWidth = 3.5;
+    shadowOff(); ctx.strokeStyle = P.lit; ctx.lineWidth = 3;
     ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(r.x + 3, r.top, r.w - 6, r.h + 4, 12); else ctx.rect(r.x + 3, r.top, r.w - 6, r.h + 4);
-    ctx.fill(); ctx.stroke(); shadowOff(); shadowOn();
+    if (ctx.roundRect) ctx.roundRect(r.x + 4, r.top + 2, r.w - 8, r.h, 12); else ctx.rect(r.x + 4, r.top + 2, r.w - 8, r.h);
+    ctx.stroke(); shadowOn();
   }
   if (st.barProg && V.lit && L.bars[st.barProg.bar]) {
     const bb = L.bars[st.barProg.bar];
@@ -767,12 +788,11 @@ function drawChart(ctx, L, song, ann, V, st) {
   for (const c of song.chords) {
     const r = L.rects[c.idx]; if (!r) continue;
     const lit = st.active === c.idx && V.lit;
-    const color = ink;
+    const color = lit ? P.lit : ink;
     const base = r.top + r.h * 0.76;
     if (c.repeat) { drawRepeatSign(ctx, r.cx, r.top + r.h * 0.5, r.h * 0.62, color); continue; }
     if (c.nc) { ctx.fillStyle = color; ctx.font = `600 ${L.cf * 0.62}px ${F_UI}`; ctx.textAlign = 'center'; ctx.fillText('N.C.', r.cx, base); continue; }
     if (!c.parsed.ok) { ctx.fillStyle = P.num; ctx.font = `600 ${L.cf * 0.7}px ${F_UI}`; ctx.textAlign = 'center'; ctx.fillText(c.sym, r.cx, base); continue; }
-    if (lit && st.fx) { ctx.shadowColor = P.lit; ctx.shadowBlur = 18; }
     drawChordSym(ctx, c.parsed, r.cx, base, L.cf, color, r.w - 10);
     shadowOff(); shadowOn();
   }
@@ -1050,6 +1070,61 @@ const pad = n => String(n).padStart(2, '0');
 const fmtT = s => { s = Math.max(0, s); return Math.floor(s / 60) + ':' + pad(Math.floor(s % 60)); };
 function setStatus(el, msg, kind) { el.textContent = msg || ''; el.className = 'status' + (kind ? ' ' + kind : ''); }
 
+/* ---- Historial (Ctrl+Z / Ctrl+Y) ---- */
+const hist = { stack: [], idx: -1, timer: 0 };
+const snapNow = () => JSON.stringify({ meta: S.meta, text: S.text, ann: S.ann });
+function updateUndoBtns() { $('btnUndo').disabled = hist.idx <= 0; $('btnRedo').disabled = hist.idx >= hist.stack.length - 1; }
+function pushHist() {
+  clearTimeout(hist.timer); const s = snapNow();
+  if (hist.stack[hist.idx] === s) { updateUndoBtns(); return; }
+  hist.stack = hist.stack.slice(0, hist.idx + 1); hist.stack.push(s);
+  if (hist.stack.length > 250) hist.stack.shift();
+  hist.idx = hist.stack.length - 1; updateUndoBtns();
+}
+function schedulePush() { clearTimeout(hist.timer); hist.timer = setTimeout(pushHist, 450); }
+function restoreHist(s) { const o = JSON.parse(s); S.meta = o.meta; S.text = o.text; S.ann = o.ann; fillForm(); persist(); recompute(); updateUndoBtns(); }
+function undo() { pushHist(); if (hist.idx > 0) { hist.idx--; restoreHist(hist.stack[hist.idx]); } }
+function redo() { pushHist(); if (hist.idx < hist.stack.length - 1) { hist.idx++; restoreHist(hist.stack[hist.idx]); } }
+$('btnUndo').addEventListener('click', undo); $('btnRedo').addEventListener('click', redo);
+
+/* ---- Copiar y pegar análisis ---- */
+let annClip = null;
+function selRange() { if (sel.a == null) return null; const b = sel.b != null ? sel.b : sel.a; return [Math.min(sel.a, b), Math.max(sel.a, b)]; }
+function copyAnn() {
+  const r = selRange(); if (!r) { setStatus($('projStatus'), '', ''); $('selInfo').textContent = 'Elegí un acorde (o un rango A–B) para copiar su análisis.'; return false; }
+  const [lo, hi] = r, A = S.ann, rel = i => i - lo, inR = i => i >= lo && i <= hi;
+  const labels = {}, notes = {};
+  for (let i = lo; i <= hi; i++) { if (A.labels[i]) labels[rel(i)] = A.labels[i]; if (A.notes[i]) notes[rel(i)] = A.notes[i]; }
+  annClip = { n: hi - lo + 1, labels, notes,
+    brackets: A.brackets.filter(b => inR(b.from) && inR(b.to)).map(b => ({ from: rel(b.from), to: rel(b.to), text: b.text })),
+    arrows: A.arrows.filter(b => inR(b.from) && inR(b.to)).map(b => ({ from: rel(b.from), to: rel(b.to), text: b.text })) };
+  const txt = song.chords.slice(lo, hi + 1).map(c => c.sym + (A.labels[c.idx] ? ' [' + A.labels[c.idx] + ']' : '')).join('  ');
+  try { navigator.clipboard.writeText(txt).catch(() => { }); } catch (_) { }
+  $('selInfo').textContent = 'Copiado: ' + annClip.n + ' acorde' + (annClip.n > 1 ? 's' : '') + '. Elegí el destino y pegá.';
+  return true;
+}
+function pasteAnn() {
+  if (!annClip) { $('selInfo').textContent = 'Primero copiá el análisis de un acorde (Ctrl+C).'; return; }
+  if (sel.a == null) { $('selInfo').textContent = 'Elegí el acorde donde empieza el pegado.'; return; }
+  const start = Math.min(sel.a, sel.b != null ? sel.b : sel.a), n = song.chords.length, A = S.ann;
+  for (let k = 0; k < annClip.n; k++) { const i = start + k; if (i >= n) break; delete A.labels[i]; delete A.notes[i]; }
+  for (const [k, v] of Object.entries(annClip.labels)) { if (start + +k < n) A.labels[start + +k] = v; }
+  for (const [k, v] of Object.entries(annClip.notes)) { if (start + +k < n) A.notes[start + +k] = v; }
+  for (const b of annClip.brackets) if (start + b.to < n) A.brackets.push({ from: start + b.from, to: start + b.to, text: b.text });
+  for (const b of annClip.arrows) if (start + b.to < n) A.arrows.push({ from: start + b.from, to: start + b.to, text: b.text });
+  afterAnn();
+}
+$('btnCopyAnn').addEventListener('click', copyAnn); $('btnPasteAnn').addEventListener('click', pasteAnn);
+document.addEventListener('keydown', e => {
+  if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+  const k = e.key.toLowerCase(), a = document.activeElement;
+  const inText = a && (a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && /^(text|number|search)$/.test(a.type)));
+  if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+  else if ((k === 'z' && e.shiftKey) || k === 'y') { e.preventDefault(); redo(); }
+  else if (!inText && k === 'c' && selRange()) { e.preventDefault(); copyAnn(); }
+  else if (!inText && k === 'v' && annClip) { e.preventDefault(); pasteAnn(); }
+});
+
 /* ---- Recalcular ---- */
 function recompute() {
   song = parseChart(S.text, S.meta);
@@ -1183,7 +1258,7 @@ $('btnAuto').addEventListener('click', () => {
 });
 $('chkAnn').addEventListener('change', e => { S.view.showAnn = e.target.checked; persist(); recompute(); });
 $('symBtns').addEventListener('click', e => { const b = e.target.closest('[data-sym]'); if (!b) return; const i = $('lblText'); const s = i.selectionStart ?? i.value.length, t = i.selectionEnd ?? s; i.setRangeText(b.dataset.sym, s, t, 'end'); i.focus(); });
-function afterAnn() { persist(); recompute(); }
+function afterAnn() { persist(); recompute(); pushHist(); }
 function renderMarks() {
   const box = $('markList'); box.textContent = '';
   const add = (txt, del) => { const d = document.createElement('div'); d.className = 'mark'; const s = document.createElement('span'); s.textContent = txt; const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', 'Quitar'); b.textContent = '×'; b.addEventListener('click', del); d.append(s, b); box.append(d); };
@@ -1194,13 +1269,13 @@ function renderMarks() {
 
 /* ---- Cifrado y metadatos ---- */
 let tmr = 0;
-$('chartText').addEventListener('input', e => { S.text = e.target.value; clearTimeout(tmr); tmr = setTimeout(() => { persist(); recompute(); }, 160); });
+$('chartText').addEventListener('input', e => { S.text = e.target.value; clearTimeout(tmr); tmr = setTimeout(() => { persist(); recompute(); schedulePush(); }, 160); });
 for (const [id, key] of [['fTitle', 'title'], ['fComposer', 'composer'], ['fStyle', 'style'], ['fKey', 'key'], ['fTime', 'time']]) {
-  $(id).addEventListener('input', e => { S.meta[key] = e.target.value; persist(); recompute(); });
+  $(id).addEventListener('input', e => { S.meta[key] = e.target.value; persist(); recompute(); schedulePush(); });
 }
 $('insChips').addEventListener('click', e => { const b = e.target.closest('[data-ins]'); if (!b) return; const t = $('chartText'); const s = t.selectionStart, en = t.selectionEnd; t.setRangeText(b.dataset.ins, s, en, 'end'); t.focus(); t.dispatchEvent(new Event('input')); });
-$('btnExample').addEventListener('click', () => { const d = DEFAULT_STATE(); S.meta = d.meta; S.text = d.text; S.ann = d.ann; { const r0 = autoAnalyze(parseChart(S.text, S.meta)); S.ann.labels = r0.labels; S.ann.brackets = r0.brackets; S.ann.arrows = r0.arrows; } fillForm(); persist(); recompute(); });
-$('btnClear').addEventListener('click', () => { S.text = ''; S.ann = { labels: {}, notes: {}, brackets: [], arrows: [], hideAuto: false }; $('chartText').value = ''; persist(); recompute(); });
+$('btnExample').addEventListener('click', () => { const d = DEFAULT_STATE(); S.meta = d.meta; S.text = d.text; S.ann = d.ann; { const r0 = autoAnalyze(parseChart(S.text, S.meta)); S.ann.labels = r0.labels; S.ann.brackets = r0.brackets; S.ann.arrows = r0.arrows; } fillForm(); persist(); recompute(); pushHist(); });
+$('btnClear').addEventListener('click', () => { S.text = ''; S.ann = { labels: {}, notes: {}, brackets: [], arrows: [], hideAuto: false }; $('chartText').value = ''; persist(); recompute(); pushHist(); });
 
 /* ---- Archivos ---- */
 async function saveFile(name, blob, statusEl) {
@@ -1222,7 +1297,7 @@ $('fileProj').addEventListener('change', async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   try { const o = JSON.parse(await f.text()); const d = DEFAULT_STATE();
     S = { meta: { ...d.meta, ...o.meta }, text: o.text ?? '', ann: { ...d.ann, ...o.ann }, audio: { ...d.audio, ...o.audio }, view: { ...d.view, ...o.view } };
-    fillForm(); persist(); recompute(); setStatus($('projStatus'), 'Proyecto abierto: ' + f.name, 'ok');
+    fillForm(); persist(); recompute(); pushHist(); setStatus($('projStatus'), 'Proyecto abierto: ' + f.name, 'ok');
   } catch (_) { setStatus($('projStatus'), 'Ese archivo no es un proyecto válido.', 'err'); }
 });
 
@@ -1253,6 +1328,8 @@ function syncSeg() {
   for (const b of $('pbgBtns').children) b.setAttribute('aria-pressed', String(b.dataset.pbg === S.view.pbg));
   $('stage').dataset.bg = S.view.pbg;
 }
+$('selHl').addEventListener('change', e => { S.view.hl = e.target.value; persist(); draw(); });
+$('selFile').addEventListener('change', e => { S.view.file = e.target.value; persist(); });
 $('selBg').addEventListener('change', e => { S.view.bg = e.target.value; persist(); });
 $('selInk').addEventListener('change', e => { S.view.ink = e.target.value; persist(); recompute(); });
 $('selAlign').addEventListener('change', e => { S.view.align = e.target.value; persist(); draw(); });
@@ -1278,12 +1355,14 @@ $('btnPng').addEventListener('click', () => {
   c.toBlob(b => { if (b) saveFile('cifrado-' + S.view.fmt.replace(':', 'x') + '.png', b, $('expStatus')); }, 'image/png');
 });
 function pickMime() {
-  const list = S.view.bg === 'alpha' ? ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'] : ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4'];
+  const list = S.view.file === 'mp4' ? ['video/mp4;codecs=avc1.640033', 'video/mp4;codecs=avc1', 'video/mp4'] : ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
   if (!window.MediaRecorder) return null;
   return list.find(m => MediaRecorder.isTypeSupported(m)) || null;
 }
 $('btnVid').addEventListener('click', () => {
   if (exporting) return;
+  if (S.view.file === 'png') { exportPngSeq(); return; }
+  if (S.view.file === 'mp4' && window.VideoEncoder && window.Mp4Muxer) { exportMp4(); return; }
   if (!timeline.total) { setStatus($('expStatus'), 'Escribí algunos compases primero.', 'err'); return; }
   const mime = pickMime();
   if (!mime) { setStatus($('expStatus'), 'Este navegador no puede grabar video. Probá con Chrome de escritorio, o exportá PNG.', 'err'); return; }
@@ -1304,8 +1383,8 @@ $('btnVid').addEventListener('click', () => {
     $('btnVid').disabled = false; $('btnExpCancel').hidden = true; $('expProgWrap').hidden = true; $('expProg').style.width = '0';
     draw();
     if (wasCancelled) { setStatus($('expStatus'), 'Exportación cancelada.', ''); return; }
-    pendingBlob = new Blob(chunks, { type: 'video/webm' });
-    showSaveButton();
+    const isMp4 = /mp4/.test(rec.mimeType || mime);
+    showSaveButton(new Blob(chunks, { type: isMp4 ? 'video/mp4' : 'video/webm' }), isMp4 ? 'mp4' : 'webm', isMp4 && S.view.bg === 'alpha');
   };
   rec.start(250);
   const tick = () => {
@@ -1322,12 +1401,110 @@ $('btnVid').addEventListener('click', () => {
   requestAnimationFrame(tick);
 });
 $('btnExpCancel').addEventListener('click', () => { if (exporting) exporting.cancelled = true; });
-function showSaveButton() {
+function showSaveButton(blob, ext, flatNote) {
+  pendingBlob = blob;
   const st = $('expStatus'); st.className = 'status ok'; st.textContent = '';
-  const b = document.createElement('button'); b.type = 'button'; b.className = 'btn pri'; b.textContent = 'Guardar el video (' + Math.round(pendingBlob.size / 1024 / 1024 * 10) / 10 + ' MB)';
-  b.addEventListener('click', () => { saveFile('cifrado-' + S.view.fmt.replace(':', 'x') + '-' + (S.view.bg === 'alpha' ? 'alfa' : S.view.bg) + '.webm', pendingBlob, st); });
-  const t = document.createElement('div'); t.textContent = S.view.bg === 'alpha' ? 'Listo. La transparencia depende de tu navegador; si tu editor lo ve con fondo negro, exportá de nuevo con verde croma.' : 'Listo.';
+  const bg = (ext === 'mp4' && S.view.bg === 'alpha') ? 'green' : S.view.bg;
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'btn pri'; b.textContent = 'Guardar el video (' + Math.round(blob.size / 1024 / 1024 * 10) / 10 + ' MB)';
+  b.addEventListener('click', () => { saveFile('cifrado-' + S.view.fmt.replace(':', 'x') + (ext === 'zip' ? '-secuencia-alfa' : '-' + (bg === 'alpha' ? 'alfa' : bg)) + '.' + ext, blob, st); });
+  const t = document.createElement('div');
+  t.textContent = ext === 'zip' ? 'Listo. Descomprimí el ZIP y arrastrá la carpeta a DaVinci. Adentro hay un LEEME.txt con el comando para pasarla a ProRes 4444.' : ext === 'mp4' ? (S.view.bg === 'alpha' ? 'Listo. El MP4 no admite transparencia: usé verde croma, quitalo con "Chroma key" en tu editor.' : 'Listo. Es un MP4 de cuadros constantes (' + S.view.fps + ' fps).') : (S.view.bg === 'alpha' ? 'Listo. La transparencia depende de tu editor; si DaVinci no lo abre, exportá en MP4 con verde croma.' : 'Listo.');
   st.append(t, document.createElement('br'), b);
+}
+/* ---- ZIP sin compresión (los PNG ya vienen comprimidos) ---- */
+const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function ZipBuilder() { this.parts = []; this.entries = []; this.offset = 0; }
+ZipBuilder.prototype.add = function (name, u8) {
+  const nb = new TextEncoder().encode(name), crc = crc32(u8), h = new DataView(new ArrayBuffer(30));
+  h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(12, 0x21, true);
+  h.setUint32(14, crc, true); h.setUint32(18, u8.length, true); h.setUint32(22, u8.length, true); h.setUint16(26, nb.length, true);
+  this.parts.push(h.buffer, nb, u8); this.entries.push({ nb, crc, size: u8.length, off: this.offset }); this.offset += 30 + nb.length + u8.length;
+};
+ZipBuilder.prototype.finish = function () {
+  const start = this.offset; let size = 0;
+  for (const e of this.entries) {
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(14, 0x21, true);
+    c.setUint32(16, e.crc, true); c.setUint32(20, e.size, true); c.setUint32(24, e.size, true); c.setUint16(28, e.nb.length, true); c.setUint32(42, e.off, true);
+    this.parts.push(c.buffer, e.nb); size += 46 + e.nb.length;
+  }
+  const en = new DataView(new ArrayBuffer(22));
+  en.setUint32(0, 0x06054b50, true); en.setUint16(8, this.entries.length, true); en.setUint16(10, this.entries.length, true); en.setUint32(12, size, true); en.setUint32(16, start, true);
+  this.parts.push(en.buffer); return new Blob(this.parts, { type: 'application/zip' });
+};
+async function exportPngSeq() {
+  const { W, H } = exportFrameInfo(), fps = S.view.fps || 30, total = timeline.total, n = Math.ceil(total * fps);
+  if (!n) { setStatus($('expStatus'), 'Escribí algunos compases primero.', 'err'); return; }
+  if (n > 20000) { setStatus($('expStatus'), 'Son demasiados cuadros (' + n + '). Bajá las repeticiones a 1 en la pestaña Tiempo.', 'err'); return; }
+  stopPlay(false);
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d', { alpha: true });
+  const zip = new ZipBuilder(), dir = 'cifrado_frames/';
+  exporting = { pos: 0, cancelled: false };
+  $('btnVid').disabled = true; $('btnExpCancel').hidden = false; $('expProgWrap').hidden = false;
+  setStatus($('expStatus'), 'Generando ' + n + ' PNG con transparencia. Puede tardar unos minutos.', '');
+  let fail = null;
+  try {
+    for (let i = 0; i < n && !exporting.cancelled; i++) {
+      const t = i / fps; exporting.pos = Math.min(t, total);
+      const st = stateForDraw(t, true);
+      renderFrame(x, W, H, 1, song, layout, S.ann, S.view, st); drawCountdown(x, W, H, { count: st.count }, t);
+      const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+      if (!blob) throw new Error('el navegador no pudo crear el PNG');
+      zip.add(dir + 'frame_' + String(i + 1).padStart(6, '0') + '.png', new Uint8Array(await blob.arrayBuffer()));
+      if (i % 4 === 0) { $('expProg').style.width = (100 * i / n).toFixed(1) + '%'; await new Promise(r => setTimeout(r, 0)); }
+    }
+    if (!exporting.cancelled) {
+      const readme = 'SECUENCIA PNG CON TRANSPARENCIA\r\n' + W + 'x' + H + ' · ' + fps + ' cuadros por segundo · ' + n + ' cuadros\r\n\r\n' +
+        'DAVINCI RESOLVE\r\n1. Descomprimí este ZIP.\r\n2. En la página Media arrastrá la carpeta cifrado_frames al Media Pool. Aparece como un solo clip.\r\n3. Si el ritmo no es ' + fps + ' fps: clic derecho en el clip > Clip Attributes > Frame rate.\r\n4. Ponelo en una pista por encima de tu video. La transparencia se respeta sola.\r\n\r\n' +
+        'PASAR A PRORES 4444 (con ffmpeg instalado)\r\nffmpeg -framerate ' + fps + ' -i cifrado_frames/frame_%06d.png -c:v prores_ks -profile:v 4444 -pix_fmt yuva444p10le cifrado_prores4444.mov\r\n';
+      zip.add('LEEME.txt', new TextEncoder().encode(readme));
+    }
+  } catch (e) { fail = e; }
+  const cancelled = exporting && exporting.cancelled; exporting = null;
+  $('btnVid').disabled = false; $('btnExpCancel').hidden = true; $('expProgWrap').hidden = true; $('expProg').style.width = '0'; draw();
+  if (cancelled) { setStatus($('expStatus'), 'Exportación cancelada.', ''); return; }
+  if (fail) { setStatus($('expStatus'), 'Falló la exportación: ' + (fail.message || fail), 'err'); return; }
+  showSaveButton(zip.finish(), 'zip', false);
+}
+async function exportMp4() {
+  const { W, H } = exportFrameInfo(), fps = S.view.fps || 30, total = timeline.total;
+  const fill = bgFillFor() || '#00b140', n = Math.ceil(total * fps);
+  if (!n) { setStatus($('expStatus'), 'Escribí algunos compases primero.', 'err'); return; }
+  stopPlay(false);
+  let codec = null;
+  for (const c of ['avc1.640033', 'avc1.640028', 'avc1.4d0028', 'avc1.42001f']) {
+    try { const r = await VideoEncoder.isConfigSupported({ codec: c, width: W, height: H, bitrate: 12e6, framerate: fps }); if (r && r.supported) { codec = c; break; } } catch (_) { }
+  }
+  if (!codec) { setStatus($('expStatus'), 'Este navegador no puede codificar H.264. Probá con Chrome o Edge actualizados, o elegí WebM.', 'err'); return; }
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+  const target = new Mp4Muxer.ArrayBufferTarget();
+  const muxer = new Mp4Muxer.Muxer({ target, video: { codec: 'avc', width: W, height: H }, fastStart: 'in-memory' });
+  let encErr = null;
+  const enc = new VideoEncoder({ output: (ch, m) => muxer.addVideoChunk(ch, m), error: e => { encErr = e; } });
+  enc.configure({ codec, width: W, height: H, bitrate: 12e6, framerate: fps });
+  exporting = { pos: 0, cancelled: false };
+  $('btnVid').disabled = true; $('btnExpCancel').hidden = false; $('expProgWrap').hidden = false;
+  setStatus($('expStatus'), 'Codificando MP4 (' + n + ' cuadros). No hace falta esperar tiempo real.', '');
+  try {
+    for (let i = 0; i < n && !exporting.cancelled && !encErr; i++) {
+      const t = i / fps; exporting.pos = Math.min(t, total);
+      const st = stateForDraw(t, true); st.bgFill = fill;
+      renderFrame(x, W, H, 1, song, layout, S.ann, S.view, st); drawCountdown(x, W, H, { count: st.count }, t);
+      const vf = new VideoFrame(c, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round(1e6 / fps) });
+      enc.encode(vf, { keyFrame: i % (fps * 2) === 0 }); vf.close();
+      while (enc.encodeQueueSize > 8) await new Promise(r => setTimeout(r, 4));
+      if (i % 8 === 0) { $('expProg').style.width = (100 * i / n).toFixed(1) + '%'; await new Promise(r => setTimeout(r, 0)); }
+    }
+    if (!exporting.cancelled && !encErr) { await enc.flush(); muxer.finalize(); }
+  } catch (e) { encErr = e; }
+  const cancelled = exporting && exporting.cancelled; exporting = null;
+  $('btnVid').disabled = false; $('btnExpCancel').hidden = true; $('expProgWrap').hidden = true; $('expProg').style.width = '0';
+  try { enc.close(); } catch (_) { }
+  draw();
+  if (cancelled) { setStatus($('expStatus'), 'Exportación cancelada.', ''); return; }
+  if (encErr) { setStatus($('expStatus'), 'Falló la codificación: ' + (encErr.message || encErr) + '. Probá con WebM.', 'err'); return; }
+  showSaveButton(new Blob([target.buffer], { type: 'video/mp4' }), 'mp4', false);
 }
 
 /* ---- Formularios ---- */
@@ -1338,14 +1515,14 @@ function fillForm() {
   $('fTempo').value = A.tempo; $('fCount').value = String(A.count); $('fReps').value = A.reps; $('fDelay').value = A.delay; $('fVol').value = A.vol;
   $('fMidiBar').value = A.midiBar; $('fMidiOff').value = A.midiOff;
   $('chkClick').checked = A.click; $('chkChords').checked = A.chords; $('chkMidiAudio').checked = A.midiAudio; $('chkMidiLoop').checked = A.midiLoop;
-  $('chkLit').checked = V.lit; $('chkAnn').checked = V.showAnn; $('selBg').value = V.bg; $('selInk').value = V.ink; $('selAlign').value = V.align;
+  $('chkLit').checked = V.lit; $('chkAnn').checked = V.showAnn; $('selBg').value = V.bg; $('selFile').value = V.file || 'mp4'; $('selHl').value = V.hl || 'color'; $('selInk').value = V.ink; $('selAlign').value = V.align;
   $('selCols').value = String(V.cols); $('selFps').value = String(V.fps); $('rngScale').value = V.scale; $('scaleVal').textContent = V.scale; $('chkPanel').checked = V.panel;
   syncSeg();
 }
 
 /* ---- Inicio ---- */
 if (!localStorage_has()) { const sg = parseChart(S.text, S.meta); const r0 = autoAnalyze(sg); S.ann.labels = r0.labels; S.ann.brackets = r0.brackets; S.ann.arrows = r0.arrows; }
-fillForm(); applyStageSize(); recompute(); raf = requestAnimationFrame(loop);
+fillForm(); applyStageSize(); recompute(); pushHist(); raf = requestAnimationFrame(loop);
 window.addEventListener('resize', () => { applyStageSize(); draw(); });
 if (document.fonts && document.fonts.load) {
   Promise.all(['600 40px Barlow', '700 40px "Barlow Semi Condensed"', '500 20px Barlow'].map(f => document.fonts.load(f))).then(() => { recompute(); }).catch(() => { });
