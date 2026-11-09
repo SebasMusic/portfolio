@@ -1,0 +1,3561 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Atril Charts</title>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,500&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Cormorant+Infant:wght@600&family=DM+Serif+Display&family=Kalam:wght@700&family=Patrick+Hand&family=Caveat+Brush&family=Gochi+Hand&family=Architects+Daughter&family=Permanent+Marker&family=Indie+Flower&family=Shadows+Into+Light+Two&family=Covered+By+Your+Grace&family=Reenie+Beanie&family=Roboto+Condensed:wght@600&family=IBM+Plex+Sans+Condensed:wght@600&family=Source+Serif+4:wght@600&family=Libre+Baskerville:wght@700&family=Crimson+Pro:wght@600&display=swap">
+<style>
+/* Layout: panel de edición a la izquierda, mesa con hojas A4 a la derecha; en teléfono se alternan. */
+:root {
+  --bg: #E7EAF0;
+  --panel: #F7F8FB;
+  --panel2: #FFFFFF;
+  --ink: #141822;
+  --muted: #5B6475;
+  --line: #D5DAE3;
+  --accent: #2F5BD8;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #E3EAFC;
+  --desk: #C9CFDA;
+  --warn: #A3440A;
+  --warn-bg: #FFEFDD;
+  --ok: #1F7A3A;
+  --c-intro: #2F5BD8; --c-verso: #0B7285; --c-precoro: #D9480F; --c-coro: #C2255C;
+  --c-puente: #6741D9; --c-solo: #2B8A3E; --c-inter: #5C6B7A; --c-final: #1B1F27; --c-default: #495057;
+  --shadow: 0 1px 2px rgba(20,24,34,.12), 0 8px 28px rgba(20,24,34,.18);
+  --ui: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --lab: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0A0D13; --panel: #141821; --panel2: #1A1F2C; --ink: #EDF0F6; --muted: #98A2B5; --line: #2A3141;
+    --accent: #8FA8FF; --accent-ink: #0A0D13; --accent-soft: #232C4A; --desk: #07090D;
+    --warn: #FFB27A; --warn-bg: #3A2412; --ok: #6FDB86;
+    --c-intro: #8FA8FF; --c-verso: #45CFE0; --c-precoro: #FFA45C; --c-coro: #FF6F9F;
+    --c-puente: #B9A0FF; --c-solo: #6FDB86; --c-inter: #A9B8C8; --c-final: #E9ECEF; --c-default: #B4BBC4;
+    --shadow: 0 1px 2px rgba(0,0,0,.5), 0 10px 32px rgba(0,0,0,.55);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0A0D13; --panel: #141821; --panel2: #1A1F2C; --ink: #EDF0F6; --muted: #98A2B5; --line: #2A3141;
+  --accent: #8FA8FF; --accent-ink: #0A0D13; --accent-soft: #232C4A; --desk: #07090D;
+  --warn: #FFB27A; --warn-bg: #3A2412; --ok: #6FDB86;
+  --c-intro: #8FA8FF; --c-verso: #45CFE0; --c-precoro: #FFA45C; --c-coro: #FF6F9F;
+  --c-puente: #B9A0FF; --c-solo: #6FDB86; --c-inter: #A9B8C8; --c-final: #E9ECEF; --c-default: #B4BBC4;
+  --shadow: 0 1px 2px rgba(0,0,0,.5), 0 10px 32px rgba(0,0,0,.55);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font: 500 14px/1.4 var(--ui);
+  overflow: hidden; -webkit-text-size-adjust: 100%;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.app { height: 100%; display: grid; grid-template-rows: auto 1fr auto; padding-left: max(0px, env(safe-area-inset-left, 0px)); padding-right: max(0px, env(safe-area-inset-right, 0px)); }
+
+/* barra superior */
+.top {
+  display: flex; align-items: center; gap: 10px; padding: 10px max(16px, env(safe-area-inset-left, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
+  background: var(--panel); border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand svg { flex: none; }
+.brand b { font: 800 19px/1 var(--ui); letter-spacing: -.02em; }
+.brand span { font: 600 11px/1 var(--lab); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); padding-top: 3px; }
+.grow { flex: 1; min-width: 0; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 36px; padding: 0 14px;
+  border: 1px solid var(--line); border-radius: 9px; background: var(--panel2); font-weight: 600; white-space: nowrap;
+}
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.primary[disabled] { opacity: .6; cursor: progress; }
+.btn.ghost { background: transparent; }
+.btn.icon { width: 36px; padding: 0; }
+.btn.sm { height: 30px; padding: 0 10px; font-size: 13px; }
+
+main { display: grid; grid-template-columns: minmax(340px, 430px) 1fr; min-height: 0; }
+.panel { display: flex; flex-direction: column; min-height: 0; min-width: 0; background: var(--panel); border-right: 1px solid var(--line); }
+.tabs { display: flex; gap: 2px; padding: 10px 14px 0 max(14px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--line); }
+.tab {
+  padding: 9px 14px 10px; border: 0; background: none; font: 700 13px/1 var(--lab); letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -1px;
+}
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tabbody { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 14px 22px max(14px, env(safe-area-inset-left, 0px)); display: none; }
+.tabbody.on { display: block; }
+.tabbody.chart.on { display: flex; flex-direction: column; gap: 12px; }
+
+.lbl { font: 700 11px/1 var(--lab); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.in {
+  height: 34px; width: 100%; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel2); min-width: 0;
+}
+select.in { padding-right: 6px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.metabox { border: 1px solid var(--line); border-radius: 12px; background: var(--panel2); }
+.metabox > summary { list-style: none; padding: 10px 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.metabox > summary::-webkit-details-marker { display: none; }
+.metabox > summary .t { font: 700 15px/1.1 var(--ui); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.metabox > summary .s { font: 600 12px/1 var(--lab); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.metabox > summary::after { content: ""; margin-left: auto; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); transition: transform .15s; flex: none; }
+.metabox[open] > summary::after { transform: rotate(-135deg); }
+.metabox .inner { padding: 4px 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+
+/* barra de herramientas del editor */
+.tools { display: flex; flex-direction: column; gap: 8px; }
+.trow { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.trow .lbl { width: 62px; flex: none; }
+.chip {
+  height: 28px; min-width: 28px; padding: 0 9px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel2);
+  font: 700 14px/1 var(--lab); letter-spacing: .04em; display: inline-flex; align-items: center; justify-content: center;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip.sec { border-left: 4px solid var(--sc, var(--c-default)); border-radius: 4px 7px 7px 4px; text-transform: uppercase; letter-spacing: .08em; font-size: 12px; }
+.chip.deg { flex-direction: column; height: 40px; min-width: 46px; gap: 2px; padding: 0 8px; }
+.chip.deg small { font: 600 10px/1 var(--lab); color: var(--muted); letter-spacing: .06em; }
+.chip.deg b { font: 700 16px/1 var(--lab); }
+.chip.fig { flex-direction: column; justify-content: flex-start; height: 58px; min-width: 46px; padding: 4px 6px 3px; gap: 0; }
+.chip.fig svg { display: block; width: 30px; height: 35px; }
+.chip.fig small { font: 600 11px/1 var(--mono); color: var(--muted); letter-spacing: 0; margin-top: 2px; }
+.figs { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.figrow { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 5px; }
+.figlab { flex: 0 0 100%; font: 700 10.5px/1 var(--lab); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); opacity: .85; }
+.chip.fig:hover small { color: var(--accent); }
+.chip.mono { font-family: var(--mono); font-weight: 600; font-size: 13px; }
+
+/* editor con resaltado */
+.ed { position: relative; flex: 1; min-height: 260px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel2); overflow: hidden; }
+.ed pre, .ed textarea {
+  position: absolute; inset: 0; margin: 0; padding: 12px 14px; border: 0; font: 500 var(--edfs, 13.5px)/var(--edlh, 22px) var(--mono);
+  white-space: pre; overflow: auto; tab-size: 4; letter-spacing: 0; word-spacing: 0;
+}
+.ed pre { pointer-events: none; overflow: hidden; color: var(--ink); }
+.ed textarea { background: transparent; -webkit-text-fill-color: transparent; color: transparent; caret-color: var(--ink); resize: none; outline: none; }
+.ed textarea::selection { background: color-mix(in srgb, var(--accent) 32%, transparent); }
+.ed:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.ed .sec { font-weight: 800; }
+.k-intro { color: var(--c-intro); } .k-verso { color: var(--c-verso); } .k-precoro { color: var(--c-precoro); } .k-coro { color: var(--c-coro); }
+.k-puente { color: var(--c-puente); } .k-solo { color: var(--c-solo); } .k-inter { color: var(--c-inter); } .k-final { color: var(--c-final); } .k-default { color: var(--c-default); }
+.ed .bar { color: var(--muted); }
+.ed .ch { font-weight: 800; }
+.ed .rh { color: var(--c-coro); }
+.ed .mk { color: var(--c-puente); }
+.ed .txt { color: var(--c-verso); font-style: italic; }
+.ed .cm { color: var(--muted); font-style: italic; }
+.ed .bad { color: var(--warn); text-decoration: underline wavy; text-underline-offset: 3px; }
+.ed .hot { background: color-mix(in srgb, var(--warn) 22%, transparent); }
+
+.warns { display: flex; flex-direction: column; gap: 4px; }
+.warn { text-align: left; border: 0; border-radius: 8px; background: var(--warn-bg); color: var(--warn); padding: 7px 10px; font-weight: 600; font-size: 13px; }
+.status { font: 600 12px/1 var(--lab); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: flex; gap: 12px; flex-wrap: wrap; }
+.status .okk { color: var(--ok); }
+
+/* ajustes de hoja */
+.group { display: flex; flex-direction: column; gap: 8px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.group:first-child { padding-top: 0; }
+.group:last-child { border-bottom: 0; }
+.seg { align-self: flex-start; display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 9px; background: var(--panel2); padding: 3px; gap: 2px; }
+.seg button { height: 28px; padding: 0 11px; border: 0; border-radius: 6px; background: none; font-weight: 600; font-size: 13px; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.themes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tcard { text-align: left; border: 2px solid var(--line); border-radius: 12px; background: var(--panel2); padding: 8px; display: flex; flex-direction: column; gap: 7px; }
+.tcard[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.tcard .sw { height: 46px; border-radius: 6px; padding: 7px 8px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid rgba(128,128,128,.3); }
+.tcard .sw i { display: block; height: 5px; border-radius: 3px; }
+.tcard .sw div { display: flex; gap: 3px; }
+.tcard b { font: 700 14px/1 var(--ui); }
+.tcard small { font: 600 11px/1.1 var(--lab); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.row .grow { min-width: 120px; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.check { display: flex; align-items: center; gap: 9px; font-weight: 600; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.big { font: 700 24px/1 var(--lab); letter-spacing: .02em; }
+.hint { font-size: 12.5px; color: var(--muted); line-height: 1.45; margin: 0; }
+
+/* guía */
+.guide h3 { margin: 18px 0 8px; font: 700 12px/1 var(--lab); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.guide h3:first-child { margin-top: 0; }
+.guide table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.guide td { padding: 6px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.guide td:first-child { width: 42%; padding-right: 10px; }
+.guide code { font: 600 12.5px var(--mono); background: var(--accent-soft); color: var(--ink); padding: 2px 6px; border-radius: 5px; white-space: nowrap; }
+.guide pre { font: 500 12.5px/1.6 var(--mono); background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 12px; overflow-x: auto; margin: 0; }
+
+/* mesa con las hojas */
+.deskwrap { display: flex; flex-direction: column; min-height: 0; min-width: 0; background: var(--desk); }
+.deskbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 16px; background: var(--panel); border-bottom: 1px solid var(--line);
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.deskbar .pg { font: 700 13px/1 var(--lab); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.desk { flex: 1; min-height: 0; overflow: auto; padding: 22px max(16px, env(safe-area-inset-right, 0px)) 40px 16px; }
+.pages { display: flex; flex-direction: column; align-items: center; gap: 26px; width: max-content; min-width: 100%; }
+.sheet { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.pgbox { position: relative; box-shadow: var(--shadow); border-radius: 2px; cursor: pointer; }
+.pgbox canvas { display: block; background: #fff; border-radius: 2px; }
+.pgbox .hl { position: absolute; pointer-events: none; border-radius: 6px; background: color-mix(in srgb, var(--accent) 13%, transparent); outline: 2px solid var(--accent); outline-offset: 0; transition: top .12s ease, height .12s ease; }
+.pgbox .hl.bar { border-radius: 4px; background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.pgbox .sel { position: absolute; pointer-events: none; border-radius: 5px; background: color-mix(in srgb, var(--accent) 22%, transparent); outline: 2px solid var(--accent); }
+.row .mini { width: 74px; font-size: 12.5px; color: var(--muted); flex: none; }
+#fontsel .fprev { font-size: 21px; line-height: 1.2; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 2px 2px 0; }
+#fontgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+#fontgrid .fh { grid-column: 1 / -1; font: 700 11px/1 var(--lab); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 8px 0 0; }
+#fontgrid .fh:first-child { margin-top: 0; }
+.fcard { text-align: left; border: 1px solid var(--line); background: var(--panel2); border-radius: 9px; padding: 8px 10px 7px; display: flex; flex-direction: column; gap: 2px; min-width: 0; color: var(--ink); }
+.fcard[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1.5px var(--accent) inset; }
+.fcard .smp { font-size: 22px; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fcard small { font-size: 11px; color: var(--muted); }
+#selbar { display: none; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 12px; border-bottom: 1px solid var(--line); background: var(--panel2); font-size: 12.5px; color: var(--muted); }
+#selbar.on { display: flex; }
+#selbar b { color: var(--ink); }
+.pgbox .mg { position: absolute; pointer-events: none; border: 1px dashed #E5484D; display: none; }
+.desk.showmg .pgbox .mg { display: block; }
+.sheet figcaption { font: 700 11px/1 var(--lab); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.sheet { margin: 0; }
+
+.mswitch { display: none; }
+
+/* biblioteca */
+.veil { position: fixed; inset: 0; z-index: 40; background: rgba(8,10,15,.55); display: none; align-items: flex-start; justify-content: center; padding: 6vh 16px 16px; }
+.veil.on { display: flex; }
+.modal { width: min(560px, 100%); max-height: 86vh; overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; }
+.modal header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.modal header h2 { margin: 0; font: 800 20px/1 var(--ui); letter-spacing: -.01em; flex: 1; }
+.modal .body { padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+.lib { display: flex; flex-direction: column; gap: 8px; }
+.item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel2); }
+.item.cur { border-color: var(--accent); }
+.item .nm { flex: 1; min-width: 0; }
+.item .nm b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item .nm small { color: var(--muted); font: 600 12px/1.2 var(--lab); letter-spacing: .08em; text-transform: uppercase; }
+.empty { color: var(--muted); text-align: center; padding: 20px 8px; border: 1px dashed var(--line); border-radius: 10px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  background: var(--ink); color: var(--bg); padding: 11px 16px; border-radius: 10px; font-weight: 600; max-width: min(90vw, 460px); text-align: center; transition: .2s; z-index: 60;
+}
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+@media (min-width: 701px) and (max-width: 980px) { main { grid-template-columns: minmax(300px, 40%) 1fr; } }
+@media (max-width: 700px) {
+  main { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+  .panel, .deskwrap { grid-area: 1 / 1; }
+  body[data-view="edit"] .deskwrap { display: none; }
+  body[data-view="sheet"] .panel { display: none; }
+  body[data-view="split"] main { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
+  body[data-view="split"] .deskwrap { grid-area: 2 / 1; border-top: 2px solid var(--accent); }
+  body[data-view="split"] #tools, body[data-view="split"] #metabox, body[data-view="split"] .status { display: none; }
+  body[data-view="split"] .tabs { padding-top: 4px; }
+  body[data-view="split"] .tabbody { padding-top: 10px; padding-bottom: 10px; }
+  body[data-view="split"] .desk { padding-top: 12px; padding-bottom: 20px; }
+  .panel { border-right: 0; }
+  .deskbar { gap: 6px; padding-left: max(12px, env(safe-area-inset-left, 0px)); }
+  .deskbar .pg, .only-wide { display: none; }
+  .top { gap: 8px; }
+  .brand span { display: none; }
+  .mswitch {
+    display: flex; gap: 6px; padding: 8px max(16px, env(safe-area-inset-left, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)); background: var(--panel); border-top: 1px solid var(--line);
+  }
+  .mswitch button { flex: 1; height: 42px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel2); font: 700 14px/1 var(--lab); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .mswitch button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .ed { --edfs: 16px; --edlh: 25px; min-height: 300px; }
+  body[data-view="split"] .ed { min-height: 110px; }
+  .btn .hide-s { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
+        <rect x="1" y="1" width="32" height="32" rx="9" fill="var(--accent)"/>
+        <g stroke="var(--accent-ink)" stroke-width="1.2" opacity=".75"><path d="M6 11h22M6 15h22M6 19h22M6 23h22"/></g>
+        <path d="M12 25 L16.5 9 M20 25 L24.5 9" stroke="var(--accent-ink)" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <b>Atril</b><span>Charts</span>
+    </div>
+    <div class="grow"></div>
+    <button class="btn" id="btn-lib" type="button"><span>Mis charts</span></button>
+    <button class="btn icon" id="btn-ui" type="button" title="Cambiar entre claro y oscuro" aria-label="Cambiar entre claro y oscuro">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+    </button>
+    <button class="btn primary" id="btn-pdf" type="button">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10.5l5 5 5-5M5 20h14"/></svg>
+      <span><span class="hide-s">Descargar </span>PDF</span>
+    </button>
+  </header>
+
+  <main>
+    <section class="panel" id="panel">
+      <nav class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="chart" aria-selected="true">Chart</button>
+        <button class="tab" role="tab" data-tab="hoja" aria-selected="false">Hoja</button>
+        <button class="tab" role="tab" data-tab="guia" aria-selected="false">Guía</button>
+      </nav>
+
+      <!-- CHART -->
+      <div class="tabbody chart on" id="tab-chart">
+        <details class="metabox" id="metabox">
+          <summary><span class="t" id="sum-title">Sin título</span><span class="s" id="sum-sub"></span></summary>
+          <div class="inner">
+            <div class="field"><label class="lbl" for="m-title">Título</label><input class="in" id="m-title" data-bind="meta.title" autocomplete="off"></div>
+            <div class="grid2">
+              <div class="field"><label class="lbl" for="m-artist">Artista</label><input class="in" id="m-artist" data-bind="meta.artist" autocomplete="off"></div>
+              <div class="field"><label class="lbl" for="m-style">Estilo</label><input class="in" id="m-style" data-bind="meta.style" placeholder="Pop, Bossa, Rock…" autocomplete="off"></div>
+            </div>
+            <div class="grid2">
+              <div class="field"><label class="lbl" for="m-album">Álbum / detalle</label><input class="in" id="m-album" data-bind="meta.album" autocomplete="off"></div>
+              <div class="field"><label class="lbl" for="m-author">Nombre de quien lo hizo</label><input class="in" id="m-author" data-bind="meta.author" placeholder="Tu nombre" autocomplete="off"></div>
+            </div>
+            <div class="field"><label class="lbl" for="m-credit">Texto del crédito (pie de página)</label><input class="in" id="m-credit" data-bind="meta.creditLabel" placeholder="Creado por" autocomplete="off"><p class="hint">Cualquiera puede poner su nombre acá. También podés hacer clic en el pie de la hoja.</p></div>
+            <div class="grid3">
+              <div class="field"><label class="lbl" for="m-key">Tonalidad</label><select class="in" id="m-key" data-bind="meta.key"></select></div>
+              <div class="field"><label class="lbl" for="m-mode">Modo</label>
+                <select class="in" id="m-mode" data-bind="meta.mode"><option value="maj">Mayor</option><option value="min">Menor</option></select></div>
+              <div class="field"><label class="lbl" for="m-ts">Compás</label><select class="in" id="m-ts"></select></div>
+            </div>
+            <div class="field"><label class="lbl" for="m-tempo">Tempo (BPM)</label><input class="in" id="m-tempo" data-bind="meta.tempo" data-type="num" inputmode="numeric" placeholder="Opcional" autocomplete="off"></div>
+          </div>
+        </details>
+
+        <div class="tools" id="tools">
+          <div class="trow"><span class="lbl">Secciones</span><span id="t-secs" class="trow"></span></div>
+          <div class="trow"><span class="lbl">Compases</span><span id="t-bars" class="trow"></span></div>
+          <div class="trow" style="align-items:flex-start"><span class="lbl" style="padding-top:2px">Ritmo</span><span id="t-rh" class="figs"></span></div>
+          <div class="trow"><span class="lbl">Marcas</span><span id="t-mk" class="trow"></span></div>
+          <div class="trow"><span class="lbl">Acordes</span>
+            <span id="t-deg" class="trow"></span>
+            <label class="check" style="margin-left:4px;font-size:12.5px"><input type="checkbox" id="deg7" data-bind="ui.sevenths"> con séptima</label>
+          </div>
+        </div>
+
+        <div class="ed" id="ed">
+          <pre id="hl" aria-hidden="true"></pre>
+          <textarea id="src" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="Texto del chart"></textarea>
+        </div>
+        <div class="warns" id="warns"></div>
+        <div class="status" id="status"></div>
+      </div>
+
+      <!-- HOJA -->
+      <div class="tabbody" id="tab-hoja">
+        <div class="group">
+          <span class="lbl">Estilo de la hoja</span>
+          <div class="themes" id="themes"></div>
+        </div>
+        <div class="group">
+          <span class="lbl">Orientación</span>
+          <div class="seg" data-bind="view.orient"><button type="button" data-v="portrait">Vertical</button><button type="button" data-v="landscape">Horizontal</button></div>
+        </div>
+        <div class="group">
+          <span class="lbl">Compases por renglón</span>
+          <div class="seg" data-bind="view.bpl" data-type="num">
+            <button type="button" data-v="0">Libre</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button>
+            <button type="button" data-v="4">4</button><button type="button" data-v="5">5</button><button type="button" data-v="6">6</button><button type="button" data-v="8">8</button>
+          </div>
+          <p class="hint">«Libre» respeta los renglones tal como los escribís en el texto.</p>
+        </div>
+        <div class="group">
+          <span class="lbl">Tamaño</span>
+          <div class="row"><input type="range" id="size" min="70" max="140" step="5" data-bind="view.size" data-type="pct" aria-label="Tamaño de la hoja"><span class="big" id="size-v">100%</span></div>
+          <label class="check"><input type="checkbox" data-bind="view.fit"> Ajustar todo a una hoja</label>
+        </div>
+        <div class="group">
+          <span class="lbl">Pauta</span>
+          <div class="seg" data-bind="view.staff"><button type="button" data-v="five">5 líneas</button><button type="button" data-v="one">1 línea</button></div>
+          <span class="lbl" style="margin-top:6px">Columnas</span>
+          <div class="seg" data-bind="view.cols" data-type="num"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button></div>
+          <label class="check" style="margin-top:4px"><input type="checkbox" data-bind="view.showMap"> Mostrar la forma de la canción</label>
+        </div>
+        <div class="group">
+          <span class="lbl">Blanca y redonda</span>
+          <div class="seg" data-bind="view.hollow"><button type="button" data-v="slash">Trazo hueco</button><button type="button" data-v="para">Paralelogramo</button></div>
+          <p class="hint">«Trazo hueco» usa el mismo trazo inclinado de la negra, pero vacío por dentro. «Paralelogramo» es el estilo ancho y chato.</p>
+        </div>
+        <div class="group">
+          <span class="lbl">Trazo de las figuras</span>
+          <div class="seg" data-bind="view.stroke"><button type="button" data-v="hand">A mano</button><button type="button" data-v="clean">Limpio</button></div>
+          <p class="hint">«A mano» dibuja pauta, clave, alteraciones, slashes y silencios con trazo de lápiz.</p>
+        </div>
+        <div class="group">
+          <span class="lbl">Letra de los acordes</span>
+          <div id="fontgrid"></div>
+          <div id="fontsel" style="display:flex;flex-direction:column;gap:10px;margin-top:10px"></div>
+          <p class="hint">Elegí una tipografía distinta para cada parte de la hoja. Podés usar cualquiera de Google Fonts: escribí su nombre en «Otra fuente…».</p>
+        </div>
+        <div class="group">
+          <span class="lbl">Tamaño del encabezado</span>
+          <div class="row"><span class="mini">Tonalidad</span><input type="range" min="30" max="200" step="5" data-bind="view.sizeKey" data-type="pct" aria-label="Tamaño de la tonalidad"><span class="big" data-show="view.sizeKey">100%</span></div>
+          <div class="row"><span class="mini">Tempo</span><input type="range" min="30" max="200" step="5" data-bind="view.sizeTempo" data-type="pct" aria-label="Tamaño del tempo"><span class="big" data-show="view.sizeTempo">100%</span></div>
+          <div class="row"><span class="mini">Compás</span><input type="range" min="30" max="200" step="5" data-bind="view.sizeTs" data-type="pct" aria-label="Tamaño del compás"><span class="big" data-show="view.sizeTs">100%</span></div>
+        </div>
+        <div class="group">
+          <span class="lbl">Cifrado</span>
+          <div class="seg" data-bind="view.notation"><button type="button" data-v="us">C D E F G A B</button><button type="button" data-v="latin">Do Re Mi Fa Sol La Si</button></div>
+        </div>
+        <div class="group">
+          <span class="lbl">Transponer</span>
+          <div class="row">
+            <button class="btn icon" type="button" id="tr-down" aria-label="Bajar un semitono">−</button>
+            <div class="grow"><div class="big" id="tr-key">E</div><div class="hint" id="tr-sub"></div></div>
+            <button class="btn icon" type="button" id="tr-up" aria-label="Subir un semitono">+</button>
+          </div>
+          <div class="seg" data-bind="view.acc"><button type="button" data-v="auto">Automático</button><button type="button" data-v="sharps">♯</button><button type="button" data-v="flats">♭</button></div>
+          <div class="row">
+            <button class="btn sm" type="button" id="tr-apply">Aplicar al texto</button>
+            <button class="btn sm ghost" type="button" id="tr-reset">Volver al original</button>
+          </div>
+          <p class="hint">Transponer cambia solo la hoja. «Aplicar al texto» reescribe los acordes en la nueva tonalidad.</p>
+        </div>
+      </div>
+
+      <!-- GUÍA -->
+      <div class="tabbody guide" id="tab-guia">
+        <h3>Estructura</h3>
+        <table>
+          <tr><td><code>[Verso]</code></td><td>Abre una sección. Se reconoce Intro, Verso, Pre Coro, Coro, Puente, Solo, Final y más. Lo que sigue en la línea queda como nota.</td></tr>
+          <tr><td><code>Am7 | F | C</code></td><td>Cada <code>|</code> separa compases. Una línea de texto es un renglón de la hoja.</td></tr>
+          <tr><td><code>| | | |</code></td><td>Tres compases vacíos (cada uno se dibuja con sus 4 slashes).</td></tr>
+          <tr><td><code>||</code> <code>|:</code> <code>:|</code> <code>|.</code></td><td>Doble barra, inicio y fin de repetición, final.</td></tr>
+          <tr><td><code>---</code></td><td>Salto de hoja.</td></tr>
+          <tr><td><code>// texto</code></td><td>Comentario que no se imprime.</td></tr>
+          <tr><td><code>&gt; texto</code></td><td>Línea de texto libre entre renglones (<code>&gt;&gt;</code> a la derecha).</td></tr>
+        </table>
+        <h3>Acordes</h3>
+        <table>
+          <tr><td><code>C#m7b5</code> <code>G/B</code></td><td>Cifrado americano completo. También entiende <code>Lam7</code>, <code>Sol/Si</code>.</td></tr>
+          <tr><td><code>C:2 G:1 Am:1</code></td><td>Los números son pulsos. Sin números se reparten parejo.</td></tr>
+          <tr><td><code>C . . G</code></td><td>El punto prolonga el acorde anterior un pulso.</td></tr>
+          <tr><td><code>Gsus4 Dadd9 G7(#11)</code></td><td>Las extensiones salen en superíndice.</td></tr>
+        </table>
+        <h3>Ritmo</h3>
+        <table>
+          <tr><td><code>/</code></td><td>Slash por pulso. Es lo que se dibuja si no escribís ritmo.</td></tr>
+          <tr><td><code>w h q e s</code></td><td>Redonda, blanca, negra, corchea, semicorchea. Con plica y barras.</td></tr>
+          <tr><td><code>re</code> <code>rq</code> <code>rh</code></td><td>Silencios (<code>r</code> + figura).</td></tr>
+          <tr><td><code>xe</code> <code>xq</code></td><td>Cabeza en X (percusión, golpe seco).</td></tr>
+          <tr><td><code>q.</code> <code>h.</code></td><td>Con puntillo.</td></tr>
+          <tr><td><code>q&gt;</code> <code>q^</code> <code>q'</code> <code>e~</code></td><td>Acento, marcato, staccato y ligadura al siguiente.</td></tr>
+          <tr><td><code>q_</code> <code>e_</code></td><td>Plica hacia abajo (sin guion bajo va hacia arriba). En un grupo con barra, cambia todo el grupo.</td></tr>
+          <tr><td><code>%</code></td><td>Repetir el compás anterior.</td></tr>
+        </table>
+        <h3>Atajos sobre la hoja</h3>
+        <table>
+          <tr><td>Clic en una figura o acorde</td><td>La selecciona. Con las flechas ← → pasás a la anterior o siguiente.</td></tr>
+          <tr><td><code>X</code></td><td>Invierte la plica de la figura seleccionada (arriba ↔ abajo).</td></tr>
+          <tr><td><code>Ctrl</code>+<code>C</code> / <code>V</code></td><td>Copia la figura seleccionada y la pega encima de otra.</td></tr>
+          <tr><td><code>Ctrl</code>+<code>Z</code> / <code>Ctrl</code>+<code>Shift</code>+<code>Z</code></td><td>Deshacer y rehacer (texto y datos del chart).</td></tr>
+          <tr><td>Clic en título, tonalidad, tempo, compás o crédito</td><td>Te lleva a ese campo para editarlo.</td></tr>
+        </table>
+        <p class="hint" style="margin-top:8px">Los ritmos tienen que sumar el compás completo (la negra vale 1). Si no suman, aparece un aviso abajo del editor.</p>
+        <h3>Marcas y textos</h3>
+        <table>
+          <tr><td><code>"Banda in"</code></td><td>Texto sobre el compás (<code>@r</code> a la derecha, <code>@c</code> al centro).</td></tr>
+          <tr><td><code>_"similar"</code></td><td>Texto debajo del compás.</td></tr>
+          <tr><td><code>@segno</code> <code>@coda</code></td><td>Símbolos de navegación.</td></tr>
+          <tr><td><code>{1.}</code> <code>{2.}</code></td><td>Casillas de primera y segunda vez.</td></tr>
+          <tr><td><code>T3/4</code></td><td>Cambio de compás desde ese punto.</td></tr>
+        </table>
+        <h3>Ejemplo</h3>
+<pre>[Coro]
+|: Emaj7:2 G#m7 F#m7 | % |
+"similar" Emaj7 | h> re xe xe re :|
+[Final]
+Amaj7 {1.} | Amaj7 {2.} |.</pre>
+      </div>
+    </section>
+
+    <section class="deskwrap">
+      <div class="deskbar">
+        <div class="seg only-wide" data-bind="view.orient"><button type="button" data-v="portrait">Vertical</button><button type="button" data-v="landscape">Horizontal</button></div>
+        <div class="seg" data-bind="ui.fitMode"><button type="button" data-v="width">Ancho</button><button type="button" data-v="page">Hoja entera</button></div>
+        <div class="seg" data-bind="ui.hlMode" title="Qué se ilumina en la hoja al editar"><button type="button" data-v="bar">Compás</button><button type="button" data-v="line">Renglón</button></div>
+        <label class="check only-wide" style="font-size:12.5px"><input type="checkbox" data-bind="ui.margins"> Márgenes</label>
+        <span class="grow"></span>
+        <span class="pg" id="pg-count"></span>
+        <button class="btn sm icon" type="button" id="z-out" aria-label="Alejar">−</button>
+        <button class="btn sm" type="button" id="z-fit">Ajustar</button>
+        <button class="btn sm icon" type="button" id="z-in" aria-label="Acercar">+</button>
+      </div>
+      <div id="selbar"><b id="sel-name">Figura</b><button class="btn sm" type="button" id="sel-flip">Girar plica (X)</button><button class="btn sm ghost" type="button" id="sel-copy">Copiar</button><button class="btn sm ghost" type="button" id="sel-paste">Pegar</button><button class="btn sm ghost" type="button" id="sel-undo">Deshacer</button><button class="btn sm ghost" type="button" id="sel-x">Soltar</button></div>
+      <div class="desk" id="desk"><div class="pages" id="pages"></div></div>
+    </section>
+  </main>
+
+  <nav class="mswitch" aria-label="Vista">
+    <button type="button" data-view="edit" aria-pressed="false">Editar</button>
+    <button type="button" data-view="split" aria-pressed="true">Dividida</button>
+    <button type="button" data-view="sheet" aria-pressed="false">Hoja</button>
+  </nav>
+</div>
+
+<div class="veil" id="veil">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="lib-h">
+    <header><h2 id="lib-h">Mis charts</h2><button class="btn icon sm" type="button" id="lib-x" aria-label="Cerrar">✕</button></header>
+    <div class="body">
+      <div class="row">
+        <button class="btn primary sm" type="button" id="lib-save">Guardar este chart</button>
+        <button class="btn sm" type="button" id="lib-new">Chart nuevo</button>
+        <button class="btn sm" type="button" id="lib-open">Abrir archivo</button>
+        <button class="btn sm" type="button" id="lib-export">Guardar archivo</button>
+        <input type="file" id="file" accept=".json,.txt,application/json,text/plain" hidden>
+      </div>
+      <div class="lib" id="lib"></div>
+      <p class="hint">Los charts guardados viven en este navegador. Para llevarlos a otro dispositivo usá «Guardar archivo» y después «Abrir archivo».</p>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ==== src/glyphs.js ==== */
+/* Atril · trazos de símbolos musicales (derivados de Noto Music, SIL OFL) */
+(function(r){r.Atril=r.Atril||{};r.Atril.glyphs={"clef":{"d":"M0.264 0.533Q0.25 0.48 0.241 0.428Q0.232 0.376 0.232 0.322Q0.232 0.275 0.2385 0.2335Q0.245 0.192 0.257 0.157Q0.27 0.117 0.291 0.0815Q0.312 0.046 0.3355 0.023Q0.359 0 0.377 0Q0.401 0 0.443 0.085Q0.464 0.128 0.474 0.178Q0.484 0.228 0.484 0.285Q0.484 0.356 0.465 0.4265Q0.446 0.497 0.4095 0.559Q0.373 0.621 0.322 0.668L0.357 0.836Q0.372 0.834 0.382 0.833Q0.392 0.832 0.397 0.832Q0.458 0.832 0.506 0.8665Q0.554 0.901 0.5825 0.957Q0.611 1.013 0.611 1.08Q0.611 1.157 0.5715 1.2185Q0.532 1.28 0.453 1.309Q0.458 1.326 0.482 1.451Q0.488 1.481 0.491 1.4985Q0.494 1.516 0.495 1.529Q0.496 1.542 0.496 1.559Q0.496 1.609 0.4715 1.6485Q0.447 1.688 0.4055 1.71Q0.364 1.732 0.313 1.732Q0.261 1.732 0.221 1.7125Q0.181 1.693 0.158 1.6585Q0.135 1.624 0.135 1.579Q0.135 1.531 0.1615 1.499Q0.188 1.467 0.237 1.467Q0.279 1.467 0.3055 1.4975Q0.332 1.528 0.332 1.57Q0.332 1.606 0.307 1.633Q0.282 1.66 0.242 1.66H0.232Q0.258 1.699 0.314 1.699Q0.383 1.699 0.422 1.654Q0.461 1.609 0.461 1.539Q0.461 1.522 0.457 1.4935Q0.453 1.465 0.443 1.425Q0.433 1.385 0.4275 1.359Q0.422 1.333 0.42 1.322Q0.386 1.332 0.34 1.332Q0.254 1.332 0.172 1.282Q0.092 1.232 0.046 1.15Q0 1.068 0 0.973Q0 0.883 0.041 0.804Q0.082 0.725 0.1425 0.659Q0.203 0.593 0.264 0.533ZM0.291 0.508Q0.314 0.496 0.34 0.4635Q0.366 0.431 0.39 0.389Q0.414 0.347 0.429 0.3045Q0.444 0.262 0.444 0.228Q0.444 0.192 0.433 0.171Q0.422 0.15 0.395 0.15Q0.371 0.15 0.3485 0.172Q0.326 0.194 0.3085 0.2305Q0.291 0.267 0.281 0.312Q0.271 0.357 0.271 0.404Q0.271 0.436 0.2775 0.462Q0.284 0.488 0.291 0.508ZM0.445 1.279Q0.543 1.237 0.543 1.107Q0.543 1.064 0.521 1.0285Q0.499 0.993 0.462 0.972Q0.425 0.951 0.379 0.951ZM0.348 0.955Q0.321 0.961 0.297 0.9805Q0.273 1 0.2585 1.0275Q0.244 1.055 0.244 1.086Q0.244 1.111 0.257 1.1375Q0.27 1.164 0.289 1.18Q0.302 1.192 0.315 1.198Q0.33 1.205 0.33 1.211Q0.33 1.214 0.32 1.217Q0.282 1.208 0.2515 1.183Q0.221 1.158 0.2035 1.1225Q0.186 1.087 0.186 1.047Q0.186 1.004 0.2035 0.964Q0.221 0.924 0.2525 0.892Q0.284 0.86 0.324 0.844L0.295 0.693Q0.179 0.787 0.1245 0.8775Q0.07 0.968 0.07 1.057Q0.07 1.122 0.104 1.178Q0.138 1.234 0.197 1.2685Q0.256 1.303 0.33 1.303Q0.35 1.303 0.3705 1.299Q0.391 1.295 0.414 1.289Z","w":0.611,"h":1.732,"ox":-0.05,"oy":1.334},"segno":{"d":"M0.188 0.377Q0.097 0.332 0.0495 0.2785Q0.002 0.225 0.002 0.162Q0.002 0.121 0.0225 0.084Q0.043 0.047 0.0775 0.0235Q0.112 0 0.154 0Q0.202 0 0.235 0.028Q0.268 0.056 0.268 0.1Q0.268 0.122 0.2515 0.135Q0.235 0.148 0.215 0.148Q0.192 0.148 0.1795 0.139Q0.167 0.13 0.162 0.115L0.153 0.087Q0.148 0.071 0.14 0.061Q0.132 0.051 0.115 0.051Q0.093 0.051 0.078 0.0725Q0.063 0.094 0.063 0.119Q0.063 0.161 0.1 0.197Q0.137 0.232 0.25 0.279L0.432 0.006H0.486L0.293 0.299Q0.391 0.349 0.433 0.4025Q0.475 0.456 0.475 0.516Q0.475 0.559 0.455 0.5955Q0.435 0.632 0.4 0.654Q0.365 0.676 0.321 0.676Q0.27 0.676 0.2405 0.6475Q0.211 0.619 0.211 0.582Q0.211 0.559 0.225 0.545Q0.239 0.531 0.264 0.531Q0.293 0.531 0.3045 0.5455Q0.316 0.56 0.319 0.578Q0.322 0.596 0.33 0.6105Q0.338 0.625 0.357 0.625Q0.384 0.625 0.4 0.606Q0.416 0.587 0.416 0.557Q0.416 0.494 0.334 0.451Q0.293 0.43 0.267 0.4165Q0.241 0.403 0.23 0.397L0.053 0.672H0ZM0.466 0.203Q0.486 0.203 0.5005 0.2175Q0.515 0.232 0.515 0.252Q0.515 0.272 0.5005 0.2865Q0.486 0.301 0.466 0.301Q0.446 0.301 0.4315 0.2865Q0.417 0.272 0.417 0.252Q0.417 0.232 0.4315 0.2175Q0.446 0.203 0.466 0.203ZM0.053 0.377Q0.073 0.377 0.0875 0.3915Q0.102 0.406 0.102 0.426Q0.102 0.446 0.0875 0.4605Q0.073 0.475 0.053 0.475Q0.033 0.475 0.0185 0.4605Q0.004 0.446 0.004 0.426Q0.004 0.406 0.0185 0.3915Q0.033 0.377 0.053 0.377Z","w":0.515,"h":0.676,"ox":-0.05,"oy":0.839},"coda":{"d":"M0.205 0.508V0.451Q0.144 0.443 0.1055 0.396Q0.067 0.349 0.058 0.27H0V0.238H0.058Q0.067 0.16 0.104 0.113Q0.141 0.066 0.205 0.057V0H0.238V0.057Q0.303 0.066 0.3395 0.1135Q0.376 0.161 0.385 0.238H0.443V0.27H0.385Q0.376 0.349 0.338 0.396Q0.3 0.443 0.238 0.451V0.508ZM0.205 0.238V0.086Q0.178 0.087 0.162 0.108Q0.148 0.127 0.1425 0.154Q0.137 0.181 0.137 0.238ZM0.238 0.238H0.306Q0.306 0.209 0.305 0.188Q0.304 0.167 0.301 0.154Q0.295 0.128 0.281 0.1075Q0.267 0.087 0.238 0.086ZM0.238 0.27V0.422Q0.267 0.42 0.281 0.4Q0.295 0.38 0.3005 0.3535Q0.306 0.327 0.306 0.27ZM0.205 0.27H0.137Q0.137 0.298 0.138 0.3185Q0.139 0.339 0.142 0.352Q0.148 0.378 0.162 0.3995Q0.176 0.421 0.205 0.422Z","w":0.443,"h":0.508,"ox":-0.05,"oy":0.754},"rwhole":{"d":"M0 0.024V0H0.683V0.024H0.523V0.134H0.16V0.024Z","w":0.683,"h":0.134,"ox":-0.05,"oy":0.512},"rhalf":{"d":"M0 0.134V0.11H0.16V0H0.523V0.11H0.683V0.134Z","w":0.683,"h":0.134,"ox":-0.05,"oy":0.378},"rquarter":{"d":"M0.096 0 0.256 0.195Q0.206 0.254 0.179 0.297Q0.152 0.34 0.152 0.384Q0.152 0.421 0.176 0.4615Q0.2 0.502 0.252 0.564L0.236 0.586Q0.192 0.558 0.154 0.558Q0.126 0.558 0.112 0.5765Q0.098 0.595 0.098 0.621Q0.098 0.653 0.1115 0.6815Q0.125 0.71 0.148 0.736L0.135 0.755Q0.066 0.705 0.033 0.664Q0 0.623 0 0.575Q0 0.532 0.027 0.512Q0.054 0.492 0.092 0.492Q0.122 0.492 0.17 0.515V0.513L0.016 0.308Q0.117 0.219 0.117 0.142Q0.117 0.081 0.053 0Z","w":0.256,"h":0.755,"ox":-0.051,"oy":0.878},"reighth":{"d":"M0.105 0.461 0.201 0.121Q0.18 0.14 0.1535 0.148Q0.127 0.156 0.101 0.156Q0.058 0.156 0.029 0.133Q0 0.11 0 0.067Q0 0.039 0.02 0.0195Q0.04 0 0.071 0Q0.1 0 0.1185 0.0185Q0.137 0.037 0.137 0.068Q0.137 0.09 0.127 0.107Q0.127 0.113 0.139 0.113Q0.194 0.113 0.244 0.027H0.262L0.141 0.461Z","w":0.262,"h":0.461,"ox":-0.05,"oy":0.73},"rsixteenth":{"d":"M0.105 0.705 0.201 0.365Q0.18 0.384 0.1535 0.392Q0.127 0.4 0.101 0.4Q0.058 0.4 0.029 0.377Q0 0.354 0 0.311Q0 0.283 0.0195 0.2635Q0.039 0.244 0.071 0.244Q0.1 0.244 0.1185 0.2625Q0.137 0.281 0.137 0.312Q0.137 0.334 0.127 0.351Q0.127 0.357 0.139 0.357Q0.18 0.357 0.217 0.311L0.269 0.121Q0.248 0.14 0.2215 0.148Q0.195 0.156 0.169 0.156Q0.126 0.156 0.097 0.133Q0.068 0.11 0.068 0.067Q0.068 0.039 0.088 0.0195Q0.108 0 0.139 0Q0.169 0 0.187 0.019Q0.205 0.038 0.205 0.068Q0.205 0.078 0.202 0.0885Q0.199 0.099 0.195 0.107Q0.195 0.113 0.207 0.113Q0.262 0.113 0.312 0.027H0.33L0.141 0.705Z","w":0.33,"h":0.705,"ox":-0.05,"oy":0.852},"sharp":{"d":"M0.047 0.463V0.32L0 0.332V0.232L0.047 0.219V0.023H0.078V0.211L0.145 0.195V0H0.176V0.187L0.225 0.176V0.275L0.176 0.289V0.432L0.225 0.42V0.523L0.176 0.535V0.723H0.145V0.543L0.078 0.561V0.756H0.047V0.568L0 0.58V0.477ZM0.145 0.439V0.295L0.078 0.312V0.455Z","w":0.225,"h":0.756,"ox":-0.05,"oy":0.509},"flat":{"d":"M0 0H0.031V0.39Q0.068 0.353 0.115 0.353Q0.147 0.353 0.173 0.3745Q0.199 0.396 0.199 0.437Q0.199 0.469 0.18 0.496Q0.161 0.523 0.129 0.55L0.06 0.609Q0.041 0.625 0.026 0.6405Q0.011 0.656 0 0.67ZM0.031 0.603Q0.057 0.575 0.075 0.5515Q0.093 0.528 0.103 0.51Q0.114 0.491 0.1195 0.475Q0.125 0.459 0.125 0.445Q0.125 0.417 0.112 0.4045Q0.099 0.392 0.084 0.392Q0.068 0.392 0.0525 0.4035Q0.037 0.415 0.031 0.435Z","w":0.199,"h":0.67,"ox":-0.05,"oy":0.615},"natural":{"d":"M0.176 0.17V0.707H0.145V0.495L0 0.532V0H0.033V0.207ZM0.147 0.402V0.274L0.031 0.303V0.43Z","w":0.176,"h":0.707,"ox":-0.05,"oy":0.486},"quarter":{"d":"M0.299 -0V0.836Q0.299 0.879 0.2705 0.916Q0.242 0.953 0.197 0.9755Q0.152 0.998 0.102 0.998Q0.056 0.998 0.028 0.9745Q0 0.951 0 0.911Q0 0.88 0.018 0.851Q0.036 0.822 0.0655 0.7985Q0.095 0.775 0.13 0.7615Q0.165 0.748 0.199 0.748Q0.242 0.748 0.273 0.773V-0Z","w":0.299,"h":0.998,"ox":-0.051,"oy":1.009},"flag8":{"d":"M0 -0H0.026Q0.033 0.041 0.0415 0.0725Q0.05 0.104 0.0665 0.1335Q0.083 0.163 0.112 0.197L0.152 0.244Q0.178 0.273 0.202 0.305Q0.274 0.398 0.274 0.498Q0.274 0.602 0.186 0.75H0.17Q0.199 0.691 0.221 0.6315Q0.243 0.572 0.243 0.518Q0.243 0.491 0.235 0.4625Q0.227 0.434 0.212 0.404Q0.181 0.343 0.125 0.3045Q0.069 0.266 0 0.266Z","w":0.274,"h":0.75,"ox":0.0,"oy":1.009},"flag16":{"d":"M0 -0H0.026Q0.03 0.035 0.0385 0.0585Q0.047 0.082 0.06 0.102Q0.077 0.127 0.0985 0.1435Q0.12 0.16 0.146 0.186Q0.176 0.215 0.2055 0.252Q0.235 0.289 0.2545 0.3345Q0.274 0.38 0.274 0.436Q0.274 0.458 0.271 0.4815Q0.268 0.505 0.26 0.531Q0.286 0.569 0.286 0.641Q0.286 0.689 0.2735 0.7365Q0.261 0.784 0.235 0.818H0.219Q0.266 0.726 0.266 0.658Q0.266 0.593 0.22 0.538Q0.19 0.501 0.1505 0.472Q0.111 0.443 0.0715 0.4235Q0.032 0.404 0 0.396ZM0.032 0.186Q0.032 0.211 0.0385 0.2355Q0.045 0.26 0.056 0.282Q0.064 0.296 0.0875 0.326Q0.111 0.356 0.145 0.39Q0.181 0.424 0.2115 0.457Q0.242 0.49 0.247 0.504Q0.251 0.489 0.251 0.462Q0.251 0.386 0.202 0.319Q0.153 0.252 0.032 0.186Z","w":0.286,"h":0.818,"ox":0.0,"oy":1.009}};})(typeof globalThis!=='undefined'?globalThis:this);
+
+/* ==== src/theory.js ==== */
+/* Atril · teoría musical: cifrado, transposición, armaduras, acordes diatónicos */
+(function (root) {
+  'use strict';
+  const A = (root.Atril = root.Atril || {});
+
+  const SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const FLAT = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+  const LP = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  const LAT2US = { Do: 'C', Re: 'D', Mi: 'E', Fa: 'F', Sol: 'G', La: 'A', Si: 'B' };
+  const US2LAT = { C: 'Do', D: 'Re', E: 'Mi', F: 'Fa', G: 'Sol', A: 'La', B: 'Si' };
+  const ACC = { '#': 1, '♯': 1, b: -1, '♭': -1 };
+
+  const ROOT_RE = /^(Sol|Do|Re|Mi|Fa|La|Si|[A-G])([#♯b♭]?)/;
+  const BASS_RE = /^(.*?)\/(Sol|Do|Re|Mi|Fa|La|Si|[A-G])([#♯b♭]?)$/;
+  const QUAL_RE = /^(?:maj|min|dim|aug|sus|add|alt|M|m|\+|-|°|ø|Δ|∆|o|\^|[0-9]|#|♯|b|♭|\(|\)|,|\.|\/)*$/;
+
+  function parseChord(tok) {
+    if (!tok) return null;
+    if (/^(N\.?C\.?)$/i.test(tok)) return { nc: true };
+    const m = ROOT_RE.exec(tok);
+    if (!m) return null;
+    const letter = LAT2US[m[1]] || m[1];
+    let rest = tok.slice(m[0].length);
+    let bass = null;
+    const bm = BASS_RE.exec(rest);
+    if (bm) {
+      rest = bm[1];
+      bass = { letter: LAT2US[bm[2]] || bm[2], acc: ACC[bm[3]] || 0 };
+    }
+    if (!QUAL_RE.test(rest)) return null;
+    return { letter, acc: ACC[m[2]] || 0, q: rest, bass };
+  }
+
+  function pcOf(letter, acc) {
+    return (((LP[letter] + acc) % 12) + 12) % 12;
+  }
+  function spell(pc, flats) {
+    const n = (flats ? FLAT : SHARP)[((pc % 12) + 12) % 12];
+    return { letter: n[0], acc: n.length > 1 ? (n[1] === '#' ? 1 : -1) : 0 };
+  }
+  function respell(ch, n, flats) {
+    if (!ch || ch.nc) return ch;
+    const r = spell(pcOf(ch.letter, ch.acc) + n, flats);
+    const out = { letter: r.letter, acc: r.acc, q: ch.q, bass: null };
+    if (ch.bass) {
+      const b = spell(pcOf(ch.bass.letter, ch.bass.acc) + n, flats);
+      out.bass = { letter: b.letter, acc: b.acc };
+    }
+    return out;
+  }
+
+  /* ---- tonalidades ---- */
+  const FIFTHS = {
+    maj: { C: 0, G: 1, D: 2, A: 3, E: 4, B: 5, 'F#': 6, 'C#': 7, F: -1, Bb: -2, Eb: -3, Ab: -4, Db: -5, Gb: -6, Cb: -7 },
+    min: { A: 0, E: 1, B: 2, 'F#': 3, 'C#': 4, 'G#': 5, 'D#': 6, 'A#': 7, D: -1, G: -2, C: -3, F: -4, Bb: -5, Eb: -6, Ab: -7 },
+  };
+  const KEY_AUTO = {
+    maj: ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'],
+    min: ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'],
+  };
+  const KEY_LIST = {
+    maj: ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'],
+    min: ['C', 'C#', 'D', 'Eb', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'],
+  };
+
+  function keyPc(name) {
+    const m = /^([A-G])([#b]?)$/.exec(name || 'C');
+    if (!m) return 0;
+    return pcOf(m[1], ACC[m[2]] || 0);
+  }
+  function keyFifths(name, mode) {
+    const t = FIFTHS[mode === 'min' ? 'min' : 'maj'];
+    return t[name] !== undefined ? t[name] : 0;
+  }
+  // acc: 'auto' | 'sharps' | 'flats'
+  function transposeKey(name, mode, n, acc) {
+    const md = mode === 'min' ? 'min' : 'maj';
+    if (!n && acc === 'auto') return name;
+    const pc = (keyPc(name) + n + 120) % 12;
+    let out = KEY_AUTO[md][pc];
+    if (acc === 'flats') {
+      if (md === 'maj' && pc === 6) out = 'Gb';
+      if (md === 'min' && pc === 3) out = 'Eb';
+    } else if (acc === 'sharps') {
+      if (md === 'maj' && pc === 1) out = 'C#';
+      if (md === 'min' && pc === 3) out = 'D#';
+      if (md === 'min' && pc === 10) out = 'A#';
+    }
+    return out;
+  }
+  // decide si los acordes se escriben con bemoles
+  function useFlats(keyName, mode, acc) {
+    if (acc === 'flats') return true;
+    if (acc === 'sharps') return false;
+    return keyFifths(keyName, mode) < 0;
+  }
+
+  /* ---- armadura de clave (posiciones en pasos de medio espacio desde la línea inferior) ---- */
+  const SHARP_POS = [8, 5, 9, 6, 3, 7, 4];
+  const FLAT_POS = [4, 7, 3, 6, 2, 5, 1];
+  function keySignature(fifths) {
+    const out = [];
+    if (fifths > 0) for (let i = 0; i < fifths; i++) out.push({ k: 'sharp', step: SHARP_POS[i] });
+    if (fifths < 0) for (let i = 0; i < -fifths; i++) out.push({ k: 'flat', step: FLAT_POS[i] });
+    return out;
+  }
+
+  /* ---- acordes de la tonalidad ---- */
+  const DEG = {
+    maj: { off: [0, 2, 4, 5, 7, 9, 11], tri: ['', 'm', 'm', '', '', 'm', 'dim'], sev: ['maj7', 'm7', 'm7', 'maj7', '7', 'm7', 'm7b5'], rom: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'] },
+    min: { off: [0, 2, 3, 5, 7, 8, 10], tri: ['m', 'dim', '', 'm', 'm', '', ''], sev: ['m7', 'm7b5', 'maj7', 'm7', 'm7', 'maj7', '7'], rom: ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'] },
+  };
+  function diatonic(keyName, mode, sevenths) {
+    const md = mode === 'min' ? 'min' : 'maj';
+    const d = DEG[md];
+    const flats = keyFifths(keyName, md) < 0;
+    const base = keyPc(keyName);
+    return d.off.map((o, i) => {
+      const r = spell(base + o, flats);
+      const q = sevenths ? d.sev[i] : d.tri[i];
+      return { text: r.letter + (r.acc > 0 ? '#' : r.acc < 0 ? 'b' : '') + q, rom: d.rom[i] };
+    });
+  }
+
+  /* ---- reescribir acordes dentro de un texto ---- */
+  function mapChordsInLine(line, fn) {
+    if (/^\s*(\[|>|\/\/|---)/.test(line)) return line;
+    return line.replace(/"[^"]*"|[^\s|"]+/g, (tok) => {
+      if (tok[0] === '"') return tok;
+      const m = /^(:*)(.*?)(:\d+(?:\.\d+)?)?(:*)$/.exec(tok);
+      if (!m || !m[2]) return tok;
+      const ch = parseChord(m[2]);
+      if (!ch || ch.nc) return tok;
+      return m[1] + fn(ch) + (m[3] || '') + m[4];
+    });
+  }
+  function chordToText(ch) {
+    if (ch.nc) return 'N.C.';
+    const a = (x) => (x > 0 ? '#' : x < 0 ? 'b' : '');
+    return ch.letter + a(ch.acc) + ch.q + (ch.bass ? '/' + ch.bass.letter + a(ch.bass.acc) : '');
+  }
+  function transposeText(text, n, flats) {
+    return text
+      .split('\n')
+      .map((ln) => mapChordsInLine(ln, (ch) => chordToText(respell(ch, n, flats))))
+      .join('\n');
+  }
+
+  /* ---- tipografía de la calidad del acorde ---- */
+  // devuelve [{k:'base'|'sup', s:'texto'}]
+  function qualitySegments(q) {
+    const segs = [];
+    let seenNum = false;
+    let i = 0;
+    const push = (k, s) => {
+      const last = segs[segs.length - 1];
+      if (last && last.k === k) last.s += s;
+      else segs.push({ k, s });
+    };
+    while (i < q.length) {
+      const rest = q.slice(i);
+      let m;
+      if (!seenNum && (m = /^(maj|min|dim|aug|M|m|\+|-|°|ø|Δ|∆|o|\^)/.exec(rest))) {
+        push('base', m[1]);
+      } else if ((m = /^(sus|add)\d*/.exec(rest))) {
+        push('sup', m[0]);
+      } else if ((m = /^\d+/.exec(rest))) {
+        if (!seenNum) { push('base', m[0]); seenNum = true; } else push('sup', m[0]);
+      } else if ((m = /^\([^)]*\)?/.exec(rest))) {
+        push('sup', m[0]);
+        seenNum = true;
+      } else if ((m = /^(maj|min|dim|aug|alt)/.exec(rest))) {
+        push('sup', m[0]);
+      } else {
+        m = [rest[0]];
+        push(seenNum ? 'sup' : 'base', rest[0]);
+      }
+      i += m[0].length;
+    }
+    return segs;
+  }
+  // parte un texto en runs de texto y alteraciones (♯ ♭ dibujados como vectores)
+  function accidentalRuns(s) {
+    const runs = [];
+    let buf = '';
+    const flush = () => { if (buf) { runs.push({ t: 'txt', s: buf }); buf = ''; } };
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (c === '#' || c === '♯') { flush(); runs.push({ t: 'acc', k: 'sharp' }); }
+      else if (c === '♭' || (c === 'b' && /[0-9)]/.test(s[i + 1] || ''))) { flush(); runs.push({ t: 'acc', k: 'flat' }); }
+      else buf += c;
+    }
+    flush();
+    return runs;
+  }
+
+  A.theory = {
+    SHARP, FLAT, LAT2US, US2LAT, KEY_LIST,
+    parseChord, respell, spell, pcOf, keyFifths, keyPc, transposeKey, useFlats, keySignature,
+    diatonic, transposeText, chordToText, mapChordsInLine, qualitySegments, accidentalRuns,
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = A.theory;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ==== src/parser.js ==== */
+/* Atril · intérprete del texto del chart */
+(function (root) {
+  'use strict';
+  const A = (root.Atril = root.Atril || {});
+  const T = A.theory || (typeof require !== 'undefined' ? require('./theory.js') : null);
+
+  const BAR_RE = /:\|\|:|\|\|:|:\|\||\|\||\|:|:\||\|\.|\|/g;
+  const RH_RE = /^([rx]?)([whqes]?)(\.?)([~>^'_]*)$/;
+  const DURS = { w: 4, h: 2, q: 1, e: 0.5, s: 0.25 };
+
+  const closeOf = (b) =>
+    ({ '|': 'single', '||': 'double', '|:': 'single', ':|': 'repeat', ':||:': 'repeat', '||:': 'double', ':||': 'repeat', '|.': 'final' }[b] || 'single');
+  const openOf = (b) =>
+    ({ '|': 'single', '||': 'double', '|:': 'repeat', ':|': 'single', ':||:': 'repeat', '||:': 'repeat', ':||': 'single', '|.': 'none' }[b] || 'single');
+
+  const fmt = (n) => String(Math.round(n * 100) / 100).replace('.', ',');
+
+  function timing(ts) {
+    const compound = ts.den === 8 && ts.num >= 6 && ts.num % 3 === 0;
+    const len = (ts.num * 4) / ts.den;
+    const slotLen = compound ? 1.5 : ts.den === 8 ? 0.5 : 4 / ts.den;
+    return { len, slotLen, slots: Math.round((len / slotLen) * 1000) / 1000, compound };
+  }
+
+  function parseBar(content, o) {
+    const { ts, idx, line, warnings } = o;
+    const off = o.off || 0;
+    const tm = timing(ts);
+    const bar = {
+      idx, line, num: ts.num, den: ts.den, len: tm.len, slotLen: tm.slotLen, slots: tm.slots,
+      mode: 'auto', chords: [], notes: [], above: [], below: [], markers: [], volta: null,
+      tsChange: null, lb: 'single', rb: 'single',
+    };
+    const warn = (msg) => warnings.push({ line, bar: idx, msg: 'Compás ' + idx + ': ' + msg });
+    const toks = [];
+    const tokPos = [];
+    {
+      const re = /_?"[^"]*"(?:@[rc])?|\S+/g;
+      let mt;
+      while ((mt = re.exec(content))) { toks.push(mt[0]); tokPos.push(off + mt.index); }
+    }
+    const items = []; // acordes y sostenidos en modo automático
+    const timeline = []; // todo en orden, para modo explícito
+    let hasRhythm = false;
+
+    toks.forEach((tk, ti) => {
+      let m;
+      const src = { line, a: tokPos[ti], b: tokPos[ti] + tk.length };
+      if ((m = /^(_?)"([^"]*)"(?:@([rc]))?$/.exec(tk))) {
+        const n = { text: m[2], align: m[3] === 'r' ? 'right' : m[3] === 'c' ? 'center' : 'left' };
+        (m[1] ? bar.below : bar.above).push(n);
+      } else if ((m = /^@(segno|coda)$/.exec(tk))) {
+        bar.markers.push(m[1]);
+      } else if ((m = /^\{([^}]+)\}$/.exec(tk))) {
+        const v = m[1].trim();
+        bar.volta = /^[\d,\s-]+$/.test(v) ? v.replace(/\s+/g, '') + '.' : v;
+      } else if ((m = /^T(\d+)\/(\d+)$/.exec(tk))) {
+        bar.tsChange = { num: +m[1], den: +m[2] };
+      } else if (tk === '%') {
+        bar.mode = 'simile';
+      } else if (tk === '.') {
+        items.push({ hold: true });
+        timeline.push({ hold: true });
+      } else if (tk === '/') {
+        hasRhythm = true;
+        timeline.push({ rh: { dur: tm.slotLen, base: tm.slotLen, dots: 0, type: 'plain', accent: null, stac: false, tie: false, down: false, src } });
+      } else if ((m = RH_RE.exec(tk)) && (m[1] || m[2])) {
+        hasRhythm = true;
+        const base = DURS[m[2] || 'q'];
+        const dots = m[3] ? 1 : 0;
+        const mods = m[4] || '';
+        timeline.push({
+          rh: {
+            dur: base * (dots ? 1.5 : 1), base, dots,
+            type: m[1] === 'r' ? 'rest' : m[1] === 'x' ? 'x' : 'slash',
+            accent: mods.includes('>') ? '>' : mods.includes('^') ? '^' : null,
+            stac: mods.includes("'"), tie: mods.includes('~'), down: mods.includes('_'), src,
+          },
+        });
+      } else {
+        const dm = /^(.*?)(?::(\d+(?:\.\d+)?))?$/.exec(tk);
+        const ch = T.parseChord(dm[1]);
+        if (ch) {
+          const it = { ch, n: dm[2] ? parseFloat(dm[2]) : null, raw: dm[1], src };
+          items.push(it);
+          timeline.push({ ch, src });
+        } else {
+          warn('no reconozco «' + tk + '»');
+        }
+      }
+    });
+
+    if (bar.mode === 'simile') return bar;
+
+    if (hasRhythm) {
+      bar.mode = 'explicit';
+      let t = 0;
+      timeline.forEach((e) => {
+        if (e.ch) bar.chords.push({ t, dur: 0, ch: e.ch, src: e.src });
+        else if (e.rh) {
+          bar.notes.push(Object.assign({ t }, e.rh));
+          t += e.rh.dur;
+        }
+      });
+      bar.chords.forEach((c, i) => {
+        const nx = bar.chords[i + 1];
+        c.dur = (nx ? nx.t : bar.len) - c.t;
+      });
+      if (Math.abs(t - bar.len) > 1e-6) {
+        warn('los ritmos suman ' + fmt(t) + ' y el compás dura ' + fmt(bar.len) + ' (la unidad es la negra)');
+      }
+    } else if (items.length) {
+      const fixed = items.reduce((a, i) => a + (i.n != null ? i.n : 0), 0);
+      const free = items.filter((i) => i.n == null);
+      let rem = bar.slots - fixed;
+      let share = [];
+      if (free.length) {
+        if (rem < free.length) {
+          if (rem < 0.0001 || rem < free.length) warn('hay más acordes que pulsos (' + fmt(bar.slots) + ')');
+          share = free.map(() => 1);
+        } else {
+          const base = Math.floor(rem / free.length);
+          const extra = rem - base * free.length;
+          share = free.map((_, i) => base + (i < extra ? 1 : 0));
+        }
+      }
+      let cur = 0;
+      let fi = 0;
+      items.forEach((it) => {
+        const n = it.n != null ? it.n : share[fi++];
+        if (it.hold) {
+          const lc = bar.chords[bar.chords.length - 1];
+          if (lc) lc.dur += n * bar.slotLen;
+        } else {
+          bar.chords.push({ t: cur * bar.slotLen, dur: n * bar.slotLen, ch: it.ch, src: it.src });
+        }
+        cur += n;
+      });
+      if (cur > bar.slots + 1e-6) warn('los acordes ocupan ' + fmt(cur) + ' pulsos y el compás tiene ' + fmt(bar.slots));
+    }
+    return bar;
+  }
+
+  function parseChart(text, base) {
+    const warnings = [];
+    const lines = [];
+    let idx = 0;
+    const cur = { num: (base && base.num) || 4, den: (base && base.den) || 4 };
+    let lastBar = null;
+
+    String(text || '').split(/\r?\n/).forEach((raw, li) => {
+      const ln = raw.trim();
+      const lineNo = li + 1;
+      if (!ln || /^\/\//.test(ln)) return;
+      if (/^---+$/.test(ln)) { lines.push({ kind: 'pagebreak', line: lineNo }); return; }
+      let m;
+      if ((m = /^\[([^\]]*)\]\s*(.*)$/.exec(ln))) {
+        lines.push({ kind: 'section', name: m[1].trim(), note: m[2].trim(), line: lineNo });
+        return;
+      }
+      if ((m = /^(>>?)\s*(.*)$/.exec(ln))) {
+        lines.push({ kind: 'note', align: m[1] === '>>' ? 'right' : 'left', text: m[2], line: lineNo });
+        return;
+      }
+      const bounds = [];
+      const segs = [];
+      const segOff = [];
+      const lead = raw.length - raw.trimStart().length;
+      let last = 0;
+      let mm;
+      BAR_RE.lastIndex = 0;
+      while ((mm = BAR_RE.exec(ln))) {
+        segs.push(ln.slice(last, mm.index));
+        segOff.push(lead + last);
+        bounds.push(mm[0]);
+        last = mm.index + mm[0].length;
+      }
+      segs.push(ln.slice(last));
+      segOff.push(lead + last);
+      let start = 0;
+      let end = segs.length - 1;
+      if (bounds.length && !segs[0].trim()) start = 1;
+      if (bounds.length && end >= 1 && !segs[end].trim()) end -= 1;
+      const bars = [];
+      for (let i = start; i <= end; i++) {
+        idx += 1;
+        // un T3/4 dentro del compás cambia el compás de aquí en adelante
+        const pre = /(?:^|\s)T(\d+)\/(\d+)(?=\s|$)/.exec(segs[i]);
+        if (pre) { cur.num = +pre[1]; cur.den = +pre[2]; }
+        const bar = parseBar(segs[i], { ts: { num: cur.num, den: cur.den }, idx, line: lineNo, warnings, off: segOff[i] });
+        bar.seg = { line: lineNo, a: segOff[i], b: segOff[i] + segs[i].length };
+        bar.lb = openOf(i > 0 ? bounds[i - 1] : null);
+        bar.rb = closeOf(i < bounds.length ? bounds[i] : null);
+        bars.push(bar);
+        lastBar = bar;
+      }
+      if (bars.length) lines.push({ kind: 'bars', bars, line: lineNo });
+    });
+
+    if (lastBar && lastBar.rb === 'single') lastBar.rb = 'final';
+    const sections = lines.filter((l) => l.kind === 'section').map((l) => l.name);
+    return { lines, warnings, barCount: idx, sections };
+  }
+
+  A.parser = { parseChart, timing };
+  if (typeof module !== 'undefined' && module.exports) module.exports = A.parser;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ==== src/themes.js ==== */
+/* Atril · temas de la hoja */
+(function (root) {
+  'use strict';
+  const A = (root.Atril = root.Atril || {});
+
+  const BARLOW = '"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif';
+
+  const LIGHT_COLORS = {
+    intro: '#2F5BD8', verso: '#0B7285', precoro: '#D9480F', coro: '#C2255C',
+    puente: '#6741D9', solo: '#2B8A3E', inter: '#5C6B7A', final: '#1B1F27', default: '#495057',
+  };
+  const DARK_COLORS = {
+    intro: '#8FA8FF', verso: '#45CFE0', precoro: '#FFA45C', coro: '#FF6F9F',
+    puente: '#B9A0FF', solo: '#6FDB86', inter: '#A9B8C8', final: '#E9ECEF', default: '#B4BBC4',
+  };
+
+  const themes = {
+    estudio: {
+      id: 'estudio', name: 'Estudio', blurb: 'Color por sección',
+      paper: '#FFFFFF', ink: '#14171F', staff: '#3A4150', muted: '#6B7380', accent: '#2F5BD8', rule: '#D5D9E0',
+      chordFamily: BARLOW, chordWeight: 700, chordScale: 1,
+      titleFamily: '"Bricolage Grotesque",' + BARLOW, titleWeight: 800, titleStyle: 'normal', titleCase: 'none',
+      textFamily: BARLOW, textWeight: 500, textStyle: 'italic',
+      labelFamily: BARLOW, labelWeight: 700, labelStyle: 'tab', labelText: '#FFFFFF',
+      sectionBar: true, colors: LIGHT_COLORS,
+    },
+    realbook: {
+      id: 'realbook', name: 'Real Book', blurb: 'Letra manuscrita',
+      paper: '#FFFFFF', ink: '#111111', staff: '#111111', muted: '#555555', accent: '#111111', rule: '#111111',
+      chordFamily: '"Patrick Hand","Comic Sans MS","Segoe Print",cursive', chordWeight: 400, chordScale: 1.1,
+      titleFamily: '"Caveat Brush","Patrick Hand",cursive', titleWeight: 400, titleStyle: 'normal', titleCase: 'upper',
+      textFamily: '"Patrick Hand","Comic Sans MS",cursive', textWeight: 400, textStyle: 'normal',
+      labelFamily: '"Patrick Hand","Comic Sans MS",cursive', labelWeight: 400, labelStyle: 'box', labelText: '#111111',
+      sectionBar: false, colors: {},
+    },
+    imprenta: {
+      id: 'imprenta', name: 'Imprenta', blurb: 'Blanco y negro',
+      paper: '#FFFFFF', ink: '#000000', staff: '#000000', muted: '#4A4A4A', accent: '#000000', rule: '#000000',
+      chordFamily: BARLOW, chordWeight: 700, chordScale: 1,
+      titleFamily: '"DM Serif Display","Times New Roman",serif', titleWeight: 400, titleStyle: 'normal', titleCase: 'none',
+      textFamily: BARLOW, textWeight: 500, textStyle: 'italic',
+      labelFamily: BARLOW, labelWeight: 700, labelStyle: 'solid', labelText: '#FFFFFF',
+      sectionBar: false, colors: {},
+    },
+    noche: {
+      id: 'noche', name: 'Noche', blurb: 'Fondo oscuro para tablet',
+      paper: '#0F1219', ink: '#F1F3F8', staff: '#7C879A', muted: '#9AA4B5', accent: '#8FA8FF', rule: '#2A3140',
+      chordFamily: BARLOW, chordWeight: 700, chordScale: 1,
+      titleFamily: '"Bricolage Grotesque",' + BARLOW, titleWeight: 800, titleStyle: 'normal', titleCase: 'none',
+      textFamily: BARLOW, textWeight: 500, textStyle: 'italic',
+      labelFamily: BARLOW, labelWeight: 700, labelStyle: 'tab', labelText: '#0F1219',
+      sectionBar: true, colors: DARK_COLORS,
+    },
+  };
+
+  function sectionKey(name) {
+    const n = String(name || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z]/g, '');
+    if (/^(reintro|interludio|instrumental|break|transicion)/.test(n)) return 'inter';
+    if (/^intro/.test(n)) return 'intro';
+    if (/^(precoro|prechorus|prestribillo|preestribillo)/.test(n)) return 'precoro';
+    if (/^(coro|estribillo|chorus)/.test(n)) return 'coro';
+    if (/^(verso|estrofa|verse|strofa)/.test(n)) return 'verso';
+    if (/^(puente|bridge)/.test(n)) return 'puente';
+    if (/^solo/.test(n)) return 'solo';
+    if (/^(final|outro|coda|cierre|fin|tag)/.test(n)) return 'final';
+    return 'default';
+  }
+  function sectionColor(th, key) {
+    return (th.colors && (th.colors[key] || th.colors.default)) || th.ink;
+  }
+
+  A.themes = { themes, sectionKey, sectionColor, list: ['estudio', 'realbook', 'imprenta', 'noche'] };
+  if (typeof module !== 'undefined' && module.exports) module.exports = A.themes;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ==== src/fonts.js ==== */
+/* Atril · catálogo de tipografías para los acordes
+   scale: iguala la altura de las mayúsculas entre familias (calibrado con la métrica de cada fuente)
+   bold: trazo extra, en fracción del cuerpo, para las letras finas */
+(function (root) {
+  'use strict';
+  const A = (root.Atril = root.Atril || {});
+  const q = (n) => '"' + n + '"';
+  const mk = (id, name, group, family, weight, scale, bold, extra) =>
+    Object.assign({ id, name, group, family: q(family) + ',' + (group === 'hand' ? '"Segoe Print","Comic Sans MS",cursive' : group === 'serif' ? 'Georgia,serif' : '"Arial Narrow",Arial,sans-serif'), weight, scale, bold, css: family, load: weight + ' 20px ' + q(family) }, extra || {});
+
+  const list = [
+    mk('kalam', 'Kalam', 'hand', 'Kalam', 700, 0.76, 0),
+    mk('patrick', 'Patrick Hand', 'hand', 'Patrick Hand', 400, 0.864, 0.045),
+    mk('caveatbrush', 'Caveat Brush', 'hand', 'Caveat Brush', 400, 0.864, 0.01),
+    mk('gochi', 'Gochi Hand', 'hand', 'Gochi Hand', 400, 1.0, 0.0),
+    mk('architects', 'Architects Daughter', 'hand', 'Architects Daughter', 400, 0.792, 0.05),
+    mk('permanent', 'Permanent Marker', 'hand', 'Permanent Marker', 400, 0.76, 0, { note: 'Solo mayúsculas' }),
+    mk('indie', 'Indie Flower', 'hand', 'Indie Flower', 400, 0.826, 0.055),
+    mk('shadows', 'Shadows Into Light', 'hand', 'Shadows Into Light Two', 400, 0.687, 0.065),
+    mk('covered', 'Covered By Your Grace', 'hand', 'Covered By Your Grace', 400, 0.731, 0.05),
+    mk('reenie', 'Reenie Beanie', 'hand', 'Reenie Beanie', 400, 0.983, 0.085),
+    mk('barlow', 'Barlow Condensed', 'sans', 'Barlow Condensed', 700, 0.814, 0),
+    mk('roboto', 'Roboto Condensed', 'sans', 'Roboto Condensed', 600, 0.803, 0),
+    mk('plex', 'IBM Plex Sans Condensed', 'sans', 'IBM Plex Sans Condensed', 600, 0.803, 0),
+    mk('source', 'Source Serif', 'serif', 'Source Serif 4', 600, 0.851, 0),
+    mk('baskerville', 'Libre Baskerville', 'serif', 'Libre Baskerville', 700, 0.74, 0),
+    mk('crimson', 'Crimson Pro', 'serif', 'Crimson Pro', 600, 1.0, 0),
+  ];
+  const byId = {};
+  list.forEach((f) => { byId[f.id] = f; });
+  /* catálogo ampliado (se carga de Google Fonts solo cuando se elige) */
+  const CATALOG = {
+    hand: ['Caveat', 'Dancing Script', 'Pacifico', 'Satisfy', 'Amatic SC', 'Handlee', 'Gloria Hallelujah', 'Rock Salt', 'Just Another Hand', 'Schoolbell', 'Nanum Pen Script', 'Sue Ellen Francisco', 'Waiting for the Sunrise', 'Homemade Apple', 'Cedarville Cursive', 'Walter Turncoat'],
+    sans: ['Inter', 'Montserrat', 'Oswald', 'Bebas Neue', 'Poppins', 'Work Sans', 'Barlow', 'Archivo Narrow', 'Fira Sans Condensed', 'Open Sans', 'Lato', 'Nunito', 'Raleway', 'Josefin Sans', 'Anton', 'Teko'],
+    serif: ['Playfair Display', 'Cormorant Garamond', 'EB Garamond', 'Lora', 'Merriweather', 'Libre Caslon Text', 'Spectral', 'DM Serif Display', 'Cinzel', 'Abril Fatface', 'Bodoni Moda', 'Old Standard TT', 'Rozha One'],
+    mono: ['JetBrains Mono', 'IBM Plex Mono', 'Courier Prime', 'Space Mono', 'Special Elite'],
+  };
+  const groupOfFam = {};
+  Object.keys(CATALOG).forEach((g) => CATALOG[g].forEach((f) => { groupOfFam[f] = g; }));
+  const dyn = {}; // familia -> { scale } (se calibra al cargar)
+  const okFam = (f) => /^[A-Za-z0-9][A-Za-z0-9 \-]{1,48}$/.test(f);
+  const isDyn = (id) => typeof id === 'string' && id.slice(0, 2) === 'g:' && okFam(id.slice(2));
+  const dynEntry = (id) => {
+    const f = id.slice(2);
+    const g = groupOfFam[f] || 'custom';
+    const stack = g === 'serif' ? 'Georgia,serif' : g === 'sans' ? 'Arial,sans-serif' : g === 'mono' ? 'monospace' : 'cursive';
+    return { id, name: f, group: g, family: '"' + f + '",' + stack, weight: g === 'sans' || g === 'serif' ? 600 : 400, scale: (dyn[f] && dyn[f].scale) || 0.85, bold: g === 'hand' || g === 'custom' ? 0.03 : 0, css: f, load: '400 20px "' + f + '"', dyn: true };
+  };
+  const get = (id) => (isDyn(id) ? dynEntry(id) : byId[id] || byId.kalam);
+  const resolve = (id) => (id && (isDyn(id) || byId[id]) ? get(id) : null);
+  const linked = {};
+  function ensure(fam) {
+    if (typeof document === 'undefined' || !okFam(fam)) return Promise.resolve();
+    if (!linked[fam]) {
+      linked[fam] = new Promise((res) => {
+        const l = document.createElement('link');
+        l.rel = 'stylesheet';
+        l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(fam).replace(/%20/g, '+') + '&display=swap';
+        l.onload = () => res();
+        l.onerror = () => res();
+        document.head.appendChild(l);
+        setTimeout(res, 4000);
+      }).then(() => (document.fonts ? document.fonts.load('400 20px "' + fam + '"', 'Aáb♯1').catch(() => null) : null));
+    }
+    return linked[fam];
+  }
+  // versiones anteriores guardaban 'hand' (Patrick Hand), 'marker' (Kalam) y 'print' (Barlow)
+  const migrate = (id) => ({ hand: 'patrick', marker: 'kalam', print: 'barlow' }[id] || id);
+
+  const GOOGLE =
+    'family=Kalam:wght@700&family=Patrick+Hand&family=Caveat+Brush&family=Gochi+Hand&family=Architects+Daughter&family=Permanent+Marker&family=Indie+Flower' +
+    '&family=Shadows+Into+Light+Two&family=Covered+By+Your+Grace&family=Reenie+Beanie&family=Roboto+Condensed:wght@600&family=IBM+Plex+Sans+Condensed:wght@600' +
+    '&family=Source+Serif+4:wght@600&family=Libre+Baskerville:wght@700&family=Crimson+Pro:wght@600';
+
+  A.fonts = { list, byId, get, resolve, isDyn, okFam, ensure, dyn, CATALOG, migrate, GOOGLE };
+  if (typeof module !== 'undefined' && module.exports) module.exports = A.fonts;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ==== src/layout.js ==== */
+/* Atril · maquetación: texto interpretado -> páginas A4 con operaciones de dibujo */
+(function (root) {
+  'use strict';
+  const A = (root.Atril = root.Atril || {});
+  const T = A.theory || (typeof require !== 'undefined' ? require('./theory.js') : null);
+  const TH = A.themes || (typeof require !== 'undefined' ? require('./themes.js') : null);
+  const G = A.glyphs || (typeof require !== 'undefined' ? require('../build/glyphs.json') : null);
+  const FN = A.fonts || (typeof require !== 'undefined' ? require('./fonts.js') : null);
+
+  const DIM = { portrait: { w: 595.28, h: 841.89 }, landscape: { w: 841.89, h: 595.28 } };
+  const fontStr = (style, weight, size, family) =>
+    (style || 'normal') + ' ' + (weight || 400) + ' ' + Math.round(size * 100) / 100 + 'px ' + family;
+
+  function layoutSong(parsed, cfg, measure) {
+    const th = (() => {
+      const o = Object.assign({}, cfg.theme);
+      const tf = FN.resolve(cfg.titleFont);
+      if (tf) { o.titleFamily = tf.family; o.titleWeight = tf.group === 'sans' || tf.group === 'serif' ? 700 : tf.weight; o.titleStyle = 'normal'; }
+      const lf = FN.resolve(cfg.labelFont);
+      if (lf) { o.labelFamily = lf.family; o.labelWeight = lf.group === 'hand' || lf.group === 'custom' ? 400 : 700; }
+      const xf = FN.resolve(cfg.textFont);
+      if (xf) { o.textFamily = xf.family; o.textWeight = xf.group === 'hand' || xf.group === 'custom' ? 400 : 500; o.textStyle = xf.group === 'hand' ? 'normal' : 'italic'; }
+      return o;
+    })();
+    const ff = FN.get(cfg.chordFont);
+    const cf = { family: ff.family, weight: ff.weight, scale: ff.scale, bold: ff.bold };
+    const handTxt = ff.group === 'hand';
+    const noteFont = (sz) => (handTxt ? fontStr('normal', cf.weight, sz * 1.15, cf.family) : fontStr(th.textStyle, th.textWeight, sz, th.textFamily));
+    const tsFont = (sz) => (handTxt ? fontStr('normal', cf.weight, sz, cf.family) : fontStr('normal', 700, sz, th.labelFamily));
+    const meta = cfg.meta;
+    const D = DIM[cfg.orient === 'landscape' ? 'landscape' : 'portrait'];
+    const W = D.w;
+    const H = D.h;
+    const M = { l: 34, r: 34, t: 32, b: 46 };
+    const n = cfg.transpose || 0;
+    const accPref = cfg.acc || 'auto';
+    const keyName = T.transposeKey(meta.key, meta.mode, n, accPref);
+    const fifths = T.keyFifths(keyName, meta.mode);
+    const flats = T.useFlats(keyName, meta.mode, accPref);
+    const respellOn = n !== 0 || accPref !== 'auto';
+    const disp = (ch) => (ch.nc || !respellOn ? ch : T.respell(ch, n, flats));
+    const bpl = cfg.bpl | 0;
+    const latin = cfg.notation === 'latin';
+    const ink = th.ink;
+    const keyText = keyName + (meta.mode === 'min' ? 'm' : '');
+    const origKeyText = meta.key + (meta.mode === 'min' ? 'm' : '');
+
+    /* ---------- filas (independientes de la escala) ---------- */
+    function buildRows() {
+      const items = [];
+      let curSec = null;
+      let pending = null;
+      let acc = [];
+      let accFirst = null;
+      let accSec = null;
+      const flush = () => {
+        if (!acc.length) return;
+        const k = Math.max(1, bpl);
+        for (let i = 0; i < acc.length; i += k) {
+          items.push({ kind: 'row', bars: acc.slice(i, i + k), sec: accSec, first: i === 0 ? accFirst : null });
+        }
+        acc = [];
+        accFirst = null;
+      };
+      parsed.lines.forEach((l) => {
+        if (l.kind === 'section') {
+          flush();
+          const key = TH.sectionKey(l.name);
+          curSec = { name: l.name, note: l.note, key };
+          pending = curSec;
+        } else if (l.kind === 'bars') {
+          if (bpl > 0) {
+            if (!acc.length) { accFirst = pending; accSec = curSec; }
+            pending = null;
+            acc = acc.concat(l.bars);
+          } else {
+            items.push({ kind: 'row', bars: l.bars, sec: curSec, first: pending });
+            pending = null;
+          }
+        } else if (l.kind === 'note') {
+          flush();
+          items.push({ kind: 'text', text: l.text, align: l.align });
+        } else if (l.kind === 'pagebreak') {
+          flush();
+          items.push({ kind: 'pagebreak' });
+        }
+      });
+      flush();
+      return items;
+    }
+    const rows = buildRows();
+    const sectionSeq = parsed.lines
+      .filter((l) => l.kind === 'section')
+      .map((l) => ({ name: l.name, key: TH.sectionKey(l.name) }));
+
+    /* ---------- construcción de páginas para una escala ---------- */
+    function build(S) {
+      const sp = 5 * S;
+      const chordPx = 20.5 * cf.scale * S;
+      const five = cfg.staff !== 'one';
+      const cols = cfg.cols === 2 ? 2 : 1;
+      const colGap = 24;
+      const contentW = W - M.l - M.r;
+      const colW = (contentW - (cols - 1) * colGap) / cols;
+      const barW = th.sectionBar ? 3.2 * S : 0;
+      const lead = (th.sectionBar ? barW + 2.4 * S : 0) + 12 * S;
+      const bodyBottom = H - M.b;
+      const padL = 1.5 * sp;
+      const padR = 1.0 * sp;
+
+      const pages = [];
+      const systems = [];
+      const hits = [];
+      const barBoxes = [];
+      let page = null;
+      let curCol = 0;
+      let y = 0;
+      let bodyTop = 0;
+      const cache = new Map();
+
+      const txtW = (s, font, ls) => measure(s, font) + (ls ? ls * Math.max(0, s.length - 1) : 0);
+
+      /* ---- acordes ---- */
+      function chordLayout(ch, size) {
+        const key = (ch.nc ? 'nc' : [ch.letter, ch.acc, ch.q, ch.bass ? ch.bass.letter + ch.bass.acc : ''].join('|')) + '@' + size;
+        if (cache.has(key)) return cache.get(key);
+        const f = (sz) => fontStr('normal', cf.weight, sz, cf.family);
+        const parts = [];
+        let x = 0;
+        const addT = (s, sz, dy) => {
+          if (!s) return;
+          const font = f(sz);
+          parts.push({ k: 't', s, dx: x, dy, font });
+          x += measure(s, font);
+        };
+        const addA = (k, h, cy) => {
+          const gl = G[k];
+          parts.push({ k: 'a', acc: k, dx: x + 0.07 * h, dy: cy, h });
+          x += (gl.w * h) / gl.h + 0.26 * h;
+        };
+        if (ch.nc) {
+          addT('N.C.', size * 0.9, 0);
+        } else {
+          const lt = (l) => (latin ? T.US2LAT[l] : l);
+          addT(lt(ch.letter), size, 0);
+          if (ch.acc) addA(ch.acc > 0 ? 'sharp' : 'flat', size * (ch.acc > 0 ? 0.66 : 0.76), ch.acc > 0 ? -size * 0.6 : -size * 0.44);
+          T.qualitySegments(ch.q).forEach((seg) => {
+            const sup = seg.k === 'sup';
+            const sz = sup ? size * 0.64 : size;
+            const dy = sup ? -size * 0.36 : 0;
+            T.accidentalRuns(seg.s).forEach((r) => {
+              if (r.t === 'txt') addT(r.s, sz, dy);
+              else addA(r.k, sz * 0.72, r.k === 'sharp' ? dy - sz * 0.38 : dy - sz * 0.2);
+            });
+          });
+          if (ch.bass) {
+            addT('/', size, 0);
+            addT(lt(ch.bass.letter), size, 0);
+            if (ch.bass.acc) addA(ch.bass.acc > 0 ? 'sharp' : 'flat', size * (ch.bass.acc > 0 ? 0.66 : 0.76), ch.bass.acc > 0 ? -size * 0.6 : -size * 0.44);
+          }
+        }
+        const out = { w: x, parts };
+        cache.set(key, out);
+        return out;
+      }
+      const chordOps = (ops, ch, x, base) => {
+        const L = chordLayout(ch, chordPx);
+        L.parts.forEach((p) => {
+          if (p.k === 't') ops.push({ t: 'text', x: x + p.dx, y: base + p.dy, s: p.s, font: p.font, color: ink, align: 'left', bold: cf.bold ? cf.bold * (p.dy < -1 ? chordPx * 0.64 : chordPx) : 0 });
+          else ops.push({ t: 'acc', k: p.acc, x: x + p.dx, y: base + p.dy, h: p.h, color: ink });
+        });
+      };
+
+      /* ---- medidas de compás ---- */
+      const lbX = (b) => (b.lb === 'repeat' ? 11 * S : b.lb === 'double' ? 3 * S : 0);
+      const rbX = (b) => (b.rb === 'repeat' ? 11 * S : b.rb === 'final' ? 6 * S : b.rb === 'double' ? 3 * S : 0);
+      const tsX = (b) => (b.tsChange && b.idx !== 1 ? 3.6 * sp : 0);
+      const minMap = new Map();
+      function barMin(bar) {
+        if (minMap.has(bar)) return minMap.get(bar);
+        const L = bar.len;
+        let inner = 0;
+        bar.chords.forEach((c, i) => {
+          const dc = disp(c.ch);
+          const w = chordLayout(dc, chordPx).w + 0.8 * sp;
+          const nx = bar.chords[i + 1];
+          const span = ((nx ? nx.t : L) - c.t) / L;
+          if (span > 0) inner = Math.max(inner, nx ? w / span : (w - padR * 0.6) / span);
+        });
+        if (bar.mode === 'auto') inner = Math.max(inner, bar.slots * 3.0 * sp);
+        if (bar.mode === 'simile') inner = Math.max(inner, 6 * sp);
+        if (bar.mode === 'explicit') {
+          const ev = bar.notes;
+          for (let i = 0; i < ev.length; i++) {
+            const nxt = ev[i + 1] ? ev[i + 1].t : L;
+            const gap = (nxt - ev[i].t) / L;
+            const need = (ev[i].dots ? 2.4 : ev[i].base <= 0.25 ? 1.5 : 1.9) * sp;
+            if (gap > 0) inner = Math.max(inner, need / gap);
+          }
+          inner = Math.max(inner, 6 * sp);
+        }
+        const v = padL + inner + padR + lbX(bar) + rbX(bar) + tsX(bar);
+        minMap.set(bar, v);
+        return v;
+      }
+
+      function headFor(bar) {
+        const showTs = bar.idx === 1 || !!bar.tsChange;
+        let w;
+        if (five) {
+          const em = 4 * sp;
+          w = 0.7 * sp + G.clef.w * em + 1.0 * sp;
+          if (fifths) w += Math.abs(fifths) * 1.2 * sp + 1.0 * sp;
+          if (showTs) w += 4.4 * sp;
+        } else {
+          w = showTs ? 0.8 * sp + 3.4 * sp + 0.8 * sp : 1.4 * sp;
+        }
+        return { w, showTs };
+      }
+
+      function solveWidths(mins, avail) {
+        const nb = mins.length;
+        const sum = mins.reduce((a, b) => a + b, 0);
+        if (sum >= avail) return mins.map((m) => (m * avail) / sum);
+        const w = new Array(nb).fill(0);
+        const fixed = new Array(nb).fill(false);
+        let rem = avail;
+        let free = nb;
+        for (let guard = 0; guard < nb + 2; guard++) {
+          const share = rem / free;
+          let changed = false;
+          for (let i = 0; i < nb; i++) {
+            if (!fixed[i] && mins[i] > share) {
+              fixed[i] = true;
+              w[i] = mins[i];
+              rem -= mins[i];
+              free -= 1;
+              changed = true;
+            }
+          }
+          if (!changed) break;
+        }
+        for (let i = 0; i < nb; i++) if (!fixed[i]) w[i] = rem / free;
+        return w;
+      }
+
+      function wrapRow(item) {
+        const chunks = [];
+        let cur = [];
+        let sum = 0;
+        item.bars.forEach((b) => {
+          const m = barMin(b);
+          if (cur.length) {
+            const avail = colW - lead - headFor(cur[0]).w;
+            if (sum + m > avail) {
+              chunks.push(cur);
+              cur = [];
+              sum = 0;
+            }
+          }
+          cur.push(b);
+          sum += m;
+        });
+        if (cur.length) chunks.push(cur);
+        // reparto parejo: mismo número de compases por renglón cuando entra
+        if (chunks.length > 1 && !item.noBalance) {
+          const all = item.bars;
+          const k = chunks.length;
+          const per = Math.ceil(all.length / k);
+          const even = [];
+          let ok = true;
+          for (let i = 0; i < all.length; i += per) {
+            const part = all.slice(i, i + per);
+            const avail = colW - lead - headFor(part[0]).w;
+            if (part.reduce((a, b) => a + barMin(b), 0) > avail) { ok = false; break; }
+            even.push(part);
+          }
+          if (ok && even.length === k) return even;
+        }
+        return chunks;
+      }
+
+      /* ---- páginas ---- */
+      const fmtTitle = (s) => (th.titleCase === 'upper' ? String(s).toUpperCase() : String(s));
+      const title = fmtTitle(meta.title || 'Sin título');
+
+      function mapRow(ops, yy) {
+        // "forma": recorrido de la canción con chips de color
+        if (!cfg.showMap || sectionSeq.length < 2) return yy;
+        const fs = 7.6;
+        const font = fontStr('normal', th.labelWeight, fs, th.labelFamily);
+        const ls = 0.5;
+        let x = M.l;
+        let line = 0;
+        const hChip = 12.5;
+        const lab = 'FORMA';
+        const labFont = fontStr('normal', th.labelWeight, 7, th.labelFamily);
+        ops.push({ t: 'text', x, y: yy + 9, s: lab, font: labFont, color: th.muted, align: 'left', ls: 1.2 });
+        x += txtW(lab, labFont, 1.2) + 10;
+        const x0 = x;
+        sectionSeq.forEach((sec, i) => {
+          const s = sec.name.toUpperCase();
+          const w = txtW(s, font, ls) + 11;
+          if (x + w > W - M.r && x > x0) {
+            line += 1;
+            x = x0;
+          }
+          const yTop = yy + line * 17;
+          const col = TH.sectionColor(th, sec.key);
+          if (th.labelStyle === 'tab') {
+            ops.push({ t: 'rect', x, y: yTop, w, h: hChip, r: 3, fill: col });
+            ops.push({ t: 'text', x: x + w / 2, y: yTop + 9, s, font, color: th.labelText, align: 'center', ls });
+          } else if (th.labelStyle === 'solid') {
+            ops.push({ t: 'rect', x, y: yTop, w, h: hChip, r: 2, fill: ink });
+            ops.push({ t: 'text', x: x + w / 2, y: yTop + 9, s, font, color: th.paper, align: 'center', ls });
+          } else {
+            ops.push({ t: 'rect', x, y: yTop, w, h: hChip, r: 3, fill: th.paper, stroke: ink, lw: 1 });
+            ops.push({ t: 'text', x: x + w / 2, y: yTop + 9, s, font, color: ink, align: 'center', ls });
+          }
+          x += w;
+          if (i < sectionSeq.length - 1) {
+            ops.push({ t: 'line', x1: x + 3, y1: yTop + 3.5, x2: x + 6, y2: yTop + 6.25, color: th.muted, lw: 1 });
+            ops.push({ t: 'line', x1: x + 6, y1: yTop + 6.25, x2: x + 3, y2: yTop + 9, color: th.muted, lw: 1 });
+            x += 9;
+          }
+        });
+        return yy + (line + 1) * 17 + 4;
+      }
+
+      function drawHeader(ops) {
+        const y0 = M.t;
+        const tempo = meta.tempo ? String(meta.tempo) : '';
+        const hf = FN.resolve(cfg.headerFont);
+        const SERIF = hf ? hf.family : '"Cormorant Infant","Cormorant Garamond","Georgia","Times New Roman",serif';
+        const HWT = hf ? (hf.group === 'hand' || hf.group === 'custom' ? 400 : hf.weight) : 600;
+        const pct = (v) => Math.max(0.25, Math.min(2.2, (+v || 100) / 100));
+        const lFont = fontStr('normal', th.labelWeight, 6.6, th.labelFamily);
+        const sFont = fontStr('italic', 500, 8, SERIF);
+        const GAP = 15;
+        const cells = [];
+        const kSz = 27 * pct(cfg.sizeKey);
+        const tSz = 27 * pct(cfg.sizeTempo);
+        const sSz = 27 * pct(cfg.sizeTs);
+        const fnt = (v) => fontStr('normal', HWT, v, SERIF);
+        // la tonalidad se escribe con ♯ y ♭ reales
+        const kLetter = keyText[0];
+        const kAcc = keyText[1] === '#' ? 'sharp' : keyText[1] === 'b' ? 'flat' : null;
+        const kRest = keyText.slice(kAcc ? 2 : 1);
+        const accH = kSz * 0.5;
+        const accW = kAcc ? (G[kAcc].w * accH) / G[kAcc].h + 2.5 : 0;
+        cells.push({ label: 'TONALIDAD', kind: 'key', sz: kSz, field: 'key', sub: n ? 'original ' + origKeyText : '', vw: txtW(kLetter, fnt(kSz), 0) + accW + (kRest ? txtW(kRest, fnt(kSz), 0) : 0), vh: kSz * 0.9 });
+        if (tempo) {
+          const qh = 27 * 0.74; // la figura no cambia de tamaño con el número
+          const qw = (G.quarter.w * qh) / G.quarter.h;
+          cells.push({ label: 'TEMPO', kind: 'tempo', sz: tSz, field: 'tempo', value: '= ' + tempo, sub: '', qh, qw, vw: qw + 5 + txtW('= ' + tempo, fnt(tSz), 0), vh: Math.max(tSz * 0.9, qh) });
+        }
+        {
+          const ns = sSz * 0.74;
+          const nw = Math.max(txtW(String(meta.num), fnt(ns), 0), txtW(String(meta.den), fnt(ns), 0));
+          cells.push({ label: 'COMPÁS', kind: 'ts', sz: sSz, ns, field: 'ts', sub: '', vw: nw, vh: ns * 1.62 });
+        }
+        let cw = 0;
+        cells.forEach((c) => {
+          c.w = Math.max(c.vw, txtW(c.label, lFont, 1.8), c.sub ? txtW(c.sub, sFont, 0) : 0) + GAP * 2;
+          cw += c.w;
+        });
+        const maxVh = Math.max.apply(null, cells.map((c) => c.vh));
+        cells.forEach((c) => { c.bottom = y0 + 11 + maxVh + (c.sub ? 12 : 0); });
+        // título: se achica hasta entrar al lado de las celdas
+        let ts = cfg.orient === 'landscape' ? 34 : 36;
+        const tFont = (sz) => fontStr(th.titleStyle, th.titleWeight, sz, th.titleFamily);
+        const room = contentW - cw - 18;
+        while (ts > 18 && txtW(title, tFont(ts), 0) > room) ts -= 1;
+        const hasPill = !!(meta.style && meta.style.trim());
+        let x = M.l;
+        const aFont = fontStr('normal', th.labelWeight, 9.5, th.labelFamily);
+        if (hasPill) {
+          const ps = meta.style.toUpperCase();
+          const pf = fontStr('normal', th.labelWeight, 8, th.labelFamily);
+          const pw = txtW(ps, pf, 0.8) + 12;
+          ops.push({ t: 'rect', x, y: y0, w: pw, h: 14, r: 7, fill: null, stroke: th.accent, lw: 1.2 });
+          ops.push({ t: 'text', x: x + pw / 2, y: y0 + 10, s: ps, font: pf, color: th.accent, align: 'center', ls: 0.8 });
+          x += pw + 9;
+        }
+        if (meta.artist) {
+          ops.push({ t: 'text', x, y: y0 + 10.5, s: String(meta.artist).toUpperCase(), font: aFont, color: ink, align: 'left', ls: 1.6 });
+        }
+        const tBase = y0 + 17 + ts * 0.86;
+        ops.push({ t: 'text', x: M.l, y: tBase, s: title, font: tFont(ts), color: ink, align: 'left' });
+        let sub = '';
+        if (meta.album) sub = meta.album;
+        let subBase = tBase + 4;
+        if (sub) {
+          subBase = tBase + 16;
+          ops.push({ t: 'text', x: M.l, y: subBase, s: sub, font: fontStr(th.textStyle, th.textWeight, 11, th.textFamily), color: th.muted, align: 'left' });
+        }
+        // celdas a la derecha: etiqueta chica, valor en serif, separadores finos
+        let cx = W - M.r;
+        const cellBottom = Math.max.apply(null, cells.map((c) => c.bottom));
+        for (let i = cells.length - 1; i >= 0; i--) {
+          const c = cells[i];
+          const left = cx - c.w;
+          const mx = left + c.w / 2;
+          const vFont = fnt(c.sz);
+          if (i > 0) ops.push({ t: 'line', x1: left, y1: y0 + 5, x2: left, y2: Math.max(y0 + 41, cellBottom - 4), color: th.rule, lw: 0.5 });
+          ops.push({ t: 'text', x: mx, y: y0 + 8, s: c.label, font: lFont, color: th.muted, align: 'center', ls: 1.8 });
+          const base = y0 + 11 + maxVh; // todas las cifras comparten la misma línea de base; el rótulo no cambia de tamaño
+          if (c.kind === 'key') {
+            let px = mx - c.vw / 2;
+            const col = th.accent;
+            ops.push({ t: 'text', x: px, y: base, s: kLetter, font: vFont, color: col, align: 'left' });
+            px += txtW(kLetter, vFont, 0);
+            if (kAcc) {
+              ops.push({ t: 'acc', k: kAcc, x: px + 1.5, y: base - c.sz * (kAcc === 'sharp' ? 0.56 : 0.4), h: accH, color: col });
+              px += accW;
+            }
+            if (kRest) ops.push({ t: 'text', x: px, y: base, s: kRest, font: vFont, color: col, align: 'left' });
+          } else if (c.kind === 'tempo') {
+            const px = mx - c.vw / 2;
+            ops.push({ t: 'glyph', g: 'quarter', x: px, y: base - c.qh + 1.2, h: c.qh, color: ink });
+            ops.push({ t: 'text', x: px + c.qw + 5, y: base, s: c.value, font: vFont, color: ink, align: 'left' });
+          } else {
+            const nf = fnt(c.ns);
+            ops.push({ t: 'text', x: mx, y: base - c.ns * 0.78, s: String(meta.num), font: nf, color: ink, align: 'center' });
+            ops.push({ t: 'text', x: mx, y: base, s: String(meta.den), font: nf, color: ink, align: 'center' });
+          }
+          if (c.sub) ops.push({ t: 'text', x: mx, y: base + 11.5, s: c.sub, font: sFont, color: th.muted, align: 'center' });
+          hits.push({ pg: 0, x: left + 3, y: y0 + 1, w: c.w - 6, h: cellBottom - y0, kind: 'field', field: c.field });
+          cx = left;
+        }
+        hits.push({ pg: 0, x: M.l, y: tBase - ts * 0.9, w: Math.min(contentW - cw - 10, txtW(title, tFont(ts), 0) + 6), h: ts * 1.05, kind: 'field', field: 'title' });
+        if (meta.artist) hits.push({ pg: 0, x, y: y0, w: 160, h: 13, kind: 'field', field: 'artist' });
+        const ruleY = Math.max(subBase, cellBottom + 2) + 9;
+        ops.push({ t: 'line', x1: M.l, y1: ruleY, x2: W - M.r, y2: ruleY, color: th.accent, lw: th.id === 'realbook' ? 1.6 : 2.4 });
+        return mapRow(ops, ruleY + 11) + 6;
+      }
+
+      function runningHeader(ops) {
+        const yy = M.t;
+        ops.push({ t: 'text', x: M.l, y: yy + 11, s: title.toUpperCase(), font: fontStr('normal', th.labelWeight, 11, th.labelFamily), color: ink, align: 'left', ls: 1.2 });
+        if (meta.artist) {
+          const tw = txtW(title.toUpperCase(), fontStr('normal', th.labelWeight, 11, th.labelFamily), 1.2);
+          ops.push({ t: 'text', x: M.l + tw + 10, y: yy + 11, s: String(meta.artist), font: fontStr(th.textStyle, th.textWeight, 10, th.textFamily), color: th.muted, align: 'left' });
+        }
+        ops.push({ t: 'line', x1: M.l, y1: yy + 18, x2: W - M.r, y2: yy + 18, color: th.rule, lw: 0.9 });
+        return yy + 30;
+      }
+
+      function newPage() {
+        page = { w: W, h: H, ops: [] };
+        pages.push(page);
+        curCol = 0;
+        bodyTop = pages.length === 1 ? drawHeader(page.ops) : runningHeader(page.ops);
+        y = bodyTop;
+      }
+      function reserve(h, pad) {
+        let usePad = y > bodyTop + 0.5 ? pad : 0;
+        if (y + usePad + h > bodyBottom + 0.01 && y > bodyTop + 0.5) {
+          if (curCol < cols - 1) {
+            curCol += 1;
+            y = bodyTop;
+          } else newPage();
+          usePad = 0;
+        }
+        const y0 = y + usePad;
+        y = y0 + h;
+        return { x0: M.l + curCol * (colW + colGap), y0 };
+      }
+
+      /* ---- primitivas ---- */
+      const line = (ops, x1, y1, x2, y2, color, lw) => ops.push({ t: 'line', x1, y1, x2, y2, color, lw });
+      const HG = cfg.hollowStyle === 'para' ? { hw: 0.55, tw: 0.88, hh: 0.64, lw: 0.2, wk: 1.08, inset: 0 } : { hw: 0.85, tw: 0.64, hh: 1.05, lw: 0.3, wk: 1.14, inset: 0.1 };
+      const HW = 0.85 * sp;
+      const HH = 1.05 * sp;
+      const slashPts = (cx, mid, k, hollow) => {
+        const hw = (hollow ? HG.hw * sp : HW) * k;
+        const tw = (hollow ? HG.tw : 0.38) * sp * k;
+        const hh = (hollow ? HG.hh * sp : HH) * k;
+        return [cx - hw - tw, mid + hh, cx - hw + tw, mid + hh, cx + hw + tw, mid - hh, cx + hw - tw, mid - hh];
+      };
+      function boundary(ops, x, close, open, yT, yB, mid) {
+        const thin = 0.9 * S;
+        const thickW = 2.6 * S;
+        const dots = (dx) => {
+          ops.push({ t: 'dot', x: dx, y: mid - 0.5 * sp, r: 0.3 * sp, fill: ink });
+          ops.push({ t: 'dot', x: dx, y: mid + 0.5 * sp, r: 0.3 * sp, fill: ink });
+        };
+        let drew = false;
+        if (close === 'final') {
+          line(ops, x - 5.2 * S, yT, x - 5.2 * S, yB, ink, thin);
+          line(ops, x - 1.3 * S, yT, x - 1.3 * S, yB, ink, thickW);
+          drew = true;
+        } else if (close === 'repeat') {
+          line(ops, x - 1.3 * S, yT, x - 1.3 * S, yB, ink, thickW);
+          line(ops, x - 5.0 * S, yT, x - 5.0 * S, yB, ink, thin);
+          dots(x - 8.8 * S);
+          drew = true;
+        }
+        if (open === 'repeat') {
+          line(ops, x + 1.3 * S, yT, x + 1.3 * S, yB, ink, thickW);
+          line(ops, x + 5.0 * S, yT, x + 5.0 * S, yB, ink, thin);
+          dots(x + 8.8 * S);
+          drew = true;
+        }
+        if (!drew) {
+          if (close === 'double' || open === 'double') {
+            line(ops, x - 1.6 * S, yT, x - 1.6 * S, yB, ink, thin);
+            line(ops, x + 1.2 * S, yT, x + 1.2 * S, yB, ink, thin);
+          } else line(ops, x, yT, x, yB, ink, thin);
+        }
+      }
+
+      function restOps(ops, ev, cx, mid) {
+        const base = ev.base;
+        const col = ink;
+        if (base >= 4) {
+          ops.push({ t: 'rect', x: cx - 1.5 * sp, y: mid - sp, w: 3.0 * sp, h: 0.62 * sp, fill: col });
+        } else if (base >= 2) {
+          ops.push({ t: 'rect', x: cx - 1.5 * sp, y: mid - 0.62 * sp, w: 3.0 * sp, h: 0.62 * sp, fill: col });
+        } else {
+          const g = base >= 1 ? 'rquarter' : base >= 0.5 ? 'reighth' : 'rsixteenth';
+          const gl = G[g];
+          const hh = gl.h * 4.6 * sp;
+          ops.push({ t: 'glyph', g, x: cx - (gl.w * 4.6 * sp) / 2, y: mid - hh / 2, h: hh, color: col });
+        }
+        if (ev.dots) ops.push({ t: 'dot', x: cx + 1.7 * sp, y: mid - 0.4 * sp, r: 0.27 * sp, fill: col });
+      }
+
+      /* ---- sistema ---- */
+      function placeSystem(sys) {
+        const bars = sys.bars;
+        const hasVolta = bars.some((b) => b.volta);
+        const hasMark = bars.some((b) => b.markers.length);
+        const hasAbove = bars.some((b) => b.above.length);
+        const hasBelow = bars.some((b) => b.below.length);
+        const hLabel = sys.label ? 18 * S : 0;
+        const hVolta = hasVolta ? 12 * S : 0;
+        const hAbove = hasMark ? 16 * S : hasAbove ? 11 * S : 0;
+        const hChord = chordPx * 0.92 + 2.0 * sp;
+        const hasDown = bars.some((b) => b.mode === 'explicit' && b.notes.some((nn) => nn.down && nn.type !== 'rest' && nn.type !== 'plain' && nn.base <= 2));
+        const hDown = hasDown ? 3.4 * sp : 0;
+        const hBelow = (hasBelow ? 12 * S : 3 * S) + hDown;
+        const hAll = hLabel + hVolta + hAbove + hChord + 4 * sp + hBelow + 11 * S;
+        const pos = reserve(hAll, sys.label ? 6 * S : 0);
+        const pg = pages.length - 1;
+        const ops = page.ops;
+        const i0 = ops.length;
+        const x0 = pos.x0;
+        const yTop = pos.y0;
+        systems.push({ pg: pages.length - 1, x: x0, y: yTop, w: colW, h: hAll, lines: Array.from(new Set(bars.map((b) => b.line))) });
+        const yVolta = yTop + hLabel;
+        const yAbove = yVolta + hVolta;
+        const yChordTop = yAbove + hAbove;
+        const staffTop = yChordTop + hChord;
+        const staffBottom = staffTop + 4 * sp;
+        const mid = staffTop + 2 * sp;
+        const chordBase = staffTop - 2.0 * sp;
+        const staffLeft = x0 + lead;
+        const staffRight = x0 + colW;
+        const first = bars[0];
+        const head = headFor(first);
+        const barsLeft = staffLeft + head.w;
+        const secCol = sys.sec ? TH.sectionColor(th, sys.sec.key) : null;
+
+        /* barra de color y etiqueta */
+        if (th.sectionBar && secCol) {
+          ops.push({ t: 'rect', x: x0, y: sys.label ? yTop : yChordTop, w: barW, h: staffBottom - (sys.label ? yTop : yChordTop), fill: secCol, nohd: true });
+        }
+        if (sys.label) {
+          const nm = sys.label.name.toUpperCase();
+          const lf = fontStr('normal', th.labelWeight, 9.6 * S * (th.id === 'realbook' ? 1.1 : 1), th.labelFamily);
+          const ls = th.id === 'realbook' ? 0.3 : 0.7;
+          const tw = txtW(nm, lf, ls) + 14 * S;
+          const th2 = 15 * S;
+          const lx = th.labelStyle === 'tab' ? x0 : staffLeft;
+          const ly = yTop + 1 * S;
+          if (th.labelStyle === 'tab') {
+            ops.push({ t: 'rect', x: lx, y: ly, w: tw + barW, h: th2, r: 3 * S, fill: secCol });
+            ops.push({ t: 'text', x: lx + barW + tw / 2, y: ly + th2 * 0.72, s: nm, font: lf, color: th.labelText, align: 'center', ls });
+          } else if (th.labelStyle === 'solid') {
+            ops.push({ t: 'rect', x: lx, y: ly, w: tw, h: th2, r: 2 * S, fill: ink });
+            ops.push({ t: 'text', x: lx + tw / 2, y: ly + th2 * 0.72, s: nm, font: lf, color: th.paper, align: 'center', ls });
+          } else {
+            ops.push({ t: 'rect', x: lx, y: ly, w: tw, h: th2, r: 4 * S, fill: th.paper, stroke: ink, lw: 1.5 * S });
+            ops.push({ t: 'text', x: lx + tw / 2, y: ly + th2 * 0.74, s: nm, font: lf, color: ink, align: 'center', ls });
+          }
+          if (sys.label.note) {
+            const nx = lx + tw + (th.labelStyle === 'tab' ? barW : 0) + 8 * S;
+            ops.push({ t: 'text', x: nx, y: ly + th2 * 0.74, s: sys.label.note, font: noteFont(10 * S), color: th.muted, align: 'left' });
+          }
+        }
+
+        /* pauta */
+        const sc = th.staff;
+        const slw = 0.55 * Math.max(S, 0.8);
+        if (five) for (let i = 0; i < 5; i++) line(ops, staffLeft, staffTop + i * sp, staffRight, staffTop + i * sp, sc, slw);
+        else line(ops, staffLeft, mid, staffRight, mid, sc, 0.9 * Math.max(S, 0.8));
+        const yT = five ? staffTop : mid - 1.7 * sp;
+        const yB = five ? staffBottom : mid + 1.7 * sp;
+        line(ops, staffLeft, yT, staffLeft, yB, ink, 0.9 * S);
+
+        /* número de compás */
+        ops.push({
+          t: 'text', x: staffLeft - 2.4 * S, y: staffTop + 0.95 * sp, s: String(first.idx),
+          font: fontStr('italic', th.textWeight, 7.6 * S, th.textFamily), color: th.muted, align: 'right',
+        });
+
+        /* clave, armadura y compás */
+        let hx = staffLeft + 0.7 * sp;
+        if (five) {
+          const em = 4 * sp;
+          const cg = G.clef;
+          ops.push({ t: 'glyph', g: 'clef', x: hx, y: staffBottom - sp - cg.oy * em, h: cg.h * em, color: ink });
+          hx += cg.w * em + 1.0 * sp;
+          T.keySignature(fifths).forEach((k) => {
+            const h = G[k.k].h * 4 * sp;
+            const cy = staffBottom - k.step * (sp / 2);
+            ops.push({ t: 'acc', k: k.k, x: hx, y: cy, h, color: ink });
+            hx += 1.2 * sp;
+          });
+          if (fifths) hx += 1.0 * sp;
+        } else hx += 0.2 * sp;
+        if (head.showTs) {
+          const numFont = tsFont(3.1 * sp);
+          const cxn = hx + (five ? 1.7 : 1.7) * sp;
+          if (five) {
+            ops.push({ t: 'text', x: cxn, y: staffTop + 2 * sp, s: String(first.num), font: numFont, color: ink, align: 'center' });
+            ops.push({ t: 'text', x: cxn, y: staffBottom, s: String(first.den), font: numFont, color: ink, align: 'center' });
+          } else {
+            ops.push({ t: 'text', x: cxn, y: mid - 0.1 * sp, s: String(first.num), font: numFont, color: ink, align: 'center' });
+            ops.push({ t: 'text', x: cxn, y: mid + 1.95 * sp, s: String(first.den), font: numFont, color: ink, align: 'center' });
+          }
+        }
+
+        /* anchos */
+        const widths = solveWidths(bars.map(barMin), staffRight - barsLeft);
+        let bx = barsLeft;
+        const geo = bars.map((b, i) => {
+          const o = { bar: b, x: bx, w: widths[i] };
+          bx += widths[i];
+          return o;
+        });
+
+        geo.forEach((g) => { if (g.bar.seg) barBoxes.push({ pg, x: g.x, y: yTop, w: g.w, h: hAll, line: g.bar.seg.line, a: g.bar.seg.a, b: g.bar.seg.b, idx: g.bar.idx }); });
+
+        /* contenido de cada compás */
+        const allNotes = [];
+        geo.forEach((g, i) => {
+          const b = g.bar;
+          const cl = g.x + lbX(b) + tsX(b);
+          const cr = g.x + g.w - rbX(b);
+          const innerW = cr - cl - padL - padR;
+          const xs = (t) => cl + padL + (t / b.len) * innerW;
+          g.xs = xs;
+          g.cl = cl;
+          g.cr = cr;
+
+          if (b.tsChange && b.idx !== 1 && (i > 0 || !head.showTs)) {
+            const numFont = tsFont(3.1 * sp);
+            const cxn = g.x + lbX(b) + 1.8 * sp;
+            if (five) {
+              ops.push({ t: 'text', x: cxn, y: staffTop + 2 * sp, s: String(b.num), font: numFont, color: ink, align: 'center' });
+              ops.push({ t: 'text', x: cxn, y: staffBottom, s: String(b.den), font: numFont, color: ink, align: 'center' });
+            } else {
+              ops.push({ t: 'text', x: cxn, y: mid - 0.1 * sp, s: String(b.num), font: numFont, color: ink, align: 'center' });
+              ops.push({ t: 'text', x: cxn, y: mid + 1.95 * sp, s: String(b.den), font: numFont, color: ink, align: 'center' });
+            }
+          }
+
+          /* acordes */
+          b.chords.forEach((c) => {
+            const dc = disp(c.ch);
+            chordOps(ops, dc, xs(c.t), chordBase);
+            if (c.src) hits.push({ pg, x: xs(c.t) - 2, y: chordBase - chordPx * 0.95, w: chordLayout(dc, chordPx).w + 4, h: chordPx * 1.3, line: c.src.line, a: c.src.a, b: c.src.b, kind: 'chord', grp: [c.src] });
+          });
+
+          /* ritmo */
+          if (b.mode === 'auto') {
+            const k = Math.max(1, Math.round(b.slots));
+            for (let s = 0; s < k; s++) {
+              ops.push({ t: 'poly', pts: slashPts(xs(s * b.slotLen) + 0.9 * sp, mid, 1, false), fill: ink });
+            }
+          } else if (b.mode === 'simile') {
+            const cx = (cl + cr) / 2;
+            ops.push({ t: 'poly', pts: slashPts(cx, mid, 1.15, false), fill: ink });
+            ops.push({ t: 'dot', x: cx - 1.45 * sp, y: mid - 0.75 * sp, r: 0.3 * sp, fill: ink });
+            ops.push({ t: 'dot', x: cx + 1.45 * sp, y: mid + 0.75 * sp, r: 0.3 * sp, fill: ink });
+          } else {
+            const evs = b.notes;
+            const SW = 0.17 * sp; // grosor de plica
+            const BT = 0.6 * sp; // grosor de barra
+            const tipUp = mid - 3.5 * sp;
+            const tipDown = mid + 3.5 * sp;
+            const beat = b.slotLen;
+            /* grupos de barra (una corchea o menos, dentro del mismo pulso) */
+            const groups = [];
+            let gcur = [];
+            let lastBeat = -1;
+            const endGroup = () => { if (gcur.length) groups.push(gcur); gcur = []; };
+            evs.forEach((ev) => {
+              const beamable = ev.type !== 'rest' && ev.type !== 'plain' && ev.base <= 0.5;
+              if (!beamable) { endGroup(); lastBeat = -1; return; }
+              const bt = Math.floor((ev.t + 1e-6) / beat);
+              if (gcur.length && bt !== lastBeat) endGroup();
+              gcur.push(ev);
+              lastBeat = bt;
+            });
+            endGroup();
+            groups.forEach((g) => { const d = !!g[0].down; g.forEach((e) => { e.edown = d; e.grp = g.map((x) => x.src); }); });
+            evs.forEach((ev) => { if (ev.edown === undefined) { ev.edown = !!ev.down; ev.grp = [ev.src]; } });
+
+            evs.forEach((ev) => {
+              ev.cx = xs(ev.t) + 0.9 * sp;
+              ev.stemX = null;
+              if (ev.type === 'rest') {
+                restOps(ops, ev, ev.cx, mid);
+                hits.push({ pg, x: ev.cx - 1.8 * sp, y: mid - 2 * sp, w: 3.9 * sp, h: 4 * sp, line: ev.src.line, a: ev.src.a, b: ev.src.b, kind: 'note', stem: false, grp: ev.grp });
+                return;
+              }
+              const stems = ev.type !== 'plain' && ev.base <= 2;
+              const down = ev.edown;
+              ev.hasStem = stems;
+              if (ev.type === 'x') {
+                const r = 0.62 * sp;
+                line(ops, ev.cx - r, mid - r, ev.cx + r, mid + r, ink, 0.26 * sp);
+                line(ops, ev.cx - r, mid + r, ev.cx + r, mid - r, ink, 0.26 * sp);
+                if (stems) {
+                  ev.stemX = down ? ev.cx - r : ev.cx + r;
+                  line(ops, ev.stemX, mid + (down ? 0.4 : -0.4) * sp, ev.stemX, down ? tipDown : tipUp, ink, SW);
+                }
+              } else {
+                const hollow = ev.type !== 'plain' && ev.base >= 2;
+                const wk = ev.base >= 4 ? HG.wk : 1;
+                if (hollow) ops.push({ t: 'poly', pts: slashPts(ev.cx, mid, wk, true), fill: th.paper, stroke: ink, lw: HG.lw * sp, sharp: true });
+                else ops.push({ t: 'poly', pts: slashPts(ev.cx, mid, 1, false), fill: ink });
+                if (stems) {
+                  const edge = hollow ? (HG.hw + HG.tw - HG.inset) * sp - SW / 2 : HW + 0.38 * sp - SW / 2;
+                  const sy = hollow ? HG.hh * sp - 0.04 * sp : HH - 0.05 * sp;
+                  ev.stemX = down ? ev.cx - edge : ev.cx + edge;
+                  line(ops, ev.stemX, mid + (down ? sy : -sy), ev.stemX, down ? tipDown : tipUp, ink, SW);
+                }
+              }
+              if (ev.dots) ops.push({ t: 'dot', x: ev.cx + 2.0 * sp, y: mid - 0.5 * sp, r: 0.27 * sp, fill: ink });
+              const ya = (down && stems ? tipDown + 1.5 * sp : staffBottom + 1.4 * sp);
+              if (ev.accent) {
+                const hw = 0.75 * sp;
+                if (ev.accent === '>') {
+                  line(ops, ev.cx - hw, ya - 0.62 * sp, ev.cx + hw, ya, ink, 0.24 * sp);
+                  line(ops, ev.cx + hw, ya, ev.cx - hw, ya + 0.62 * sp, ink, 0.24 * sp);
+                } else {
+                  line(ops, ev.cx - 0.6 * sp, ya + 0.62 * sp, ev.cx, ya - 0.7 * sp, ink, 0.24 * sp);
+                  line(ops, ev.cx, ya - 0.7 * sp, ev.cx + 0.6 * sp, ya + 0.62 * sp, ink, 0.24 * sp);
+                }
+              }
+              if (ev.stac) ops.push({ t: 'dot', x: ev.cx, y: ya, r: 0.28 * sp, fill: ink });
+              const top = stems && !down ? tipUp - 0.7 * sp : mid - 1.6 * sp;
+              const bot = stems && down ? tipDown + 0.7 * sp : mid + 1.6 * sp;
+              hits.push({ pg, x: ev.cx - 1.9 * sp, y: top, w: 4.6 * sp, h: bot - top, line: ev.src.line, a: ev.src.a, b: ev.src.b, kind: 'note', stem: stems, down, grp: ev.grp });
+            });
+            /* barras y banderas */
+            groups.forEach((g) => {
+              const down = g[0].edown;
+              const tip = down ? tipDown : tipUp;
+              const lvl = (k) => (down ? tip - BT - k * 0.98 * sp : tip + k * 0.98 * sp);
+              if (g.length >= 2) {
+                const x1 = g[0].stemX - SW / 2;
+                const x2 = g[g.length - 1].stemX + SW / 2;
+                ops.push({ t: 'rect', x: x1, y: lvl(0), w: x2 - x1, h: BT, fill: ink });
+                let i2 = 0;
+                while (i2 < g.length) {
+                  if (g[i2].base <= 0.25) {
+                    let j = i2;
+                    while (j + 1 < g.length && g[j + 1].base <= 0.25) j++;
+                    if (j > i2) {
+                      ops.push({ t: 'rect', x: g[i2].stemX - SW / 2, y: lvl(1), w: g[j].stemX - g[i2].stemX + SW, h: BT, fill: ink });
+                    } else {
+                      const left = i2 > 0;
+                      const sx = left ? g[i2].stemX - 1.25 * sp : g[i2].stemX - SW / 2;
+                      ops.push({ t: 'rect', x: sx, y: lvl(1), w: 1.25 * sp + (left ? SW / 2 : 0), h: BT, fill: ink });
+                    }
+                    i2 = j + 1;
+                  } else i2++;
+                }
+              } else {
+                const e = g[0];
+                const two = e.base <= 0.25;
+                const gn = two ? 'flag16' : 'flag8';
+                const em = 3.9 * sp;
+                const fh = G[gn].h * em;
+                ops.push({ t: 'glyph', g: gn, x: e.stemX - SW / 2, y: down ? tip - fh : tip, h: fh, color: ink, flip: down });
+              }
+            });
+            evs.forEach((ev) => allNotes.push(ev));
+          }
+
+          /* notas de texto */
+          const aFont = noteFont(9 * S);
+          b.above.forEach((nn) => {
+            const ax = nn.align === 'right' ? cr - padR : nn.align === 'center' ? (cl + cr) / 2 : cl + padL;
+            ops.push({ t: 'text', x: ax, y: yAbove + hAbove - 3 * S, s: nn.text, font: aFont, color: ink, align: nn.align });
+          });
+          b.below.forEach((nn) => {
+            const ax = nn.align === 'right' ? cr - padR : nn.align === 'center' ? (cl + cr) / 2 : cl + padL;
+            ops.push({ t: 'text', x: ax, y: staffBottom + 9.5 * S + hDown, s: nn.text, font: aFont, color: ink, align: nn.align });
+          });
+          b.markers.forEach((mk, mi) => {
+            const gl = G[mk];
+            const hh = (mk === 'segno' ? 13 : 11.5) * S;
+            ops.push({ t: 'glyph', g: mk, x: cl + padL + mi * (gl.w / gl.h * hh + 4 * S), y: yAbove + (hAbove - hh) / 2, h: hh, color: ink });
+          });
+        });
+
+        /* ligaduras: curvan hacia el lado contrario de la plica */
+        for (let i = 0; i < allNotes.length; i++) {
+          const e = allNotes[i];
+          if (!e.tie || e.type === 'rest') continue;
+          const nx = allNotes[i + 1];
+          const up = !!e.edown && e.hasStem;
+          const yb = mid + (up ? -1.5 : 1.5) * sp;
+          const dy = (up ? -1 : 1) * 2.0 * sp;
+          const x1 = e.cx + 0.6 * sp;
+          if (nx && nx.type !== 'rest') {
+            const x2 = nx.cx - 0.6 * sp;
+            if (x2 > x1 + 2) ops.push({ t: 'curve', x1, y1: yb, cx: (x1 + x2) / 2, cy: yb + dy, x2, y2: yb, color: ink, lw: 0.34 * sp });
+          } else if (!nx) {
+            ops.push({ t: 'curve', x1, y1: yb, cx: x1 + 1.7 * sp, cy: yb + dy * 0.8, x2: x1 + 3.4 * sp, y2: yb, color: ink, lw: 0.34 * sp });
+          }
+        }
+
+        /* repeticiones y finales */
+        geo.forEach((g, i) => {
+          const b = g.bar;
+          if (i === 0) {
+            if (b.lb !== 'single') boundary(ops, g.x, 'none', b.lb, yT, yB, mid);
+          } else {
+            boundary(ops, g.x, geo[i - 1].bar.rb, b.lb, yT, yB, mid);
+          }
+        });
+        const lastG = geo[geo.length - 1];
+        boundary(ops, staffRight, lastG.bar.rb, 'none', yT, yB, mid);
+
+        /* voltas */
+        let vi = 0;
+        while (vi < geo.length) {
+          const v = geo[vi].bar.volta;
+          if (!v) { vi++; continue; }
+          let vj = vi;
+          while (vj + 1 < geo.length && geo[vj + 1].bar.volta === v) vj++;
+          const vx1 = geo[vi].x + lbX(geo[vi].bar) + 2 * S;
+          const vx2 = geo[vj].x + geo[vj].w - 2 * S;
+          const vy = yVolta + 2 * S;
+          line(ops, vx1, vy, vx2, vy, ink, 0.9 * S);
+          line(ops, vx1, vy, vx1, vy + 8 * S, ink, 0.9 * S);
+          if (geo[vj].bar.rb === 'repeat') line(ops, vx2, vy, vx2, vy + 8 * S, ink, 0.9 * S);
+          ops.push({ t: 'text', x: vx1 + 3.5 * S, y: vy + 8.2 * S, s: v, font: fontStr('normal', th.labelWeight, 8.6 * S, th.labelFamily), color: ink, align: 'left' });
+          vi = vj + 1;
+        }
+        const HD = { line: 1, poly: 1, dot: 1, ell: 1, curve: 1, glyph: 1, acc: 1 };
+        for (let q = i0; q < ops.length; q++) {
+          const o = ops[q];
+          if (HD[o.t] || (o.t === 'rect' && !o.r && !o.nohd)) o.hd = true;
+        }
+      }
+
+      /* ---- recorrido de filas ---- */
+      newPage();
+      rows.forEach((item) => {
+        if (item.kind === 'pagebreak') {
+          if (y > bodyTop + 0.5 || curCol > 0) newPage();
+          return;
+        }
+        if (item.kind === 'text') {
+          const h = 13 * S;
+          const pos = reserve(h, 0);
+          page.ops.push({
+            t: 'text', x: item.align === 'right' ? pos.x0 + colW : pos.x0 + lead, y: pos.y0 + 9 * S, s: item.text,
+            font: noteFont(10 * S), color: th.muted, align: item.align,
+          });
+          return;
+        }
+        wrapRow(item).forEach((bars, si) => placeSystem({ bars, label: si === 0 ? item.first : null, sec: item.sec }));
+      });
+
+      /* pie de página y numeración */
+      const N = pages.length;
+      pages.forEach((pg, i) => {
+        pg.hand = cfg.stroke !== 'clean';
+        const fy = H - 24;
+        const f = fontStr('normal', th.labelWeight, 8, th.labelFamily);
+        if (meta.author) {
+          const cl = meta.creditLabel == null ? 'Creado por' : String(meta.creditLabel).trim();
+          const cs = ((cl ? cl + ' ' : '') + meta.author).toUpperCase();
+          pg.ops.push({ t: 'text', x: W / 2, y: fy, s: cs, font: f, color: th.muted, align: 'center', ls: 1.3 });
+          const cwid = txtW(cs, f, 1.3);
+          hits.push({ pg: i, x: W / 2 - cwid / 2 - 4, y: fy - 10, w: cwid + 8, h: 14, kind: 'field', field: 'author' });
+        }
+        if (n) {
+          pg.ops.push({ t: 'text', x: M.l, y: fy, s: 'TRANSPUESTO ' + (n > 0 ? '+' : '') + n + '  ·  ' + keyText, font: f, color: th.muted, align: 'left', ls: 1 });
+        }
+        if (N > 1) {
+          pg.ops.push({ t: 'text', x: W - M.r, y: fy, s: i + 1 + ' / ' + N, font: fontStr('normal', th.labelWeight, 9, th.labelFamily), color: th.muted, align: 'right', ls: 0.8 });
+        }
+      });
+      return { pages, scale: S, systems, hits, barBoxes };
+    }
+
+    /* ---------- ajuste a una página ---------- */
+    let S0 = cfg.size || 1;
+    let res = build(S0);
+    if (cfg.fit && res.pages.length > 1) {
+      let lo = 0.4;
+      let hi = S0;
+      let best = build(lo);
+      if (best.pages.length <= 1) {
+        for (let it = 0; it < 9; it++) {
+          const mid = (lo + hi) / 2;
+          const r = build(mid);
+          if (r.pages.length <= 1) { lo = mid; best = r; } else hi = mid;
+        }
+      }
+      res = best;
+    }
+    return { pages: res.pages, systems: res.systems, hits: res.hits, barBoxes: res.barBoxes, margins: M, scale: res.scale, keyName: keyText, sections: sectionSeq, W, H };
+  }
+
+  A.layout = { layoutSong, fontStr, DIM };
+  if (typeof module !== 'undefined' && module.exports) module.exports = A.layout;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ==== src/painter.js ==== */
+/* Atril · dibujante: operaciones de la maquetación -> canvas 2D */
+(function (root) {
+  'use strict';
+  const A = (root.Atril = root.Atril || {});
+  const G = A.glyphs || (typeof require !== 'undefined' ? require('../build/glyphs.json') : null);
+  const pathCache = {};
+  const polyCache = {};
+
+  /* ruido de valor determinista: el trazo "a mano" no cambia entre vistas ni PDFs */
+  function hsh(n) { const v = Math.sin(n * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); }
+  function vn(t) { const i = Math.floor(t); const f = t - i; const u = f * f * (3 - 2 * f); return (hsh(i) * (1 - u) + hsh(i + 1) * u) * 2 - 1; }
+  const seedOf = (x, y) => Math.floor(x * 7.31 + y * 13.17) % 997;
+
+  // descompone el trazo de un símbolo en puntos (una vez por símbolo)
+  function flatten(name) {
+    if (polyCache[name]) return polyCache[name];
+    const d = G[name].d;
+    const subs = [];
+    let cur = null;
+    let cx = 0; let cy = 0;
+    const re = /([MLHVQCZ])([^MLHVQCZ]*)/g;
+    let m;
+    const addLine = (x, y) => {
+      const dx = x - cx; const dy = y - cy;
+      const n = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 0.045));
+      for (let i = 1; i <= n; i++) cur.push([cx + (dx * i) / n, cy + (dy * i) / n]);
+      cx = x; cy = y;
+    };
+    while ((m = re.exec(d))) {
+      const c = m[1];
+      const a = m[2].trim() ? m[2].trim().split(/[\s,]+/).map(Number) : [];
+      if (c === 'M') { cur = [[a[0], a[1]]]; subs.push(cur); cx = a[0]; cy = a[1]; }
+      else if (c === 'L') addLine(a[0], a[1]);
+      else if (c === 'H') addLine(a[0], cy);
+      else if (c === 'V') addLine(cx, a[0]);
+      else if (c === 'Q') {
+        for (let i = 1; i <= 6; i++) { const t = i / 6; const u = 1 - t; cur.push([u * u * cx + 2 * u * t * a[0] + t * t * a[2], u * u * cy + 2 * u * t * a[1] + t * t * a[3]]); }
+        cx = a[2]; cy = a[3];
+      } else if (c === 'C') {
+        for (let i = 1; i <= 8; i++) { const t = i / 8; const u = 1 - t; cur.push([u * u * u * cx + 3 * u * u * t * a[0] + 3 * u * t * t * a[2] + t * t * t * a[4], u * u * u * cy + 3 * u * u * t * a[1] + 3 * u * t * t * a[3] + t * t * t * a[5]]); }
+        cx = a[4]; cy = a[5];
+      }
+    }
+    polyCache[name] = subs;
+    return subs;
+  }
+
+  function roughGlyph(ctx, name, x, y, h, color, seed, flip) {
+    const gl = G[name];
+    const k = h / gl.h;
+    const amp = 0.42 / k; // 0.42 pt de temblor, sin importar el tamaño
+    const fr = 5.5;
+    ctx.save();
+    if (flip) { ctx.translate(x, y + h); ctx.scale(k, -k); } else { ctx.translate(x, y); ctx.scale(k, k); }
+    ctx.beginPath();
+    flatten(name).forEach((pts) => {
+      const q = pts.map((p) => [p[0] + vn(p[0] * fr + seed) * amp, p[1] + vn(p[1] * fr + seed + 31) * amp]);
+      const n = q.length;
+      if (n < 3) return;
+      ctx.moveTo((q[0][0] + q[n - 1][0]) / 2, (q[0][1] + q[n - 1][1]) / 2);
+      for (let i = 0; i < n; i++) {
+        const a = q[i]; const b = q[(i + 1) % n];
+        ctx.quadraticCurveTo(a[0], a[1], (a[0] + b[0]) / 2, (b[1] + a[1]) / 2);
+      }
+      ctx.closePath();
+    });
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 0.3 / k;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function handLine(ctx, op) {
+    const dx = op.x2 - op.x1; const dy = op.y2 - op.y1;
+    const len = Math.hypot(dx, dy);
+    if (len < 0.01) return;
+    const nx = -dy / len; const ny = dx / len;
+    const a = Math.min(0.32, len * 0.03 + 0.08);
+    const seed = seedOf(op.x1, op.y1);
+    const n = Math.max(2, Math.round(len / 16));
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const t = i / n;
+      const o = vn(t * len / 22 + seed) * a;
+      const px = op.x1 + dx * t + nx * o;
+      const py = op.y1 + dy * t + ny * o;
+      if (i === 0) ctx.moveTo(px, py);
+      else if (i < n) {
+        const t2 = (i + 0.5) / n;
+        const o2 = vn(t2 * len / 22 + seed) * a;
+        ctx.lineTo(px, py);
+        void o2;
+      } else ctx.lineTo(px, py);
+    }
+    ctx.strokeStyle = op.color;
+    ctx.lineWidth = op.lw * 1.04;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+  }
+
+  function handPoly(ctx, pts, op) {
+    const seed = seedOf(pts[0], pts[1]);
+    const j = op.sharp ? 0.1 : 0.2;
+    const q = [];
+    for (let i = 0; i < pts.length; i += 2) q.push([pts[i] + vn(i * 1.7 + seed) * j, pts[i + 1] + vn(i * 2.3 + seed + 9) * j]);
+    ctx.beginPath();
+    const n = q.length;
+    if (op.sharp) {
+      ctx.moveTo(q[0][0], q[0][1]);
+      for (let i = 1; i < n; i++) ctx.lineTo(q[i][0], q[i][1]);
+    } else {
+      ctx.moveTo((q[0][0] + q[n - 1][0]) / 2, (q[0][1] + q[n - 1][1]) / 2);
+      for (let i = 0; i < n; i++) {
+        const a = q[i]; const b = q[(i + 1) % n];
+        ctx.quadraticCurveTo(a[0], a[1], (a[0] + b[0]) / 2, (a[1] + b[1]) / 2);
+      }
+    }
+    ctx.closePath();
+    if (op.fill) { ctx.fillStyle = op.fill; ctx.fill(); }
+    ctx.lineJoin = op.sharp ? 'miter' : 'round';
+    ctx.strokeStyle = op.stroke || op.fill;
+    ctx.lineWidth = op.stroke ? op.lw || 1 : 0.45;
+    ctx.stroke();
+  }
+
+  function glyphPath(name, P2D) {
+    if (!pathCache[name]) pathCache[name] = new P2D(G[name].d);
+    return pathCache[name];
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    r = Math.max(0, Math.min(r || 0, w / 2, h / 2));
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function sharp(ctx, x, yc, h, color) {
+    const w = 0.58 * h;
+    ctx.strokeStyle = color;
+    ctx.lineCap = 'butt';
+    ctx.lineWidth = 0.075 * h;
+    ctx.beginPath();
+    ctx.moveTo(x + 0.2 * w, yc - 0.38 * h);
+    ctx.lineTo(x + 0.2 * w, yc + 0.5 * h);
+    ctx.moveTo(x + 0.8 * w, yc - 0.5 * h);
+    ctx.lineTo(x + 0.8 * w, yc + 0.38 * h);
+    ctx.stroke();
+    ctx.lineWidth = 0.15 * h;
+    ctx.beginPath();
+    ctx.moveTo(x, yc - 0.08 * h);
+    ctx.lineTo(x + w, yc - 0.25 * h);
+    ctx.moveTo(x, yc + 0.24 * h);
+    ctx.lineTo(x + w, yc + 0.07 * h);
+    ctx.stroke();
+  }
+
+  function flat(ctx, x, yc, h, color) {
+    const sx = x + 0.07 * h;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineCap = 'butt';
+    ctx.lineWidth = 0.08 * h;
+    ctx.beginPath();
+    ctx.moveTo(sx, yc - 0.56 * h);
+    ctx.lineTo(sx, yc + 0.5 * h);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(sx, yc + 0.5 * h);
+    ctx.bezierCurveTo(sx + 0.52 * h, yc + 0.3 * h, sx + 0.62 * h, yc - 0.22 * h, sx, yc - 0.04 * h);
+    ctx.bezierCurveTo(sx + 0.36 * h, yc - 0.12 * h, sx + 0.34 * h, yc + 0.14 * h, sx, yc + 0.32 * h);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function paintOp(ctx, op, P2D, hand) {
+    const hd = hand && op.hd;
+    if (hd) {
+      if (op.t === 'line') { handLine(ctx, op); return; }
+      if (op.t === 'poly') { handPoly(ctx, op.pts, op); return; }
+      if (op.t === 'rect') { handPoly(ctx, [op.x, op.y, op.x + op.w, op.y, op.x + op.w, op.y + op.h, op.x, op.y + op.h], op); return; }
+      if (op.t === 'glyph') { roughGlyph(ctx, op.g, op.x, op.y, op.h, op.color, seedOf(op.x, op.y), op.flip); return; }
+      if (op.t === 'acc') {
+        const top = op.k === 'flat' ? op.y - 0.7 * op.h : op.y - 0.5 * op.h;
+        roughGlyph(ctx, op.k, op.x, top, op.h, op.color, seedOf(op.x, op.y));
+        return;
+      }
+    }
+    switch (op.t) {
+      case 'rect':
+        if (op.r) roundRect(ctx, op.x, op.y, op.w, op.h, op.r);
+        else { ctx.beginPath(); ctx.rect(op.x, op.y, op.w, op.h); }
+        if (op.fill) { ctx.fillStyle = op.fill; ctx.fill(); }
+        if (op.stroke) { ctx.strokeStyle = op.stroke; ctx.lineWidth = op.lw || 1; ctx.stroke(); }
+        break;
+      case 'line':
+        ctx.beginPath();
+        ctx.moveTo(op.x1, op.y1);
+        ctx.lineTo(op.x2, op.y2);
+        ctx.strokeStyle = op.color;
+        ctx.lineWidth = op.lw;
+        ctx.lineCap = 'butt';
+        ctx.stroke();
+        break;
+      case 'poly': {
+        const p = op.pts;
+        ctx.beginPath();
+        ctx.moveTo(p[0], p[1]);
+        for (let i = 2; i < p.length; i += 2) ctx.lineTo(p[i], p[i + 1]);
+        ctx.closePath();
+        if (op.fill) { ctx.fillStyle = op.fill; ctx.fill(); }
+        if (op.stroke) { ctx.strokeStyle = op.stroke; ctx.lineWidth = op.lw || 1; ctx.lineJoin = 'miter'; ctx.stroke(); }
+        break;
+      }
+      case 'dot':
+        ctx.beginPath();
+        ctx.arc(op.x, op.y, op.r, 0, Math.PI * 2);
+        ctx.fillStyle = op.fill;
+        ctx.fill();
+        break;
+      case 'ell':
+        ctx.beginPath();
+        ctx.ellipse(op.x, op.y, op.rx, op.ry, op.rot || 0, 0, Math.PI * 2);
+        ctx.fillStyle = op.fill;
+        ctx.fill();
+        break;
+      case 'curve':
+        ctx.beginPath();
+        ctx.moveTo(op.x1, op.y1);
+        ctx.quadraticCurveTo(op.cx, op.cy, op.x2, op.y2);
+        ctx.strokeStyle = op.color;
+        ctx.lineWidth = op.lw;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        break;
+      case 'glyph': {
+        const gl = G[op.g];
+        const k = op.h / gl.h;
+        ctx.save();
+        if (op.flip) { ctx.translate(op.x, op.y + op.h); ctx.scale(k, -k); } else { ctx.translate(op.x, op.y); ctx.scale(k, k); }
+        ctx.fillStyle = op.color;
+        ctx.fill(glyphPath(op.g, P2D));
+        ctx.restore();
+        break;
+      }
+      case 'acc': {
+        const gl = G[op.k];
+        const k = op.h / gl.h;
+        // el centro de la alteración (♯) o de la panza del bemol (♭) cae sobre op.y
+        const top = op.k === 'flat' ? op.y - 0.7 * op.h : op.y - 0.5 * op.h;
+        ctx.save();
+        ctx.translate(op.x, top);
+        ctx.scale(k, k);
+        ctx.fillStyle = op.color;
+        ctx.fill(glyphPath(op.k, P2D));
+        ctx.restore();
+        break;
+      }
+      case 'text': {
+        ctx.font = op.font;
+        ctx.fillStyle = op.color;
+        ctx.textBaseline = 'alphabetic';
+        if (op.bold) {
+          ctx.strokeStyle = op.color;
+          ctx.lineWidth = op.bold;
+          ctx.lineJoin = 'round';
+          ctx.textAlign = op.align || 'left';
+          ctx.strokeText(op.s, op.x, op.y);
+          ctx.fillText(op.s, op.x, op.y);
+        } else if (op.ls) {
+          const chars = Array.from(op.s);
+          const ws = chars.map((c) => ctx.measureText(c).width);
+          const total = ws.reduce((a, b) => a + b, 0) + op.ls * Math.max(0, chars.length - 1);
+          let x = op.align === 'center' ? op.x - total / 2 : op.align === 'right' ? op.x - total : op.x;
+          ctx.textAlign = 'left';
+          chars.forEach((c, i) => {
+            ctx.fillText(c, x, op.y);
+            x += ws[i] + op.ls;
+          });
+        } else {
+          ctx.textAlign = op.align || 'left';
+          ctx.fillText(op.s, op.x, op.y);
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  // dibuja una página: px = píxeles por punto
+  function paintPage(ctx, page, theme, px, P2D) {
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = theme.paper;
+    ctx.fillRect(0, 0, Math.ceil(page.w * px), Math.ceil(page.h * px));
+    ctx.scale(px, px);
+    ctx.lineJoin = 'miter';
+    page.ops.forEach((op) => paintOp(ctx, op, P2D, page.hand));
+    ctx.restore();
+  }
+
+  A.painter = { paintPage };
+  if (typeof module !== 'undefined' && module.exports) module.exports = A.painter;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ==== src/pdf.js ==== */
+/* Atril · escritor de PDF mínimo: una imagen JPEG por hoja, tamaño A4 en puntos */
+(function (root) {
+  'use strict';
+  const A = (root.Atril = root.Atril || {});
+
+  function utf16hex(s) {
+    let h = 'FEFF';
+    for (let i = 0; i < s.length; i++) h += s.charCodeAt(i).toString(16).padStart(4, '0');
+    return '<' + h.toUpperCase() + '>';
+  }
+
+  // pages: [{wPt, hPt, wPx, hPx, jpeg: Uint8Array}]
+  function buildPdf(pages, info) {
+    const enc = new TextEncoder();
+    const chunks = [];
+    let len = 0;
+    const offsets = [];
+    const push = (x) => {
+      const b = typeof x === 'string' ? enc.encode(x) : x;
+      chunks.push(b);
+      len += b.length;
+    };
+    const begin = (num) => {
+      offsets[num] = len;
+      push(num + ' 0 obj\n');
+    };
+    const N = pages.length;
+    const pageObj = (i) => 4 + i * 3;
+    push('%PDF-1.4\n');
+    push(new Uint8Array([0x25, 0xe2, 0xe3, 0xcf, 0xd3, 0x0a]));
+
+    begin(1);
+    push('<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+    begin(2);
+    push('<< /Type /Pages /Count ' + N + ' /Kids [' + pages.map((_, i) => pageObj(i) + ' 0 R').join(' ') + '] >>\nendobj\n');
+    begin(3);
+    const d = new Date();
+    const pad = (x) => String(x).padStart(2, '0');
+    const stamp = 'D:' + d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z';
+    push('<< /Title ' + utf16hex(info.title || 'Chart') + ' /Author ' + utf16hex(info.author || '') + ' /Creator ' + utf16hex('Atril') + ' /CreationDate (' + stamp + ') >>\nendobj\n');
+
+    pages.forEach((p, i) => {
+      const po = pageObj(i);
+      const wPt = +p.wPt.toFixed(2);
+      const hPt = +p.hPt.toFixed(2);
+      begin(po);
+      push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + wPt + ' ' + hPt + '] /Resources << /XObject << /Im0 ' + (po + 2) + ' 0 R >> /ProcSet [/PDF /ImageC] >> /Contents ' + (po + 1) + ' 0 R >>\nendobj\n');
+      const content = 'q ' + wPt + ' 0 0 ' + hPt + ' 0 0 cm /Im0 Do Q';
+      begin(po + 1);
+      push('<< /Length ' + content.length + ' >>\nstream\n' + content + '\nendstream\nendobj\n');
+      begin(po + 2);
+      push('<< /Type /XObject /Subtype /Image /Width ' + p.wPx + ' /Height ' + p.hPx + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + p.jpeg.length + ' >>\nstream\n');
+      push(p.jpeg);
+      push('\nendstream\nendobj\n');
+    });
+
+    const total = 4 + N * 3;
+    const xref = len;
+    let x = 'xref\n0 ' + total + '\n0000000000 65535 f \n';
+    for (let i = 1; i < total; i++) x += String(offsets[i]).padStart(10, '0') + ' 00000 n \n';
+    push(x);
+    push('trailer\n<< /Size ' + total + ' /Root 1 0 R /Info 3 0 R >>\nstartxref\n' + xref + '\n%%EOF\n');
+
+    const out = new Uint8Array(len);
+    let o = 0;
+    chunks.forEach((c) => {
+      out.set(c, o);
+      o += c.length;
+    });
+    return out;
+  }
+
+  A.pdf = { buildPdf };
+  if (typeof module !== 'undefined' && module.exports) module.exports = A.pdf;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ==== src/app.js ==== */
+/* Atril · aplicación */
+(function () {
+  'use strict';
+  const At = window.Atril;
+  const T = At.theory;
+  const TH = At.themes;
+  const FN = At.fonts;
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  /* ---------- ejemplo ---------- */
+  const SAMPLE = {
+    meta: { title: 'Causa y efecto', artist: 'Jorge Drexler', album: 'Álbum: Sea · 2001', author: 'Sebas Gómez', style: 'Pop', tempo: 81, key: 'E', mode: 'maj', num: 4, den: 4 },
+    text: [
+      '// Ejemplo. Borrá todo y escribí tu chart; la guía tiene la sintaxis.',
+      '[Intro] Loop',
+      '| | | |',
+      'B/E h q. e~ | C#m7:2 G#m7:2 | F#m7 | B/E h q. e~ | C#m7:2 G#m7:2 | F#m7 ||',
+      '[Verso]',
+      'G#m7 | C#m7(9) | Amaj7 | F#m7 |',
+      'G#m7 | C#m7(9) | Amaj7 | G#m7 ||',
+      '[Pre Coro]',
+      'Am7 | D6:2 D/C:2 | Eadd9 | C#m7 |',
+      'Am11 | D6 | D/C ||',
+      '[Coro]',
+      '|: Emaj7:2 G#m7 F#m7 | Emaj7:2 G#m7 F#m7 |',
+      '"similar" Emaj7:2 G#m7 F#m7 | Emaj7:2 G#m7 F#m7 :|',
+      '[Puente]',
+      '|: Amaj7/C# | B/C# | Amaj7/C# | F#/C# :|',
+      '[Final]',
+      'C#m7 | Cmaj7 | D#m7b5:2 G#7(#11) C#m7 | Amaj7 {1.} | Amaj7 h> re xe xe re {2.}',
+      'G#m7:2 Gm7 F#m7 |.',
+    ].join('\n'),
+  };
+  const DEFAULT_VIEW = { orient: 'portrait', theme: 'estudio', bpl: 0, size: 100, fit: false, staff: 'five', cols: 1, showMap: true, notation: 'us', chordFont: 'kalam', stroke: 'hand', rev: 5, transpose: 0, acc: 'auto', sizeKey: 100, sizeTempo: 100, sizeTs: 100, hollow: 'slash', titleFont: '', labelFont: '', textFont: '', headerFont: '' };
+  const BLANK = {
+    meta: { title: 'Sin título', artist: '', album: '', author: '', creditLabel: 'Creado por', style: '', tempo: '', key: 'C', mode: 'maj', num: 4, den: 4 },
+    text: '[Intro]\nC | G | Am | F ||\n[Verso]\nAm | F | C | G |\nAm | F | C | G ||\n',
+  };
+
+  /* ---------- estado ---------- */
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+  let doc = null;
+  const ui = { sevenths: false, zoom: 1, fitMode: 'width', margins: false, hlMode: 'bar' };
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+  };
+  function normalize(d) {
+    const base = clone(SAMPLE);
+    const out = { id: (d && d.id) || null, meta: Object.assign({}, BLANK.meta, (d && d.meta) || {}), text: d && typeof d.text === 'string' ? d.text : base.text, view: Object.assign({}, DEFAULT_VIEW, (d && d.view) || {}) };
+    if ((out.view.rev || 0) < 4) out.view.chordFont = 'marker';
+    if ((out.view.rev || 0) < 5) { out.view.chordFont = FN.migrate(out.view.chordFont); out.view.rev = 5; }
+    if (!FN.byId[out.view.chordFont] && !FN.isDyn(out.view.chordFont)) out.view.chordFont = 'kalam';
+    if (out.meta.creditLabel == null) out.meta.creditLabel = 'Creado por';
+    if (!out.meta.author) out.meta.author = store.get('atril.author') || '';
+    if (!T.KEY_LIST.maj.includes(out.meta.key) && out.meta.mode !== 'min') out.meta.key = 'C';
+    return out;
+  }
+  function loadCurrent() {
+    try {
+      const raw = store.get('atril.cur');
+      if (raw) return normalize(JSON.parse(raw));
+    } catch (e) { /* ignorar */ }
+    return normalize({ meta: SAMPLE.meta, text: SAMPLE.text });
+  }
+  let saveT = 0;
+  function persist() {
+    clearTimeout(saveT);
+    saveT = setTimeout(() => store.set('atril.cur', JSON.stringify(doc)), 350);
+  }
+  const getPath = (o, p) => p.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
+  function setPath(o, p, v) {
+    const ks = p.split('.');
+    const last = ks.pop();
+    const t = ks.reduce((a, k) => a[k], o);
+    t[last] = v;
+  }
+  const root = () => ({ meta: doc.meta, view: doc.view, ui });
+
+  /* ---------- enlaces genéricos ---------- */
+  const castVal = (el, v) => {
+    const ty = el.dataset.type;
+    if (ty === 'num') return v === '' ? '' : Number.isNaN(+v) ? v : +v;
+    if (ty === 'pct') return +v;
+    return v;
+  };
+  function bindAll() {
+    $$('.seg[data-bind]').forEach((seg) => {
+      seg.addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-v]');
+        if (!b) return;
+        setPath(root(), seg.dataset.bind, castVal(seg, b.dataset.v));
+        changed();
+      });
+    });
+    $$('input[data-bind],select[data-bind]').forEach((el) => {
+      const ev = el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input';
+      el.addEventListener(ev, () => {
+        let v = el.type === 'checkbox' ? el.checked : castVal(el, el.value);
+        if (el.id === 'size') v = +el.value;
+        setPath(root(), el.dataset.bind, v);
+        changed(el.dataset.bind.startsWith('ui.') ? { noPersist: true } : undefined);
+      });
+    });
+  }
+  function syncControls() {
+    $$('.seg[data-bind]').forEach((seg) => {
+      const cur = String(getPath(root(), seg.dataset.bind));
+      $$('button[data-v]', seg).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === cur)));
+    });
+    $$('input[data-bind],select[data-bind]').forEach((el) => {
+      const v = getPath(root(), el.dataset.bind);
+      if (el.type === 'checkbox') el.checked = !!v;
+      else if (document.activeElement !== el) el.value = v == null ? '' : v;
+    });
+    $('#size-v').textContent = doc.view.size + '%';
+    $$('[data-show]').forEach((el) => { el.textContent = getPath(root(), el.dataset.show) + '%'; });
+    syncFontSelects();
+    $$('#fontgrid .fcard').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.id === doc.view.chordFont)));
+    const m = doc.meta;
+    $('#m-ts').value = m.num + '/' + m.den;
+    $('#sum-title').textContent = m.title || 'Sin título';
+    $('#sum-sub').textContent = [m.key + (m.mode === 'min' ? 'm' : ''), m.num + '/' + m.den, m.tempo ? m.tempo + ' bpm' : ''].filter(Boolean).join(' · ');
+    const n = doc.view.transpose;
+    const k = T.transposeKey(m.key, m.mode, n, doc.view.acc) + (m.mode === 'min' ? 'm' : '');
+    $('#tr-key').textContent = k;
+    $('#tr-sub').textContent = n ? 'Original ' + m.key + (m.mode === 'min' ? 'm' : '') + ' · ' + (n > 0 ? '+' : '') + n + ' semitonos' : 'Tonalidad original';
+    $$('.tcard').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.id === doc.view.theme)));
+    buildDegrees();
+  }
+
+  /* ---------- iconos de figuras ---------- */
+  function figIcon(kind) {
+    const G = At.glyphs;
+    const line = '<path d="M1 17H23" stroke="currentColor" stroke-width="1" opacity=".35"/>';
+    const slashF = '<polygon points="5,22.5 9.2,22.5 19.5,11.5 15.3,11.5" fill="currentColor"/>';
+    const slashH = '<polygon points="4.6,22.2 10.2,22.2 20.4,12 14.8,12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="miter"/>';
+    const stem = '<path d="M19.6 12V3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>';
+    const flag = (y) => '<path d="M19.6 ' + y + 'c4 1.6 4.4 5 2.2 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>';
+    const xh = '<path d="M7 13l8 8M15 13l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M15.4 17V3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>';
+    const rest = (name, h) => {
+      const g = G[name];
+      const k = h / g.h;
+      return '<svg x="' + (12 - (g.w * k) / 2) + '" y="' + (17 - h / 2) + '" width="' + g.w * k + '" height="' + h + '" viewBox="0 0 ' + g.w + ' ' + g.h + '"><path d="' + g.d + '" fill="currentColor"/></svg>';
+    };
+    let body = '';
+    switch (kind) {
+      case 'slash': body = slashF; break;
+      case 'simile': body = '<polygon points="7,23 10.4,23 17,11 13.6,11" fill="currentColor"/><circle cx="6" cy="12.5" r="1.7" fill="currentColor"/><circle cx="18" cy="21.5" r="1.7" fill="currentColor"/>'; break;
+      case 'w': body = slashH; break;
+      case 'h': body = slashH + stem; break;
+      case 'q': body = slashF + stem; break;
+      case 'e': body = slashF + stem + flag(3); break;
+      case 's': body = slashF + stem + flag(3) + flag(7); break;
+      case 'rh': body = '<rect x="6" y="14.2" width="12" height="2.8" fill="currentColor"/>'; break;
+      case 'rq': body = rest('rquarter', 17); break;
+      case 're': body = rest('reighth', 13); break;
+      case 'rs': body = rest('rsixteenth', 18); break;
+      case 'xq': body = xh; break;
+      case 'xe': body = xh + '<path d="M15.4 3c4 1.6 4.4 5 2.2 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>'; break;
+      case 'dot': body = '<polygon points="4,22.5 8,22.5 16.5,13 12.5,13" fill="currentColor"/><circle cx="20" cy="15.8" r="1.9" fill="currentColor"/>'; break;
+      case 'acc': body = '<polygon points="5,15.5 8.4,15.5 15,7 11.6,7" fill="currentColor" opacity=".45"/><path d="M6 20l12 3.5L6 27" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'; break;
+      case 'mar': body = '<polygon points="5,15.5 8.4,15.5 15,7 11.6,7" fill="currentColor" opacity=".45"/><path d="M6.5 27L12 19l5.5 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'; break;
+      case 'stac': body = '<polygon points="5,15.5 8.4,15.5 15,7 11.6,7" fill="currentColor" opacity=".45"/><circle cx="11" cy="24" r="2" fill="currentColor"/>'; break;
+      case 'tie': body = '<polygon points="3,16 6.4,16 11,10 7.6,10" fill="currentColor" opacity=".45"/><polygon points="17,16 20.4,16 24,11 20.6,11" fill="currentColor" opacity=".45" transform="translate(-2 0)"/><path d="M5 22c4 5 13 5 17 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>'; break;
+      default: body = '';
+    }
+    const showLine = ['rq', 're', 'rs', 'rh'].includes(kind) || ['slash', 'simile', 'w', 'h', 'q', 'e', 's', 'xq', 'xe', 'dot'].includes(kind);
+    return '<svg viewBox="0 0 24 28" width="24" height="28" aria-hidden="true">' + (showLine ? line : '') + body + '</svg>';
+  }
+
+  /* ---------- barras de herramientas ---------- */
+  const SECS = [['Intro', 'intro'], ['Verso', 'verso'], ['Pre Coro', 'precoro'], ['Coro', 'coro'], ['Puente', 'puente'], ['Solo', 'solo'], ['Re Intro', 'inter'], ['Final', 'final']];
+  function buildTools() {
+    const secs = $('#t-secs');
+    SECS.forEach(([name, key]) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip sec';
+      b.style.setProperty('--sc', 'var(--c-' + key + ')');
+      b.textContent = name;
+      b.addEventListener('click', () => insertSection(name));
+      secs.appendChild(b);
+    });
+    const mk = (host, items) => items.forEach(([label, text, tip, cls]) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip ' + (cls || 'mono');
+      b.textContent = label;
+      b.title = tip;
+      b.addEventListener('click', () => (host === '#t-mk' ? insertInBar(text) : insertText(text)));
+      $(host).appendChild(b);
+    });
+    mk('#t-bars', [['|', ' | ', 'Barra de compás'], ['||', ' || ', 'Doble barra'], ['|:', ' |: ', 'Inicio de repetición'], [':|', ' :| ', 'Fin de repetición'], ['|.', ' |.', 'Barra final']]);
+    const FIG = {
+      'Figuras': [
+        ['/', ' / ', 'Slash (un pulso)', 'slash'], ['w', ' w ', 'Redonda (4 pulsos)', 'w'], ['h', ' h ', 'Blanca (2 pulsos)', 'h'], ['q', ' q ', 'Negra (1 pulso)', 'q'],
+        ['e', ' e ', 'Corchea (medio pulso)', 'e'], ['s', ' s ', 'Semicorchea (un cuarto de pulso)', 's'], ['%', ' % ', 'Repetir el compás anterior', 'simile'],
+      ],
+      'Silencios': [
+        ['rh', ' rh ', 'Silencio de blanca', 'rh'], ['rq', ' rq ', 'Silencio de negra', 'rq'], ['re', ' re ', 'Silencio de corchea', 're'], ['rs', ' rs ', 'Silencio de semicorchea', 'rs'],
+      ],
+      'Golpe seco': [
+        ['xq', ' xq ', 'Negra en X', 'xq'], ['xe', ' xe ', 'Corchea en X', 'xe'],
+      ],
+      'Se pegan': [
+        ['q.', '.', 'Puntillo: se escribe pegado a la figura (q. = negra con puntillo)', 'dot'], ['q>', '>', 'Acento: se escribe pegado a la figura (q>)', 'acc'],
+        ['q^', '^', 'Marcato: se escribe pegado a la figura (q^)', 'mar'], ["q'", "'", 'Staccato: se escribe pegado a la figura (q\')', 'stac'], ['e~', '~', 'Ligadura al siguiente: se escribe pegado a la figura (e~)', 'tie'],
+      ],
+    };
+    const host = $('#t-rh');
+    host.textContent = '';
+    Object.keys(FIG).forEach((grp) => {
+      const row = document.createElement('div');
+      row.className = 'figrow';
+      const lab = document.createElement('span');
+      lab.className = 'figlab';
+      lab.textContent = grp;
+      row.appendChild(lab);
+      FIG[grp].forEach(([label, text, tip, kind]) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'chip fig';
+        b.title = tip;
+        b.setAttribute('aria-label', tip);
+        b.innerHTML = figIcon(kind) + '<small>' + esc(label) + '</small>';
+        b.addEventListener('click', () => insertText(text));
+        row.appendChild(b);
+      });
+      host.appendChild(row);
+    });
+    mk('#t-mk', [['segno', ' @segno ', 'Segno'], ['coda', ' @coda ', 'Coda'], ['1.', ' {1.} ', 'Primera vez'], ['2.', ' {2.} ', 'Segunda vez'], ['“texto”', ' "texto" ', 'Texto sobre el compás'], ['_texto', ' _"texto" ', 'Texto debajo del compás']]);
+  }
+  function buildDegrees() {
+    const host = $('#t-deg');
+    const key = JSON.stringify([doc.meta.key, doc.meta.mode, ui.sevenths]);
+    if (host.dataset.key === key) return;
+    host.dataset.key = key;
+    host.textContent = '';
+    T.diatonic(doc.meta.key, doc.meta.mode, ui.sevenths).forEach((d) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip deg';
+      b.innerHTML = '<small>' + esc(d.rom) + '</small><b>' + esc(d.text) + '</b>';
+      b.title = 'Insertar ' + d.text;
+      b.addEventListener('click', () => insertText(' ' + d.text + ' '));
+      host.appendChild(b);
+    });
+  }
+
+  /* ---------- editor ---------- */
+  const src = $('#src');
+  const hl = $('#hl');
+  const SPLIT = /(\s+|:\|\|:|\|\|:|:\|\||\|\||\|:|:\||\|\.|\||_?"[^"]*"(?:@[rc])?)/;
+  const RH = /^([rx]?)([whqes]?)(\.?)([~>^'_]*)$/;
+  function classify(p) {
+    if (!p) return '';
+    if (/^\s+$/.test(p)) return p;
+    if (/^(:\|\|:|\|\|:|:\|\||\|\||\|:|:\||\|\.|\|)$/.test(p)) return '<span class="bar">' + esc(p) + '</span>';
+    if (/^_?"/.test(p)) return '<span class="txt">' + esc(p) + '</span>';
+    if (/^(@(segno|coda)|\{[^}]*\}|T\d+\/\d+)$/.test(p)) return '<span class="mk">' + esc(p) + '</span>';
+    if (p === '/' || p === '%' || p === '.') return '<span class="rh">' + esc(p) + '</span>';
+    const m = RH.exec(p);
+    if (m && (m[1] || m[2])) return '<span class="rh">' + esc(p) + '</span>';
+    const dm = /^(.*?)(?::\d+(?:\.\d+)?)?$/.exec(p);
+    if (dm && T.parseChord(dm[1])) return '<span class="ch">' + esc(p) + '</span>';
+    return '<span class="bad">' + esc(p) + '</span>';
+  }
+  let hotLine = -1;
+  function highlight() {
+    const lines = src.value.split('\n');
+    const html = lines.map((line, i) => {
+      let h;
+      if (/^\s*\/\//.test(line) || /^\s*(>|---)/.test(line)) h = '<span class="cm">' + esc(line) + '</span>';
+      else {
+        const sm = /^(\s*)(\[([^\]]*)\])(.*)$/.exec(line);
+        if (sm) h = esc(sm[1]) + '<span class="sec k-' + TH.sectionKey(sm[3]) + '">' + esc(sm[2]) + '</span><span class="cm">' + esc(sm[4]) + '</span>';
+        else h = line.split(SPLIT).map(classify).join('');
+      }
+      return i === hotLine ? '<span class="hot">' + (h || ' ') + '</span>' : h;
+    });
+    hl.innerHTML = html.join('\n') + '\n';
+    hl.scrollTop = src.scrollTop;
+    hl.scrollLeft = src.scrollLeft;
+  }
+  function insertText(s) {
+    src.focus();
+    let ok = false;
+    try { ok = document.execCommand('insertText', false, s); } catch (e) { ok = false; }
+    if (!ok) {
+      const a = src.selectionStart;
+      const b = src.selectionEnd;
+      src.setRangeText(s, a, b, 'end');
+      src.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+  /* las marcas (segno, coda, casillas, textos) van dentro de un compás: si el cursor quedó después de la última barra, se ponen en ese último compás */
+  function insertInBar(s) {
+    const v = src.value;
+    const pos = src.selectionStart;
+    const ls = v.lastIndexOf('\n', pos - 1) + 1;
+    let le = v.indexOf('\n', pos);
+    if (le < 0) le = v.length;
+    const line = v.slice(ls, le);
+    if (!/^\s*(\[|>|\/\/|---)/.test(line) && line.trim()) {
+      const re = /:\|\|:|\|\|:|:\|\||\|\||\|:|:\||\|\.|\|/g;
+      const ends = [];
+      let m;
+      while ((m = re.exec(line))) ends.push({ a: m.index, b: m.index + m[0].length });
+      const last = ends[ends.length - 1];
+      if (last && pos - ls >= last.b && !line.slice(last.b).trim()) {
+        const prev = ends[ends.length - 2];
+        const at = ls + (prev ? prev.b : 0);
+        src.focus();
+        src.setSelectionRange(at, at);
+      }
+    }
+    insertText(s);
+  }
+  function insertSection(name) {
+    const v = src.value;
+    const pos = src.selectionStart;
+    const atStart = pos === 0 || v[pos - 1] === '\n';
+    insertText((atStart ? '' : '\n') + '[' + name + ']\n');
+  }
+  function jumpToLine(n) {
+    const lines = src.value.split('\n');
+    let start = 0;
+    for (let i = 0; i < n - 1; i++) start += lines[i].length + 1;
+    const end = start + (lines[n - 1] || '').length;
+    $$('.tab')[0].click();
+    if (document.body.dataset.view === 'sheet') setView('edit');
+    src.focus({ preventScroll: true });
+    src.setSelectionRange(end, end); // solo cursor: si quedara el renglón seleccionado, al insertar un signo se borraría
+    const lh = parseFloat(getComputedStyle(src).lineHeight) || 22;
+    src.scrollTop = Math.max(0, (n - 3) * lh);
+    hotLine = n - 1;
+    highlight();
+    setTimeout(() => { hotLine = -1; highlight(); }, 1400);
+  }
+
+  /* ---------- fuentes ---------- */
+  const FONT_SETS = {
+    estudio: ['500 20px "Barlow Condensed"', '700 20px "Barlow Condensed"', 'italic 500 20px "Barlow Condensed"', '800 20px "Bricolage Grotesque"'],
+    realbook: ['400 20px "Patrick Hand"', '400 20px "Caveat Brush"', '700 20px "Barlow Condensed"'],
+    imprenta: ['500 20px "Barlow Condensed"', '700 20px "Barlow Condensed"', 'italic 500 20px "Barlow Condensed"', '400 20px "DM Serif Display"'],
+    noche: ['500 20px "Barlow Condensed"', '700 20px "Barlow Condensed"', 'italic 500 20px "Barlow Condensed"', '800 20px "Bricolage Grotesque"'],
+  };
+  const HEADER_FONT = ['600 20px "Cormorant Infant"'];
+  let fontsDone = {};
+  const FONT_KEYS = ['chordFont', 'titleFont', 'labelFont', 'textFont', 'headerFont'];
+  const capRatio = (f) => { mctx.font = f; return mctx.measureText('H').actualBoundingBoxAscent / 100; };
+  async function loadDyn(fam) {
+    await FN.ensure(fam);
+    if (!FN.dyn[fam]) {
+      if (document.fonts) await document.fonts.load('700 20px "Kalam"', 'H').catch(() => null);
+      const ck = capRatio('700 100px "Kalam"');
+      const cf = capRatio('400 100px "' + fam + '"');
+      FN.dyn[fam] = { scale: cf > 0 && ck > 0 ? Math.max(0.5, Math.min(1.5, (0.76 * ck) / cf)) : 0.85 };
+    }
+  }
+  function ensureFonts() {
+    const id = doc.view.theme;
+    const ids = FONT_KEYS.map((k) => doc.view[k]).filter(Boolean);
+    const key = id + '|' + ids.join('|');
+    if (fontsDone[key]) return fontsDone[key];
+    const loads = (FONT_SETS[id] || []).concat([FN.get(doc.view.chordFont).load], HEADER_FONT);
+    ids.forEach((fid) => { const f = FN.resolve(fid); if (f && !f.dyn) loads.push(f.load); });
+    const list = loads.map((f) => (document.fonts ? document.fonts.load(f, 'Aáb♯1') : Promise.resolve()));
+    ids.forEach((fid) => { if (FN.isDyn(fid)) list.push(loadDyn(fid.slice(2)).catch(() => null)); });
+    const timeout = new Promise((r) => setTimeout(r, 5000));
+    fontsDone[key] = Promise.race([Promise.all(list).catch(() => null), timeout]);
+    return fontsDone[key];
+  }
+
+  /* ---------- render ---------- */
+  const mcv = document.createElement('canvas');
+  const mctx = mcv.getContext('2d');
+  const measure = (s, font) => { mctx.font = font; return mctx.measureText(s).width; };
+  let result = null;
+  let renderTok = 0;
+  let renderT = 0;
+
+  function computeLayout() {
+    const parsed = At.parser.parseChart(doc.text, { num: doc.meta.num, den: doc.meta.den });
+    const cfg = {
+      theme: TH.themes[doc.view.theme] || TH.themes.estudio, meta: doc.meta, orient: doc.view.orient, transpose: doc.view.transpose,
+      acc: doc.view.acc, bpl: doc.view.bpl, size: doc.view.size / 100, fit: doc.view.fit, showMap: doc.view.showMap, staff: doc.view.staff, cols: doc.view.cols, notation: doc.view.notation, chordFont: doc.view.chordFont, stroke: doc.view.stroke, hollowStyle: doc.view.hollow, titleFont: doc.view.titleFont, labelFont: doc.view.labelFont, textFont: doc.view.textFont, headerFont: doc.view.headerFont, sizeKey: doc.view.sizeKey, sizeTempo: doc.view.sizeTempo, sizeTs: doc.view.sizeTs,
+    };
+    return { parsed, cfg, res: At.layout.layoutSong(parsed, cfg, measure) };
+  }
+
+  async function render() {
+    const tok = ++renderTok;
+    await ensureFonts();
+    if (tok !== renderTok) return;
+    let out;
+    try { out = computeLayout(); } catch (e) { console.error(e); showToast('No pude dibujar la hoja: ' + e.message); return; }
+    result = out;
+    paintPreview();
+    renderWarnings(out.parsed);
+  }
+  function scheduleRender() {
+    clearTimeout(renderT);
+    renderT = setTimeout(render, 90);
+  }
+
+  const pagesEl = $('#pages');
+  let hlEls = [];
+  let lastKey = '';
+  function paintPreview() {
+    const { res, cfg } = result;
+    const desk = $('#desk');
+    desk.classList.toggle('showmg', !!ui.margins);
+    if (paintPreview.fit !== ui.fitMode) { paintPreview.fit = ui.fitMode; desk.scrollTop = 0; }
+    const availW = Math.max(240, desk.clientWidth - 32);
+    const availH = Math.max(240, desk.clientHeight - 64);
+    const pg0 = res.pages[0];
+    let base = Math.min(availW, res.W > res.H ? 1240 : 820);
+    if (ui.fitMode === 'page') base = Math.min(availW, (availH * pg0.w) / pg0.h, 1240);
+    const cssW = Math.round(base * ui.zoom);
+    const dpr = Math.min(3, Math.max(1.5, window.devicePixelRatio || 1));
+    while (pagesEl.children.length > res.pages.length) pagesEl.lastChild.remove();
+    res.pages.forEach((pg, i) => {
+      let fig = pagesEl.children[i];
+      if (!fig) {
+        fig = document.createElement('figure');
+        fig.className = 'sheet';
+        fig.innerHTML = '<div class="pgbox" title="Clic para ir a esa línea del texto"><canvas></canvas><div class="mg"></div></div><figcaption></figcaption>';
+        pagesEl.appendChild(fig);
+        const box = fig.firstChild;
+        box.dataset.pg = i;
+        box.addEventListener('click', (e) => onSheetClick(e, box));
+      }
+      const box = fig.firstChild;
+      const cv = box.firstChild;
+      const cssH = Math.round((cssW * pg.h) / pg.w);
+      const px = (cssW * dpr) / pg.w;
+      cv.width = Math.round(pg.w * px);
+      cv.height = Math.round(pg.h * px);
+      cv.style.width = cssW + 'px';
+      cv.style.height = cssH + 'px';
+      At.painter.paintPage(cv.getContext('2d'), pg, cfg.theme, px, Path2D);
+      const m = res.margins;
+      const mg = box.querySelector('.mg');
+      mg.style.left = (m.l / pg.w) * 100 + '%';
+      mg.style.right = (m.r / pg.w) * 100 + '%';
+      mg.style.top = (m.t / pg.h) * 100 + '%';
+      mg.style.bottom = (m.b / pg.h) * 100 + '%';
+      fig.lastChild.textContent = 'Hoja ' + (i + 1) + ' de ' + res.pages.length;
+    });
+    $('#pg-count').textContent = res.pages.length + (res.pages.length === 1 ? ' hoja A4' : ' hojas A4') + (res.W > res.H ? ' · horizontal' : ' · vertical');
+    lastKey = '';
+    drawHighlight(false);
+    drawSel();
+  }
+
+  /* ---------- hoja <-> texto ---------- */
+  const currentLine = () => src.value.slice(0, src.selectionStart).split('\n').length;
+  function activeSystems(line) {
+    if (!result) return [];
+    const sy = result.res.systems || [];
+    const hit = sy.filter((s) => s.lines.includes(line));
+    if (hit.length) return hit;
+    const txt = src.value.split('\n')[line - 1] || '';
+    const minL = (s) => Math.min.apply(null, s.lines);
+    const maxL = (s) => Math.max.apply(null, s.lines);
+    if (/^\s*\[/.test(txt)) {
+      const nx = sy.filter((s) => minL(s) > line);
+      if (nx.length) {
+        const mn = Math.min.apply(null, nx.map(minL));
+        return sy.filter((s) => minL(s) === mn);
+      }
+    }
+    const pv = sy.filter((s) => maxL(s) < line);
+    if (pv.length) {
+      const mx = Math.max.apply(null, pv.map(maxL));
+      return sy.filter((s) => s.lines.includes(mx));
+    }
+    return [];
+  }
+  /* compás donde está el cursor del editor */
+  function activeBar() {
+    const bb = (result && result.res.barBoxes) || [];
+    const line = currentLine();
+    const col = src.selectionStart - lineStart(line);
+    const mine = bb.filter((q) => q.line === line);
+    if (!mine.length) return [];
+    let hit = mine.filter((q) => col >= q.a && col <= q.b);
+    if (hit.length > 1) hit = [hit[0]];
+    if (!hit.length) {
+      // el cursor está en la barra entre compases o fuera de todos: el compás más cercano
+      let best = null;
+      mine.forEach((q) => { const d = col < q.a ? q.a - col : col - q.b; if (!best || d < best.d) best = { d, q }; });
+      hit = best && best.d <= 3 ? [best.q] : [];
+    }
+    return hit;
+  }
+  function drawHighlight(scroll) {
+    hlEls.forEach((e) => e.remove());
+    hlEls = [];
+    if (!result) return;
+    const boxes = [];
+    const barHit = ui.hlMode === 'bar' ? activeBar() : [];
+    if (barHit.length) barHit.forEach((q) => boxes.push({ pg: q.pg, x: q.x + 1, y: q.y, w: q.w - 2, h: q.h }));
+    else activeSystems(currentLine()).forEach((q) => boxes.push({ pg: q.pg, x: q.x - 5, y: q.y - 3, w: q.w + 10, h: q.h + 4 }));
+    const key = boxes.map((q) => q.pg + ':' + Math.round(q.y) + ':' + Math.round(q.x)).join('|');
+    boxes.forEach((s) => {
+      const box = pagesEl.children[s.pg] && pagesEl.children[s.pg].firstChild;
+      if (!box) return;
+      const pg = result.res.pages[s.pg];
+      const k = box.clientWidth / pg.w;
+      const d = document.createElement('div');
+      d.className = 'hl' + (barHit.length ? ' bar' : '');
+      d.style.left = s.x * k + 'px';
+      d.style.width = s.w * k + 'px';
+      d.style.top = s.y * k + 'px';
+      d.style.height = s.h * k + 'px';
+      box.appendChild(d);
+      hlEls.push(d);
+    });
+    if (scroll && key !== lastKey && hlEls.length) {
+      const desk = $('#desk');
+      const dr = desk.getBoundingClientRect();
+      const r = hlEls[0].getBoundingClientRect();
+      const top = r.top - dr.top + desk.scrollTop;
+      if (r.top < dr.top + 20 || r.bottom > dr.bottom - 20) desk.scrollTo({ top: Math.max(0, top - desk.clientHeight * 0.3), behavior: 'smooth' });
+    }
+    lastKey = key;
+  }
+  let curT = 0;
+  function scheduleCursor() {
+    clearTimeout(curT);
+    curT = setTimeout(() => drawHighlight(true), 60);
+  }
+  /* ---------- selección de figuras ---------- */
+  let sel = null; // {line, a}
+  let selEl = null;
+  let clip = '';
+  const hitsOf = () => (result ? result.res.hits || [] : []);
+  const selHit = () => (sel ? hitsOf().find((h) => (h.kind === 'note' || h.kind === 'chord') && h.line === sel.line && h.a === sel.a) : null);
+  const lineStart = (n) => { const ls = src.value.split('\n'); let o = 0; for (let i = 0; i < n - 1; i++) o += ls[i].length + 1; return o; };
+  function drawSel() {
+    if (selEl) { selEl.remove(); selEl = null; }
+    const bar = $('#selbar');
+    const h = selHit();
+    if (!h) { if (sel) sel = null; bar.classList.remove('on'); return; }
+    const box = pagesEl.children[h.pg] && pagesEl.children[h.pg].firstChild;
+    if (!box) return;
+    const pg = result.res.pages[h.pg];
+    const k = box.clientWidth / pg.w;
+    selEl = document.createElement('div');
+    selEl.className = 'sel';
+    selEl.style.left = h.x * k + 'px';
+    selEl.style.top = h.y * k + 'px';
+    selEl.style.width = h.w * k + 'px';
+    selEl.style.height = h.h * k + 'px';
+    box.appendChild(selEl);
+    const tok = src.value.split('\n')[h.line - 1].slice(h.a, h.b);
+    $('#sel-name').textContent = (h.kind === 'chord' ? 'Acorde ' : 'Figura ') + tok;
+    $('#sel-flip').style.display = h.kind === 'note' ? '' : 'none';
+    bar.classList.add('on');
+  }
+  function select(h) {
+    sel = h ? { line: h.line, a: h.a } : null;
+    if (h) {
+      const o = lineStart(h.line);
+      src.setSelectionRange(o + h.b, o + h.b);
+      drawHighlight(false);
+    }
+    drawSel();
+  }
+  const isEditable = (t) => t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
+  function focusField(f) {
+    const map = { title: '#m-title', artist: '#m-artist', key: '#m-key', tempo: '#m-tempo', ts: '#m-ts', author: '#m-author' };
+    $$('.tab')[0].click();
+    if (document.body.dataset.view === 'sheet') setView('edit');
+    $('#metabox').open = true;
+    const el = $(map[f]);
+    if (el) { el.scrollIntoView({ block: 'center' }); el.focus(); if (el.select) el.select(); }
+  }
+  function onSheetClick(e, box) {
+    if (!result) return;
+    const i = +box.dataset.pg;
+    const pg = result.res.pages[i];
+    const r = box.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width) * pg.w;
+    const y = ((e.clientY - r.top) / r.height) * pg.h;
+    const inside = hitsOf().filter((h) => h.pg === i && x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h);
+    inside.sort((p, q) => p.w * p.h - q.w * q.h);
+    const pick = inside.find((h) => h.kind !== 'field') || inside[0];
+    if (pick && pick.kind === 'field') { select(null); focusField(pick.field); return; }
+    if (pick) { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); select(pick); return; }
+    select(null);
+    const bbx = (result.res.barBoxes || []).find((q) => q.pg === i && x >= q.x && x <= q.x + q.w && y >= q.y - 4 && y <= q.y + q.h);
+    if (bbx) {
+      const ln = src.value.split('\n')[bbx.line - 1] || '';
+      const seg = ln.slice(bbx.a, bbx.b);
+      const at = lineStart(bbx.line) + bbx.a + seg.replace(/\s+$/, '').length;
+      $$('.tab')[0].click();
+      if (document.body.dataset.view === 'sheet') setView('edit');
+      src.focus({ preventScroll: true });
+      src.setSelectionRange(at, at);
+      drawHighlight(false);
+      return;
+    }
+    const s = (result.res.systems || []).find((q) => q.pg === i && y >= q.y - 6 && y <= q.y + q.h + 4 && x >= q.x - 6 && x <= q.x + q.w + 6);
+    if (s) jumpToLine(Math.min.apply(null, s.lines));
+  }
+  /* reemplaza texto en el editor y mantiene el historial y la hoja al día */
+  function applyEdits(edits) {
+    // edits: [{line, a, b, text}] ; se aplican de atrás hacia adelante
+    const lines = src.value.split('\n');
+    const sorted = edits.slice().sort((p, q) => q.line - p.line || q.a - p.a);
+    sorted.forEach((ed) => { const L = lines[ed.line - 1]; lines[ed.line - 1] = L.slice(0, ed.a) + ed.text + L.slice(ed.b); });
+    src.value = lines.join('\n');
+    doc.text = src.value;
+    highlight();
+    histNow();
+    persist();
+    scheduleRender();
+  }
+  function flipSel() {
+    const h = selHit();
+    if (!h || h.kind !== 'note') return;
+    if (!h.stem) { showToast('Esta figura no lleva plica (redonda, silencio o slash simple).'); return; }
+    const toDown = !h.down;
+    const lines = src.value.split('\n');
+    const edits = [];
+    let shift = 0;
+    (h.grp || [{ line: h.line, a: h.a, b: h.b }]).forEach((g) => {
+      const tok = lines[g.line - 1].slice(g.a, g.b);
+      const nt = toDown ? (tok.includes('_') ? tok : tok + '_') : tok.replace(/_/g, '');
+      if (nt === tok) return;
+      edits.push({ line: g.line, a: g.a, b: g.b, text: nt });
+      if (g.line === sel.line && g.a < sel.a) shift += nt.length - tok.length;
+    });
+    if (!edits.length) return;
+    sel = { line: sel.line, a: sel.a + shift };
+    applyEdits(edits);
+  }
+  function copySel() {
+    const h = selHit();
+    if (!h) return false;
+    clip = src.value.split('\n')[h.line - 1].slice(h.a, h.b);
+    return true;
+  }
+  function pasteSel(text) {
+    const h = selHit();
+    const t = String(text || clip || '').replace(/\s+/g, ' ').trim();
+    if (!h || !t) return;
+    applyEdits([{ line: h.line, a: h.a, b: h.b, text: t }]);
+  }
+  function stepSel(d) {
+    const hs = hitsOf().filter((h) => h.kind === 'note' || h.kind === 'chord').sort((p, q) => p.line - q.line || p.a - q.a);
+    if (!hs.length) return;
+    let i = sel ? hs.findIndex((h) => h.line === sel.line && h.a === sel.a) : -1;
+    i = i < 0 ? (d > 0 ? 0 : hs.length - 1) : Math.max(0, Math.min(hs.length - 1, i + d));
+    select(hs[i]);
+  }
+
+  /* ---------- historial (deshacer / rehacer) ---------- */
+  const hist = { st: [], i: -1, t: 0 };
+  const snap = () => JSON.stringify({ text: doc.text, meta: doc.meta, view: doc.view });
+  function histNow() {
+    clearTimeout(hist.t);
+    const sn = snap();
+    if (hist.i >= 0 && hist.st[hist.i] === sn) return;
+    hist.st.length = hist.i + 1;
+    hist.st.push(sn);
+    if (hist.st.length > 200) hist.st.shift();
+    hist.i = hist.st.length - 1;
+  }
+  function histSoon() { clearTimeout(hist.t); hist.t = setTimeout(histNow, 500); }
+  function histGo(d) {
+    histNow();
+    const j = hist.i + d;
+    if (j < 0 || j >= hist.st.length) { showToast(d < 0 ? 'No hay nada más para deshacer.' : 'No hay nada para rehacer.'); return; }
+    hist.i = j;
+    const o = JSON.parse(hist.st[j]);
+    doc.text = o.text;
+    doc.meta = o.meta;
+    doc.view = o.view;
+    src.value = doc.text;
+    highlight();
+    syncControls();
+    persist();
+    scheduleRender();
+  }
+  /* selectores de tipografía para cada parte de la hoja */
+  const FONT_PARTS = [
+    ['chordFont', 'Acordes (otra fuente)', false],
+    ['titleFont', 'Título', true],
+    ['headerFont', 'Cifras del encabezado', true],
+    ['labelFont', 'Rótulos y secciones', true],
+    ['textFont', 'Notas y textos', true],
+  ];
+  const GN = { hand: 'Manuscritas', sans: 'Palo seco', serif: 'Con serifa', mono: 'Máquina de escribir', display: 'Display' };
+  function buildFontSelects() {
+    const host = $('#fontsel');
+    FONT_PARTS.forEach(([key, label, allowTheme]) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'field';
+      wrap.dataset.fkey = key;
+      const sel = document.createElement('select');
+      sel.className = 'in';
+      sel.setAttribute('aria-label', label);
+      const add = (parent, v, t) => { const o = document.createElement('option'); o.value = v; o.textContent = t; parent.appendChild(o); };
+      if (allowTheme) add(sel, '', 'Del estilo de la hoja');
+      else add(sel, '', 'Elegí una…');
+      const g0 = document.createElement('optgroup'); g0.label = 'Las de la app';
+      FN.list.forEach((f) => add(g0, f.id, f.name));
+      sel.appendChild(g0);
+      Object.keys(FN.CATALOG).forEach((g) => {
+        const og = document.createElement('optgroup');
+        og.label = GN[g] + ' · Google Fonts';
+        FN.CATALOG[g].forEach((f) => add(og, 'g:' + f, f));
+        sel.appendChild(og);
+      });
+      add(sel, '__custom', 'Otra fuente de Google Fonts…');
+      const inp = document.createElement('input');
+      inp.className = 'in';
+      inp.placeholder = 'Nombre exacto en fonts.google.com';
+      inp.autocomplete = 'off';
+      inp.style.display = 'none';
+      const prev = document.createElement('div');
+      prev.className = 'fprev';
+      prev.textContent = 'Am7 C♯m7(9) B♭  ·  Causa y efecto';
+      const l = document.createElement('label');
+      l.className = 'lbl';
+      l.textContent = label;
+      wrap.append(l, sel, inp, prev);
+      host.appendChild(wrap);
+      const apply = (v) => { doc.view[key] = v; changed(); };
+      sel.addEventListener('change', () => {
+        if (sel.value === '__custom') { inp.style.display = ''; inp.focus(); return; }
+        inp.style.display = 'none';
+        apply(sel.value);
+      });
+      let t = 0;
+      inp.addEventListener('input', () => {
+        clearTimeout(t);
+        t = setTimeout(() => {
+          const v = inp.value.trim().replace(/\s+/g, ' ');
+          if (!v) return;
+          if (!FN.okFam(v)) { showToast('Ese nombre no es válido. Escribilo como figura en Google Fonts.'); return; }
+          apply('g:' + v);
+        }, 700);
+      });
+    });
+  }
+  function syncFontSelects() {
+    $$('#fontsel .field').forEach((wrap) => {
+      const key = wrap.dataset.fkey;
+      const v = doc.view[key] || '';
+      const sel = wrap.querySelector('select');
+      const inp = wrap.querySelector('input');
+      const prev = wrap.querySelector('.fprev');
+      const known = Array.from(sel.options).some((o) => o.value === v);
+      if (known) { sel.value = v; if (document.activeElement !== inp) inp.style.display = 'none'; }
+      else if (v) { sel.value = '__custom'; inp.style.display = ''; if (document.activeElement !== inp) inp.value = v.replace(/^g:/, ''); }
+      const f = FN.resolve(v);
+      if (f) {
+        if (f.dyn) FN.ensure(f.css).then(() => { prev.style.fontFamily = f.family; });
+        prev.style.fontFamily = f.family;
+        prev.style.display = '';
+      } else prev.style.display = 'none';
+    });
+  }
+  function buildFontGrid() {
+    const host = $('#fontgrid');
+    const groups = [['hand', 'Manuscritas'], ['sans', 'Formales · palo seco'], ['serif', 'Formales · con serifa']];
+    groups.forEach(([g, title]) => {
+      const h = document.createElement('div');
+      h.className = 'fh';
+      h.textContent = title;
+      host.appendChild(h);
+      FN.list.filter((f) => f.group === g).forEach((f) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'fcard';
+        b.dataset.id = f.id;
+        b.innerHTML = '<span class="smp" style="font-family:' + f.family.replace(/"/g, "'") + ';font-weight:' + f.weight + '">Am7 C♯m7(9) B♭</span><small>' + esc(f.name) + (f.note ? ' · ' + esc(f.note) : '') + '</small>';
+        b.addEventListener('click', () => { doc.view.chordFont = f.id; changed(); });
+        host.appendChild(b);
+      });
+    });
+  }
+  function setView(v) {
+    document.body.dataset.view = v;
+    $$('.mswitch button').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.view === v)));
+    if (v !== 'edit') scheduleRender();
+  }
+  function renderWarnings(parsed) {
+    const host = $('#warns');
+    host.textContent = '';
+    parsed.warnings.slice(0, 6).forEach((w) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'warn';
+      b.textContent = w.msg + ' · línea ' + w.line;
+      b.addEventListener('click', () => jumpToLine(w.line));
+      host.appendChild(b);
+    });
+    if (parsed.warnings.length > 6) {
+      const p = document.createElement('div');
+      p.className = 'hint';
+      p.textContent = 'y ' + (parsed.warnings.length - 6) + ' avisos más';
+      host.appendChild(p);
+    }
+    const st = $('#status');
+    const secs = parsed.sections.length;
+    st.innerHTML = '<span>' + parsed.barCount + ' compases</span><span>' + secs + (secs === 1 ? ' sección' : ' secciones') + '</span>' +
+      (parsed.warnings.length ? '' : '<span class="okk">Todo suma</span>');
+  }
+
+  /* ---------- cambios ---------- */
+  function changed(opt) {
+    if (doc.meta.author) store.set('atril.author', doc.meta.author);
+    histSoon();
+    syncControls();
+    if (!opt || !opt.noPersist) persist();
+    scheduleRender();
+  }
+
+  /* ---------- transposición ---------- */
+  function transposeBy(d) {
+    let n = doc.view.transpose + d;
+    if (n > 11) n -= 12;
+    if (n < -11) n += 12;
+    doc.view.transpose = n;
+    changed();
+  }
+  function applyTranspose() {
+    const n = doc.view.transpose;
+    if (!n && doc.view.acc === 'auto') { showToast('No hay nada para aplicar: la tonalidad está en el original.'); return; }
+    const newKey = T.transposeKey(doc.meta.key, doc.meta.mode, n, doc.view.acc);
+    const flats = T.useFlats(newKey, doc.meta.mode, doc.view.acc);
+    doc.text = T.transposeText(doc.text, n, flats);
+    doc.meta.key = newKey;
+    doc.view.transpose = 0;
+    src.value = doc.text;
+    highlight();
+    changed();
+    showToast('Acordes reescritos en ' + newKey + (doc.meta.mode === 'min' ? 'm' : '') + '.');
+  }
+
+  /* ---------- temas y selects ---------- */
+  function buildThemeCards() {
+    const host = $('#themes');
+    TH.list.forEach((id) => {
+      const t = TH.themes[id];
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'tcard';
+      b.dataset.id = id;
+      const cols = ['intro', 'verso', 'precoro', 'coro'].map((k) => TH.sectionColor(t, k));
+      const chips = t.sectionBar ? cols.map((c) => '<i style="background:' + c + ';width:18px"></i>').join('') : '<i style="background:' + t.ink + ';width:30px"></i><i style="background:' + t.ink + ';width:14px;opacity:.5"></i>';
+      b.innerHTML = '<span class="sw" style="background:' + t.paper + '"><div>' + chips + '</div><i style="background:' + t.staff + ';height:2px;opacity:.7"></i></span><b>' + esc(t.name) + '</b><small>' + esc(t.blurb) + '</small>';
+      b.addEventListener('click', () => { doc.view.theme = id; changed(); });
+      host.appendChild(b);
+    });
+  }
+  function buildSelects() {
+    const k = $('#m-key');
+    T.KEY_LIST.maj.forEach((n) => { const o = document.createElement('option'); o.value = n; o.textContent = n.replace('#', '♯').replace(/b$/, '♭'); k.appendChild(o); });
+    const ts = $('#m-ts');
+    ['2/4', '3/4', '4/4', '5/4', '6/4', '3/8', '6/8', '7/8', '9/8', '12/8'].forEach((n) => { const o = document.createElement('option'); o.value = n; o.textContent = n; ts.appendChild(o); });
+    ts.addEventListener('change', () => {
+      const [a, b] = ts.value.split('/').map(Number);
+      doc.meta.num = a;
+      doc.meta.den = b;
+      changed();
+    });
+  }
+
+  /* ---------- toast ---------- */
+  let toastT = 0;
+  function showToast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => t.classList.remove('on'), 3200);
+  }
+
+  /* ---------- biblioteca ---------- */
+  const readLib = () => { try { return JSON.parse(store.get('atril.lib') || '[]'); } catch (e) { return []; } };
+  const writeLib = (l) => store.set('atril.lib', JSON.stringify(l));
+  const slug = (s) => String(s || 'chart').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'chart';
+  function renderLib() {
+    const host = $('#lib');
+    host.textContent = '';
+    const lib = readLib().sort((a, b) => b.updated - a.updated);
+    if (!lib.length) {
+      const e = document.createElement('div');
+      e.className = 'empty';
+      e.textContent = 'Todavía no guardaste ningún chart. Usá «Guardar este chart» para tenerlo acá.';
+      host.appendChild(e);
+      return;
+    }
+    lib.forEach((it) => {
+      const row = document.createElement('div');
+      row.className = 'item' + (doc.id === it.id ? ' cur' : '');
+      const when = new Date(it.updated).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+      row.innerHTML = '<div class="nm"><b>' + esc(it.meta.title || 'Sin título') + '</b><small>' + esc([it.meta.artist, it.meta.key + (it.meta.mode === 'min' ? 'm' : ''), when].filter(Boolean).join(' · ')) + '</small></div>';
+      const open = document.createElement('button');
+      open.className = 'btn sm';
+      open.type = 'button';
+      open.textContent = 'Abrir';
+      open.addEventListener('click', () => { loadDoc(it); closeLib(); });
+      const del = document.createElement('button');
+      del.className = 'btn sm ghost';
+      del.type = 'button';
+      del.textContent = 'Borrar';
+      let armed = false;
+      del.addEventListener('click', () => {
+        if (!armed) {
+          armed = true;
+          del.textContent = '¿Seguro?';
+          setTimeout(() => { armed = false; del.textContent = 'Borrar'; }, 2600);
+          return;
+        }
+        writeLib(readLib().filter((x) => x.id !== it.id));
+        if (doc.id === it.id) doc.id = null;
+        renderLib();
+      });
+      row.append(open, del);
+      host.appendChild(row);
+    });
+  }
+  function openLib() { renderLib(); $('#veil').classList.add('on'); }
+  function closeLib() { $('#veil').classList.remove('on'); }
+  function loadDoc(d) {
+    doc = normalize(clone(d));
+    src.value = doc.text;
+    ui.zoom = 1;
+    highlight();
+    changed();
+  }
+  function saveToLib() {
+    const lib = readLib();
+    if (!doc.id) doc.id = 'c' + Date.now().toString(36);
+    const entry = { id: doc.id, meta: clone(doc.meta), text: doc.text, view: clone(doc.view), updated: Date.now() };
+    const i = lib.findIndex((x) => x.id === doc.id);
+    if (i >= 0) lib[i] = entry; else lib.push(entry);
+    if (!writeLib(lib)) { showToast('Este navegador no permite guardar. Usá «Guardar archivo».'); return; }
+    persist();
+    renderLib();
+    showToast('Guardado en Mis charts.');
+  }
+  function newDoc() {
+    loadDoc({ id: null, meta: BLANK.meta, text: BLANK.text, view: doc.view });
+    closeLib();
+    $('#metabox').open = true;
+  }
+  async function saveFile() {
+    const dl = await getDownloads();
+    if (!dl) { showToast('Esta vista no permite guardar archivos.'); return; }
+    const data = JSON.stringify({ atril: 1, meta: doc.meta, text: doc.text, view: doc.view }, null, 2);
+    try {
+      await dl.save({ filename: slug(doc.meta.title) + '.json', data: new Blob([data], { type: 'application/json' }) });
+      showToast('Archivo listo.');
+    } catch (e) { downloadError(e); }
+  }
+  function openFile(f) {
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      const t = String(r.result || '');
+      try {
+        const j = JSON.parse(t);
+        if (j && typeof j.text === 'string') { loadDoc({ id: null, meta: j.meta, text: j.text, view: j.view }); closeLib(); showToast('Chart abierto.'); return; }
+      } catch (e) { /* texto plano */ }
+      loadDoc({ id: null, meta: Object.assign({}, doc.meta, { title: f.name.replace(/\.[^.]+$/, '') }), text: t, view: doc.view });
+      closeLib();
+      showToast('Texto abierto como chart.');
+    };
+    r.readAsText(f);
+  }
+
+  /* ---------- descarga PDF ---------- */
+  let dlP = null;
+  function getDownloads() {
+    if (!dlP) {
+      // dentro de claude.ai se usa su descarga; en una página propia, un enlace de descarga normal
+      const shim = {
+        save: async ({ filename, data }) => {
+          const url = URL.createObjectURL(data);
+          const el = document.createElement('a');
+          el.href = url; el.download = filename;
+          document.body.appendChild(el); el.click(); el.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 4000);
+        },
+      };
+      dlP = (window.claude && window.claude.use ? window.claude.use('downloads') : Promise.resolve(shim)).catch(() => shim);
+    }
+    return dlP;
+  }
+  function downloadError(e) {
+    const c = e && e.code;
+    if (c === 'declined') showToast('Descarga cancelada.');
+    else if (c === 'rate_limited') showToast('Hay otra descarga esperando. Probá de nuevo en un momento.');
+    else if (c === 'too_large') showToast('El archivo es demasiado grande. Probá con el tamaño de hoja más chico.');
+    else showToast('No se pudo descargar: ' + ((e && e.message) || 'error desconocido'));
+  }
+  const toJpeg = (cv, q) => new Promise((res, rej) => cv.toBlob((b) => (b ? b.arrayBuffer().then((x) => res(new Uint8Array(x))) : rej(new Error('No se pudo generar la imagen'))), 'image/jpeg', q));
+  async function downloadPdf() {
+    const btn = $('#btn-pdf');
+    const dl = await getDownloads();
+    if (!dl) { showToast('Esta vista no puede guardar archivos. Abrí el chart desde claude.ai para descargar.'); return; }
+    btn.disabled = true;
+    const label = btn.lastElementChild.innerHTML;
+    btn.lastElementChild.textContent = 'Generando…';
+    try {
+      await ensureFonts();
+      const { res, cfg } = computeLayout();
+      const px = 300 / 72;
+      const pages = [];
+      for (const pg of res.pages) {
+        const cv = document.createElement('canvas');
+        cv.width = Math.round(pg.w * px);
+        cv.height = Math.round(pg.h * px);
+        At.painter.paintPage(cv.getContext('2d'), pg, cfg.theme, px, Path2D);
+        pages.push({ wPt: pg.w, hPt: pg.h, wPx: cv.width, hPx: cv.height, jpeg: await toJpeg(cv, 0.93) });
+        cv.width = cv.height = 1;
+        await new Promise((r) => setTimeout(r, 0));
+      }
+      const bytes = At.pdf.buildPdf(pages, { title: doc.meta.title, author: doc.meta.author || doc.meta.artist });
+      await dl.save({ filename: slug(doc.meta.title) + (doc.view.orient === 'landscape' ? '-horizontal' : '') + '.pdf', data: new Blob([bytes], { type: 'application/pdf' }) });
+      showToast('PDF listo: ' + pages.length + (pages.length === 1 ? ' hoja' : ' hojas') + ' A4.');
+    } catch (e) {
+      downloadError(e);
+    } finally {
+      btn.disabled = false;
+      btn.lastElementChild.innerHTML = label;
+    }
+  }
+
+  /* ---------- eventos ---------- */
+  function wire() {
+    src.addEventListener('input', () => { doc.text = src.value; highlight(); persist(); histSoon(); scheduleRender(); });
+    src.addEventListener('scroll', () => { hl.scrollTop = src.scrollTop; hl.scrollLeft = src.scrollLeft; });
+    $$('.tab').forEach((t) => t.addEventListener('click', () => {
+      $$('.tab').forEach((x) => x.setAttribute('aria-selected', String(x === t)));
+      $$('.tabbody').forEach((b) => b.classList.toggle('on', b.id === 'tab-' + t.dataset.tab));
+    }));
+    $$('.mswitch button').forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
+    ['keyup', 'click', 'focus', 'select'].forEach((ev) => src.addEventListener(ev, scheduleCursor));
+    document.addEventListener('selectionchange', () => { if (document.activeElement === src) scheduleCursor(); });
+    $('#tr-up').addEventListener('click', () => transposeBy(1));
+    $('#tr-down').addEventListener('click', () => transposeBy(-1));
+    $('#tr-reset').addEventListener('click', () => { doc.view.transpose = 0; doc.view.acc = 'auto'; changed(); });
+    $('#tr-apply').addEventListener('click', applyTranspose);
+    $('#z-in').addEventListener('click', () => { ui.zoom = Math.min(2.2, +(ui.zoom + 0.15).toFixed(2)); if (result) paintPreview(); });
+    $('#z-out').addEventListener('click', () => { ui.zoom = Math.max(0.4, +(ui.zoom - 0.15).toFixed(2)); if (result) paintPreview(); });
+    $('#z-fit').addEventListener('click', () => { ui.zoom = 1; if (result) paintPreview(); });
+    $('#btn-pdf').addEventListener('click', downloadPdf);
+    $('#btn-lib').addEventListener('click', openLib);
+    $('#lib-x').addEventListener('click', closeLib);
+    $('#veil').addEventListener('click', (e) => { if (e.target.id === 'veil') closeLib(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLib(); });
+    $('#lib-save').addEventListener('click', saveToLib);
+    $('#lib-new').addEventListener('click', newDoc);
+    $('#lib-export').addEventListener('click', saveFile);
+    $('#lib-open').addEventListener('click', () => $('#file').click());
+    $('#file').addEventListener('change', (e) => { openFile(e.target.files[0]); e.target.value = ''; });
+    $('#btn-ui').addEventListener('click', () => {
+      const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      const nx = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = nx;
+      store.set('atril.ui', nx);
+    });
+    $('#sel-flip').addEventListener('click', flipSel);
+    $('#sel-copy').addEventListener('click', () => { if (copySel()) showToast('Copiado: ' + clip); });
+    $('#sel-paste').addEventListener('click', () => { if (!clip) showToast('Primero copiá una figura o un acorde.'); else pasteSel(clip); });
+    $('#sel-undo').addEventListener('click', () => histGo(-1));
+    $('#sel-x').addEventListener('click', () => select(null));
+    document.addEventListener('copy', (e) => {
+      if (isEditable(e.target) || !sel || !copySel() || !e.clipboardData) return;
+      e.clipboardData.setData('text/plain', clip);
+      e.preventDefault();
+    });
+    document.addEventListener('paste', (e) => {
+      if (isEditable(e.target) || !sel) return;
+      e.preventDefault();
+      pasteSel(e.clipboardData ? e.clipboardData.getData('text/plain') : '');
+    });
+    document.addEventListener('keydown', (e) => {
+      const mod = e.ctrlKey || e.metaKey;
+      const k = e.key.toLowerCase();
+      const inText = e.target === src;
+      const inField = isEditable(e.target) && !inText;
+      if (mod && (k === 'z' || k === 'y') && !inField) {
+        e.preventDefault();
+        histGo(k === 'y' || e.shiftKey ? 1 : -1);
+        return;
+      }
+      if (isEditable(e.target) || mod || e.altKey) return;
+      if (k === 'x' && sel) { e.preventDefault(); flipSel(); }
+      else if (e.key === 'Escape' && sel) select(null);
+      else if ((e.key === 'ArrowRight' || e.key === 'ArrowDown') && sel) { e.preventDefault(); stepSel(1); }
+      else if ((e.key === 'ArrowLeft' || e.key === 'ArrowUp') && sel) { e.preventDefault(); stepSel(-1); }
+    });
+    let rz = 0;
+    window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (result) paintPreview(); }, 120); });
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => { fontsDone = {}; scheduleRender(); });
+  }
+
+  /* ---------- inicio ---------- */
+  const savedUi = store.get('atril.ui');
+  if (savedUi === 'dark' || savedUi === 'light') document.documentElement.dataset.theme = savedUi;
+  setView(window.innerWidth <= 700 ? 'split' : 'edit');
+  doc = loadCurrent();
+  buildSelects();
+  At.debug = () => ({ result, doc, sel });
+  buildThemeCards();
+  buildFontGrid();
+  buildFontSelects();
+  buildTools();
+  bindAll();
+  wire();
+  src.value = doc.text;
+  highlight();
+  syncControls();
+  histNow();
+  render();
+  getDownloads();
+})();
+
+</script>
+
+</body>
+</html>
