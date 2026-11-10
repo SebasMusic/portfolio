@@ -230,6 +230,9 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 .fcard small { font-size: 11px; color: var(--muted); }
 #selbar { display: none; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 12px; border-bottom: 1px solid var(--line); background: var(--panel2); font-size: 12.5px; color: var(--muted); }
 #selbar.on { display: flex; }
+#selbar b { }
+.pgbox .slot { position: absolute; pointer-events: none; border-radius: 5px; background: color-mix(in srgb, var(--accent) 26%, transparent); outline: 2px solid var(--accent); }
+.pgbox .slotin { position: absolute; z-index: 6; width: 118px; padding: 0 8px; border: 2px solid var(--accent); border-radius: 6px; background: #fff; color: #111; font: 700 17px var(--ui); outline: none; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
 #selbar b { color: var(--ink); }
 .pgbox .mg { position: absolute; pointer-events: none; border: 1px dashed #E5484D; display: none; }
 .desk.showmg .pgbox .mg { display: block; }
@@ -472,7 +475,13 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         </table>
         <h3>Atajos sobre la hoja</h3>
         <table>
-          <tr><td>Clic en una figura o acorde</td><td>La selecciona. Con las flechas ← → pasás a la anterior o siguiente.</td></tr>
+          <tr><td>Clic en un compás de la hoja</td><td>Marca el compás y el tiempo donde vas a escribir. Después escribí el acorde directo (<code>C</code>, <code>Am7</code>…) y confirmá con <code>Enter</code>.</td></tr>
+          <tr><td><code>Espacio</code></td><td>Confirma el acorde y pasa al siguiente slash. Si el compás tiene ritmo escrito, pasa a la siguiente figura. <code>Mayús</code>+<code>Espacio</code> vuelve atrás.</td></tr>
+          <tr><td><code>←</code> <code>→</code></td><td>Compás anterior o siguiente. Con <code>→</code> en el último compás de una sección se agrega uno nuevo.</td></tr>
+          <tr><td><code>↑</code> <code>↓</code></td><td>Renglón de arriba o de abajo. Con <code>↓</code> en el último renglón se agrega uno nuevo.</td></tr>
+          <tr><td><code>Mayús</code>+<code>→</code> / <code>↓</code></td><td>Agrega un compás o un renglón nuevo justo después del actual, en cualquier lugar del chart.</td></tr>
+          <tr><td><code>Supr</code></td><td>Borra el acorde del tiempo marcado. <code>Esc</code> sale.</td></tr>
+        <tr><td>Clic en una figura o acorde</td><td>La selecciona. Con las flechas ← → pasás a la anterior o siguiente.</td></tr>
           <tr><td><code>X</code></td><td>Invierte la plica de la figura seleccionada (arriba ↔ abajo).</td></tr>
           <tr><td><code>Ctrl</code>+<code>C</code> / <code>V</code></td><td>Copia la figura seleccionada y la pega encima de otra.</td></tr>
           <tr><td><code>Ctrl</code>+<code>Z</code> / <code>Ctrl</code>+<code>Shift</code>+<code>Z</code></td><td>Deshacer y rehacer (texto y datos del chart).</td></tr>
@@ -508,7 +517,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
         <button class="btn sm" type="button" id="z-fit">Ajustar</button>
         <button class="btn sm icon" type="button" id="z-in" aria-label="Acercar">+</button>
       </div>
-      <div id="selbar"><b id="sel-name">Figura</b><button class="btn sm" type="button" id="sel-flip">Girar plica (X)</button><button class="btn sm ghost" type="button" id="sel-copy">Copiar</button><button class="btn sm ghost" type="button" id="sel-paste">Pegar</button><button class="btn sm ghost" type="button" id="sel-undo">Deshacer</button><button class="btn sm ghost" type="button" id="sel-x">Soltar</button></div>
+      <div id="selbar"><b id="sel-name">Figura</b><button class="btn sm" type="button" id="sel-flip">Girar plica (X)</button><button class="btn sm ghost" type="button" id="sel-copy">Copiar</button><button class="btn sm ghost" type="button" id="sel-paste">Pegar</button><button class="btn sm ghost" type="button" id="sel-undo">Deshacer</button><button class="btn sm ghost" type="button" id="sel-x">Soltar</button><span id="sel-help" style="display:none;flex-basis:100%">Escribí un acorde · <b>Espacio</b> siguiente tiempo · <b>←</b> <b>→</b> compases · <b>↑</b> <b>↓</b> renglones · <b>Mayús+→</b> / <b>Mayús+↓</b> agrega compás / renglón · <b>Supr</b> borra · <b>Esc</b> sale</span></div>
       <div class="desk" id="desk"><div class="pages" id="pages"></div></div>
     </section>
   </main>
@@ -1760,7 +1769,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
           return o;
         });
 
-        geo.forEach((g) => { if (g.bar.seg) barBoxes.push({ pg, x: g.x, y: yTop, w: g.w, h: hAll, line: g.bar.seg.line, a: g.bar.seg.a, b: g.bar.seg.b, idx: g.bar.idx }); });
+        geo.forEach((g) => { if (g.bar.seg) { g.bb = { pg, x: g.x, y: yTop, w: g.w, h: hAll, line: g.bar.seg.line, a: g.bar.seg.a, b: g.bar.seg.b, idx: g.bar.idx, mode: g.bar.mode, slots: [] }; barBoxes.push(g.bb); } });
 
         /* contenido de cada compás */
         const allNotes = [];
@@ -1773,6 +1782,13 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
           g.xs = xs;
           g.cl = cl;
           g.cr = cr;
+          if (g.bb) {
+            g.bb.cy = chordBase - chordPx * 0.95;
+            g.bb.ch = chordPx * 1.3;
+            // posiciones donde se puede escribir un acorde: un slash por pulso, o cada figura si hay ritmo escrito
+            if (b.mode === 'explicit') g.bb.slots = b.notes.map((nn) => xs(nn.t));
+            else if (b.mode === 'auto') { const n = Math.max(1, Math.round(b.slots)); for (let j = 0; j < n; j++) g.bb.slots.push(xs(j * b.slotLen)); }
+          }
 
           if (b.tsChange && b.idx !== 1 && (i > 0 || !head.showTs)) {
             const numFont = tsFont(3.1 * sp);
@@ -2894,8 +2910,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     });
     $('#pg-count').textContent = res.pages.length + (res.pages.length === 1 ? ' hoja A4' : ' hojas A4') + (res.W > res.H ? ' · horizontal' : ' · vertical');
     lastKey = '';
-    drawHighlight(false);
-    drawSel();
+    if (cur) { entry = null; setCursor(cur.idx, cur.slot); } else { drawHighlight(false); drawSel(); }
   }
 
   /* ---------- hoja <-> texto ---------- */
@@ -2987,7 +3002,19 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     if (selEl) { selEl.remove(); selEl = null; }
     const bar = $('#selbar');
     const h = selHit();
-    if (!h) { if (sel) sel = null; bar.classList.remove('on'); return; }
+    const figBtns = ['#sel-flip', '#sel-copy', '#sel-paste'];
+    if (!h) {
+      if (sel) sel = null;
+      if (cur) {
+        figBtns.forEach((q) => { $(q).style.display = 'none'; });
+        $('#sel-name').textContent = 'Compás ' + cur.idx + ' · tiempo ' + (cur.slot + 1);
+        $('#sel-help').style.display = '';
+        bar.classList.add('on');
+      } else bar.classList.remove('on');
+      return;
+    }
+    figBtns.forEach((q) => { $(q).style.display = ''; });
+    $('#sel-help').style.display = 'none';
     const box = pagesEl.children[h.pg] && pagesEl.children[h.pg].firstChild;
     if (!box) return;
     const pg = result.res.pages[h.pg];
@@ -3009,9 +3036,253 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     if (h) {
       const o = lineStart(h.line);
       src.setSelectionRange(o + h.b, o + h.b);
+      const bb = (result.res.barBoxes || []).find((q) => q.line === h.line && h.a >= q.a && h.a <= q.b);
+      if (bb) { setCursor(bb.idx, slotAtX(bb, h.x + (h.kind === 'chord' ? 2 : h.w * 0.22))); return; }
       drawHighlight(false);
     }
     drawSel();
+  }
+
+  /* ---------- cursor de compás y tiempo: escribir acordes directo en la hoja ---------- */
+  let cur = null; // { idx: n.º de compás, slot: tiempo (o figura) dentro del compás }
+  let slotEl = null;
+  let entry = null;
+  const parseNow = () => At.parser.parseChart(src.value, { num: doc.meta.num, den: doc.meta.den });
+  const flatBars = (parsed) => { const o = []; parsed.lines.forEach((l, li) => { if (l.kind === 'bars') l.bars.forEach((b) => o.push({ b, li })); }); return o; };
+  const boxOf = (idx) => ((result && result.res.barBoxes) || []).find((q) => q.idx === idx);
+  const nSlots = (b) => (b.mode === 'explicit' ? b.notes.length : Math.max(1, Math.round(b.slots)));
+  function slotAtX(box, x) {
+    let best = 0;
+    box.slots.forEach((sx, i) => { if (Math.abs(sx - x) < Math.abs(box.slots[best] - x)) best = i; });
+    return best;
+  }
+  function setCursor(idx, slot) {
+    const box = boxOf(idx);
+    const n = box && box.slots.length ? box.slots.length : 1e9;
+    cur = { idx, slot: Math.max(0, Math.min(n - 1, slot || 0)) };
+    if (box) {
+      const seg = (src.value.split('\n')[box.line - 1] || '').slice(box.a, box.b);
+      const at = lineStart(box.line) + box.a + seg.replace(/\s+$/, '').length;
+      src.setSelectionRange(at, at);
+    }
+    drawHighlight(false);
+    drawSlot();
+    drawSel();
+  }
+  function clearCur() {
+    cur = null;
+    closeEntry(false);
+    drawSlot();
+    drawSel();
+  }
+  function drawSlot() {
+    if (slotEl) { slotEl.remove(); slotEl = null; }
+    if (!cur || !result) return;
+    const box = boxOf(cur.idx);
+    if (!box || !box.slots.length) return;
+    const pgEl = pagesEl.children[box.pg] && pagesEl.children[box.pg].firstChild;
+    if (!pgEl) return;
+    const k = pgEl.clientWidth / result.res.pages[box.pg].w;
+    const x = box.slots[cur.slot];
+    const nx = box.slots[cur.slot + 1];
+    const w = Math.max(14, Math.min((nx != null ? nx - x : box.x + box.w - x - 6) - 3, 52));
+    slotEl = document.createElement('div');
+    slotEl.className = 'slot';
+    slotEl.style.left = (x - 3) * k + 'px';
+    slotEl.style.top = box.cy * k + 'px';
+    slotEl.style.width = w * k + 'px';
+    slotEl.style.height = box.ch * k + 'px';
+    pgEl.appendChild(slotEl);
+  }
+  /* -- texto del compás: separar en fichas -- */
+  const tokenize = (txt) => { const re = /_?"[^"]*"(?:@[rc])?|\S+/g; const o = []; let m; while ((m = re.exec(txt))) o.push({ s: m[0], i: m.index, e: m.index + m[0].length }); return o; };
+  const isOther = (t) => /^(_?"|@|\{|T\d|%$|\/$)/.test(t) || (RH.test(t) && (RH.exec(t)[1] || RH.exec(t)[2]));
+  const isChordTok = (t) => t === '.' || (!isOther(t) && !!At.theory.parseChord(t.replace(/:\d+(\.\d+)?$/, '')));
+  const chordTxt = (c, bar, segTxt) => segTxt.slice(c.src.a - bar.seg.a, c.src.b - bar.seg.a).replace(/:\d+(\.\d+)?$/, '');
+  function chordAt(bar, slot) {
+    const line = src.value.split('\n')[bar.seg.line - 1] || '';
+    const segTxt = line.slice(bar.seg.a, bar.seg.b);
+    if (bar.mode === 'explicit') {
+      const nt = bar.notes[slot];
+      const c = nt && bar.chords.find((q) => Math.abs(q.t - nt.t) < 1e-6);
+      return c ? chordTxt(c, bar, segTxt) : '';
+    }
+    const c = bar.chords.find((q) => Math.round((q.t / bar.slotLen) * 1000) / 1000 === slot);
+    return c ? chordTxt(c, bar, segTxt) : '';
+  }
+  function editExplicit(bar, segTxt, slot, t) {
+    const nt = bar.notes[slot];
+    if (!nt) return null;
+    const toks = tokenize(segTxt);
+    const ni = toks.findIndex((q) => q.i === nt.src.a - bar.seg.a);
+    if (ni < 0) return null;
+    let j = ni;
+    while (j - 1 >= 0 && toks[j - 1].s !== '.' && isChordTok(toks[j - 1].s)) j--;
+    if (!t) {
+      if (j === ni) return null;
+      return segTxt.slice(0, toks[j].i) + segTxt.slice(toks[ni].i);
+    }
+    if (j < ni) return segTxt.slice(0, toks[j].i) + t + segTxt.slice(toks[ni - 1].e);
+    return segTxt.slice(0, toks[ni].i) + t + ' ' + segTxt.slice(toks[ni].i);
+  }
+  function editAuto(bar, segTxt, slot, t) {
+    const sl = bar.slotLen;
+    const n = Math.max(1, Math.round(bar.slots));
+    const ent = bar.chords.map((c) => ({ s: Math.round((c.t / sl) * 1000) / 1000, txt: chordTxt(c, bar, segTxt) }));
+    const toks = tokenize(segTxt);
+    if (!t) {
+      const i = ent.findIndex((e) => e.s === slot);
+      if (i < 0) return null;
+      ent.splice(i, 1);
+      if (ent.length) ent[0].s = 0;
+    } else {
+      const i = ent.findIndex((e) => e.s === slot);
+      if (i >= 0) ent[i].txt = t;
+      else if (!ent.length) {
+        if (slot > 0) {
+          // compás vacío y un tiempo que no es el primero: se escribe con un slash por pulso
+          const keep = toks.filter((q) => !isChordTok(q.s)).map((q) => q.s);
+          const parts = [];
+          for (let j = 0; j < n; j++) parts.push((j === slot ? t + ' ' : '') + '/');
+          return ' ' + keep.concat(parts).join(' ') + ' ';
+        }
+        ent.push({ s: 0, txt: t });
+      } else { ent.push({ s: slot, txt: t }); ent.sort((a, b) => a.s - b.s); }
+    }
+    const durs = ent.map((e, i) => (i + 1 < ent.length ? ent[i + 1].s : n) - e.s);
+    const base = ent.length ? Math.floor(n / ent.length) : 0;
+    const extra = ent.length ? n - base * ent.length : 0;
+    const dflt = ent.map((_, i) => base + (i < extra ? 1 : 0));
+    const same = ent.length && base >= 1 && durs.every((d, i) => d === dflt[i]);
+    const str = ent.map((e, i) => e.txt + (same ? '' : ':' + durs[i])).join(' ');
+    const out = [];
+    let placed = false;
+    toks.forEach((q) => {
+      if (isChordTok(q.s)) { if (!placed && str) out.push(str); placed = true; return; }
+      out.push(q.s);
+    });
+    if (!placed && str) out.push(str);
+    return ' ' + out.join(' ') + ' ';
+  }
+  function applyChord(idx, slot, text) {
+    const e = flatBars(parseNow()).find((q) => q.b.idx === idx);
+    if (!e) return false;
+    const bar = e.b;
+    if (bar.mode === 'simile') { showToast('Ese compás repite el anterior (%). Borrá el % en el texto para escribir acordes.'); return false; }
+    const t = String(text || '').trim().replace(/:.*$/, '');
+    if (t && !(/^n\.?c\.?$/i.test(t) || At.theory.parseChord(t))) { showToast('No reconozco «' + t + '» como acorde.'); return false; }
+    const line = src.value.split('\n')[bar.seg.line - 1] || '';
+    const segTxt = line.slice(bar.seg.a, bar.seg.b);
+    const ns = bar.mode === 'explicit' ? editExplicit(bar, segTxt, slot, t) : editAuto(bar, segTxt, slot, t);
+    if (ns == null) return false;
+    applyEdits([{ line: bar.seg.line, a: bar.seg.a, b: bar.seg.b, text: ns }]);
+    return true;
+  }
+  /* -- agregar compases y renglones -- */
+  function insertBarAfter(idx) {
+    const e = flatBars(parseNow()).find((q) => q.b.idx === idx);
+    if (!e) return;
+    const L = e.b.seg.line;
+    const ln = src.value.split('\n')[L - 1];
+    const m = /^(:\|\|:|\|\|:|:\|\||\|\||\|:|:\||\|\.|\|)/.exec(ln.slice(e.b.seg.b));
+    let nl;
+    if (m && (m[0] === '|:' || m[0] === '||:' || m[0] === ':||:')) nl = ln.slice(0, e.b.seg.b) + ' |' + ln.slice(e.b.seg.b);
+    else if (m) { const cut = e.b.seg.b + m[0].length; nl = ln.slice(0, cut) + ' |' + ln.slice(cut); } else nl = ln.replace(/\s+$/, '') + ' | |';
+    cur = { idx: idx + 1, slot: 0 };
+    applyEdits([{ line: L, a: 0, b: ln.length, text: nl }]);
+  }
+  function insertLineAfter(idx) {
+    const parsed = parseNow();
+    const e = flatBars(parsed).find((q) => q.b.idx === idx);
+    if (!e) return;
+    const l = parsed.lines[e.li];
+    const lastIdx = l.bars[l.bars.length - 1].idx;
+    const lines = src.value.split('\n');
+    lines.splice(e.b.seg.line, 0, '| |');
+    cur = { idx: lastIdx + 1, slot: 0 };
+    commitText(lines.join('\n'));
+  }
+  function goNext() {
+    const parsed = parseNow();
+    const flat = flatBars(parsed);
+    const e = flat.find((q) => q.b.idx === cur.idx);
+    if (!e) return;
+    const l = parsed.lines[e.li];
+    const nx = parsed.lines[e.li + 1];
+    const endOfSection = l.bars[l.bars.length - 1] === e.b && !(nx && nx.kind === 'bars');
+    if (endOfSection) insertBarAfter(cur.idx);
+    else setCursor(cur.idx + 1, 0);
+  }
+  function goPrev(last) {
+    if (cur.idx <= 1) return;
+    const e = flatBars(parseNow()).find((q) => q.b.idx === cur.idx - 1);
+    setCursor(cur.idx - 1, last && e ? nSlots(e.b) - 1 : 0);
+  }
+  function moveSlot(d) {
+    const e = flatBars(parseNow()).find((q) => q.b.idx === cur.idx);
+    if (!e) return;
+    const s = cur.slot + d;
+    if (s >= 0 && s < nSlots(e.b)) setCursor(cur.idx, s);
+    else if (d > 0) goNext();
+    else goPrev(true);
+  }
+  function goVertical(d) {
+    const boxes = (result && result.res.barBoxes) || [];
+    const cb = boxOf(cur.idx);
+    if (!cb) return;
+    const key = (q) => q.pg + ':' + Math.round(q.y);
+    const keys = Array.from(new Set(boxes.map(key)));
+    const ci = keys.indexOf(key(cb));
+    const ti = ci + d;
+    if (ti < 0) return;
+    if (ti >= keys.length) { insertLineAfter(cur.idx); return; }
+    const cx = cb.x + cb.w / 2;
+    let best = null;
+    boxes.filter((q) => key(q) === keys[ti]).forEach((q) => { const dd = Math.abs(q.x + q.w / 2 - cx); if (!best || dd < best.dd) best = { dd, q }; });
+    if (best) setCursor(best.q.idx, 0);
+  }
+  /* -- escribir un acorde sobre la hoja -- */
+  function closeEntry(commit) {
+    if (!entry) return;
+    const en = entry;
+    entry = null;
+    const v = en.el.value;
+    en.el.remove();
+    if (commit && (v.trim() || en.had)) applyChord(en.idx, en.slot, v);
+    if (commit) return true;
+    return false;
+  }
+  function startEntry(first) {
+    if (!cur || !result) return;
+    const box = boxOf(cur.idx);
+    if (!box || !box.slots.length) { showToast('Ese compás repite el anterior (%). Borrá el % para escribir acordes.'); return; }
+    closeEntry(true);
+    const pgEl = pagesEl.children[box.pg] && pagesEl.children[box.pg].firstChild;
+    if (!pgEl) return;
+    const k = pgEl.clientWidth / result.res.pages[box.pg].w;
+    const fe = flatBars(parseNow()).find((q) => q.b.idx === cur.idx);
+    const prev = fe ? chordAt(fe.b, cur.slot) : '';
+    const el = document.createElement('input');
+    el.className = 'slotin';
+    el.value = first != null ? first : prev;
+    el.setAttribute('aria-label', 'Acorde del compás ' + cur.idx);
+    el.autocomplete = 'off';
+    el.spellcheck = false;
+    el.style.left = (box.slots[cur.slot] - 4) * k + 'px';
+    el.style.top = (box.cy - 2) * k + 'px';
+    el.style.height = Math.max(26, box.ch * k + 4) + 'px';
+    pgEl.appendChild(el);
+    entry = { el, idx: cur.idx, slot: cur.slot, had: !!prev };
+    el.focus();
+    el.setSelectionRange(el.value.length, el.value.length);
+    const finish = (adv) => { const ok = closeEntry(true); if (adv) moveSlot(1); return ok; };
+    el.addEventListener('keydown', (ev) => {
+      ev.stopPropagation();
+      if (ev.key === 'Enter') { ev.preventDefault(); finish(false); }
+      else if (ev.key === ' ' || ev.key === 'Tab') { ev.preventDefault(); finish(true); }
+      else if (ev.key === 'Escape') { ev.preventDefault(); closeEntry(false); }
+    });
+    el.addEventListener('blur', () => { if (entry && entry.el === el) closeEntry(true); });
   }
   const isEditable = (t) => t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
   function focusField(f) {
@@ -3037,14 +3308,8 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     select(null);
     const bbx = (result.res.barBoxes || []).find((q) => q.pg === i && x >= q.x && x <= q.x + q.w && y >= q.y - 4 && y <= q.y + q.h);
     if (bbx) {
-      const ln = src.value.split('\n')[bbx.line - 1] || '';
-      const seg = ln.slice(bbx.a, bbx.b);
-      const at = lineStart(bbx.line) + bbx.a + seg.replace(/\s+$/, '').length;
-      $$('.tab')[0].click();
-      if (document.body.dataset.view === 'sheet') setView('edit');
-      src.focus({ preventScroll: true });
-      src.setSelectionRange(at, at);
-      drawHighlight(false);
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      setCursor(bbx.idx, slotAtX(bbx, x));
       return;
     }
     const s = (result.res.systems || []).find((q) => q.pg === i && y >= q.y - 6 && y <= q.y + q.h + 4 && x >= q.x - 6 && x <= q.x + q.w + 6);
@@ -3056,8 +3321,11 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     const lines = src.value.split('\n');
     const sorted = edits.slice().sort((p, q) => q.line - p.line || q.a - p.a);
     sorted.forEach((ed) => { const L = lines[ed.line - 1]; lines[ed.line - 1] = L.slice(0, ed.a) + ed.text + L.slice(ed.b); });
-    src.value = lines.join('\n');
-    doc.text = src.value;
+    commitText(lines.join('\n'));
+  }
+  function commitText(v) {
+    src.value = v;
+    doc.text = v;
     highlight();
     histNow();
     persist();
@@ -3529,6 +3797,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
       e.preventDefault();
       pasteSel(e.clipboardData ? e.clipboardData.getData('text/plain') : '');
     });
+    src.addEventListener('focus', () => { if (cur) clearCur(); });
     document.addEventListener('keydown', (e) => {
       const mod = e.ctrlKey || e.metaKey;
       const k = e.key.toLowerCase();
@@ -3540,10 +3809,27 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
         return;
       }
       if (isEditable(e.target) || mod || e.altKey) return;
-      if (k === 'x' && sel) { e.preventDefault(); flipSel(); }
-      else if (e.key === 'Escape' && sel) select(null);
-      else if ((e.key === 'ArrowRight' || e.key === 'ArrowDown') && sel) { e.preventDefault(); stepSel(1); }
-      else if ((e.key === 'ArrowLeft' || e.key === 'ArrowUp') && sel) { e.preventDefault(); stepSel(-1); }
+      if (k === 'x' && sel) { e.preventDefault(); flipSel(); return; }
+      if (e.key === 'Escape') { if (sel) select(null); else if (cur) clearCur(); return; }
+      if (!sel && !cur) return;
+      const nav = (fn) => { e.preventDefault(); if (sel) select(null); if (cur) fn(); };
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        if (sel) { e.preventDefault(); stepSel(e.key === 'ArrowRight' ? 1 : -1); return; }
+        e.preventDefault();
+        if (e.key === 'ArrowRight') { if (e.shiftKey) insertBarAfter(cur.idx); else goNext(); } else goPrev(false);
+      } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        nav(() => { if (e.key === 'ArrowDown' && e.shiftKey) insertLineAfter(cur.idx); else goVertical(e.key === 'ArrowDown' ? 1 : -1); });
+      } else if (e.key === ' ') {
+        nav(() => moveSlot(e.shiftKey ? -1 : 1));
+      } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (cur && !sel) { e.preventDefault(); applyChord(cur.idx, cur.slot, ''); }
+      } else if (e.key === 'Enter') {
+        if (cur) { e.preventDefault(); if (sel) select(null); startEntry(null); }
+      } else if (e.key.length === 1 && /[A-Za-z]/.test(e.key) && cur) {
+        e.preventDefault();
+        if (sel) select(null);
+        startEntry(e.key.toUpperCase());
+      }
     });
     let rz = 0;
     window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (result) paintPreview(); }, 120); });
@@ -3556,7 +3842,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
   setView(window.innerWidth <= 700 ? 'split' : 'edit');
   doc = loadCurrent();
   buildSelects();
-  At.debug = () => ({ result, doc, sel });
+  At.debug = () => ({ result, doc, sel, cur });
   buildThemeCards();
   buildFontGrid();
   buildFontSelects();
