@@ -289,6 +289,10 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   .btn .hide-s { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.seccolors{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.seccolors label{display:flex;align-items:center;gap:8px;border:1px solid var(--line,#d5d9e0);border-radius:8px;padding:5px 8px;font-size:12px;cursor:pointer}
+.seccolors input[type=color]{width:28px;height:22px;padding:0;border:0;background:none;cursor:pointer}
+.seccolors .dot{opacity:.5;font-size:10px;margin-left:auto}
 </style>
 
 <div class="app">
@@ -407,6 +411,12 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
           <p class="hint">«Trazo hueco» usa el mismo trazo inclinado de la negra, pero vacío por dentro. «Paralelogramo» es el estilo ancho y chato.</p>
         </div>
         <div class="group">
+          <span class="lbl">Colores de las secciones</span>
+          <div id="seccolors" class="seccolors"></div>
+          <button type="button" class="btn" id="seccolors-reset" style="margin-top:8px">Restaurar colores del tema</button>
+          <p class="hint">Cambian la etiqueta (INTRO, CORO…) y la barra lateral de cada sección. En los temas sin color se usan como acento.</p>
+        </div>
+        <div class="group">
           <span class="lbl">Trazo de las figuras</span>
           <div class="seg" data-bind="view.stroke"><button type="button" data-v="hand">A mano</button><button type="button" data-v="clean">Limpio</button></div>
           <p class="hint">«A mano» dibuja pauta, clave, alteraciones, slashes y silencios con trazo de lápiz.</p>
@@ -480,7 +490,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
           <tr><td><code>←</code> <code>→</code></td><td>Compás anterior o siguiente. Con <code>→</code> en el último compás de una sección se agrega uno nuevo.</td></tr>
           <tr><td><code>↑</code> <code>↓</code></td><td>Renglón de arriba o de abajo. Con <code>↓</code> en el último renglón se agrega uno nuevo.</td></tr>
           <tr><td><code>Mayús</code>+<code>→</code> / <code>↓</code></td><td>Agrega un compás o un renglón nuevo justo después del actual, en cualquier lugar del chart.</td></tr>
-          <tr><td><code>Supr</code></td><td>Borra el acorde del tiempo marcado. <code>Esc</code> sale.</td></tr>
+          <tr><td><code>Supr</code> / <code>Retroceso</code></td><td><code>Supr</code> borra el compás marcado entero; <code>Retroceso</code> borra solo el acorde del tiempo marcado. Se puede deshacer con <code>Ctrl</code>+<code>Z</code>. <code>Esc</code> sale.</td></tr>
         <tr><td>Clic en una figura o acorde</td><td>La selecciona. Con las flechas ← → pasás a la anterior o siguiente.</td></tr>
           <tr><td><code>X</code></td><td>Invierte la plica de la figura seleccionada (arriba ↔ abajo).</td></tr>
           <tr><td><code>Ctrl</code>+<code>C</code> / <code>V</code></td><td>Copia la figura seleccionada y la pega encima de otra.</td></tr>
@@ -517,7 +527,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
         <button class="btn sm" type="button" id="z-fit">Ajustar</button>
         <button class="btn sm icon" type="button" id="z-in" aria-label="Acercar">+</button>
       </div>
-      <div id="selbar"><b id="sel-name">Figura</b><button class="btn sm" type="button" id="sel-flip">Girar plica (X)</button><button class="btn sm ghost" type="button" id="sel-copy">Copiar</button><button class="btn sm ghost" type="button" id="sel-paste">Pegar</button><button class="btn sm ghost" type="button" id="sel-undo">Deshacer</button><button class="btn sm ghost" type="button" id="sel-x">Soltar</button><span id="sel-help" style="display:none;flex-basis:100%">Escribí un acorde · <b>Espacio</b> siguiente tiempo · <b>←</b> <b>→</b> compases · <b>↑</b> <b>↓</b> renglones · <b>Mayús+→</b> / <b>Mayús+↓</b> agrega compás / renglón · <b>Supr</b> borra · <b>Esc</b> sale</span></div>
+      <div id="selbar"><b id="sel-name">Figura</b><button class="btn sm" type="button" id="sel-flip">Girar plica (X)</button><button class="btn sm ghost" type="button" id="sel-copy">Copiar</button><button class="btn sm ghost" type="button" id="sel-paste">Pegar</button><button class="btn sm ghost" type="button" id="sel-undo">Deshacer</button><button class="btn sm ghost" type="button" id="sel-x">Soltar</button><span id="sel-help" style="display:none;flex-basis:100%">Escribí un acorde · <b>Espacio</b> siguiente tiempo · <b>←</b> <b>→</b> compases · <b>↑</b> <b>↓</b> renglones · <b>Mayús+→</b> / <b>Mayús+↓</b> agrega compás / renglón · <b>Supr</b> borra el compás · <b>Retroceso</b> borra el acorde · <b>Esc</b> sale</span></div>
       <div class="desk" id="desk"><div class="pages" id="pages"></div></div>
     </section>
   </main>
@@ -1150,6 +1160,10 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
       if (xf) { o.textFamily = xf.family; o.textWeight = xf.group === 'hand' || xf.group === 'custom' ? 400 : 500; o.textStyle = xf.group === 'hand' ? 'normal' : 'italic'; }
       return o;
     })();
+    const SC = cfg.secColors || {};
+    const lumOf = (h) => { const m = /^#?([0-9a-f]{6})$/i.exec(h || ''); if (!m) return 0; const n = parseInt(m[1], 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
+    const onCol = (c) => (lumOf(c) > 0.62 ? '#111111' : '#FFFFFF');
+    const secPick = (key) => { const c = SC[key]; return /^#[0-9a-f]{6}$/i.test(c || '') ? c : null; };
     const ff = FN.get(cfg.chordFont);
     const cf = { family: ff.family, weight: ff.weight, scale: ff.scale, bold: ff.bold };
     const handTxt = ff.group === 'hand';
@@ -1434,16 +1448,17 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
             x = x0;
           }
           const yTop = yy + line * 17;
-          const col = TH.sectionColor(th, sec.key);
+          const cu = secPick(sec.key);
+          const col = cu || TH.sectionColor(th, sec.key);
           if (th.labelStyle === 'tab') {
             ops.push({ t: 'rect', x, y: yTop, w, h: hChip, r: 3, fill: col });
-            ops.push({ t: 'text', x: x + w / 2, y: yTop + 9, s, font, color: th.labelText, align: 'center', ls });
+            ops.push({ t: 'text', x: x + w / 2, y: yTop + 9, s, font, color: cu ? onCol(col) : th.labelText, align: 'center', ls });
           } else if (th.labelStyle === 'solid') {
-            ops.push({ t: 'rect', x, y: yTop, w, h: hChip, r: 2, fill: ink });
-            ops.push({ t: 'text', x: x + w / 2, y: yTop + 9, s, font, color: th.paper, align: 'center', ls });
+            ops.push({ t: 'rect', x, y: yTop, w, h: hChip, r: 2, fill: cu || ink });
+            ops.push({ t: 'text', x: x + w / 2, y: yTop + 9, s, font, color: cu ? onCol(cu) : th.paper, align: 'center', ls });
           } else {
-            ops.push({ t: 'rect', x, y: yTop, w, h: hChip, r: 3, fill: th.paper, stroke: ink, lw: 1 });
-            ops.push({ t: 'text', x: x + w / 2, y: yTop + 9, s, font, color: ink, align: 'center', ls });
+            ops.push({ t: 'rect', x, y: yTop, w, h: hChip, r: 3, fill: th.paper, stroke: cu || ink, lw: 1 });
+            ops.push({ t: 'text', x: x + w / 2, y: yTop + 9, s, font, color: cu || ink, align: 'center', ls });
           }
           x += w;
           if (i < sectionSeq.length - 1) {
@@ -1688,7 +1703,8 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
         const first = bars[0];
         const head = headFor(first);
         const barsLeft = staffLeft + head.w;
-        const secCol = sys.sec ? TH.sectionColor(th, sys.sec.key) : null;
+        const secCu = sys.sec ? secPick(sys.sec.key) : null;
+        const secCol = sys.sec ? (secCu || TH.sectionColor(th, sys.sec.key)) : null;
 
         /* barra de color y etiqueta */
         if (th.sectionBar && secCol) {
@@ -1704,13 +1720,13 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
           const ly = yTop + 1 * S;
           if (th.labelStyle === 'tab') {
             ops.push({ t: 'rect', x: lx, y: ly, w: tw + barW, h: th2, r: 3 * S, fill: secCol });
-            ops.push({ t: 'text', x: lx + barW + tw / 2, y: ly + th2 * 0.72, s: nm, font: lf, color: th.labelText, align: 'center', ls });
+            ops.push({ t: 'text', x: lx + barW + tw / 2, y: ly + th2 * 0.72, s: nm, font: lf, color: secCu ? onCol(secCol) : th.labelText, align: 'center', ls });
           } else if (th.labelStyle === 'solid') {
-            ops.push({ t: 'rect', x: lx, y: ly, w: tw, h: th2, r: 2 * S, fill: ink });
-            ops.push({ t: 'text', x: lx + tw / 2, y: ly + th2 * 0.72, s: nm, font: lf, color: th.paper, align: 'center', ls });
+            ops.push({ t: 'rect', x: lx, y: ly, w: tw, h: th2, r: 2 * S, fill: secCu || ink });
+            ops.push({ t: 'text', x: lx + tw / 2, y: ly + th2 * 0.72, s: nm, font: lf, color: secCu ? onCol(secCu) : th.paper, align: 'center', ls });
           } else {
-            ops.push({ t: 'rect', x: lx, y: ly, w: tw, h: th2, r: 4 * S, fill: th.paper, stroke: ink, lw: 1.5 * S });
-            ops.push({ t: 'text', x: lx + tw / 2, y: ly + th2 * 0.74, s: nm, font: lf, color: ink, align: 'center', ls });
+            ops.push({ t: 'rect', x: lx, y: ly, w: tw, h: th2, r: 4 * S, fill: th.paper, stroke: secCu || ink, lw: 1.5 * S });
+            ops.push({ t: 'text', x: lx + tw / 2, y: ly + th2 * 0.74, s: nm, font: lf, color: secCu || ink, align: 'center', ls });
           }
           if (sys.label.note) {
             const nx = lx + tw + (th.labelStyle === 'tab' ? barW : 0) + 8 * S;
@@ -2490,7 +2506,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
       'G#m7:2 Gm7 F#m7 |.',
     ].join('\n'),
   };
-  const DEFAULT_VIEW = { orient: 'portrait', theme: 'estudio', bpl: 0, size: 100, fit: false, staff: 'five', cols: 1, showMap: true, notation: 'us', chordFont: 'kalam', stroke: 'hand', rev: 5, transpose: 0, acc: 'auto', sizeKey: 100, sizeTempo: 100, sizeTs: 100, hollow: 'slash', titleFont: '', labelFont: '', textFont: '', headerFont: '' };
+  const DEFAULT_VIEW = { orient: 'portrait', theme: 'estudio', bpl: 0, size: 100, fit: false, staff: 'five', cols: 1, showMap: true, notation: 'us', chordFont: 'kalam', stroke: 'hand', rev: 5, transpose: 0, acc: 'auto', sizeKey: 100, sizeTempo: 100, sizeTs: 100, hollow: 'slash', secColors: {}, titleFont: '', labelFont: '', textFont: '', headerFont: '' };
   const BLANK = {
     meta: { title: 'Sin título', artist: '', album: '', author: '', creditLabel: 'Creado por', style: '', tempo: '', key: 'C', mode: 'maj', num: 4, den: 4 },
     text: '[Intro]\nC | G | Am | F ||\n[Verso]\nAm | F | C | G |\nAm | F | C | G ||\n',
@@ -2573,6 +2589,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
       else if (document.activeElement !== el) el.value = v == null ? '' : v;
     });
     $('#size-v').textContent = doc.view.size + '%';
+    if (typeof syncSecColors === 'function') syncSecColors();
     $$('[data-show]').forEach((el) => { el.textContent = getPath(root(), el.dataset.show) + '%'; });
     syncFontSelects();
     $$('#fontgrid .fcard').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.id === doc.view.chordFont)));
@@ -2844,7 +2861,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     const parsed = At.parser.parseChart(doc.text, { num: doc.meta.num, den: doc.meta.den });
     const cfg = {
       theme: TH.themes[doc.view.theme] || TH.themes.estudio, meta: doc.meta, orient: doc.view.orient, transpose: doc.view.transpose,
-      acc: doc.view.acc, bpl: doc.view.bpl, size: doc.view.size / 100, fit: doc.view.fit, showMap: doc.view.showMap, staff: doc.view.staff, cols: doc.view.cols, notation: doc.view.notation, chordFont: doc.view.chordFont, stroke: doc.view.stroke, hollowStyle: doc.view.hollow, titleFont: doc.view.titleFont, labelFont: doc.view.labelFont, textFont: doc.view.textFont, headerFont: doc.view.headerFont, sizeKey: doc.view.sizeKey, sizeTempo: doc.view.sizeTempo, sizeTs: doc.view.sizeTs,
+      acc: doc.view.acc, bpl: doc.view.bpl, size: doc.view.size / 100, fit: doc.view.fit, showMap: doc.view.showMap, staff: doc.view.staff, cols: doc.view.cols, notation: doc.view.notation, chordFont: doc.view.chordFont, stroke: doc.view.stroke, hollowStyle: doc.view.hollow, secColors: doc.view.secColors, titleFont: doc.view.titleFont, labelFont: doc.view.labelFont, textFont: doc.view.textFont, headerFont: doc.view.headerFont, sizeKey: doc.view.sizeKey, sizeTempo: doc.view.sizeTempo, sizeTs: doc.view.sizeTs,
     };
     return { parsed, cfg, res: At.layout.layoutSong(parsed, cfg, measure) };
   }
@@ -3202,6 +3219,30 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     cur = { idx: lastIdx + 1, slot: 0 };
     commitText(lines.join('\n'));
   }
+  function deleteBar(idx) {
+    const e = flatBars(parseNow()).find((q) => q.b.idx === idx);
+    if (!e) return;
+    const L = e.b.seg.line;
+    const lines = src.value.split('\n');
+    const ln = lines[L - 1];
+    const re = /:\|\|:|\|\|:|:\|\||\|\||\|:|:\||\|\.|\|/g;
+    const bs = [];
+    let m;
+    while ((m = re.exec(ln))) bs.push({ i: m.index, n: m[0].length });
+    const after = bs.find((q) => q.i === e.b.seg.b);
+    const before = bs.find((q) => q.i + q.n === e.b.seg.a);
+    let nl;
+    if (after) nl = ln.slice(0, e.b.seg.a) + ln.slice(after.i + after.n);
+    else if (before) nl = ln.slice(0, before.i);
+    else nl = '';
+    if (!nl.replace(re, '').trim()) lines.splice(L - 1, 1);
+    else lines[L - 1] = nl;
+    const v = lines.join('\n');
+    const total = At.parser.parseChart(v, { num: doc.meta.num, den: doc.meta.den }).barCount;
+    if (total < 1) cur = null;
+    else cur = { idx: Math.min(idx, total), slot: 0 };
+    commitText(v);
+  }
   function goNext() {
     const parsed = parseNow();
     const flat = flatBars(parsed);
@@ -3476,6 +3517,35 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
         prev.style.fontFamily = f.family;
         prev.style.display = '';
       } else prev.style.display = 'none';
+    });
+  }
+  const SEC_LIST = [['intro', 'Intro'], ['verso', 'Verso'], ['precoro', 'Pre coro'], ['coro', 'Coro'], ['puente', 'Puente'], ['solo', 'Solo'], ['inter', 'Interludio'], ['final', 'Final'], ['default', 'Otras']];
+  function buildSecColors() {
+    const host = $('#seccolors');
+    host.textContent = '';
+    SEC_LIST.forEach(([k, name]) => {
+      const lab = document.createElement('label');
+      const inp = document.createElement('input');
+      inp.type = 'color';
+      inp.dataset.k = k;
+      inp.addEventListener('input', () => {
+        doc.view.secColors = Object.assign({}, doc.view.secColors, { [k]: inp.value });
+        changed();
+      });
+      const sp = document.createElement('span');
+      sp.textContent = name;
+      lab.append(inp, sp);
+      host.appendChild(lab);
+    });
+    $('#seccolors-reset').addEventListener('click', () => { doc.view.secColors = {}; changed(); });
+  }
+  function syncSecColors() {
+    const th = TH.themes[doc.view.theme] || TH.themes.estudio;
+    const cu = doc.view.secColors || {};
+    $$('#seccolors input').forEach((inp) => {
+      if (document.activeElement === inp) return;
+      inp.value = cu[inp.dataset.k] || (th.colors && (th.colors[inp.dataset.k] || th.colors.default)) || th.ink;
+      inp.parentNode.style.outline = cu[inp.dataset.k] ? '2px solid ' + inp.value : '';
     });
   }
   function buildFontGrid() {
@@ -3822,7 +3892,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
       } else if (e.key === ' ') {
         nav(() => moveSlot(e.shiftKey ? -1 : 1));
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (cur && !sel) { e.preventDefault(); applyChord(cur.idx, cur.slot, ''); }
+        if (cur && !sel) { e.preventDefault(); if (e.key === 'Delete') deleteBar(cur.idx); else applyChord(cur.idx, cur.slot, ''); }
       } else if (e.key === 'Enter') {
         if (cur) { e.preventDefault(); if (sel) select(null); startEntry(null); }
       } else if (e.key.length === 1 && /[A-Za-z]/.test(e.key) && cur) {
@@ -3846,6 +3916,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
   buildThemeCards();
   buildFontGrid();
   buildFontSelects();
+  buildSecColors();
   buildTools();
   $$('#tools .dt').forEach((b) => b.addEventListener('click', () => {
     const open = b.getAttribute('aria-expanded') !== 'true';
