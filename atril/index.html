@@ -136,6 +136,15 @@ select.in { padding-right: 6px; }
 .chip.fig:hover small { color: var(--accent); }
 .chip.mono { font-family: var(--mono); font-weight: 600; font-size: 13px; }
 
+.drawers { border: 1px solid var(--line); border-radius: 12px; background: var(--panel2); overflow: hidden; flex: none; }
+.dtabs { display: flex; }
+.dt { flex: 1; min-width: 0; height: 36px; padding: 0 6px; border: 0; border-right: 1px solid var(--line); background: none; font: 700 12.5px/1 var(--lab); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dt:last-child { border-right: 0; }
+.dt:hover { color: var(--ink); background: var(--accent-soft); }
+.dt[aria-expanded="true"] { color: var(--accent-ink); background: var(--accent); }
+.dpanel { padding: 10px 10px 12px; border-top: 1px solid var(--line); max-height: 34vh; overflow-y: auto; background: var(--panel); }
+.dpanel[hidden] { display: none; }
+
 /* editor con resaltado */
 .ed { position: relative; flex: 1; min-height: 260px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel2); overflow: hidden; }
 .ed pre, .ed textarea {
@@ -333,14 +342,21 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
           </div>
         </details>
 
-        <div class="tools" id="tools">
-          <div class="trow"><span class="lbl">Secciones</span><span id="t-secs" class="trow"></span></div>
-          <div class="trow"><span class="lbl">Compases</span><span id="t-bars" class="trow"></span></div>
-          <div class="trow" style="align-items:flex-start"><span class="lbl" style="padding-top:2px">Ritmo</span><span id="t-rh" class="figs"></span></div>
-          <div class="trow"><span class="lbl">Marcas</span><span id="t-mk" class="trow"></span></div>
-          <div class="trow"><span class="lbl">Acordes</span>
+        <div class="drawers" id="tools">
+          <div class="dtabs" role="tablist" aria-label="Herramientas de escritura">
+            <button type="button" class="dt" data-d="secs" aria-expanded="false">Secciones</button>
+            <button type="button" class="dt" data-d="bars" aria-expanded="false">Compases</button>
+            <button type="button" class="dt" data-d="rh" aria-expanded="false">Ritmo</button>
+            <button type="button" class="dt" data-d="mk" aria-expanded="false">Marcas</button>
+            <button type="button" class="dt" data-d="deg" aria-expanded="false">Acordes</button>
+          </div>
+          <div class="dpanel" data-p="secs" hidden><span id="t-secs" class="trow"></span></div>
+          <div class="dpanel" data-p="bars" hidden><span id="t-bars" class="trow"></span></div>
+          <div class="dpanel" data-p="rh" hidden><span id="t-rh" class="figs"></span></div>
+          <div class="dpanel" data-p="mk" hidden><span id="t-mk" class="trow"></span></div>
+          <div class="dpanel" data-p="deg" hidden>
             <span id="t-deg" class="trow"></span>
-            <label class="check" style="margin-left:4px;font-size:12.5px"><input type="checkbox" id="deg7" data-bind="ui.sevenths"> con séptima</label>
+            <label class="check" style="margin-top:8px;font-size:12.5px"><input type="checkbox" id="deg7" data-bind="ui.sevenths"> con séptima</label>
           </div>
         </div>
 
@@ -3545,6 +3561,11 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
   buildFontGrid();
   buildFontSelects();
   buildTools();
+  $$('#tools .dt').forEach((b) => b.addEventListener('click', () => {
+    const open = b.getAttribute('aria-expanded') !== 'true';
+    $$('#tools .dt').forEach((x) => x.setAttribute('aria-expanded', String(open && x === b)));
+    $$('#tools .dpanel').forEach((pn) => { pn.hidden = !(open && pn.dataset.p === b.dataset.d); });
+  }));
   bindAll();
   wire();
   src.value = doc.text;
