@@ -231,6 +231,9 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 #selbar { display: none; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 12px; border-bottom: 1px solid var(--line); background: var(--panel2); font-size: 12.5px; color: var(--muted); }
 #selbar.on { display: flex; }
 #selbar b { }
+#t-mk .chip.glyph{height:36px;min-width:40px;padding:0 10px}
+#chg select{height:28px;width:auto;padding:0 6px;font-size:12.5px}
+#chg label{display:flex;align-items:center;gap:6px}
 .pgbox .slot { position: absolute; pointer-events: none; border-radius: 5px; background: color-mix(in srgb, var(--accent) 26%, transparent); outline: 2px solid var(--accent); }
 .pgbox .slotin { position: absolute; z-index: 6; width: 118px; padding: 0 8px; border: 2px solid var(--accent); border-radius: 6px; background: #fff; color: #111; font: 700 17px var(--ui); outline: none; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
 #selbar b { color: var(--ink); }
@@ -367,6 +370,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
           </div>
         </div>
 
+        <p class="hint" id="tools-hint" style="margin:-4px 0 0"></p>
         <div class="ed" id="ed">
           <pre id="hl" aria-hidden="true"></pre>
           <textarea id="src" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="Texto del chart"></textarea>
@@ -480,7 +484,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
           <tr><td><code>xe</code> <code>xq</code></td><td>Cabeza en X (percusión, golpe seco).</td></tr>
           <tr><td><code>q.</code> <code>h.</code></td><td>Con puntillo.</td></tr>
           <tr><td><code>q&gt;</code> <code>q^</code> <code>q'</code> <code>e~</code></td><td>Acento, marcato, staccato y ligadura al siguiente.</td></tr>
-          <tr><td><code>q_</code> <code>e_</code></td><td>Plica hacia abajo (sin guion bajo va hacia arriba). En un grupo con barra, cambia todo el grupo.</td></tr>
+          <tr><td><code>q+</code> <code>e+</code></td><td>Plica hacia arriba (sin el <code>+</code> va hacia abajo, que es lo normal). En un grupo con barra, cambia todo el grupo.</td></tr>
           <tr><td><code>%</code></td><td>Repetir el compás anterior.</td></tr>
         </table>
         <h3>Atajos sobre la hoja</h3>
@@ -491,10 +495,10 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
           <tr><td><code>↑</code> <code>↓</code></td><td>Renglón de arriba o de abajo. Con <code>↓</code> en el último renglón se agrega uno nuevo.</td></tr>
           <tr><td><code>Mayús</code>+<code>→</code> / <code>↓</code></td><td>Agrega un compás o un renglón nuevo justo después del actual, en cualquier lugar del chart.</td></tr>
           <tr><td><code>3</code> <code>4</code> <code>5</code> <code>6</code> <code>7</code></td><td>Escribe una figura en el tiempo marcado: <code>3</code> semicorchea, <code>4</code> corchea, <code>5</code> negra, <code>6</code> blanca, <code>7</code> redonda. Con <code>Mayús</code> se escribe el silencio. Lo que sobra del compás se completa con slashes.</td></tr>
-          <tr><td><code>.</code> (punto)</td><td>Agrega o quita el puntillo de la figura marcada: suma la mitad de su valor (la blanca pasa de 2 a 3 tiempos, la negra de 1 a 1½).</td></tr>
+          <tr><td><code>L</code></td><td>Agrega o quita el puntillo de la figura marcada: suma la mitad de su valor (la blanca pasa de 2 a 3 tiempos, la negra de 1 a 1½).</td></tr>
           <tr><td><code>Supr</code> / <code>Retroceso</code></td><td><code>Supr</code> borra el compás marcado entero; <code>Retroceso</code> borra solo el acorde del tiempo marcado. Se puede deshacer con <code>Ctrl</code>+<code>Z</code>. <code>Esc</code> sale.</td></tr>
         <tr><td>Clic en una figura o acorde</td><td>La selecciona. Con las flechas ← → pasás a la anterior o siguiente.</td></tr>
-          <tr><td><code>X</code></td><td>Invierte la plica de la figura seleccionada (arriba ↔ abajo).</td></tr>
+          <tr><td><code>X</code></td><td>Invierte la plica de la figura seleccionada (abajo ↔ arriba).</td></tr>
           <tr><td><code>Ctrl</code>+<code>C</code> / <code>V</code></td><td>Copia la figura seleccionada y la pega encima de otra.</td></tr>
           <tr><td><code>Ctrl</code>+<code>Z</code> / <code>Ctrl</code>+<code>Shift</code>+<code>Z</code></td><td>Deshacer y rehacer (texto y datos del chart).</td></tr>
           <tr><td>Clic en título, tonalidad, tempo, compás o crédito</td><td>Te lleva a ese campo para editarlo.</td></tr>
@@ -504,9 +508,11 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         <table>
           <tr><td><code>"Banda in"</code></td><td>Texto sobre el compás (<code>@r</code> a la derecha, <code>@c</code> al centro).</td></tr>
           <tr><td><code>_"similar"</code></td><td>Texto debajo del compás.</td></tr>
-          <tr><td><code>@segno</code> <code>@coda</code></td><td>Símbolos de navegación.</td></tr>
+          <tr><td><code>@segno</code> <code>@coda</code></td><td>Símbolos de navegación. Con <code>:3</code> van sobre el tercer tiempo (<code>@segno:3</code>) y con <code>*1.5</code> se agrandan (<code>@coda:3*1.5</code>). Lo mismo vale para los textos: <code>"Banda in":3*0.8</code>. Hacé clic sobre uno en la hoja para cambiarle el tamaño (A− / A+ o las teclas <code>+</code> y <code>−</code>) o borrarlo.</td></tr>
           <tr><td><code>{1.}</code> <code>{2.}</code></td><td>Casillas de primera y segunda vez.</td></tr>
           <tr><td><code>T3/4</code></td><td>Cambio de compás desde ese punto.</td></tr>
+          <tr><td><code>K:Eb</code> <code>K:F#m</code></td><td>Cambio de tonalidad (cambia la armadura) desde ese compás en adelante.</td></tr>
+          <tr><td><code>Clef:bass</code> <code>Clef:treble</code></td><td>Cambio de clave (Fa o Sol) desde ese compás en adelante. También podés elegirlos abajo de «Desde este compás», con un compás marcado en la hoja.</td></tr>
         </table>
         <h3>Ejemplo</h3>
 <pre>[Coro]
@@ -529,7 +535,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
         <button class="btn sm" type="button" id="z-fit">Ajustar</button>
         <button class="btn sm icon" type="button" id="z-in" aria-label="Acercar">+</button>
       </div>
-      <div id="selbar"><b id="sel-name">Figura</b><button class="btn sm" type="button" id="sel-flip">Girar plica (X)</button><button class="btn sm ghost" type="button" id="sel-copy">Copiar</button><button class="btn sm ghost" type="button" id="sel-paste">Pegar</button><button class="btn sm ghost" type="button" id="sel-undo">Deshacer</button><button class="btn sm ghost" type="button" id="sel-x">Soltar</button><span id="sel-help" style="display:none;flex-basis:100%">Escribí un acorde · <b>Espacio</b> siguiente tiempo · <b>←</b> <b>→</b> compases · <b>↑</b> <b>↓</b> renglones · <b>Mayús+→</b> / <b>Mayús+↓</b> agrega compás / renglón · <b>3–7</b> figuras (<b>Mayús</b> silencio) · <b>.</b> puntillo · <b>Supr</b> borra el compás · <b>Retroceso</b> borra el acorde · <b>Esc</b> sale</span></div>
+      <div id="selbar"><b id="sel-name">Figura</b><button class="btn sm" type="button" id="sel-flip">Girar plica (X)</button><button class="btn sm" type="button" id="sel-sm" style="display:none" title="Más chico (tecla −)">A−</button><button class="btn sm" type="button" id="sel-big" style="display:none" title="Más grande (tecla +)">A+</button><button class="btn sm ghost" type="button" id="sel-del" style="display:none">Borrar</button><button class="btn sm ghost" type="button" id="sel-copy">Copiar</button><button class="btn sm ghost" type="button" id="sel-paste">Pegar</button><button class="btn sm ghost" type="button" id="sel-undo">Deshacer</button><button class="btn sm ghost" type="button" id="sel-x">Soltar</button><div id="chg" style="display:none;flex-basis:100%;align-items:center;gap:10px;flex-wrap:wrap"><b>Desde este compás</b><label>Compás <select class="in sm" id="chg-ts"></select></label><label>Tonalidad <select class="in sm" id="chg-key"></select></label><label>Clave <select class="in sm" id="chg-clef"></select></label><span class="hint">Solo cambia de este compás hacia adelante.</span></div><span id="sel-help" style="display:none;flex-basis:100%">Escribí un acorde · <b>Espacio</b> siguiente tiempo · <b>←</b> <b>→</b> compases · <b>↑</b> <b>↓</b> renglones · <b>Mayús+→</b> / <b>Mayús+↓</b> agrega compás / renglón · <b>3–7</b> figuras (<b>Mayús</b> silencio) · <b>L</b> puntillo · <b>Supr</b> borra el compás · <b>Retroceso</b> borra el acorde · <b>Esc</b> sale</span></div>
       <div class="desk" id="desk"><div class="pages" id="pages"></div></div>
     </section>
   </main>
@@ -562,7 +568,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
 <script>
 /* ==== src/glyphs.js ==== */
 /* Atril · trazos de símbolos musicales (derivados de Noto Music, SIL OFL) */
-(function(r){r.Atril=r.Atril||{};r.Atril.glyphs={"clef":{"d":"M0.264 0.533Q0.25 0.48 0.241 0.428Q0.232 0.376 0.232 0.322Q0.232 0.275 0.2385 0.2335Q0.245 0.192 0.257 0.157Q0.27 0.117 0.291 0.0815Q0.312 0.046 0.3355 0.023Q0.359 0 0.377 0Q0.401 0 0.443 0.085Q0.464 0.128 0.474 0.178Q0.484 0.228 0.484 0.285Q0.484 0.356 0.465 0.4265Q0.446 0.497 0.4095 0.559Q0.373 0.621 0.322 0.668L0.357 0.836Q0.372 0.834 0.382 0.833Q0.392 0.832 0.397 0.832Q0.458 0.832 0.506 0.8665Q0.554 0.901 0.5825 0.957Q0.611 1.013 0.611 1.08Q0.611 1.157 0.5715 1.2185Q0.532 1.28 0.453 1.309Q0.458 1.326 0.482 1.451Q0.488 1.481 0.491 1.4985Q0.494 1.516 0.495 1.529Q0.496 1.542 0.496 1.559Q0.496 1.609 0.4715 1.6485Q0.447 1.688 0.4055 1.71Q0.364 1.732 0.313 1.732Q0.261 1.732 0.221 1.7125Q0.181 1.693 0.158 1.6585Q0.135 1.624 0.135 1.579Q0.135 1.531 0.1615 1.499Q0.188 1.467 0.237 1.467Q0.279 1.467 0.3055 1.4975Q0.332 1.528 0.332 1.57Q0.332 1.606 0.307 1.633Q0.282 1.66 0.242 1.66H0.232Q0.258 1.699 0.314 1.699Q0.383 1.699 0.422 1.654Q0.461 1.609 0.461 1.539Q0.461 1.522 0.457 1.4935Q0.453 1.465 0.443 1.425Q0.433 1.385 0.4275 1.359Q0.422 1.333 0.42 1.322Q0.386 1.332 0.34 1.332Q0.254 1.332 0.172 1.282Q0.092 1.232 0.046 1.15Q0 1.068 0 0.973Q0 0.883 0.041 0.804Q0.082 0.725 0.1425 0.659Q0.203 0.593 0.264 0.533ZM0.291 0.508Q0.314 0.496 0.34 0.4635Q0.366 0.431 0.39 0.389Q0.414 0.347 0.429 0.3045Q0.444 0.262 0.444 0.228Q0.444 0.192 0.433 0.171Q0.422 0.15 0.395 0.15Q0.371 0.15 0.3485 0.172Q0.326 0.194 0.3085 0.2305Q0.291 0.267 0.281 0.312Q0.271 0.357 0.271 0.404Q0.271 0.436 0.2775 0.462Q0.284 0.488 0.291 0.508ZM0.445 1.279Q0.543 1.237 0.543 1.107Q0.543 1.064 0.521 1.0285Q0.499 0.993 0.462 0.972Q0.425 0.951 0.379 0.951ZM0.348 0.955Q0.321 0.961 0.297 0.9805Q0.273 1 0.2585 1.0275Q0.244 1.055 0.244 1.086Q0.244 1.111 0.257 1.1375Q0.27 1.164 0.289 1.18Q0.302 1.192 0.315 1.198Q0.33 1.205 0.33 1.211Q0.33 1.214 0.32 1.217Q0.282 1.208 0.2515 1.183Q0.221 1.158 0.2035 1.1225Q0.186 1.087 0.186 1.047Q0.186 1.004 0.2035 0.964Q0.221 0.924 0.2525 0.892Q0.284 0.86 0.324 0.844L0.295 0.693Q0.179 0.787 0.1245 0.8775Q0.07 0.968 0.07 1.057Q0.07 1.122 0.104 1.178Q0.138 1.234 0.197 1.2685Q0.256 1.303 0.33 1.303Q0.35 1.303 0.3705 1.299Q0.391 1.295 0.414 1.289Z","w":0.611,"h":1.732,"ox":-0.05,"oy":1.334},"segno":{"d":"M0.188 0.377Q0.097 0.332 0.0495 0.2785Q0.002 0.225 0.002 0.162Q0.002 0.121 0.0225 0.084Q0.043 0.047 0.0775 0.0235Q0.112 0 0.154 0Q0.202 0 0.235 0.028Q0.268 0.056 0.268 0.1Q0.268 0.122 0.2515 0.135Q0.235 0.148 0.215 0.148Q0.192 0.148 0.1795 0.139Q0.167 0.13 0.162 0.115L0.153 0.087Q0.148 0.071 0.14 0.061Q0.132 0.051 0.115 0.051Q0.093 0.051 0.078 0.0725Q0.063 0.094 0.063 0.119Q0.063 0.161 0.1 0.197Q0.137 0.232 0.25 0.279L0.432 0.006H0.486L0.293 0.299Q0.391 0.349 0.433 0.4025Q0.475 0.456 0.475 0.516Q0.475 0.559 0.455 0.5955Q0.435 0.632 0.4 0.654Q0.365 0.676 0.321 0.676Q0.27 0.676 0.2405 0.6475Q0.211 0.619 0.211 0.582Q0.211 0.559 0.225 0.545Q0.239 0.531 0.264 0.531Q0.293 0.531 0.3045 0.5455Q0.316 0.56 0.319 0.578Q0.322 0.596 0.33 0.6105Q0.338 0.625 0.357 0.625Q0.384 0.625 0.4 0.606Q0.416 0.587 0.416 0.557Q0.416 0.494 0.334 0.451Q0.293 0.43 0.267 0.4165Q0.241 0.403 0.23 0.397L0.053 0.672H0ZM0.466 0.203Q0.486 0.203 0.5005 0.2175Q0.515 0.232 0.515 0.252Q0.515 0.272 0.5005 0.2865Q0.486 0.301 0.466 0.301Q0.446 0.301 0.4315 0.2865Q0.417 0.272 0.417 0.252Q0.417 0.232 0.4315 0.2175Q0.446 0.203 0.466 0.203ZM0.053 0.377Q0.073 0.377 0.0875 0.3915Q0.102 0.406 0.102 0.426Q0.102 0.446 0.0875 0.4605Q0.073 0.475 0.053 0.475Q0.033 0.475 0.0185 0.4605Q0.004 0.446 0.004 0.426Q0.004 0.406 0.0185 0.3915Q0.033 0.377 0.053 0.377Z","w":0.515,"h":0.676,"ox":-0.05,"oy":0.839},"coda":{"d":"M0.205 0.508V0.451Q0.144 0.443 0.1055 0.396Q0.067 0.349 0.058 0.27H0V0.238H0.058Q0.067 0.16 0.104 0.113Q0.141 0.066 0.205 0.057V0H0.238V0.057Q0.303 0.066 0.3395 0.1135Q0.376 0.161 0.385 0.238H0.443V0.27H0.385Q0.376 0.349 0.338 0.396Q0.3 0.443 0.238 0.451V0.508ZM0.205 0.238V0.086Q0.178 0.087 0.162 0.108Q0.148 0.127 0.1425 0.154Q0.137 0.181 0.137 0.238ZM0.238 0.238H0.306Q0.306 0.209 0.305 0.188Q0.304 0.167 0.301 0.154Q0.295 0.128 0.281 0.1075Q0.267 0.087 0.238 0.086ZM0.238 0.27V0.422Q0.267 0.42 0.281 0.4Q0.295 0.38 0.3005 0.3535Q0.306 0.327 0.306 0.27ZM0.205 0.27H0.137Q0.137 0.298 0.138 0.3185Q0.139 0.339 0.142 0.352Q0.148 0.378 0.162 0.3995Q0.176 0.421 0.205 0.422Z","w":0.443,"h":0.508,"ox":-0.05,"oy":0.754},"rwhole":{"d":"M0 0.024V0H0.683V0.024H0.523V0.134H0.16V0.024Z","w":0.683,"h":0.134,"ox":-0.05,"oy":0.512},"rhalf":{"d":"M0 0.134V0.11H0.16V0H0.523V0.11H0.683V0.134Z","w":0.683,"h":0.134,"ox":-0.05,"oy":0.378},"rquarter":{"d":"M0.096 0 0.256 0.195Q0.206 0.254 0.179 0.297Q0.152 0.34 0.152 0.384Q0.152 0.421 0.176 0.4615Q0.2 0.502 0.252 0.564L0.236 0.586Q0.192 0.558 0.154 0.558Q0.126 0.558 0.112 0.5765Q0.098 0.595 0.098 0.621Q0.098 0.653 0.1115 0.6815Q0.125 0.71 0.148 0.736L0.135 0.755Q0.066 0.705 0.033 0.664Q0 0.623 0 0.575Q0 0.532 0.027 0.512Q0.054 0.492 0.092 0.492Q0.122 0.492 0.17 0.515V0.513L0.016 0.308Q0.117 0.219 0.117 0.142Q0.117 0.081 0.053 0Z","w":0.256,"h":0.755,"ox":-0.051,"oy":0.878},"reighth":{"d":"M0.105 0.461 0.201 0.121Q0.18 0.14 0.1535 0.148Q0.127 0.156 0.101 0.156Q0.058 0.156 0.029 0.133Q0 0.11 0 0.067Q0 0.039 0.02 0.0195Q0.04 0 0.071 0Q0.1 0 0.1185 0.0185Q0.137 0.037 0.137 0.068Q0.137 0.09 0.127 0.107Q0.127 0.113 0.139 0.113Q0.194 0.113 0.244 0.027H0.262L0.141 0.461Z","w":0.262,"h":0.461,"ox":-0.05,"oy":0.73},"rsixteenth":{"d":"M0.105 0.705 0.201 0.365Q0.18 0.384 0.1535 0.392Q0.127 0.4 0.101 0.4Q0.058 0.4 0.029 0.377Q0 0.354 0 0.311Q0 0.283 0.0195 0.2635Q0.039 0.244 0.071 0.244Q0.1 0.244 0.1185 0.2625Q0.137 0.281 0.137 0.312Q0.137 0.334 0.127 0.351Q0.127 0.357 0.139 0.357Q0.18 0.357 0.217 0.311L0.269 0.121Q0.248 0.14 0.2215 0.148Q0.195 0.156 0.169 0.156Q0.126 0.156 0.097 0.133Q0.068 0.11 0.068 0.067Q0.068 0.039 0.088 0.0195Q0.108 0 0.139 0Q0.169 0 0.187 0.019Q0.205 0.038 0.205 0.068Q0.205 0.078 0.202 0.0885Q0.199 0.099 0.195 0.107Q0.195 0.113 0.207 0.113Q0.262 0.113 0.312 0.027H0.33L0.141 0.705Z","w":0.33,"h":0.705,"ox":-0.05,"oy":0.852},"sharp":{"d":"M0.047 0.463V0.32L0 0.332V0.232L0.047 0.219V0.023H0.078V0.211L0.145 0.195V0H0.176V0.187L0.225 0.176V0.275L0.176 0.289V0.432L0.225 0.42V0.523L0.176 0.535V0.723H0.145V0.543L0.078 0.561V0.756H0.047V0.568L0 0.58V0.477ZM0.145 0.439V0.295L0.078 0.312V0.455Z","w":0.225,"h":0.756,"ox":-0.05,"oy":0.509},"flat":{"d":"M0 0H0.031V0.39Q0.068 0.353 0.115 0.353Q0.147 0.353 0.173 0.3745Q0.199 0.396 0.199 0.437Q0.199 0.469 0.18 0.496Q0.161 0.523 0.129 0.55L0.06 0.609Q0.041 0.625 0.026 0.6405Q0.011 0.656 0 0.67ZM0.031 0.603Q0.057 0.575 0.075 0.5515Q0.093 0.528 0.103 0.51Q0.114 0.491 0.1195 0.475Q0.125 0.459 0.125 0.445Q0.125 0.417 0.112 0.4045Q0.099 0.392 0.084 0.392Q0.068 0.392 0.0525 0.4035Q0.037 0.415 0.031 0.435Z","w":0.199,"h":0.67,"ox":-0.05,"oy":0.615},"natural":{"d":"M0.176 0.17V0.707H0.145V0.495L0 0.532V0H0.033V0.207ZM0.147 0.402V0.274L0.031 0.303V0.43Z","w":0.176,"h":0.707,"ox":-0.05,"oy":0.486},"quarter":{"d":"M0.299 -0V0.836Q0.299 0.879 0.2705 0.916Q0.242 0.953 0.197 0.9755Q0.152 0.998 0.102 0.998Q0.056 0.998 0.028 0.9745Q0 0.951 0 0.911Q0 0.88 0.018 0.851Q0.036 0.822 0.0655 0.7985Q0.095 0.775 0.13 0.7615Q0.165 0.748 0.199 0.748Q0.242 0.748 0.273 0.773V-0Z","w":0.299,"h":0.998,"ox":-0.051,"oy":1.009},"flag8":{"d":"M0 -0H0.026Q0.033 0.041 0.0415 0.0725Q0.05 0.104 0.0665 0.1335Q0.083 0.163 0.112 0.197L0.152 0.244Q0.178 0.273 0.202 0.305Q0.274 0.398 0.274 0.498Q0.274 0.602 0.186 0.75H0.17Q0.199 0.691 0.221 0.6315Q0.243 0.572 0.243 0.518Q0.243 0.491 0.235 0.4625Q0.227 0.434 0.212 0.404Q0.181 0.343 0.125 0.3045Q0.069 0.266 0 0.266Z","w":0.274,"h":0.75,"ox":0.0,"oy":1.009},"flag16":{"d":"M0 -0H0.026Q0.03 0.035 0.0385 0.0585Q0.047 0.082 0.06 0.102Q0.077 0.127 0.0985 0.1435Q0.12 0.16 0.146 0.186Q0.176 0.215 0.2055 0.252Q0.235 0.289 0.2545 0.3345Q0.274 0.38 0.274 0.436Q0.274 0.458 0.271 0.4815Q0.268 0.505 0.26 0.531Q0.286 0.569 0.286 0.641Q0.286 0.689 0.2735 0.7365Q0.261 0.784 0.235 0.818H0.219Q0.266 0.726 0.266 0.658Q0.266 0.593 0.22 0.538Q0.19 0.501 0.1505 0.472Q0.111 0.443 0.0715 0.4235Q0.032 0.404 0 0.396ZM0.032 0.186Q0.032 0.211 0.0385 0.2355Q0.045 0.26 0.056 0.282Q0.064 0.296 0.0875 0.326Q0.111 0.356 0.145 0.39Q0.181 0.424 0.2115 0.457Q0.242 0.49 0.247 0.504Q0.251 0.489 0.251 0.462Q0.251 0.386 0.202 0.319Q0.153 0.252 0.032 0.186Z","w":0.286,"h":0.818,"ox":0.0,"oy":1.009}};})(typeof globalThis!=='undefined'?globalThis:this);
+(function(r){r.Atril=r.Atril||{};r.Atril.glyphs={"clef":{"d":"M0.264 0.533Q0.25 0.48 0.241 0.428Q0.232 0.376 0.232 0.322Q0.232 0.275 0.2385 0.2335Q0.245 0.192 0.257 0.157Q0.27 0.117 0.291 0.0815Q0.312 0.046 0.3355 0.023Q0.359 0 0.377 0Q0.401 0 0.443 0.085Q0.464 0.128 0.474 0.178Q0.484 0.228 0.484 0.285Q0.484 0.356 0.465 0.4265Q0.446 0.497 0.4095 0.559Q0.373 0.621 0.322 0.668L0.357 0.836Q0.372 0.834 0.382 0.833Q0.392 0.832 0.397 0.832Q0.458 0.832 0.506 0.8665Q0.554 0.901 0.5825 0.957Q0.611 1.013 0.611 1.08Q0.611 1.157 0.5715 1.2185Q0.532 1.28 0.453 1.309Q0.458 1.326 0.482 1.451Q0.488 1.481 0.491 1.4985Q0.494 1.516 0.495 1.529Q0.496 1.542 0.496 1.559Q0.496 1.609 0.4715 1.6485Q0.447 1.688 0.4055 1.71Q0.364 1.732 0.313 1.732Q0.261 1.732 0.221 1.7125Q0.181 1.693 0.158 1.6585Q0.135 1.624 0.135 1.579Q0.135 1.531 0.1615 1.499Q0.188 1.467 0.237 1.467Q0.279 1.467 0.3055 1.4975Q0.332 1.528 0.332 1.57Q0.332 1.606 0.307 1.633Q0.282 1.66 0.242 1.66H0.232Q0.258 1.699 0.314 1.699Q0.383 1.699 0.422 1.654Q0.461 1.609 0.461 1.539Q0.461 1.522 0.457 1.4935Q0.453 1.465 0.443 1.425Q0.433 1.385 0.4275 1.359Q0.422 1.333 0.42 1.322Q0.386 1.332 0.34 1.332Q0.254 1.332 0.172 1.282Q0.092 1.232 0.046 1.15Q0 1.068 0 0.973Q0 0.883 0.041 0.804Q0.082 0.725 0.1425 0.659Q0.203 0.593 0.264 0.533ZM0.291 0.508Q0.314 0.496 0.34 0.4635Q0.366 0.431 0.39 0.389Q0.414 0.347 0.429 0.3045Q0.444 0.262 0.444 0.228Q0.444 0.192 0.433 0.171Q0.422 0.15 0.395 0.15Q0.371 0.15 0.3485 0.172Q0.326 0.194 0.3085 0.2305Q0.291 0.267 0.281 0.312Q0.271 0.357 0.271 0.404Q0.271 0.436 0.2775 0.462Q0.284 0.488 0.291 0.508ZM0.445 1.279Q0.543 1.237 0.543 1.107Q0.543 1.064 0.521 1.0285Q0.499 0.993 0.462 0.972Q0.425 0.951 0.379 0.951ZM0.348 0.955Q0.321 0.961 0.297 0.9805Q0.273 1 0.2585 1.0275Q0.244 1.055 0.244 1.086Q0.244 1.111 0.257 1.1375Q0.27 1.164 0.289 1.18Q0.302 1.192 0.315 1.198Q0.33 1.205 0.33 1.211Q0.33 1.214 0.32 1.217Q0.282 1.208 0.2515 1.183Q0.221 1.158 0.2035 1.1225Q0.186 1.087 0.186 1.047Q0.186 1.004 0.2035 0.964Q0.221 0.924 0.2525 0.892Q0.284 0.86 0.324 0.844L0.295 0.693Q0.179 0.787 0.1245 0.8775Q0.07 0.968 0.07 1.057Q0.07 1.122 0.104 1.178Q0.138 1.234 0.197 1.2685Q0.256 1.303 0.33 1.303Q0.35 1.303 0.3705 1.299Q0.391 1.295 0.414 1.289Z","w":0.611,"h":1.732,"ox":-0.05,"oy":1.334},"segno":{"d":"M0.188 0.377Q0.097 0.332 0.0495 0.2785Q0.002 0.225 0.002 0.162Q0.002 0.121 0.0225 0.084Q0.043 0.047 0.0775 0.0235Q0.112 0 0.154 0Q0.202 0 0.235 0.028Q0.268 0.056 0.268 0.1Q0.268 0.122 0.2515 0.135Q0.235 0.148 0.215 0.148Q0.192 0.148 0.1795 0.139Q0.167 0.13 0.162 0.115L0.153 0.087Q0.148 0.071 0.14 0.061Q0.132 0.051 0.115 0.051Q0.093 0.051 0.078 0.0725Q0.063 0.094 0.063 0.119Q0.063 0.161 0.1 0.197Q0.137 0.232 0.25 0.279L0.432 0.006H0.486L0.293 0.299Q0.391 0.349 0.433 0.4025Q0.475 0.456 0.475 0.516Q0.475 0.559 0.455 0.5955Q0.435 0.632 0.4 0.654Q0.365 0.676 0.321 0.676Q0.27 0.676 0.2405 0.6475Q0.211 0.619 0.211 0.582Q0.211 0.559 0.225 0.545Q0.239 0.531 0.264 0.531Q0.293 0.531 0.3045 0.5455Q0.316 0.56 0.319 0.578Q0.322 0.596 0.33 0.6105Q0.338 0.625 0.357 0.625Q0.384 0.625 0.4 0.606Q0.416 0.587 0.416 0.557Q0.416 0.494 0.334 0.451Q0.293 0.43 0.267 0.4165Q0.241 0.403 0.23 0.397L0.053 0.672H0ZM0.466 0.203Q0.486 0.203 0.5005 0.2175Q0.515 0.232 0.515 0.252Q0.515 0.272 0.5005 0.2865Q0.486 0.301 0.466 0.301Q0.446 0.301 0.4315 0.2865Q0.417 0.272 0.417 0.252Q0.417 0.232 0.4315 0.2175Q0.446 0.203 0.466 0.203ZM0.053 0.377Q0.073 0.377 0.0875 0.3915Q0.102 0.406 0.102 0.426Q0.102 0.446 0.0875 0.4605Q0.073 0.475 0.053 0.475Q0.033 0.475 0.0185 0.4605Q0.004 0.446 0.004 0.426Q0.004 0.406 0.0185 0.3915Q0.033 0.377 0.053 0.377Z","w":0.515,"h":0.676,"ox":-0.05,"oy":0.839},"coda":{"d":"M0.205 0.508V0.451Q0.144 0.443 0.1055 0.396Q0.067 0.349 0.058 0.27H0V0.238H0.058Q0.067 0.16 0.104 0.113Q0.141 0.066 0.205 0.057V0H0.238V0.057Q0.303 0.066 0.3395 0.1135Q0.376 0.161 0.385 0.238H0.443V0.27H0.385Q0.376 0.349 0.338 0.396Q0.3 0.443 0.238 0.451V0.508ZM0.205 0.238V0.086Q0.178 0.087 0.162 0.108Q0.148 0.127 0.1425 0.154Q0.137 0.181 0.137 0.238ZM0.238 0.238H0.306Q0.306 0.209 0.305 0.188Q0.304 0.167 0.301 0.154Q0.295 0.128 0.281 0.1075Q0.267 0.087 0.238 0.086ZM0.238 0.27V0.422Q0.267 0.42 0.281 0.4Q0.295 0.38 0.3005 0.3535Q0.306 0.327 0.306 0.27ZM0.205 0.27H0.137Q0.137 0.298 0.138 0.3185Q0.139 0.339 0.142 0.352Q0.148 0.378 0.162 0.3995Q0.176 0.421 0.205 0.422Z","w":0.443,"h":0.508,"ox":-0.05,"oy":0.754},"rwhole":{"d":"M0 0.024V0H0.683V0.024H0.523V0.134H0.16V0.024Z","w":0.683,"h":0.134,"ox":-0.05,"oy":0.512},"rhalf":{"d":"M0 0.134V0.11H0.16V0H0.523V0.11H0.683V0.134Z","w":0.683,"h":0.134,"ox":-0.05,"oy":0.378},"rquarter":{"d":"M0.096 0 0.256 0.195Q0.206 0.254 0.179 0.297Q0.152 0.34 0.152 0.384Q0.152 0.421 0.176 0.4615Q0.2 0.502 0.252 0.564L0.236 0.586Q0.192 0.558 0.154 0.558Q0.126 0.558 0.112 0.5765Q0.098 0.595 0.098 0.621Q0.098 0.653 0.1115 0.6815Q0.125 0.71 0.148 0.736L0.135 0.755Q0.066 0.705 0.033 0.664Q0 0.623 0 0.575Q0 0.532 0.027 0.512Q0.054 0.492 0.092 0.492Q0.122 0.492 0.17 0.515V0.513L0.016 0.308Q0.117 0.219 0.117 0.142Q0.117 0.081 0.053 0Z","w":0.256,"h":0.755,"ox":-0.051,"oy":0.878},"reighth":{"d":"M0.105 0.461 0.201 0.121Q0.18 0.14 0.1535 0.148Q0.127 0.156 0.101 0.156Q0.058 0.156 0.029 0.133Q0 0.11 0 0.067Q0 0.039 0.02 0.0195Q0.04 0 0.071 0Q0.1 0 0.1185 0.0185Q0.137 0.037 0.137 0.068Q0.137 0.09 0.127 0.107Q0.127 0.113 0.139 0.113Q0.194 0.113 0.244 0.027H0.262L0.141 0.461Z","w":0.262,"h":0.461,"ox":-0.05,"oy":0.73},"rsixteenth":{"d":"M0.105 0.705 0.201 0.365Q0.18 0.384 0.1535 0.392Q0.127 0.4 0.101 0.4Q0.058 0.4 0.029 0.377Q0 0.354 0 0.311Q0 0.283 0.0195 0.2635Q0.039 0.244 0.071 0.244Q0.1 0.244 0.1185 0.2625Q0.137 0.281 0.137 0.312Q0.137 0.334 0.127 0.351Q0.127 0.357 0.139 0.357Q0.18 0.357 0.217 0.311L0.269 0.121Q0.248 0.14 0.2215 0.148Q0.195 0.156 0.169 0.156Q0.126 0.156 0.097 0.133Q0.068 0.11 0.068 0.067Q0.068 0.039 0.088 0.0195Q0.108 0 0.139 0Q0.169 0 0.187 0.019Q0.205 0.038 0.205 0.068Q0.205 0.078 0.202 0.0885Q0.199 0.099 0.195 0.107Q0.195 0.113 0.207 0.113Q0.262 0.113 0.312 0.027H0.33L0.141 0.705Z","w":0.33,"h":0.705,"ox":-0.05,"oy":0.852},"sharp":{"d":"M0.047 0.463V0.32L0 0.332V0.232L0.047 0.219V0.023H0.078V0.211L0.145 0.195V0H0.176V0.187L0.225 0.176V0.275L0.176 0.289V0.432L0.225 0.42V0.523L0.176 0.535V0.723H0.145V0.543L0.078 0.561V0.756H0.047V0.568L0 0.58V0.477ZM0.145 0.439V0.295L0.078 0.312V0.455Z","w":0.225,"h":0.756,"ox":-0.05,"oy":0.509},"flat":{"d":"M0 0H0.031V0.39Q0.068 0.353 0.115 0.353Q0.147 0.353 0.173 0.3745Q0.199 0.396 0.199 0.437Q0.199 0.469 0.18 0.496Q0.161 0.523 0.129 0.55L0.06 0.609Q0.041 0.625 0.026 0.6405Q0.011 0.656 0 0.67ZM0.031 0.603Q0.057 0.575 0.075 0.5515Q0.093 0.528 0.103 0.51Q0.114 0.491 0.1195 0.475Q0.125 0.459 0.125 0.445Q0.125 0.417 0.112 0.4045Q0.099 0.392 0.084 0.392Q0.068 0.392 0.0525 0.4035Q0.037 0.415 0.031 0.435Z","w":0.199,"h":0.67,"ox":-0.05,"oy":0.615},"natural":{"d":"M0.176 0.17V0.707H0.145V0.495L0 0.532V0H0.033V0.207ZM0.147 0.402V0.274L0.031 0.303V0.43Z","w":0.176,"h":0.707,"ox":-0.05,"oy":0.486},"quarter":{"d":"M0.299 -0V0.836Q0.299 0.879 0.2705 0.916Q0.242 0.953 0.197 0.9755Q0.152 0.998 0.102 0.998Q0.056 0.998 0.028 0.9745Q0 0.951 0 0.911Q0 0.88 0.018 0.851Q0.036 0.822 0.0655 0.7985Q0.095 0.775 0.13 0.7615Q0.165 0.748 0.199 0.748Q0.242 0.748 0.273 0.773V-0Z","w":0.299,"h":0.998,"ox":-0.051,"oy":1.009},"flag8":{"d":"M0 -0H0.026Q0.033 0.041 0.0415 0.0725Q0.05 0.104 0.0665 0.1335Q0.083 0.163 0.112 0.197L0.152 0.244Q0.178 0.273 0.202 0.305Q0.274 0.398 0.274 0.498Q0.274 0.602 0.186 0.75H0.17Q0.199 0.691 0.221 0.6315Q0.243 0.572 0.243 0.518Q0.243 0.491 0.235 0.4625Q0.227 0.434 0.212 0.404Q0.181 0.343 0.125 0.3045Q0.069 0.266 0 0.266Z","w":0.274,"h":0.75,"ox":0.0,"oy":1.009},"flag16":{"d":"M0 -0H0.026Q0.03 0.035 0.0385 0.0585Q0.047 0.082 0.06 0.102Q0.077 0.127 0.0985 0.1435Q0.12 0.16 0.146 0.186Q0.176 0.215 0.2055 0.252Q0.235 0.289 0.2545 0.3345Q0.274 0.38 0.274 0.436Q0.274 0.458 0.271 0.4815Q0.268 0.505 0.26 0.531Q0.286 0.569 0.286 0.641Q0.286 0.689 0.2735 0.7365Q0.261 0.784 0.235 0.818H0.219Q0.266 0.726 0.266 0.658Q0.266 0.593 0.22 0.538Q0.19 0.501 0.1505 0.472Q0.111 0.443 0.0715 0.4235Q0.032 0.404 0 0.396ZM0.032 0.186Q0.032 0.211 0.0385 0.2355Q0.045 0.26 0.056 0.282Q0.064 0.296 0.0875 0.326Q0.111 0.356 0.145 0.39Q0.181 0.424 0.2115 0.457Q0.242 0.49 0.247 0.504Q0.251 0.489 0.251 0.462Q0.251 0.386 0.202 0.319Q0.153 0.252 0.032 0.186Z","w":0.286,"h":0.818,"ox":0.0,"oy":1.009},"bclef":{"d":"M0 0.777Q0.166 0.669 0.238 0.599Q0.286 0.552 0.323 0.4915Q0.36 0.431 0.3815 0.364Q0.403 0.297 0.403 0.231Q0.403 0.172 0.385 0.1265Q0.367 0.081 0.333 0.055Q0.299 0.029 0.252 0.029Q0.234 0.029 0.2145 0.033Q0.195 0.037 0.174 0.045Q0.131 0.061 0.108 0.0865Q0.085 0.112 0.085 0.135Q0.085 0.144 0.093 0.148Q0.101 0.152 0.108 0.152Q0.118 0.152 0.133 0.148Q0.14 0.146 0.1465 0.145Q0.153 0.144 0.16 0.144Q0.198 0.144 0.222 0.1665Q0.246 0.189 0.246 0.226Q0.246 0.262 0.216 0.288Q0.186 0.314 0.145 0.314Q0.096 0.314 0.061 0.283Q0.026 0.252 0.026 0.203Q0.026 0.144 0.059 0.098Q0.092 0.052 0.1485 0.026Q0.205 0 0.274 0Q0.35 0 0.41 0.033Q0.47 0.066 0.5055 0.1235Q0.541 0.181 0.541 0.254Q0.541 0.349 0.488 0.436Q0.461 0.481 0.4265 0.521Q0.392 0.561 0.339 0.6025Q0.286 0.644 0.206 0.692Q0.126 0.74 0.007 0.799ZM0.637 0.091Q0.66 0.091 0.676 0.107Q0.692 0.123 0.692 0.146Q0.692 0.169 0.676 0.1845Q0.66 0.2 0.637 0.2Q0.614 0.2 0.598 0.1845Q0.582 0.169 0.582 0.146Q0.582 0.123 0.598 0.107Q0.614 0.091 0.637 0.091ZM0.637 0.311Q0.66 0.311 0.676 0.327Q0.692 0.343 0.692 0.366Q0.692 0.389 0.676 0.4045Q0.66 0.42 0.637 0.42Q0.614 0.42 0.598 0.4045Q0.582 0.389 0.582 0.366Q0.582 0.343 0.598 0.327Q0.614 0.311 0.637 0.311Z","w":0.692,"h":0.799,"ox":-0.05,"oy":0.9}};})(typeof globalThis!=='undefined'?globalThis:this);
 
 /* ==== src/theory.js ==== */
 /* Atril · teoría musical: cifrado, transposición, armaduras, acordes diatónicos */
@@ -777,7 +783,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
   const T = A.theory || (typeof require !== 'undefined' ? require('./theory.js') : null);
 
   const BAR_RE = /:\|\|:|\|\|:|:\|\||\|\||\|:|:\||\|\.|\|/g;
-  const RH_RE = /^([rx]?)([whqes]?)(\.?)([~>^'_]*)$/;
+  const RH_RE = /^([rx]?)([whqes]?)(\.?)([~>^'_+]*)$/;
   const DURS = { w: 4, h: 2, q: 1, e: 0.5, s: 0.25 };
 
   const closeOf = (b) =>
@@ -807,7 +813,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     const toks = [];
     const tokPos = [];
     {
-      const re = /_?"[^"]*"(?:@[rc])?|\S+/g;
+      const re = /_?"[^"]*"(?:@[rc])?(?::\d+(?:\.\d+)?)?(?:\*\d+(?:\.\d+)?)?|\S+/g;
       let mt;
       while ((mt = re.exec(content))) { toks.push(mt[0]); tokPos.push(off + mt.index); }
     }
@@ -818,16 +824,18 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     toks.forEach((tk, ti) => {
       let m;
       const src = { line, a: tokPos[ti], b: tokPos[ti] + tk.length };
-      if ((m = /^(_?)"([^"]*)"(?:@([rc]))?$/.exec(tk))) {
-        const n = { text: m[2], align: m[3] === 'r' ? 'right' : m[3] === 'c' ? 'center' : 'left' };
+      if ((m = /^(_?)"([^"]*)"(?:@([rc]))?(?::(\d+(?:\.\d+)?))?(?:\*(\d+(?:\.\d+)?))?$/.exec(tk))) {
+        const n = { text: m[2], align: m[3] === 'r' ? 'right' : m[3] === 'c' ? 'center' : 'left', t: m[4] ? Math.max(0, (parseFloat(m[4]) - 1) * tm.slotLen) : null, size: Math.max(0.4, Math.min(4, m[5] ? parseFloat(m[5]) : 1)), src };
         (m[1] ? bar.below : bar.above).push(n);
-      } else if ((m = /^@(segno|coda)$/.exec(tk))) {
-        bar.markers.push(m[1]);
+      } else if ((m = /^@(segno|coda)(?::(\d+(?:\.\d+)?))?(?:\*(\d+(?:\.\d+)?))?$/.exec(tk))) {
+        bar.markers.push({ k: m[1], t: m[2] ? Math.max(0, (parseFloat(m[2]) - 1) * tm.slotLen) : null, size: Math.max(0.4, Math.min(4, m[3] ? parseFloat(m[3]) : 1)), src });
       } else if ((m = /^\{([^}]+)\}$/.exec(tk))) {
         const v = m[1].trim();
         bar.volta = /^[\d,\s-]+$/.test(v) ? v.replace(/\s+/g, '') + '.' : v;
       } else if ((m = /^T(\d+)\/(\d+)$/.exec(tk))) {
         bar.tsChange = { num: +m[1], den: +m[2] };
+      } else if (/^K:[A-G][#b]?m?$/.test(tk) || /^Clef:(bass|treble)$/.test(tk)) {
+        /* cambio de tonalidad o de clave: lo resuelve parseChart */
       } else if (tk === '%') {
         bar.mode = 'simile';
       } else if (tk === '.') {
@@ -846,7 +854,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
             dur: base * (dots ? 1.5 : 1), base, dots,
             type: m[1] === 'r' ? 'rest' : m[1] === 'x' ? 'x' : 'slash',
             accent: mods.includes('>') ? '>' : mods.includes('^') ? '^' : null,
-            stac: mods.includes("'"), tie: mods.includes('~'), down: mods.includes('_'), src,
+            stac: mods.includes("'"), tie: mods.includes('~'), down: !mods.includes('+'), src,
           },
         });
       } else {
@@ -917,7 +925,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     const warnings = [];
     const lines = [];
     let idx = 0;
-    const cur = { num: (base && base.num) || 4, den: (base && base.den) || 4 };
+    const cur = { num: (base && base.num) || 4, den: (base && base.den) || 4, key: (base && base.key) || 'C', mode: (base && base.mode) === 'min' ? 'min' : 'maj', clef: 'treble' };
     let lastBar = null;
 
     String(text || '').split(/\r?\n/).forEach((raw, li) => {
@@ -959,8 +967,18 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
         // un T3/4 dentro del compás cambia el compás de aquí en adelante
         const pre = /(?:^|\s)T(\d+)\/(\d+)(?=\s|$)/.exec(segs[i]);
         if (pre) { cur.num = +pre[1]; cur.den = +pre[2]; }
+        const km = /(?:^|\s)K:([A-G][#b]?)(m?)(?=\s|$)/.exec(segs[i]);
+        const cm = /(?:^|\s)Clef:(bass|treble)(?=\s|$)/.exec(segs[i]);
+        const prevKey = { name: cur.key, mode: cur.mode };
+        const prevClef = cur.clef;
+        if (km) { cur.key = km[1]; cur.mode = km[2] ? 'min' : 'maj'; }
+        if (cm) cur.clef = cm[1];
         const bar = parseBar(segs[i], { ts: { num: cur.num, den: cur.den }, idx, line: lineNo, warnings, off: segOff[i] });
         bar.seg = { line: lineNo, a: segOff[i], b: segOff[i] + segs[i].length };
+        bar.key = { name: cur.key, mode: cur.mode };
+        bar.clef = cur.clef;
+        bar.keyChange = km ? prevKey : null;
+        bar.clefChange = cm ? prevClef : null;
         bar.lb = openOf(i > 0 ? bounds[i - 1] : null);
         bar.rb = closeOf(i < bounds.length ? bounds[i] : null);
         bars.push(bar);
@@ -970,7 +988,12 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     });
 
     if (lastBar && lastBar.rb === 'single') lastBar.rb = 'final';
-    const sections = lines.filter((l) => l.kind === 'section').map((l) => l.name);
+    // solo cuentan las secciones que tienen compases escritos debajo
+    const sections = [];
+    lines.forEach((l, i) => {
+      if (l.kind !== 'section') return;
+      for (let j = i + 1; j < lines.length && lines[j].kind !== 'section'; j++) if (lines[j].kind === 'bars') { sections.push(l.name); return; }
+    });
     return { lines, warnings, barCount: idx, sections };
   }
 
@@ -1187,6 +1210,14 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     const latin = cfg.notation === 'latin';
     const ink = th.ink;
     const keyText = keyName + (meta.mode === 'min' ? 'm' : '');
+    const bFifths = (b) => (b && b.key ? T.keyFifths(T.transposeKey(b.key.name, b.key.mode, n, accPref), b.key.mode) : fifths);
+    const pFifths = (kc) => (kc ? T.keyFifths(T.transposeKey(kc.name, kc.mode, n, accPref), kc.mode) : 0);
+    const sigList = (f, clef) => T.keySignature(f).map((k) => ({ k: k.k, step: clef === 'bass' ? (k.step - 2 < 0 ? k.step + 5 : k.step - 2) : k.step }));
+    const cancelList = (pf, nf, clef) => {
+      const keep = pf !== 0 && nf !== 0 && Math.sign(pf) === Math.sign(nf) ? Math.min(Math.abs(pf), Math.abs(nf)) : 0;
+      if (Math.abs(nf) > Math.abs(pf) && Math.sign(pf) === Math.sign(nf)) return [];
+      return sigList(pf, clef).slice(keep);
+    };
     const origKeyText = meta.key + (meta.mode === 'min' ? 'm' : '');
 
     /* ---------- filas (independientes de la escala) ---------- */
@@ -1233,9 +1264,13 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
       return items;
     }
     const rows = buildRows();
-    const sectionSeq = parsed.lines
-      .filter((l) => l.kind === 'section')
-      .map((l) => ({ name: l.name, key: TH.sectionKey(l.name) }));
+    const sectionSeq = [];
+    parsed.lines.forEach((l, i) => {
+      if (l.kind !== 'section') return;
+      for (let j = i + 1; j < parsed.lines.length && parsed.lines[j].kind !== 'section'; j++) {
+        if (parsed.lines[j].kind === 'bars') { sectionSeq.push({ name: l.name, key: TH.sectionKey(l.name) }); return; }
+      }
+    });
 
     /* ---------- construcción de páginas para una escala ---------- */
     function build(S) {
@@ -1318,7 +1353,18 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
       /* ---- medidas de compás ---- */
       const lbX = (b) => (b.lb === 'repeat' ? 11 * S : b.lb === 'double' ? 3 * S : 0);
       const rbX = (b) => (b.rb === 'repeat' ? 11 * S : b.rb === 'final' ? 6 * S : b.rb === 'double' ? 3 * S : 0);
-      const tsX = (b) => (b.tsChange && b.idx !== 1 ? 3.6 * sp : 0);
+      const chgParts = (b) => {
+        if (b.idx === 1) return { clef: 0, key: 0, ts: 0 };
+        const o = { clef: 0, key: 0, ts: b.tsChange ? 3.6 * sp : 0 };
+        if (five && b.clefChange) o.clef = (b.clef === 'bass' ? G.bclef.w : G.clef.w) * 4 * sp * 0.82 + 1.0 * sp;
+        if (five && b.keyChange) {
+          const nf = bFifths(b);
+          const pf = pFifths(b.keyChange);
+          o.key = (cancelList(pf, nf, b.clef).length + Math.abs(nf)) * 1.2 * sp + 0.8 * sp;
+        }
+        return o;
+      };
+      const tsX = (b) => { const o = chgParts(b); return o.clef + o.key + o.ts; };
       const minMap = new Map();
       function barMin(bar) {
         if (minMap.has(bar)) return minMap.get(bar);
@@ -1354,7 +1400,9 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
         if (five) {
           const em = 4 * sp;
           w = 0.7 * sp + G.clef.w * em + 1.0 * sp;
-          if (fifths) w += Math.abs(fifths) * 1.2 * sp + 1.0 * sp;
+          const bf = bFifths(bar);
+          w = w - G.clef.w * em + (bar.clef === 'bass' ? G.bclef.w : G.clef.w) * em;
+          if (bf) w += Math.abs(bf) * 1.2 * sp + 1.0 * sp;
           if (showTs) w += 4.4 * sp;
         } else {
           w = showTs ? 0.8 * sp + 3.4 * sp + 0.8 * sp : 1.4 * sp;
@@ -1680,11 +1728,14 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
         const hasBelow = bars.some((b) => b.below.length);
         const hLabel = sys.label ? 18 * S : 0;
         const hVolta = hasVolta ? 12 * S : 0;
-        const hAbove = hasMark ? 16 * S : hasAbove ? 11 * S : 0;
+        const mSz = Math.max(1, ...bars.flatMap((b) => b.markers.map((m) => m.size)));
+        const aSz = Math.max(1, ...bars.flatMap((b) => b.above.map((m) => m.size)));
+        const bSz = Math.max(1, ...bars.flatMap((b) => b.below.map((m) => m.size)));
+        const hAbove = Math.max(hasMark ? 16 * S * mSz : 0, hasAbove ? 11 * S * aSz : 0);
         const hChord = chordPx * 0.92 + 2.0 * sp;
         const hasDown = bars.some((b) => b.mode === 'explicit' && b.notes.some((nn) => nn.down && nn.type !== 'rest' && nn.type !== 'plain' && nn.base <= 2));
-        const hDown = hasDown ? 3.4 * sp : 0;
-        const hBelow = (hasBelow ? 12 * S : 3 * S) + hDown;
+        const hDown = hasDown ? 1.3 * sp : 0;
+        const hBelow = (hasBelow ? 12 * S * bSz : 3 * S) + hDown;
         const hAll = hLabel + hVolta + hAbove + hChord + 4 * sp + hBelow + 11 * S;
         const pos = reserve(hAll, sys.label ? 6 * S : 0);
         const pg = pages.length - 1;
@@ -1756,15 +1807,22 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
         if (five) {
           const em = 4 * sp;
           const cg = G.clef;
-          ops.push({ t: 'glyph', g: 'clef', x: hx, y: staffBottom - sp - cg.oy * em, h: cg.h * em, color: ink });
-          hx += cg.w * em + 1.0 * sp;
-          T.keySignature(fifths).forEach((k) => {
+          if (first.clef === 'bass') {
+            const bg = G.bclef;
+            ops.push({ t: 'glyph', g: 'bclef', x: hx, y: staffTop - 0.05 * sp, h: bg.h * em, color: ink });
+            hx += bg.w * em + 1.0 * sp;
+          } else {
+            ops.push({ t: 'glyph', g: 'clef', x: hx, y: staffBottom - sp - cg.oy * em, h: cg.h * em, color: ink });
+            hx += cg.w * em + 1.0 * sp;
+          }
+          const ff = bFifths(first);
+          sigList(ff, first.clef).forEach((k) => {
             const h = G[k.k].h * 4 * sp;
             const cy = staffBottom - k.step * (sp / 2);
             ops.push({ t: 'acc', k: k.k, x: hx, y: cy, h, color: ink });
             hx += 1.2 * sp;
           });
-          if (fifths) hx += 1.0 * sp;
+          if (ff) hx += 1.0 * sp;
         } else hx += 0.2 * sp;
         if (head.showTs) {
           const numFont = tsFont(3.1 * sp);
@@ -1793,7 +1851,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
         const allNotes = [];
         geo.forEach((g, i) => {
           const b = g.bar;
-          const cl = g.x + lbX(b) + tsX(b);
+          const cl = g.x + lbX(b) + (i > 0 ? tsX(b) : 0);
           const cr = g.x + g.w - rbX(b);
           const innerW = cr - cl - padL - padR;
           const xs = (t) => cl + padL + (t / b.len) * innerW;
@@ -1808,9 +1866,29 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
             else if (b.mode === 'auto') { const n = Math.max(1, Math.round(b.slots)); for (let j = 0; j < n; j++) g.bb.slots.push(xs(j * b.slotLen)); }
           }
 
-          if (b.tsChange && b.idx !== 1 && (i > 0 || !head.showTs)) {
+          if (i > 0 && b.idx !== 1 && (b.clefChange || b.keyChange) && five) {
+            let cx2 = g.x + lbX(b) + 0.5 * sp;
+            const emc = 4 * sp;
+            if (b.clefChange) {
+              if (b.clef === 'bass') { ops.push({ t: 'glyph', g: 'bclef', x: cx2, y: staffTop - 0.05 * sp, h: G.bclef.h * emc, color: ink }); cx2 += G.bclef.w * emc + 1.0 * sp; }
+              else { ops.push({ t: 'glyph', g: 'clef', x: cx2, y: staffBottom - sp - G.clef.oy * emc, h: G.clef.h * emc, color: ink }); cx2 += G.clef.w * emc + 1.0 * sp; }
+            }
+            if (b.keyChange) {
+              const nf = bFifths(b);
+              cancelList(pFifths(b.keyChange), nf, b.clef).forEach((k) => {
+                ops.push({ t: 'acc', k: 'natural', x: cx2, y: staffBottom - k.step * (sp / 2), h: G.natural.h * emc, color: ink });
+                cx2 += 1.2 * sp;
+              });
+              sigList(nf, b.clef).forEach((k) => {
+                ops.push({ t: 'acc', k: k.k, x: cx2, y: staffBottom - k.step * (sp / 2), h: G[k.k].h * emc, color: ink });
+                cx2 += 1.2 * sp;
+              });
+            }
+          }
+          if (b.tsChange && b.idx !== 1 && i > 0) {
             const numFont = tsFont(3.1 * sp);
-            const cxn = g.x + lbX(b) + 1.8 * sp;
+            const pp = chgParts(b);
+            const cxn = g.x + lbX(b) + pp.clef + pp.key + 1.8 * sp;
             if (five) {
               ops.push({ t: 'text', x: cxn, y: staffTop + 2 * sp, s: String(b.num), font: numFont, color: ink, align: 'center' });
               ops.push({ t: 'text', x: cxn, y: staffBottom, s: String(b.den), font: numFont, color: ink, align: 'center' });
@@ -1842,8 +1920,8 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
             const evs = b.notes;
             const SW = 0.17 * sp; // grosor de plica
             const BT = 0.6 * sp; // grosor de barra
-            const tipUp = mid - 3.5 * sp;
-            const tipDown = mid + 3.5 * sp;
+            const tipUp = mid - 3.4 * sp;
+            const tipDown = mid + 3.4 * sp;
             const beat = b.slotLen;
             /* grupos de barra (una corchea o menos, dentro del mismo pulso) */
             const groups = [];
@@ -1948,18 +2026,25 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
 
           /* notas de texto */
           const aFont = noteFont(9 * S);
-          b.above.forEach((nn) => {
-            const ax = nn.align === 'right' ? cr - padR : nn.align === 'center' ? (cl + cr) / 2 : cl + padL;
-            ops.push({ t: 'text', x: ax, y: yAbove + hAbove - 3 * S, s: nn.text, font: aFont, color: ink, align: nn.align });
-          });
-          b.below.forEach((nn) => {
-            const ax = nn.align === 'right' ? cr - padR : nn.align === 'center' ? (cl + cr) / 2 : cl + padL;
-            ops.push({ t: 'text', x: ax, y: staffBottom + 9.5 * S + hDown, s: nn.text, font: aFont, color: ink, align: nn.align });
-          });
+          const putText = (nn, yb) => {
+            const ax = nn.t != null ? xs(nn.t) : nn.align === 'right' ? cr - padR : nn.align === 'center' ? (cl + cr) / 2 : cl + padL;
+            const f = nn.size === 1 ? aFont : noteFont(9 * S * nn.size);
+            ops.push({ t: 'text', x: ax, y: yb, s: nn.text, font: f, color: ink, align: nn.align });
+            if (nn.src) {
+              const tw = txtW(nn.text, f, 0);
+              const x0 = nn.align === 'right' ? ax - tw : nn.align === 'center' ? ax - tw / 2 : ax;
+              hits.push({ pg, x: x0 - 2, y: yb - 9 * S * nn.size, w: tw + 4, h: 11 * S * nn.size, line: nn.src.line, a: nn.src.a, b: nn.src.b, kind: 'mark', grp: [nn.src] });
+            }
+          };
+          b.above.forEach((nn) => putText(nn, yAbove + hAbove - 3 * S));
+          b.below.forEach((nn) => putText(nn, staffBottom + 9.5 * S * nn.size + hDown));
           b.markers.forEach((mk, mi) => {
-            const gl = G[mk];
-            const hh = (mk === 'segno' ? 13 : 11.5) * S;
-            ops.push({ t: 'glyph', g: mk, x: cl + padL + mi * (gl.w / gl.h * hh + 4 * S), y: yAbove + (hAbove - hh) / 2, h: hh, color: ink });
+            const gl = G[mk.k];
+            const hh = (mk.k === 'segno' ? 13 : 11.5) * S * mk.size;
+            const mx = mk.t != null ? xs(mk.t) + 0.3 * sp : cl + padL + mi * (gl.w / gl.h * hh + 4 * S);
+            const my = yAbove + hAbove - hh - 1.5 * S;
+            ops.push({ t: 'glyph', g: mk.k, x: mx, y: my, h: hh, color: ink });
+            if (mk.src) hits.push({ pg, x: mx - 2, y: my - 2, w: gl.w / gl.h * hh + 4, h: hh + 4, line: mk.src.line, a: mk.src.a, b: mk.src.b, kind: 'mark', grp: [mk.src] });
           });
         });
 
@@ -2645,6 +2730,11 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
 
   /* ---------- barras de herramientas ---------- */
   const SECS = [['Intro', 'intro'], ['Verso', 'verso'], ['Pre Coro', 'precoro'], ['Coro', 'coro'], ['Puente', 'puente'], ['Solo', 'solo'], ['Re Intro', 'inter'], ['Final', 'final']];
+  function glyphSvg(k) {
+    const g = At.glyphs[k];
+    const h = 24;
+    return '<svg viewBox="0 0 ' + g.w + ' ' + g.h + '" height="' + h + '" width="' + Math.round(h * g.w / g.h) + '" aria-hidden="true"><path d="' + g.d + '" fill="currentColor"/></svg>';
+  }
   function buildTools() {
     const secs = $('#t-secs');
     SECS.forEach(([name, key]) => {
@@ -2653,7 +2743,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
       b.className = 'chip sec';
       b.style.setProperty('--sc', 'var(--c-' + key + ')');
       b.textContent = name;
-      b.addEventListener('click', () => insertSection(name));
+      b.addEventListener('click', () => (cur ? placeSection(name) : insertSection(name)));
       secs.appendChild(b);
     });
     const mk = (host, items) => items.forEach(([label, text, tip, cls]) => {
@@ -2662,7 +2752,11 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
       b.className = 'chip ' + (cls || 'mono');
       b.textContent = label;
       b.title = tip;
-      b.addEventListener('click', () => (host === '#t-mk' ? insertInBar(text) : insertText(text)));
+      if (host === '#t-mk' && (label === 'segno' || label === 'coda')) { b.innerHTML = glyphSvg(label); b.setAttribute('aria-label', tip); b.classList.add('glyph'); }
+      b.addEventListener('click', () => {
+        if (cur) { if (host === '#t-bars') placeBarline(label); else placeMark(label); return; }
+        if (host === '#t-mk') insertInBar(text); else insertText(text);
+      });
       $(host).appendChild(b);
     });
     mk('#t-bars', [['|', ' | ', 'Barra de compás'], ['||', ' || ', 'Doble barra'], ['|:', ' |: ', 'Inicio de repetición'], [':|', ' :| ', 'Fin de repetición'], ['|.', ' |.', 'Barra final']]);
@@ -2698,7 +2792,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
         b.title = tip;
         b.setAttribute('aria-label', tip);
         b.innerHTML = figIcon(kind) + '<small>' + esc(label) + '</small>';
-        b.addEventListener('click', () => insertText(text));
+        b.addEventListener('click', () => (cur ? placeFigure(kind) : insertText(text)));
         row.appendChild(b);
       });
       host.appendChild(row);
@@ -2717,7 +2811,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
       b.className = 'chip deg';
       b.innerHTML = '<small>' + esc(d.rom) + '</small><b>' + esc(d.text) + '</b>';
       b.title = 'Insertar ' + d.text;
-      b.addEventListener('click', () => insertText(' ' + d.text + ' '));
+      b.addEventListener('click', () => (cur ? placeChord(d.text) : insertText(' ' + d.text + ' ')));
       host.appendChild(b);
     });
   }
@@ -2725,14 +2819,14 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
   /* ---------- editor ---------- */
   const src = $('#src');
   const hl = $('#hl');
-  const SPLIT = /(\s+|:\|\|:|\|\|:|:\|\||\|\||\|:|:\||\|\.|\||_?"[^"]*"(?:@[rc])?)/;
-  const RH = /^([rx]?)([whqes]?)(\.?)([~>^'_]*)$/;
+  const SPLIT = /(\s+|:\|\|:|\|\|:|:\|\||\|\||\|:|:\||\|\.|\||_?"[^"]*"(?:@[rc])?(?::\d+(?:\.\d+)?)?(?:\*\d+(?:\.\d+)?)?)/;
+  const RH = /^([rx]?)([whqes]?)(\.?)([~>^'_+]*)$/;
   function classify(p) {
     if (!p) return '';
     if (/^\s+$/.test(p)) return p;
     if (/^(:\|\|:|\|\|:|:\|\||\|\||\|:|:\||\|\.|\|)$/.test(p)) return '<span class="bar">' + esc(p) + '</span>';
     if (/^_?"/.test(p)) return '<span class="txt">' + esc(p) + '</span>';
-    if (/^(@(segno|coda)|\{[^}]*\}|T\d+\/\d+)$/.test(p)) return '<span class="mk">' + esc(p) + '</span>';
+    if (/^(@(segno|coda)(?::[\d.]+)?(?:\*[\d.]+)?|\{[^}]*\}|T\d+\/\d+|K:[A-G][#b]?m?|Clef:(bass|treble))$/.test(p)) return '<span class="mk">' + esc(p) + '</span>';
     if (p === '/' || p === '%' || p === '.') return '<span class="rh">' + esc(p) + '</span>';
     const m = RH.exec(p);
     if (m && (m[1] || m[2])) return '<span class="rh">' + esc(p) + '</span>';
@@ -2856,7 +2950,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
   let renderT = 0;
 
   function computeLayout() {
-    const parsed = At.parser.parseChart(doc.text, { num: doc.meta.num, den: doc.meta.den });
+    const parsed = At.parser.parseChart(doc.text, pbase());
     const cfg = {
       theme: TH.themes[doc.view.theme] || TH.themes.estudio, meta: doc.meta, orient: doc.view.orient, transpose: doc.view.transpose,
       acc: doc.view.acc, bpl: doc.view.bpl, size: doc.view.size / 100, fit: doc.view.fit, showMap: doc.view.showMap, staff: doc.view.staff, cols: doc.view.cols, notation: doc.view.notation, chordFont: doc.view.chordFont, stroke: doc.view.stroke, hollowStyle: doc.view.hollow, secColors: doc.view.secColors, titleFont: doc.view.titleFont, labelFont: doc.view.labelFont, textFont: doc.view.textFont, headerFont: doc.view.headerFont, sizeKey: doc.view.sizeKey, sizeTempo: doc.view.sizeTempo, sizeTs: doc.view.sizeTs,
@@ -3011,17 +3105,18 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
   let selEl = null;
   let clip = '';
   const hitsOf = () => (result ? result.res.hits || [] : []);
-  const selHit = () => (sel ? hitsOf().find((h) => (h.kind === 'note' || h.kind === 'chord') && h.line === sel.line && h.a === sel.a) : null);
+  const selHit = () => (sel ? hitsOf().find((h) => (h.kind === 'note' || h.kind === 'chord' || h.kind === 'mark') && h.line === sel.line && h.a === sel.a) : null);
   const lineStart = (n) => { const ls = src.value.split('\n'); let o = 0; for (let i = 0; i < n - 1; i++) o += ls[i].length + 1; return o; };
   function drawSel() {
     if (selEl) { selEl.remove(); selEl = null; }
+    syncChg();
     const bar = $('#selbar');
     const h = selHit();
     const figBtns = ['#sel-flip', '#sel-copy', '#sel-paste'];
     if (!h) {
       if (sel) sel = null;
       if (cur) {
-        figBtns.forEach((q) => { $(q).style.display = 'none'; });
+        figBtns.concat(['#sel-sm', '#sel-big', '#sel-del']).forEach((q) => { $(q).style.display = 'none'; });
         $('#sel-name').textContent = 'Compás ' + cur.idx + ' · tiempo ' + (cur.slot + 1);
         $('#sel-help').style.display = '';
         bar.classList.add('on');
@@ -3029,6 +3124,9 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
       return;
     }
     figBtns.forEach((q) => { $(q).style.display = ''; });
+    const isMark = h.kind === 'mark';
+    ['#sel-copy', '#sel-paste'].forEach((q) => { $(q).style.display = isMark ? 'none' : ''; });
+    ['#sel-sm', '#sel-big', '#sel-del'].forEach((q) => { $(q).style.display = isMark ? '' : 'none'; });
     $('#sel-help').style.display = 'none';
     const box = pagesEl.children[h.pg] && pagesEl.children[h.pg].firstChild;
     if (!box) return;
@@ -3042,7 +3140,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     selEl.style.height = h.h * k + 'px';
     box.appendChild(selEl);
     const tok = src.value.split('\n')[h.line - 1].slice(h.a, h.b);
-    $('#sel-name').textContent = (h.kind === 'chord' ? 'Acorde ' : 'Figura ') + tok;
+    $('#sel-name').textContent = (h.kind === 'chord' ? 'Acorde ' : h.kind === 'mark' ? (/^@/.test(tok) ? 'Signo ' : 'Texto ') : 'Figura ') + tok;
     $('#sel-flip').style.display = h.kind === 'note' ? '' : 'none';
     bar.classList.add('on');
   }
@@ -3062,7 +3160,8 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
   let cur = null; // { idx: n.º de compás, slot: tiempo (o figura) dentro del compás }
   let slotEl = null;
   let entry = null;
-  const parseNow = () => At.parser.parseChart(src.value, { num: doc.meta.num, den: doc.meta.den });
+  const pbase = () => ({ num: doc.meta.num, den: doc.meta.den, key: doc.meta.key, mode: doc.meta.mode });
+  const parseNow = () => At.parser.parseChart(src.value, pbase());
   const flatBars = (parsed) => { const o = []; parsed.lines.forEach((l, li) => { if (l.kind === 'bars') l.bars.forEach((b) => o.push({ b, li })); }); return o; };
   const boxOf = (idx) => ((result && result.res.barBoxes) || []).find((q) => q.idx === idx);
   const nSlots = (b) => (b.mode === 'explicit' ? b.notes.length : Math.max(1, Math.round(b.slots)));
@@ -3110,8 +3209,8 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     pgEl.appendChild(slotEl);
   }
   /* -- texto del compás: separar en fichas -- */
-  const tokenize = (txt) => { const re = /_?"[^"]*"(?:@[rc])?|\S+/g; const o = []; let m; while ((m = re.exec(txt))) o.push({ s: m[0], i: m.index, e: m.index + m[0].length }); return o; };
-  const isOther = (t) => /^(_?"|@|\{|T\d|%$|\/$)/.test(t) || (RH.test(t) && (RH.exec(t)[1] || RH.exec(t)[2]));
+  const tokenize = (txt) => { const re = /_?"[^"]*"(?:@[rc])?(?::\d+(?:\.\d+)?)?(?:\*\d+(?:\.\d+)?)?|\S+/g; const o = []; let m; while ((m = re.exec(txt))) o.push({ s: m[0], i: m.index, e: m.index + m[0].length }); return o; };
+  const isOther = (t) => /^(_?"|@|\{|T\d|K:|Clef:|%$|\/$)/.test(t) || (RH.test(t) && (RH.exec(t)[1] || RH.exec(t)[2]));
   const isChordTok = (t) => t === '.' || (!isOther(t) && !!At.theory.parseChord(t.replace(/:\d+(\.\d+)?$/, '')));
   const chordTxt = (c, bar, segTxt) => segTxt.slice(c.src.a - bar.seg.a, c.src.b - bar.seg.a).replace(/:\d+(\.\d+)?$/, '');
   function chordAt(bar, slot) {
@@ -3196,7 +3295,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
   /* -- figuras con el teclado: 3 semicorchea · 4 corchea · 5 negra · 6 blanca · 7 redonda (Mayús = silencio) · punto = puntillo -- */
   const DURV = { w: 4, h: 2, q: 1, e: 0.5, s: 0.25 };
   const LET_OF = { 4: 'w', 2: 'h', 1: 'q', 0.5: 'e', 0.25: 's' };
-  const RHT = /^([rx]?)([whqes]?)(\.?)([~>^'_]*)$/;
+  const RHT = /^([rx]?)([whqes]?)(\.?)([~>^'_+]*)$/;
   const isRhTok = (t) => t === '/' || (RHT.test(t) && !!(RHT.exec(t)[1] || RHT.exec(t)[2]));
   function rhythmEdit(idx, slot, op) {
     const e = flatBars(parseNow()).find((q) => q.b.idx === idx);
@@ -3229,13 +3328,22 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     const s0 = Math.max(0, Math.min(items.length - 1, slot));
     const old = items[s0].rh;
     let tok;
-    if (op.dot) {
+    if (op.mod) {
+      let m;
+      if (old === '/') { const lt = LET_OF[sl]; if (!lt) { showToast('Primero escribí una figura en ese tiempo.'); return false; } m = ['', '', lt, '', '']; }
+      else m = RHT.exec(old);
+      let mods = m[4] || '';
+      if (mods.includes(op.mod)) mods = mods.replace(op.mod, '');
+      else { if (op.mod === '>') mods = mods.replace('^', ''); if (op.mod === '^') mods = mods.replace('>', ''); mods += op.mod; }
+      tok = (old === '/' ? '' : m[1]) + (old === '/' ? m[2] : m[2] || 'q') + (old === '/' ? '' : m[3] || '') + mods;
+    } else if (op.slash) tok = '/';
+    else if (op.dot) {
       let m;
       if (old === '/') { const lt = LET_OF[sl]; if (!lt) { showToast('Acá el puntillo no se puede aplicar a un slash. Escribí primero una figura.'); return false; } m = ['', '', lt, '', '']; }
       else m = RHT.exec(old);
       const dotted = old !== '/' && !!m[3];
       tok = (m[1] || '') + (old === '/' ? m[2] : m[2] || 'q') + (dotted ? '' : '.') + (old === '/' ? '' : m[4] || '');
-    } else tok = (op.rest ? 'r' : '') + op.letter;
+    } else tok = (op.rest ? 'r' : op.x ? 'x' : '') + op.letter;
     const nd = durOf(tok);
     let total = durOf(old);
     let i = s0 + 1;
@@ -3252,9 +3360,179 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     out.forEach((it) => { parts.push(...it.ch); parts.push(it.rh); });
     parts.push(...pend);
     const ns = ' ' + parts.join(' ') + ' ';
-    cur = { idx, slot: op.dot ? s0 : Math.min(out.length - 1, s0 + 1) };
+    cur = { idx, slot: op.dot || op.mod ? s0 : Math.min(out.length - 1, s0 + 1) };
     applyEdits([{ line: bar.seg.line, a: bar.seg.a, b: bar.seg.b, text: ns }]);
     return true;
+  }
+  /* -- cambios de compás, tonalidad y clave a partir del compás marcado (solo afectan hacia adelante) -- */
+  const CHG_TS = ['2/4', '3/4', '4/4', '5/4', '6/4', '7/4', '2/2', '3/8', '5/8', '6/8', '7/8', '9/8', '12/8'];
+  const CHG_RE = { ts: /^T\d+\/\d+$/, key: /^K:[A-G][#b]?m?$/, clef: /^Clef:(bass|treble)$/ };
+  function buildChg() {
+    const fill = (id, opts) => { const el = $(id); el.textContent = ''; opts.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; el.appendChild(o); }); };
+    fill('#chg-ts', [['', '(sin cambio)']].concat(CHG_TS.map((x) => ['T' + x, x])));
+    fill('#chg-key', [['', '(sin cambio)']].concat(T.KEY_LIST.maj.map((k) => ['K:' + k, k + ' mayor'])).concat(T.KEY_LIST.min.map((k) => ['K:' + k + 'm', k + ' menor'])));
+    fill('#chg-clef', [['', '(sin cambio)'], ['Clef:treble', 'Sol'], ['Clef:bass', 'Fa']]);
+    [['ts', '#chg-ts'], ['key', '#chg-key'], ['clef', '#chg-clef']].forEach(([kind, id]) => {
+      $(id).addEventListener('change', () => { if (cur) setBarToken(cur.idx, kind, $(id).value); });
+    });
+  }
+  function syncChg() {
+    const box = $('#chg');
+    const th = $('#tools-hint');
+    if (th) th.textContent = cur ? 'Los botones escriben en el compás ' + cur.idx + ' de la hoja (tiempo ' + (cur.slot + 1) + ').' : 'Marcá un compás en la hoja para escribir ahí sin pasar por el texto; si no, se escribe en el texto.';
+    if (!cur) { box.style.display = 'none'; return; }
+    box.style.display = 'flex';
+    const e = flatBars(parseNow()).find((q) => q.b.idx === cur.idx);
+    if (!e) return;
+    const b = e.b;
+    const set = (id, v) => { if (document.activeElement !== $(id)) $(id).value = v; };
+    set('#chg-ts', b.tsChange ? 'T' + b.num + '/' + b.den : '');
+    set('#chg-key', b.keyChange ? 'K:' + b.key.name + (b.key.mode === 'min' ? 'm' : '') : '');
+    set('#chg-clef', b.clefChange ? 'Clef:' + b.clef : '');
+  }
+  function setBarToken(idx, kind, tok) {
+    const e = flatBars(parseNow()).find((q) => q.b.idx === idx);
+    if (!e) return;
+    const bar = e.b;
+    const line = src.value.split('\n')[bar.seg.line - 1] || '';
+    const segTxt = line.slice(bar.seg.a, bar.seg.b);
+    const rest = tokenize(segTxt).map((q) => q.s).filter((t) => !CHG_RE[kind].test(t));
+    const parts = tok ? [tok].concat(rest) : rest;
+    cur = { idx, slot: cur ? cur.slot : 0 };
+    applyEdits([{ line: bar.seg.line, a: bar.seg.a, b: bar.seg.b, text: ' ' + parts.join(' ') + ' ' }]);
+  }
+  /* -- los botones de la izquierda escriben directo en el compás marcado de la hoja -- */
+  const BARRE = /:\|\|:|\|\|:|:\|\||\|\||\|:|:\||\|\.|\|/g;
+  function barTokens(ln) { const o = []; let m; BARRE.lastIndex = 0; while ((m = BARRE.exec(ln))) o.push({ i: m.index, n: m[0].length, t: m[0] }); return o; }
+  function editBarTokens(idx, fn, after) {
+    const e = flatBars(parseNow()).find((q) => q.b.idx === idx);
+    if (!e) return false;
+    const bar = e.b;
+    if (bar.mode === 'simile' && !after) { /* se permite: las marcas valen también en un % */ }
+    const line = src.value.split('\n')[bar.seg.line - 1] || '';
+    const segTxt = line.slice(bar.seg.a, bar.seg.b);
+    const parts = fn(tokenize(segTxt).map((q) => q.s));
+    if (!parts) return false;
+    cur = { idx, slot: cur ? cur.slot : 0 };
+    applyEdits([{ line: bar.seg.line, a: bar.seg.a, b: bar.seg.b, text: ' ' + parts.join(' ') + ' ' }]);
+    if (after) after(bar);
+    return true;
+  }
+  function placeBarline(tk) {
+    if (tk === '|') { insertBarAfter(cur.idx); return; }
+    const e = flatBars(parseNow()).find((q) => q.b.idx === cur.idx);
+    if (!e) return;
+    const bar = e.b;
+    const L = bar.seg.line;
+    const lines = src.value.split('\n');
+    const ln = lines[L - 1];
+    const bs = barTokens(ln);
+    const lead = ln.length - ln.trimStart().length;
+    let nl;
+    if (tk === '|:') {
+      const before = bs.find((q) => q.i + q.n === bar.seg.a);
+      if (before) { const nt = before.t === ':|' || before.t === ':||' ? ':||:' : '|:'; nl = ln.slice(0, before.i) + nt + ln.slice(before.i + before.n); }
+      else nl = ln.slice(0, lead) + '|: ' + ln.slice(lead);
+    } else {
+      const after = bs.find((q) => q.i === bar.seg.b);
+      if (after) { const nt = tk === ':|' && after.t.endsWith(':') ? ':||:' : tk; nl = ln.slice(0, after.i) + nt + ln.slice(after.i + after.n); }
+      else nl = ln.replace(/\s+$/, '') + ' ' + tk;
+    }
+    cur = { idx: cur.idx, slot: cur.slot };
+    applyEdits([{ line: L, a: 0, b: ln.length, text: nl }]);
+  }
+  function placeSection(name) {
+    const e = flatBars(parseNow()).find((q) => q.b.idx === cur.idx);
+    if (!e) return;
+    const bar = e.b;
+    const L = bar.seg.line;
+    const lines = src.value.split('\n');
+    const ln = lines[L - 1];
+    const lead = ln.length - ln.trimStart().length;
+    const before = barTokens(ln).find((q) => q.i + q.n === bar.seg.a);
+    const hdr = '[' + name + ']';
+    if (!before || before.i <= lead) lines.splice(L - 1, 0, hdr);
+    else {
+      const opens = before.t.endsWith(':');
+      const left = ln.slice(0, before.i) + (opens ? '|' : before.t);
+      const right = (opens ? before.t : '') + ln.slice(before.i + before.n);
+      lines.splice(L - 1, 1, left, hdr, right.trim() ? right.trimStart() : '|');
+    }
+    cur = { idx: cur.idx, slot: cur.slot };
+    commitText(lines.join('\n'));
+  }
+  function placeMark(label) {
+    const idx = cur.idx;
+    const e = flatBars(parseNow()).find((q) => q.b.idx === idx);
+    if (!e) return false;
+    const bar = e.b;
+    const t0 = bar.mode === 'explicit' ? (bar.notes[cur.slot] ? bar.notes[cur.slot].t : 0) : cur.slot * bar.slotLen;
+    const N = Math.round((t0 / bar.slotLen + 1) * 100) / 100;
+    const pos = N === 1 ? '' : ':' + N;
+    const posOf = (t, m) => parseFloat(m[1] || 1) === N;
+    const tog = (kind) => (parts) => {
+      const re = new RegExp('^@' + kind + '(?::([\\d.]+))?(?:\\*[\\d.]+)?$');
+      const same = parts.some((t) => { const m = re.exec(t); return m && posOf(t, m); });
+      const rest = parts.filter((t) => !re.test(t));
+      return same ? rest : rest.concat(['@' + kind + pos]);
+    };
+    if (label === 'segno') return editBarTokens(idx, tog('segno'));
+    if (label === 'coda') return editBarTokens(idx, tog('coda'));
+    if (label === '1.' || label === '2.') return editBarTokens(idx, (parts) => { const tk = '{' + label + '}'; const has = parts.includes(tk); const rest = parts.filter((t) => !/^\{[^}]*\}$/.test(t)); return has ? rest : rest.concat([tk]); });
+    const below = label === '_texto';
+    const tok = (below ? '_' : '') + '"texto"' + pos;
+    return editBarTokens(idx, (parts) => parts.concat([tok]), (bar2) => {
+      const L = bar2.seg.line;
+      const ln = src.value.split('\n')[L - 1];
+      const at = ln.indexOf('"texto"', bar2.seg.a);
+      if (at < 0) return;
+      const o = lineStart(L) + at + 1;
+      src.focus();
+      src.setSelectionRange(o, o + 5);
+    });
+  }
+  function placeSimile() {
+    editBarTokens(cur.idx, (parts) => parts.filter((t) => !isChordTok(t) && !isRhTok(t) && t !== '%').concat(['%']));
+  }
+  function placeChord(text) {
+    const e = flatBars(parseNow()).find((q) => q.b.idx === cur.idx);
+    if (!e) return;
+    const idx = cur.idx;
+    const slot = cur.slot;
+    const nx = slot + 1 < nSlots(e.b) ? slot + 1 : slot;
+    cur = { idx, slot: nx };
+    if (!applyChord(idx, slot, text)) cur = { idx, slot };
+  }
+  function placeFigure(kind) {
+    const L = { w: 'w', h: 'h', q: 'q', e: 'e', s: 's', rh: 'h', rq: 'q', re: 'e', rs: 's', xq: 'q', xe: 'e' };
+    if (kind === 'simile') return placeSimile();
+    if (kind === 'slash') return rhythmEdit(cur.idx, cur.slot, { slash: true });
+    if (kind === 'dot') return rhythmEdit(cur.idx, cur.slot, { dot: true });
+    const mod = { acc: '>', mar: '^', stac: "'", tie: '~' }[kind];
+    if (mod) return rhythmEdit(cur.idx, cur.slot, { mod });
+    return rhythmEdit(cur.idx, cur.slot, { letter: L[kind], rest: kind[0] === 'r' && kind.length === 2, x: kind[0] === 'x' });
+  }
+  /* -- signos y textos sobre la hoja: tamaño y borrado -- */
+  const MARK_RE = /^(@(?:segno|coda)|_?"[^"]*"(?:@[rc])?)(?::([\d.]+))?(?:\*([\d.]+))?$/;
+  function resizeSel(d) {
+    const h = selHit();
+    if (!h || h.kind !== 'mark') return;
+    const tok = src.value.split('\n')[h.line - 1].slice(h.a, h.b);
+    const m = MARK_RE.exec(tok);
+    if (!m) return;
+    const sz = Math.max(0.5, Math.min(3, Math.round(((m[3] ? parseFloat(m[3]) : 1) + d) * 100) / 100));
+    const nt = m[1] + (m[2] ? ':' + m[2] : '') + (sz !== 1 ? '*' + sz : '');
+    applyEdits([{ line: h.line, a: h.a, b: h.b, text: nt }]);
+  }
+  function deleteSelMark() {
+    const h = selHit();
+    if (!h || h.kind !== 'mark') return;
+    const ln = src.value.split('\n')[h.line - 1];
+    let a = h.a;
+    let b = h.b;
+    if (ln[b] === ' ') b += 1; else if (a > 0 && ln[a - 1] === ' ') a -= 1;
+    sel = null;
+    applyEdits([{ line: h.line, a, b, text: '' }]);
   }
   /* -- agregar compases y renglones -- */
   function insertBarAfter(idx) {
@@ -3299,7 +3577,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     if (!nl.replace(re, '').trim()) lines.splice(L - 1, 1);
     else lines[L - 1] = nl;
     const v = lines.join('\n');
-    const total = At.parser.parseChart(v, { num: doc.meta.num, den: doc.meta.den }).barCount;
+    const total = At.parser.parseChart(v, pbase()).barCount;
     if (total < 1) cur = null;
     else cur = { idx: Math.min(idx, total), slot: 0 };
     commitText(v);
@@ -3443,7 +3721,7 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
     let shift = 0;
     (h.grp || [{ line: h.line, a: h.a, b: h.b }]).forEach((g) => {
       const tok = lines[g.line - 1].slice(g.a, g.b);
-      const nt = toDown ? (tok.includes('_') ? tok : tok + '_') : tok.replace(/_/g, '');
+      const nt = toDown ? tok.replace(/\+/g, '') : tok.replace(/_/g, '').replace(/\+/g, '') + '+';
       if (nt === tok) return;
       edits.push({ line: g.line, a: g.a, b: g.b, text: nt });
       if (g.line === sel.line && g.a < sel.a) shift += nt.length - tok.length;
@@ -3942,6 +4220,11 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
       if (isEditable(e.target) || mod || e.altKey) return;
       if (k === 'x' && sel) { e.preventDefault(); flipSel(); return; }
       if (e.key === 'Escape') { if (sel) select(null); else if (cur) clearCur(); return; }
+      if (sel && selHit() && selHit().kind === 'mark') {
+        if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelMark(); return; }
+        if (e.key === '+' || e.key === '=') { e.preventDefault(); resizeSel(0.25); return; }
+        if (e.key === '-' || e.key === '_') { e.preventDefault(); resizeSel(-0.25); return; }
+      }
       if (!sel && !cur) return;
       const nav = (fn) => { e.preventDefault(); if (sel) select(null); if (cur) fn(); };
       if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
@@ -3960,11 +4243,11 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
         e.preventDefault();
         if (sel) select(null);
         rhythmEdit(cur.idx, cur.slot, { letter: { 3: 's', 4: 'e', 5: 'q', 6: 'h', 7: 'w' }[e.code.slice(-1)], rest: e.shiftKey });
-      } else if (cur && (e.key === '.' || e.code === 'NumpadDecimal')) {
+      } else if (cur && e.code === 'KeyL') {
         e.preventDefault();
         if (sel) select(null);
         rhythmEdit(cur.idx, cur.slot, { dot: true });
-      } else if (e.key.length === 1 && /[A-Za-z]/.test(e.key) && cur) {
+      } else if (e.key.length === 1 && /[A-Za-z]/.test(e.key) && cur && e.code !== 'KeyL') {
         e.preventDefault();
         if (sel) select(null);
         startEntry(e.key.toUpperCase());
@@ -3986,6 +4269,10 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
   buildFontGrid();
   buildFontSelects();
   buildSecColors();
+  buildChg();
+  $('#sel-sm').addEventListener('click', () => resizeSel(-0.25));
+  $('#sel-big').addEventListener('click', () => resizeSel(0.25));
+  $('#sel-del').addEventListener('click', deleteSelMark);
   buildTools();
   $$('#tools .dt').forEach((b) => b.addEventListener('click', () => {
     const open = b.getAttribute('aria-expanded') !== 'true';
