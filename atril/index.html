@@ -1729,10 +1729,31 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
         const hLabel = sys.label ? 18 * S : 0;
         const hVolta = hasVolta ? 12 * S : 0;
         const mkH = (m) => (m.k === 'segno' ? 13 : 12) * S * m.size;
-        const mHmax = Math.max(0, ...bars.flatMap((b) => b.markers.map(mkH)));
+        /* un signo que cae sobre un acorde se pone a la izquierda del acorde, en su misma fila, para no abrir espacio arriba */
+        const preW = solveWidths(bars.map(barMin), colW - lead - headFor(bars[0]).w);
+        const preX = [];
+        { let o = 0; bars.forEach((b, i) => { const cl = o + lbX(b) + (i > 0 ? tsX(b) : 0); const cr = o + preW[i] - rbX(b); const iw = cr - cl - padL - padR; preX.push((t) => cl + padL + (t / b.len) * iw); o += preW[i]; }); }
+        const sideX = new Map();
+        bars.forEach((b, i) => {
+          b.markers.forEach((mk) => {
+            const t = mk.t != null ? mk.t : 0;
+            const ci = b.chords.findIndex((c) => Math.abs(c.t - t) < 0.01);
+            if (ci < 0) return;
+            const gl = G[mk.k];
+            const wM = (gl.w / gl.h) * mkH(mk);
+            const xm = preX[i](t) - wM - 0.7 * sp;
+            let end = -1e9;
+            if (ci > 0) { const pc = b.chords[ci - 1]; end = preX[i](pc.t) + chordLayout(disp(pc.ch), chordPx).w; }
+            else if (i > 0) { const pb = bars[i - 1]; const pc = pb.chords[pb.chords.length - 1]; if (pc) end = preX[i - 1](pc.t) + chordLayout(disp(pc.ch), chordPx).w; }
+            if (xm < end + 0.4 * sp) return;
+            sideX.set(mk, xm);
+          });
+        });
+        const mHmax = Math.max(0, ...bars.flatMap((b) => b.markers.filter((m) => !sideX.has(m)).map(mkH)));
+        const sideExtra = Math.max(0, ...bars.flatMap((b) => b.markers.filter((m) => sideX.has(m)).map((m) => mkH(m) / 2 - 0.57 * chordPx)));
         const aSz = Math.max(1, ...bars.flatMap((b) => b.above.map((m) => m.size)));
         const bSz = Math.max(1, ...bars.flatMap((b) => b.below.map((m) => m.size)));
-        const hAbove = Math.max(hasMark ? mHmax + 3 * S : 0, hasAbove ? 9 * S * aSz + 2 * S : 0);
+        const hAbove = Math.max(mHmax ? mHmax + 3 * S : 0, sideExtra > 0 ? sideExtra + 2 * S : 0, hasAbove ? 9 * S * aSz + 2 * S : 0);
         const hChord = chordPx * 0.92 + 2.0 * sp;
         const hasDown = bars.some((b) => b.mode === 'explicit' && b.notes.some((nn) => nn.down && nn.type !== 'rest' && nn.type !== 'plain' && nn.base <= 2));
         const hDown = hasDown ? 1.3 * sp : 0;
@@ -2042,8 +2063,9 @@ Amaj7 {1.} | Amaj7 {2.} |.</pre>
           b.markers.forEach((mk, mi) => {
             const gl = G[mk.k];
             const hh = mkH(mk);
-            const mx = mk.t != null ? xs(mk.t) + 0.3 * sp : cl + padL + mi * (gl.w / gl.h * hh + 4 * S);
-            const my = yAbove + hAbove - hh - 1.5 * S;
+            const sx = sideX.get(mk);
+            const mx = sx != null ? barsLeft + sx : mk.t != null ? xs(mk.t) + 0.3 * sp : cl + padL + mi * (gl.w / gl.h * hh + 4 * S);
+            const my = sx != null ? chordBase - 0.35 * chordPx - hh / 2 : yAbove + hAbove - hh - 1.5 * S;
             ops.push({ t: 'glyph', g: mk.k, x: mx, y: my, h: hh, color: ink });
             if (mk.src) hits.push({ pg, x: mx - 2, y: my - 2, w: gl.w / gl.h * hh + 4, h: hh + 4, line: mk.src.line, a: mk.src.a, b: mk.src.b, kind: 'mark', grp: [mk.src] });
           });
